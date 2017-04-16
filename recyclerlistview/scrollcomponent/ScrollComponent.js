@@ -55,11 +55,14 @@ class ScrollComponent extends React.Component {
                         horizontal={this.props.isHorizontal}
                         onScroll={this._onScroll}
                         onLayout={this._onLayout}>
-                <View style={{
-                    height: this.props.contentHeight,
-                    width: this.props.contentWidth,
-                }}>
-                    {this.props.children}
+                <View>
+                    <View style={{
+                        height: this.props.contentHeight,
+                        width: this.props.contentWidth,
+                    }}>
+                        {this.props.children}
+                    </View>
+                    {this.props.renderFooter ? this.props.renderFooter() : null}
                 </View>
             </ScrollView>
         );
@@ -80,6 +83,7 @@ ScrollComponent.propTypes = {
     onSizeChanged: React.PropTypes.func,
     parentProps: React.PropTypes.object,
     isHorizontal: React.PropTypes.bool,
-    initialOffset: React.PropTypes.number
+    initialOffset: React.PropTypes.number,
+    renderFooter: React.PropTypes.func
 }
 //#endif

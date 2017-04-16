@@ -154,7 +154,7 @@ class RecyclerListView extends React.Component {
             this._virtualRenderer ?
                 <ScrollComponent ref="scrollComponent" initialOffset={this.props.initialOffset} parentProps={this.props}
                                  onScroll={this._onScroll} isHorizontal={this.props.isHorizontal}
-                                 onSizeChanged={this._onSizeChanged}
+                                 onSizeChanged={this._onSizeChanged} renderFooter={this.props.renderFooter}
                                  contentHeight={this._virtualRenderer.getLayoutDimension().height}
                                  contentWidth={this._virtualRenderer.getLayoutDimension().width}>
                     {this._generateRenderStack()}
@@ -188,6 +188,7 @@ RecyclerListView
     onScroll: React.PropTypes.func,
     onEndReached: React.PropTypes.func,
     onEndReachedThreshold: React.PropTypes.number,
-    onVisibleIndexesChanged: React.PropTypes.func
+    onVisibleIndexesChanged: React.PropTypes.func,
+    renderFooter: React.PropTypes.func
 };
 //#endif
