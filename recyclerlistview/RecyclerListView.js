@@ -5,10 +5,10 @@
  * DONE: Make another class for render stack generator
  * DONE: Simplify rendering a loading footer
  * TODO: Anchor first visible index on any insert/delete data wise
- * TODO: Build Scroll to index
+ * DONE: Build Scroll to index
  * DONE: Give viewability callbacks
  * TODO: Add full render logic in cases like change of dimensions
- * TODO: Fix all proptypes
+ * DONE: Fix all proptypes
  * TODO: Add Initial render Index support
  * TODO: Heavily reduce isHorizontal checks
  */
@@ -153,7 +153,7 @@ class RecyclerListView extends React.Component {
     _processOnEndReached() {
         if (this.props.onEndReached && this._virtualRenderer) {
             let layout = this._virtualRenderer.getLayoutDimension();
-            let windowBound = this.props.isHorizontal ? layout.width - this.props.width : layout.height - this.props.height;
+            let windowBound = this.props.isHorizontal ? layout.width - this._layout.width : layout.height - this._layout.height;
             if (windowBound - this._virtualRenderer.getViewabilityTracker().getLastOffset() <= this.props.onEndReachedThreshold) {
                 if (!this._onEndReachedCalled) {
                     this._onEndReachedCalled = true;
