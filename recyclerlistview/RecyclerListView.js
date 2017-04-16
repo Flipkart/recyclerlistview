@@ -3,13 +3,14 @@
  * TODO: Add notify data set changed and notify data insert option in data source
  * DONE: Add on end reached callback
  * DONE: Make another class for render stack generator
- * TODO: Simplify rendering a loading footer
+ * DONE: Simplify rendering a loading footer
  * TODO: Anchor first visible index on any insert/delete data wise
  * TODO: Build Scroll to index
  * DONE: Give viewability callbacks
  * TODO: Add full render logic in cases like change of dimensions
  * TODO: Fix all proptypes
  * TODO: Add Initial render Index support
+ * TODO: Heavily reduce isHorizontal checks
  */
 import React, {Component} from "react";
 import Messages from "./messages/Messages";
@@ -47,23 +48,39 @@ class RecyclerListView extends React.Component {
         this._processOnEndReached();
     }
 
-    scrollToIndex(index) {
-
+    scrollToIndex(index, animate) {
+        let offsets = this._virtualRenderer.getViewabilityTracker().getOffsetForIndex(index);
+        this.scrollToOffset(offsets.x, offsets.y, animate);
     }
 
-    scrollToItem(data) {
-
+    scrollToItem(data, animate) {
+        let count = this.props.dataProvider.getSize();
+        for (let i = 0; i < count; i++) {
+            if (this.props.dataProvider.getDataForIndex(i) === data) {
+                this.scrollToIndex(i, animate);
+                break;
+            }
+        }
     }
 
-    getScrollOffset() {
-        let offset = this._virtualRenderer.getViewabilityTracker().getLastOffset();
-        let x = this.props.isHorizontal ? offset : 0;
-        let y = !this.props.isHorizontal ? offset : 0;
-        return {x: x, y: y};
+    scrollToTop(animate) {
+        this.scrollToOffset(0, 0, animate);
+    }
+
+    scrollToEnd(animate) {
+        let lastIndex = this.props.dataProvider.getSize() - 1;
+        this.scrollToIndex(lastIndex, animate);
     }
 
     scrollToOffset(x, y, animate) {
         this.refs["scrollComponent"].scrollTo(x, y, animate);
+    }
+
+    getCurrentScrollOffset() {
+        let offset = this._virtualRenderer.getViewabilityTracker().getLastOffset();
+        let x = this.props.isHorizontal ? offset : 0;
+        let y = !this.props.isHorizontal ? offset : 0;
+        return {x: x, y: y};
     }
 
     _onSizeChanged(layout) {

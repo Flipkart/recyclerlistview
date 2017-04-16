@@ -42,6 +42,12 @@ class ViewabilityTracker {
         return this._currentOffset;
     }
 
+    getOffsetForIndex(index) {
+        if (this._layouts.length > index) {
+            return {x: this._layouts[index].x, y: this._layouts[index].y};
+        }
+    }
+
     _fitAndUpdate(startIndex) {
         let newVisibleItems = [];
         let newEngagedItems = [];
