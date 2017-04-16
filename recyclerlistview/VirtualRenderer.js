@@ -1,6 +1,6 @@
 import ViewabilityTracker from "./ViewabilityTracker";
 import LayoutManager from "./layoutmanager/LayoutManager";
-import RecycleItemPool from "./utils/RecycleItemPool";
+import RecycleItemPool from "../utils/RecycleItemPool";
 class VirtualRenderer {
     constructor(refreshFunc) {
         this._renderStack = [];

@@ -1,4 +1,4 @@
-import NearestBinarySearch from "../../utils/NearestBinarySearch";
+import NearestBinarySearch from "../utils/NearestBinarySearch";
 class ViewabilityTracker {
     constructor(layouts, renderAheadOffset, initialOffset, maxOffset, dimensions, isHorizontal) {
         this._layouts = layouts;
