@@ -1,16 +1,16 @@
 /***
- * TODO: Reduce layout processing on data insert
- * TODO: Add notify data set changed and notify data insert option in data source
+ * DONE: Reduce layout processing on data insert
+ * DONE: Add notify data set changed and notify data insert option in data source
  * DONE: Add on end reached callback
  * DONE: Make another class for render stack generator
  * DONE: Simplify rendering a loading footer
- * TODO: Anchor first visible index on any insert/delete data wise
+ * DONE: Anchor first visible index on any insert/delete data wise
  * DONE: Build Scroll to index
  * DONE: Give viewability callbacks
- * TODO: Add full render logic in cases like change of dimensions
+ * DONE: Add full render logic in cases like change of dimensions
  * DONE: Fix all proptypes
  * TODO: Add Initial render Index support
- * TODO: Heavily reduce isHorizontal checks
+ * DONE: Heavily reduce isHorizontal checks
  */
 import React, {Component} from "react";
 import Messages from "./messages/Messages";
@@ -27,26 +27,20 @@ class RecyclerListView extends React.Component {
         this._onScroll = this._onScroll.bind(this);
         this._onSizeChanged = this._onSizeChanged.bind(this);
         this._onVisibleItemsChanged = this._onVisibleItemsChanged.bind(this);
+        this.scrollToOffset = this.scrollToOffset.bind(this);
         this._onEndReachedCalled = false;
         this._virtualRenderer = null;
+        this._initComplete = false;
         this._params = {};
         this._layout = {height: 0, width: 0};
+        this._pendingScrollToOffset = null;
         this.state = {
             renderStack: []
         };
     }
 
     componentWillReceiveProps(newProps) {
-        this._params.isHorizontal = newProps.isHorizontal;
-        this._params.itemCount = newProps.dataProvider.getSize();
-        this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
-        if (this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
-            this._virtualRenderer.setLayoutManager(new LayoutManager(newProps.layoutProvider, this._layout, newProps.isHorizontal));
-            this._virtualRenderer.refreshWithAnchor();
-        } else if (this.props.dataProvider !== newProps.dataProvider) {
-            this._virtualRenderer.getLayoutManager().reLayoutFromIndex(newProps.dataProvider._firstIndexToProcess, newProps.dataProvider.getSize());
-            this._virtualRenderer.refresh();
-        }
+        this._checkAndChangeLayouts(newProps);
         if (!this.props.onVisibleItemsChanged) {
             this._virtualRenderer.removeVisibleItemsListener();
         }
@@ -55,7 +49,16 @@ class RecyclerListView extends React.Component {
         }
     }
 
+
     componentDidUpdate() {
+        if (this._pendingScrollToOffset) {
+            let offset = this._pendingScrollToOffset;
+            this._pendingScrollToOffset = null;
+            setTimeout(() => {
+                this._pendingScrollToOffset = null;
+                this.scrollToOffset(offset.x, offset.y)
+            }, 0);
+        }
         this._processOnEndReached();
     }
 
@@ -94,15 +97,32 @@ class RecyclerListView extends React.Component {
         return {x: x, y: y};
     }
 
+    _checkAndChangeLayouts(newProps, forceFullRender) {
+        this._params.isHorizontal = newProps.isHorizontal;
+        this._params.itemCount = newProps.dataProvider.getSize();
+        this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
+        if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
+            this._virtualRenderer.setLayoutManager(new LayoutManager(newProps.layoutProvider, this._layout, newProps.isHorizontal));
+            this._virtualRenderer.refreshWithAnchor();
+        } else if (this.props.dataProvider !== newProps.dataProvider) {
+            this._virtualRenderer.getLayoutManager().reLayoutFromIndex(newProps.dataProvider._firstIndexToProcess, newProps.dataProvider.getSize());
+            this._virtualRenderer.refresh();
+        }
+    }
+
     _onSizeChanged(layout) {
         this._layout.height = layout.height;
         this._layout.width = layout.width;
-        if (layout.height > 0 && layout.width > 0) {
+        if (layout.height === 0 || layout.width === 0) {
+            throw "RecyclerListView needs to have a bounded size. Currently height or, width is 0";
+        }
+        if (!this._initComplete) {
+            this._initComplete = true;
             this._initTrackers();
             this._processOnEndReached();
         }
         else {
-            console.error("RecyclerListView needs to have a bounded size. Currently height or, width is 0");
+            this._checkAndChangeLayouts(this.props, this.scrollToOffset);
         }
     }
 
@@ -112,6 +132,8 @@ class RecyclerListView extends React.Component {
             this.setState((prevState, props) => {
                 return {renderStack: stack};
             });
+        }, (offset) => {
+            this._pendingScrollToOffset = offset
         });
         if (this.props.onVisibleItemsChanged) {
             this._virtualRenderer.attachVisibleItemsListener(this._onVisibleItemsChanged);

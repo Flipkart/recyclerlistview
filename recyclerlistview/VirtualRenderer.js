@@ -1,10 +1,11 @@
 import ViewabilityTracker from "./ViewabilityTracker";
 import RecycleItemPool from "../utils/RecycleItemPool";
 class VirtualRenderer {
-    constructor(renderStackChanged) {
+    constructor(renderStackChanged, scrollOnNextUpdate) {
         this._renderStack = [];
         this._usageMap = {};
         this._renderStackChanged = renderStackChanged;
+        this._scrollOnNextUpdate = scrollOnNextUpdate;
         this._dimensions = null;
         this._params = null;
 
@@ -47,7 +48,10 @@ class VirtualRenderer {
     refreshWithAnchor() {
         let firstVisibleIndex = this._viewabilityTracker.findFirstVisibleIndex();
         this._prepareViewabilityTracker();
-        this._viewabilityTracker.forceRefreshWithOffset(this._layoutManager.getOffsetForIndex(firstVisibleIndex));
+        let offset = this._layoutManager.getOffsetForIndex(firstVisibleIndex);
+        this._scrollOnNextUpdate(offset);
+        offset = this._params.isHorizontal ? offset.x : offset.y;
+        this._viewabilityTracker.forceRefreshWithOffset(offset);
     }
 
     refresh() {

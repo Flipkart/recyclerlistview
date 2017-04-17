@@ -4,11 +4,12 @@ class NearestBinarySearch {
         let high = size - 1;
         let mid = Math.floor((low + high) / 2);
         let lastValue = 0;
-        let lastDiff = valueExtractor(mid) - targetValue;
+        let absoluteLastDiff = Math.abs(valueExtractor(mid) - targetValue);
         let result = mid;
         let diff = 0;
+        let absoluteDiff = 0;
 
-        if (lastDiff == 0) {
+        if (absoluteLastDiff == 0) {
             return result;
         }
 
@@ -19,8 +20,9 @@ class NearestBinarySearch {
             mid = Math.floor((low + high) / 2);
             lastValue = valueExtractor(mid);
             diff = lastValue - targetValue;
-            if (diff >= 0 && diff < lastDiff) {
-                lastDiff = diff;
+            absoluteDiff = Math.abs(diff);
+            if (diff >= 0 && absoluteDiff < absoluteLastDiff) {
+                absoluteLastDiff = absoluteDiff;
                 result = mid;
             }
             if (targetValue < lastValue) {
