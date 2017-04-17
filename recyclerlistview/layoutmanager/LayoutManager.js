@@ -2,13 +2,11 @@ import LayoutProvider from "../dependencies/LayoutProvider";
 class LayoutManager {
     constructor(layoutProvider: LayoutProvider, dimensions, isHorizontal) {
         this._layoutProvider = layoutProvider;
-        this._itemCount = 0;
         this._window = dimensions;
         this._totalHeight = 0;
         this._totalWidth = 0;
         this._layouts = [];
         this._isHorizontal = isHorizontal;
-
     }
 
     getLayoutDimension() {
@@ -19,23 +17,34 @@ class LayoutManager {
         return this._layouts;
     }
 
-    setTotalItemCount(count) {
-        this._itemCount = count;
+    getOffsetForIndex(index) {
+        if (this._layouts.length > index) {
+            return {x: this._layouts[index].x, y: this._layouts[index].y};
+        }
     }
 
-    relayout() {
+    reLayoutFromIndex(startIndex, itemCount) {
+        startIndex = this._locateFirstNeighbourIndex(startIndex);
         let startX = 0;
         let startY = 0;
         let maxBound = 0;
+
+        let startVal = this._layouts[startIndex];
+
+        if (startVal) {
+            startX = startVal.x;
+            startY = startVal.y;
+            this._pointDimensionsToRect(startVal);
+        }
+
         let oldItemCount = this._layouts.length;
 
         let itemDim = {height: 0, width: 0};
         let itemRect = null;
 
-        this._newLayouts = [];
-
-        for (let i = 0; i < this._itemCount; i++) {
+        for (let i = startIndex; i < itemCount; i++) {
             this._layoutProvider.setLayoutForType(this._layoutProvider.getLayoutTypeForIndex(i), itemDim);
+            this._setMaxBounds(itemDim);
             while (!this._checkBounds(startX, startY, itemDim, this._isHorizontal)) {
                 if (this._isHorizontal) {
                     startX += maxBound;
@@ -53,7 +62,7 @@ class LayoutManager {
             maxBound = this._isHorizontal ? Math.max(maxBound, itemDim.width) : Math.max(maxBound, itemDim.height);
 
             if (i > oldItemCount - 1) {
-                this._newLayouts.push({x: startX, y: startY, height: itemDim.height, width: itemDim.width});
+                this._layouts.push({x: startX, y: startY, height: itemDim.height, width: itemDim.width});
             }
             else {
                 itemRect = this._layouts[i];
@@ -61,7 +70,6 @@ class LayoutManager {
                 itemRect.y = startY;
                 itemRect.width = itemDim.width;
                 itemRect.height = itemDim.height;
-                this._newLayouts.push(itemRect);
             }
 
             if (this._isHorizontal) {
@@ -71,7 +79,22 @@ class LayoutManager {
                 startX += itemDim.width;
             }
         }
-        this._layouts = this._newLayouts;
+        if (oldItemCount < itemCount) {
+            this._layouts.splice(itemCount, itemCount - oldItemCount);
+        }
+        this._setFinalDimensions(maxBound);
+    }
+
+    _pointDimensionsToRect(itemRect) {
+        if (this._isHorizontal) {
+            this._totalWidth = itemRect.x;
+        }
+        else {
+            this._totalHeight = itemRect.y;
+        }
+    }
+
+    _setFinalDimensions(maxBound) {
         if (this._isHorizontal) {
             this._totalHeight = this._window.height;
             this._totalWidth += maxBound;
@@ -79,6 +102,33 @@ class LayoutManager {
         else {
             this._totalWidth = this._window.width;
             this._totalHeight += maxBound;
+        }
+    }
+
+    _locateFirstNeighbourIndex(startIndex) {
+        if (startIndex == 0) {
+            return 0
+        }
+        let i = startIndex - 1;
+        for (; i >= 0; i--) {
+            if (this._isHorizontal) {
+                if (this._layouts[i].y === 0) {
+                    break;
+                }
+            }
+            else if (this._layouts[i].x === 0) {
+                break;
+            }
+        }
+        return i;
+    }
+
+    _setMaxBounds(itemDim) {
+        if (this._isHorizontal) {
+            itemDim.y = Math.min(this._window.height, itemDim.y);
+        }
+        else {
+            itemDim.x = Math.min(this._window.width, itemDim.x);
         }
     }
 

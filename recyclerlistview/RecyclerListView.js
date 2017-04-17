@@ -19,6 +19,7 @@ import ViewHolder from "./ViewHolder";
 import VirtualRenderer from "./VirtualRenderer";
 import DataProvider from "./dependencies/DataProvider";
 import LayoutProvider from "./dependencies/LayoutProvider";
+import LayoutManager from "./layoutmanager/LayoutManager";
 
 class RecyclerListView extends React.Component {
     constructor(args) {
@@ -28,6 +29,7 @@ class RecyclerListView extends React.Component {
         this._onVisibleItemsChanged = this._onVisibleItemsChanged.bind(this);
         this._onEndReachedCalled = false;
         this._virtualRenderer = null;
+        this._params = {};
         this._layout = {height: 0, width: 0};
         this.state = {
             renderStack: []
@@ -35,7 +37,16 @@ class RecyclerListView extends React.Component {
     }
 
     componentWillReceiveProps(newProps) {
-        this._virtualRenderer.updatePropsAndDimensions(newProps, this._layout);
+        this._params.isHorizontal = newProps.isHorizontal;
+        this._params.itemCount = newProps.dataProvider.getSize();
+        this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
+        if (this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
+            this._virtualRenderer.setLayoutManager(new LayoutManager(newProps.layoutProvider, this._layout, newProps.isHorizontal));
+            this._virtualRenderer.refreshWithAnchor();
+        } else if (this.props.dataProvider !== newProps.dataProvider) {
+            this._virtualRenderer.getLayoutManager().reLayoutFromIndex(newProps.dataProvider._firstIndexToProcess, newProps.dataProvider.getSize());
+            this._virtualRenderer.refresh();
+        }
         if (!this.props.onVisibleItemsChanged) {
             this._virtualRenderer.removeVisibleItemsListener();
         }
@@ -49,7 +60,7 @@ class RecyclerListView extends React.Component {
     }
 
     scrollToIndex(index, animate) {
-        let offsets = this._virtualRenderer.getViewabilityTracker().getOffsetForIndex(index);
+        let offsets = this._virtualRenderer.getLayoutManager().getOffsetForIndex(index);
         this.scrollToOffset(offsets.x, offsets.y, animate);
     }
 
@@ -72,7 +83,7 @@ class RecyclerListView extends React.Component {
         this.scrollToIndex(lastIndex, animate);
     }
 
-    scrollToOffset(x, y, animate) {
+    scrollToOffset(x, y, animate = false) {
         this.refs["scrollComponent"].scrollTo(x, y, animate);
     }
 
@@ -105,7 +116,15 @@ class RecyclerListView extends React.Component {
         if (this.props.onVisibleItemsChanged) {
             this._virtualRenderer.attachVisibleItemsListener(this._onVisibleItemsChanged);
         }
-        this._virtualRenderer.init(this.props, this._layout);
+        this._virtualRenderer.setParamsAndDimensions({
+            isHorizontal: this.props.isHorizontal,
+            itemCount: this.props.dataProvider.getSize(),
+            initialOffset: this.props.initialOffset,
+            renderAheadOffset: this.props.renderAheadOffset
+        }, this._layout);
+        this._virtualRenderer.setLayoutManager(new LayoutManager(this.props.layoutProvider, this._layout, this.props.isHorizontal));
+        this._virtualRenderer.setLayoutProvider(this.props.layoutProvider);
+        this._virtualRenderer.init();
     }
 
     _onVisibleItemsChanged(all, now, notNow) {
@@ -120,11 +139,11 @@ class RecyclerListView extends React.Component {
     }
 
     _renderRowUsingMeta(itemMeta) {
-        let itemRect = itemMeta.itemRect;
+        let itemRect = this._virtualRenderer.getLayoutManager().getLayouts()[itemMeta.dataIndex];
         let data = this.props.dataProvider.getDataForIndex(itemMeta.dataIndex);
         //TODO:Talha remove this
         let dataTest = {data: data, key: itemMeta.key};
-        let type = itemMeta.type;
+        let type = this.props.layoutProvider.getLayoutTypeForIndex(itemMeta.dataIndex);
         return (
             <ViewHolder key={itemMeta.key} x={itemRect.x} y={itemRect.y} height={itemRect.height}
                         width={itemRect.width}>

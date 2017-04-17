@@ -55,7 +55,7 @@ class ScrollComponent extends React.Component {
                         horizontal={this.props.isHorizontal}
                         onScroll={this._onScroll}
                         onLayout={this._onLayout}>
-                <View>
+                <View style={{flexDirection: this.props.isHorizontal ? 'row' : 'column'}}>
                     <View style={{
                         height: this.props.contentHeight,
                         width: this.props.contentWidth,
