@@ -122,7 +122,7 @@ class RecyclerListView extends React.Component {
             this._processOnEndReached();
         }
         else {
-            this._checkAndChangeLayouts(this.props, this.scrollToOffset);
+            this._checkAndChangeLayouts(this.props, true);
         }
     }
 

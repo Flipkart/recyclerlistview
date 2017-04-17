@@ -46,7 +46,7 @@ class VirtualRenderer {
     }
 
     refreshWithAnchor() {
-        let firstVisibleIndex = this._viewabilityTracker.findFirstVisibleIndex();
+        let firstVisibleIndex = this._viewabilityTracker._findFirstVisibleIndexLinearly();
         this._prepareViewabilityTracker();
         let offset = this._layoutManager.getOffsetForIndex(firstVisibleIndex);
         this._scrollOnNextUpdate(offset);

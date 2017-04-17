@@ -37,8 +37,7 @@ class ViewabilityTracker {
     }
 
     forceRefresh() {
-        let offset = this._currentOffset + 0.0001;
-        this.updateOffset(offset);
+        this.forceRefreshWithOffset(this._currentOffset);
     }
 
     forceRefreshWithOffset(offset) {
@@ -191,7 +190,7 @@ class ViewabilityTracker {
     }
 
     _isItemInBounds(window, itemBound) {
-        return (window.start <= itemBound && window.end >= itemBound);
+        return (window.start < itemBound && window.end >= itemBound);
     }
 
     _itemIntersectsWindow(window, startBound, endBound) {

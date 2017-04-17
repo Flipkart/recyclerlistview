@@ -125,10 +125,10 @@ class LayoutManager {
 
     _setMaxBounds(itemDim) {
         if (this._isHorizontal) {
-            itemDim.y = Math.min(this._window.height, itemDim.y);
+            itemDim.height = Math.min(this._window.height, itemDim.height);
         }
         else {
-            itemDim.x = Math.min(this._window.width, itemDim.x);
+            itemDim.width = Math.min(this._window.width, itemDim.width);
         }
     }
 
