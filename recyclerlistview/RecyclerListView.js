@@ -104,6 +104,7 @@ class RecyclerListView extends React.Component {
         this._params.itemCount = newProps.dataProvider.getSize();
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
         if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
+            //TODO: use old layout manager
             this._virtualRenderer.setLayoutManager(new LayoutManager(newProps.layoutProvider, this._layout, newProps.isHorizontal));
             this._virtualRenderer.refreshWithAnchor();
         } else if (this.props.dataProvider !== newProps.dataProvider) {
