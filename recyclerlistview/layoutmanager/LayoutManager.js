@@ -25,6 +25,7 @@ class LayoutManager {
         }
     }
 
+    //TODO:Talha laziliy calculate in future revisions
     reLayoutFromIndex(startIndex, itemCount) {
         startIndex = this._locateFirstNeighbourIndex(startIndex);
         let startX = 0;

@@ -31,9 +31,11 @@ class RecyclerListView extends React.Component {
         this._onEndReachedCalled = false;
         this._virtualRenderer = null;
         this._initComplete = false;
+        this._relayoutReqIndex = -1;
         this._params = {};
         this._layout = {height: 0, width: 0};
         this._pendingScrollToOffset = null;
+        this._tempDim = {};
         this.state = {
             renderStack: []
         };
@@ -64,6 +66,7 @@ class RecyclerListView extends React.Component {
             }, 0);
         }
         this._processOnEndReached();
+        this._checkAndChangeLayouts(this.props);
     }
 
     scrollToIndex(index, animate) {
@@ -110,6 +113,14 @@ class RecyclerListView extends React.Component {
         } else if (this.props.dataProvider !== newProps.dataProvider) {
             this._virtualRenderer.getLayoutManager().reLayoutFromIndex(newProps.dataProvider._firstIndexToProcess, newProps.dataProvider.getSize());
             this._virtualRenderer.refresh();
+        } else if (this._relayoutReqIndex >= 0) {
+            this._virtualRenderer.getLayoutManager().reLayoutFromIndex(this._relayoutReqIndex, newProps.dataProvider.getSize());
+            this._relayoutReqIndex = -1;
+            this._virtualRenderer.refresh();
+            //TODO:Talha Test this out
+            this.setState((prevState, props) => {
+                return {};
+            });
         }
     }
 
@@ -170,12 +181,24 @@ class RecyclerListView extends React.Component {
         //TODO:Talha remove this
         let dataTest = {data: data, key: itemMeta.key};
         let type = this.props.layoutProvider.getLayoutTypeForIndex(itemMeta.dataIndex);
+        this._checkExpectedDimensionDiscrepancy(itemRect, type, itemMeta.dataIndex);
         return (
             <ViewHolder key={itemMeta.key} x={itemRect.x} y={itemRect.y} height={itemRect.height}
                         width={itemRect.width}>
                 {this.props.rowRenderer(type, dataTest)}
             </ViewHolder>
         );
+    }
+
+    _checkExpectedDimensionDiscrepancy(itemRect, type, index) {
+        this.props.layoutProvider.setLayoutForType(type, this._tempDim);
+        if (itemRect.height !== this._tempDim.height || itemRect.width !== this._tempDim.width) {
+            if (this._relayoutReqIndex === -1) {
+                this._relayoutReqIndex = index;
+            } else {
+                this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
+            }
+        }
     }
 
     _generateRenderStack() {
@@ -211,6 +234,7 @@ class RecyclerListView extends React.Component {
         }
     }
 
+
     render() {
         return (
             this._virtualRenderer ?
@@ -236,7 +260,7 @@ RecyclerListView
     isHorizontal: false,
     renderAheadOffset: 250,
     onEndReachedThreshold: 0,
-    initialRenderIndex:0
+    initialRenderIndex: 0
 };
 
 //#if [DEV]
