@@ -54,9 +54,13 @@ class RecyclerListView extends React.Component {
         if (this._pendingScrollToOffset) {
             let offset = this._pendingScrollToOffset;
             this._pendingScrollToOffset = null;
+            if (this.props.isHorizontal) {
+                offset.y = 0;
+            } else {
+                offset.x = 0;
+            }
             setTimeout(() => {
-                this._pendingScrollToOffset = null;
-                this.scrollToOffset(offset.x, offset.y)
+                this.scrollToOffset(offset.x, offset.y, false);
             }, 0);
         }
         this._processOnEndReached();
@@ -133,7 +137,7 @@ class RecyclerListView extends React.Component {
                 return {renderStack: stack};
             });
         }, (offset) => {
-            this._pendingScrollToOffset = offset
+            this._pendingScrollToOffset = offset;
         });
         if (this.props.onVisibleItemsChanged) {
             this._virtualRenderer.attachVisibleItemsListener(this._onVisibleItemsChanged);

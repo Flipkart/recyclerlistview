@@ -46,7 +46,7 @@ class VirtualRenderer {
     }
 
     refreshWithAnchor() {
-        let firstVisibleIndex = this._viewabilityTracker._findFirstVisibleIndexLinearly();
+        let firstVisibleIndex = this._viewabilityTracker.findFirstVisibleIndex();
         this._prepareViewabilityTracker();
         let offset = this._layoutManager.getOffsetForIndex(firstVisibleIndex);
         this._scrollOnNextUpdate(offset);
@@ -87,6 +87,7 @@ class VirtualRenderer {
     }
 
     _onEngagedItemsChanged(all, now, notNow) {
+        console.log(all);
         let count = notNow.length;
         let resolvedIndex = 0;
         for (let i = 0; i < count; i++) {

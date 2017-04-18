@@ -17,6 +17,8 @@ class ViewabilityTracker {
         this.onVisibleRowsChanged = null;
         this.onEngagedRowsChanged = null;
 
+        this._binarySearchBias = 0.001;
+
         this._relevantDim = {startBound: 0, endBound: 0};
 
         this._valueExtractorForBinarySearch = this._valueExtractorForBinarySearch.bind(this);
@@ -107,7 +109,7 @@ class ViewabilityTracker {
 
     _findFirstVisibleIndexUsingBS() {
         const count = this._layouts.length;
-        return NearestBinarySearch.findClosestHigherValueIndex(count, this._visibleWindow.start, this._valueExtractorForBinarySearch);
+        return NearestBinarySearch.findClosestHigherValueIndex(count, this._visibleWindow.start + this._binarySearchBias, this._valueExtractorForBinarySearch);
     }
 
     _valueExtractorForBinarySearch(index) {
