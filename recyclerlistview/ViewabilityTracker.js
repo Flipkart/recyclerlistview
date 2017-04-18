@@ -1,20 +1,23 @@
 import NearestBinarySearch from "../utils/NearestBinarySearch";
 class ViewabilityTracker {
-    constructor(layouts, renderAheadOffset, initialOffset, maxOffset, dimensions, isHorizontal) {
-        this._layouts = layouts;
+    constructor(renderAheadOffset, initialOffset) {
+        this._layouts = null;
         this._currentOffset = Math.max(0, initialOffset);
-        this._maxOffset = maxOffset;
+        this._maxOffset = null;
         this._renderAheadOffset = renderAheadOffset;
-        this._isHorizontal = isHorizontal;
-        this._windowBound = isHorizontal ? dimensions.width : dimensions.height;
         this._visibleWindow = {start: 0, end: 0};
         this._engagedWindow = {start: 0, end: 0};
+
+        this._isHorizontal = false;
+        this._windowBound = 0;
 
         this._visibleIndexes = [];  //needs to be sorted
         this._engagedIndexes = [];  //needs to be sorted
 
         this.onVisibleRowsChanged = null;
         this.onEngagedRowsChanged = null;
+
+        this._binarySearchBias = 0.001;
 
         this._relevantDim = {startBound: 0, endBound: 0};
 
@@ -23,6 +26,25 @@ class ViewabilityTracker {
 
     init() {
         this._doInitialFit(this._currentOffset);
+    }
+
+    setLayouts(layouts, maxOffset) {
+        this._layouts = layouts;
+        this._maxOffset = maxOffset;
+    }
+
+    setDimensions(dimensions, isHorizontal) {
+        this._isHorizontal = isHorizontal;
+        this._windowBound = isHorizontal ? dimensions.width : dimensions.height;
+    }
+
+    forceRefresh() {
+        this.forceRefreshWithOffset(this._currentOffset);
+    }
+
+    forceRefreshWithOffset(offset) {
+        this._currentOffset = -1;
+        this.updateOffset(offset);
     }
 
     updateOffset(offset) {
@@ -42,10 +64,17 @@ class ViewabilityTracker {
         return this._currentOffset;
     }
 
-    getOffsetForIndex(index) {
-        if (this._layouts.length > index) {
-            return {x: this._layouts[index].x, y: this._layouts[index].y};
+    findFirstVisibleIndex() {
+        let firstVisibleIndex = 0;
+
+        //TODO: Talha calculate this value smartly
+        if (this._currentOffset > 5000) {
+            firstVisibleIndex = this._findFirstVisibleIndexUsingBS();
         }
+        else if (this._currentOffset > 0) {
+            firstVisibleIndex = this._findFirstVisibleIndexLinearly();
+        }
+        return firstVisibleIndex;
     }
 
     _fitAndUpdate(startIndex) {
@@ -59,21 +88,8 @@ class ViewabilityTracker {
     _doInitialFit(offset) {
         offset = Math.min(this._maxOffset, Math.max(0, offset));
         this._updateTrackingWindows(offset);
-        let firstVisibleIndex = this._findFirstVisibleIndex();
+        let firstVisibleIndex = this.findFirstVisibleIndex();
         this._fitAndUpdate(firstVisibleIndex);
-    }
-
-    _findFirstVisibleIndex() {
-        let firstVisibleIndex = 0;
-
-        //TODO: Talha calculate this value smartly
-        if (this._currentOffset > 5000) {
-            firstVisibleIndex = this._findFirstVisibleIndexUsingBS();
-        }
-        else if (this._currentOffset > 0) {
-            firstVisibleIndex = this._findFirstVisibleIndexLinearly();
-        }
-        return firstVisibleIndex;
     }
 
     //TODO:Talha switch to binary search and remove atleast once logic in _fitIndexes
@@ -93,7 +109,7 @@ class ViewabilityTracker {
 
     _findFirstVisibleIndexUsingBS() {
         const count = this._layouts.length;
-        return NearestBinarySearch.findClosestHigherValueIndex(count, this._visibleWindow.start, this._valueExtractorForBinarySearch);
+        return NearestBinarySearch.findClosestHigherValueIndex(count, this._visibleWindow.start + this._binarySearchBias, this._valueExtractorForBinarySearch);
     }
 
     _valueExtractorForBinarySearch(index) {
@@ -176,7 +192,7 @@ class ViewabilityTracker {
     }
 
     _isItemInBounds(window, itemBound) {
-        return (window.start <= itemBound && window.end >= itemBound);
+        return (window.start < itemBound && window.end >= itemBound);
     }
 
     _itemIntersectsWindow(window, startBound, endBound) {
