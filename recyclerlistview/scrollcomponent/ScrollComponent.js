@@ -8,25 +8,6 @@ class ScrollComponent extends React.Component {
 
         this._height = 0;
         this._width = 0;
-
-        this._initialOffsetProcessed = false;
-    }
-
-    componentDidUpdate() {
-        if (!this._initialOffsetProcessed) {
-            setTimeout(() => {
-                this._checkInitialOffset()
-            }, 0);
-        }
-    }
-
-    _checkInitialOffset() {
-        if (!this._initialOffsetProcessed) {
-            this._initialOffsetProcessed = true;
-            if (this.props.initialOffset !== 0) {
-                this.props.isHorizontal ? this.scrollTo(this.props.initialOffset, 0, false) : this.scrollTo(0, this.props.initialOffset, false);
-            }
-        }
     }
 
     _onScroll(event) {
@@ -71,7 +52,6 @@ class ScrollComponent extends React.Component {
 
 export default ScrollComponent;
 ScrollComponent.defaultProps = {
-    initialOffset: 0,
     isHorizontal: false,
     contentHeight: 0,
     contentWidth: 0
@@ -83,7 +63,6 @@ ScrollComponent.propTypes = {
     onSizeChanged: React.PropTypes.func,
     parentProps: React.PropTypes.object,
     isHorizontal: React.PropTypes.bool,
-    initialOffset: React.PropTypes.number,
     renderFooter: React.PropTypes.func
 }
 //#endif

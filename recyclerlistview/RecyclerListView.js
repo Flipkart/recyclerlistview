@@ -9,8 +9,8 @@
  * DONE: Give viewability callbacks
  * DONE: Add full render logic in cases like change of dimensions
  * DONE: Fix all proptypes
- * TODO: Add Initial render Index support
- * DONE: Heavily reduce isHorizontal checks
+ * DONE: Add Initial render Index support
+ * TODO: Heavily reduce isHorizontal checks
  */
 import React, {Component} from "react";
 import Messages from "./messages/Messages";
@@ -96,9 +96,7 @@ class RecyclerListView extends React.Component {
 
     getCurrentScrollOffset() {
         let offset = this._virtualRenderer.getViewabilityTracker().getLastOffset();
-        let x = this.props.isHorizontal ? offset : 0;
-        let y = !this.props.isHorizontal ? offset : 0;
-        return {x: x, y: y};
+        return this.props.isHorizontal ? offset.x : offset.y;
     }
 
     _checkAndChangeLayouts(newProps, forceFullRender) {
@@ -146,7 +144,8 @@ class RecyclerListView extends React.Component {
             isHorizontal: this.props.isHorizontal,
             itemCount: this.props.dataProvider.getSize(),
             initialOffset: this.props.initialOffset,
-            renderAheadOffset: this.props.renderAheadOffset
+            renderAheadOffset: this.props.renderAheadOffset,
+            initialRenderIndex: this.props.initialRenderIndex
         }, this._layout);
         this._virtualRenderer.setLayoutManager(new LayoutManager(this.props.layoutProvider, this._layout, this.props.isHorizontal));
         this._virtualRenderer.setLayoutProvider(this.props.layoutProvider);
@@ -236,6 +235,7 @@ RecyclerListView
     isHorizontal: false,
     renderAheadOffset: 250,
     onEndReachedThreshold: 0,
+    initialRenderIndex:0
 };
 
 //#if [DEV]
@@ -251,6 +251,7 @@ RecyclerListView
     onEndReached: React.PropTypes.func,
     onEndReachedThreshold: React.PropTypes.number,
     onVisibleIndexesChanged: React.PropTypes.func,
-    renderFooter: React.PropTypes.func
+    renderFooter: React.PropTypes.func,
+    initialRenderIndex: React.PropTypes.number
 };
 //#endif

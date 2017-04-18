@@ -61,9 +61,26 @@ class VirtualRenderer {
 
     init() {
         this._recyclePool = new RecycleItemPool();
+        let offset;
+        if (this._params.initialRenderIndex > 0) {
+            offset = this._layoutManager.getOffsetForIndex(this._params.initialRenderIndex);
+            this._params.initialOffset = this._params.isHorizontal ? offset.x : offset.y;
+        }
+        else {
+            offset = {};
+            if (this._params.isHorizontal) {
+                offset.x = this._params.initialOffset;
+                offset.y = 0;
+            }
+            else {
+                offset.y = this._params.initialOffset;
+                offset.x = 0;
+            }
+        }
         this._viewabilityTracker = new ViewabilityTracker(this._params.renderAheadOffset, this._params.initialOffset);
         this._prepareViewabilityTracker();
         this._viewabilityTracker.init();
+        this._scrollOnNextUpdate(offset);
     }
 
     _prepareViewabilityTracker() {
