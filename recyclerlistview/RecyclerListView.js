@@ -14,8 +14,8 @@
  */
 import React, {Component} from "react";
 import Messages from "./messages/Messages";
-import ScrollComponent from "./scrollcomponent/ScrollComponent";
-import ViewHolder from "./ViewHolder";
+import ScrollComponent from "./scrollcomponent/reactnative/ScrollComponent";
+import ViewHolder from "./viewholder/reactnative/ViewHolder";
 import VirtualRenderer from "./VirtualRenderer";
 import DataProvider from "./dependencies/DataProvider";
 import LayoutProvider from "./dependencies/LayoutProvider";
