@@ -5,4 +5,7 @@ export default{
     RecyclerListView,
     DataProvider,
     LayoutProvider
-}
+};
+export {RecyclerListView};
+export {DataProvider};
+export {LayoutProvider};
