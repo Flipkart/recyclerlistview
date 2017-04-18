@@ -104,7 +104,6 @@ class VirtualRenderer {
     }
 
     _onEngagedItemsChanged(all, now, notNow) {
-        console.log(all);
         let count = notNow.length;
         let resolvedIndex = 0;
         for (let i = 0; i < count; i++) {
