@@ -1,0 +1,19 @@
+{
+  "name": "recyclerlistview",
+  "version": "1.0.0-alpha",
+  "description": "The listview that you need and deserve",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Flipkart/ReactEssentials.git#recyclerlistview-v1.0-alpha"
+  },
+  "author": "naqvitalha <naqvitalha@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Flipkart/ReactEssentials/issues"
+  },
+  "homepage": "https://github.com/Flipkart/ReactEssentials/tree/recyclerlistview-v1.0-alpha#readme"
+}
