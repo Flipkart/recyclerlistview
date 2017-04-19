@@ -17,8 +17,6 @@ class ViewabilityTracker {
         this.onVisibleRowsChanged = null;
         this.onEngagedRowsChanged = null;
 
-        this._binarySearchBias = 0.001;
-
         this._relevantDim = {startBound: 0, endBound: 0};
 
         this._valueExtractorForBinarySearch = this._valueExtractorForBinarySearch.bind(this);
@@ -64,7 +62,29 @@ class ViewabilityTracker {
         return this._currentOffset;
     }
 
-    findFirstVisibleIndex() {
+    findFirstLogicallyVisibleIndex() {
+        let relevantIndex = this._findFirstVisibleIndexUsingBS(0.001);
+        let result = relevantIndex;
+        for (let i = relevantIndex - 1; i >= 0; i--) {
+            if (this._isHorizontal) {
+                if (this._layouts[relevantIndex].x !== this._layouts[i].x) {
+                    break;
+                }
+                else {
+                    result = i;
+                }
+            } else {
+                if (this._layouts[relevantIndex].y !== this._layouts[i].y) {
+                    break;
+                } else {
+                    result = i;
+                }
+            }
+        }
+        return result;
+    }
+
+    _findFirstVisibleIndexOptimally() {
         let firstVisibleIndex = 0;
 
         //TODO: Talha calculate this value smartly
@@ -88,7 +108,7 @@ class ViewabilityTracker {
     _doInitialFit(offset) {
         offset = Math.min(this._maxOffset, Math.max(0, offset));
         this._updateTrackingWindows(offset);
-        let firstVisibleIndex = this.findFirstVisibleIndex();
+        let firstVisibleIndex = this._findFirstVisibleIndexOptimally();
         this._fitAndUpdate(firstVisibleIndex);
     }
 
@@ -107,9 +127,9 @@ class ViewabilityTracker {
         }
     }
 
-    _findFirstVisibleIndexUsingBS() {
+    _findFirstVisibleIndexUsingBS(bias = 0) {
         const count = this._layouts.length;
-        return NearestBinarySearch.findClosestHigherValueIndex(count, this._visibleWindow.start + this._binarySearchBias, this._valueExtractorForBinarySearch);
+        return NearestBinarySearch.findClosestHigherValueIndex(count, this._visibleWindow.start + bias, this._valueExtractorForBinarySearch);
     }
 
     _valueExtractorForBinarySearch(index) {
@@ -118,7 +138,7 @@ class ViewabilityTracker {
         return this._relevantDim.endBound;
     }
 
-    //TODO:Talha Optimize further in later revisions
+    //TODO:Talha Optimize further in later revisions, alteast once logic can be replace with a BS lookup
     _fitIndexes(newVisibleIndexes, newEngagedIndexes, startIndex, isReverse) {
         const count = this._layouts.length;
         let relevantDim = {startBound: 0, endBound: 0};
@@ -192,7 +212,7 @@ class ViewabilityTracker {
     }
 
     _isItemInBounds(window, itemBound) {
-        return (window.start < itemBound && window.end >= itemBound);
+        return (window.start <= itemBound && window.end >= itemBound);
     }
 
     _itemIntersectsWindow(window, startBound, endBound) {
