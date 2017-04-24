@@ -14,14 +14,23 @@
  */
 import React, {Component} from "react";
 import Messages from "./messages/Messages";
-import ScrollComponent from "./scrollcomponent/reactnative/ScrollComponent";
-import ViewHolder from "./viewholder/reactnative/ViewHolder";
 import VirtualRenderer from "./VirtualRenderer";
 import DataProvider from "./dependencies/DataProvider";
 import LayoutProvider from "./dependencies/LayoutProvider";
 import LayoutManager from "./layoutmanager/LayoutManager";
 
-class RecyclerListView extends React.Component {
+let ScrollComponent, ViewHolder;
+
+if (navigator && navigator.product == "ReactNative") {
+    ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent");
+    ViewHolder = require("./viewholder/reactnative/ViewHolder");
+}
+else {
+    ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
+    ViewHolder = require("./viewholder/web/ViewHolder").default;
+}
+
+class RecyclerListView extends Component {
     constructor(args) {
         super(args);
         this._onScroll = this._onScroll.bind(this);
