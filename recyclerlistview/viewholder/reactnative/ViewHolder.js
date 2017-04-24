@@ -30,5 +30,5 @@ ViewHolder.propTypes = {
     y: React.PropTypes.number.isRequired,
     height: React.PropTypes.number.isRequired,
     width: React.PropTypes.number.isRequired
-}
+};
 //#endif

@@ -250,7 +250,7 @@ class RecyclerListView extends React.Component {
                     {this._generateRenderStack()}
                 </ScrollComponent> :
                 <ScrollComponent ref="scrollComponent" parentProps={this.props}
-                                 onSizeChanged={this._onSizeChanged}></ScrollComponent>
+    onSizeChanged={this._onSizeChanged}/>
 
         );
     }
