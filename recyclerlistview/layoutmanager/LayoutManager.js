@@ -21,7 +21,10 @@ class LayoutManager {
         if (this._layouts.length > index) {
             return {x: this._layouts[index].x, y: this._layouts[index].y};
         } else {
-            throw "No layout available for index: " + index;
+            throw {
+                type: "LayoutUnavailableException",
+                message: "No layout available for index: " + index
+            }
         }
     }
 

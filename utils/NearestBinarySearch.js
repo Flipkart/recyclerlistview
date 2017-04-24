@@ -13,8 +13,12 @@ class NearestBinarySearch {
             return result;
         }
 
-        if (high < 0)
-            throw "The collection cannot be empty";
+        if (high < 0) {
+            throw {
+                message: "The collection cannot be empty",
+                type: "InvalidStateException"
+            };
+        }
 
         while (low <= high) {
             mid = Math.floor((low + high) / 2);

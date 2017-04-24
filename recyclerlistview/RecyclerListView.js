@@ -20,6 +20,7 @@ import VirtualRenderer from "./VirtualRenderer";
 import DataProvider from "./dependencies/DataProvider";
 import LayoutProvider from "./dependencies/LayoutProvider";
 import LayoutManager from "./layoutmanager/LayoutManager";
+import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
 
 class RecyclerListView extends React.Component {
     constructor(args) {
@@ -42,6 +43,7 @@ class RecyclerListView extends React.Component {
     }
 
     componentWillReceiveProps(newProps) {
+        this._assertDependencyPresence(newProps);
         this._checkAndChangeLayouts(newProps);
         if (!this.props.onVisibleItemsChanged) {
             this._virtualRenderer.removeVisibleItemsListener();
@@ -129,10 +131,12 @@ class RecyclerListView extends React.Component {
     }
 
     _onSizeChanged(layout) {
+        let hasHeightChanged = this._layout.height !== layout.height;
+        let hasWidthChanged = this._layout.width !== layout.width;
         this._layout.height = layout.height;
         this._layout.width = layout.width;
         if (layout.height === 0 || layout.width === 0) {
-            throw "RecyclerListView needs to have a bounded size. Currently height or, width is 0";
+            throw RecyclerListViewExceptions.layoutException;
         }
         if (!this._initComplete) {
             this._initComplete = true;
@@ -140,12 +144,20 @@ class RecyclerListView extends React.Component {
             this._processOnEndReached();
         }
         else {
-            this._checkAndChangeLayouts(this.props, true);
+            if ((hasHeightChanged && hasWidthChanged) ||
+                (hasHeightChanged && this.props.isHorizontal) ||
+                (hasWidthChanged && !this.props.isHorizontal)) {
+                this._checkAndChangeLayouts(this.props, true);
+            } else {
+                this.setState((prevState, props) => {
+                    return prevState;
+                });
+            }
         }
     }
 
     _initTrackers() {
-        this._assertDependencyPresence();
+        this._assertDependencyPresence(this.props);
         this._virtualRenderer = new VirtualRenderer((stack) => {
             this.setState((prevState, props) => {
                 return {renderStack: stack};
@@ -173,9 +185,15 @@ class RecyclerListView extends React.Component {
 
     }
 
-    _assertDependencyPresence() {
-        if (!this.props.dataProvider || !this.props.layoutProvider) {
-            throw Messages.ERROR_LISTVIEW_VALIDATION;
+    _assertDependencyPresence(props) {
+        if (!props.dataProvider || !props.layoutProvider) {
+            throw RecyclerListViewExceptions.unresolvedDependenciesException;
+        }
+    }
+
+    _assertType(type) {
+        if (!type) {
+            throw RecyclerListViewExceptions.itemTypeNullException;
         }
     }
 
@@ -183,19 +201,22 @@ class RecyclerListView extends React.Component {
         let itemRect = this._virtualRenderer.getLayoutManager().getLayouts()[itemMeta.dataIndex];
         let data = this.props.dataProvider.getDataForIndex(itemMeta.dataIndex);
         //TODO:Talha remove this
-        let dataTest = {data: data, key: itemMeta.key};
         let type = this.props.layoutProvider.getLayoutTypeForIndex(itemMeta.dataIndex);
+        this._assertType(type);
         this._checkExpectedDimensionDiscrepancy(itemRect, type, itemMeta.dataIndex);
         return (
-            <ViewHolder key={itemMeta.key} x={itemRect.x} y={itemRect.y} height={itemRect.height}
+            <ViewHolder key={itemMeta.key} data={data} x={itemRect.x} y={itemRect.y} height={itemRect.height}
                         width={itemRect.width}>
-                {this.props.rowRenderer(type, dataTest)}
+                {this.props.rowRenderer(type, data)}
             </ViewHolder>
         );
     }
 
     _checkExpectedDimensionDiscrepancy(itemRect, type, index) {
         this.props.layoutProvider.setLayoutForType(type, this._tempDim);
+
+        //TODO:Talha calling private method, find an alternative and remove this
+        this._virtualRenderer.getLayoutManager()._setMaxBounds(this._tempDim);
         if (itemRect.height !== this._tempDim.height || itemRect.width !== this._tempDim.width) {
             if (this._relayoutReqIndex === -1) {
                 this._relayoutReqIndex = index;
