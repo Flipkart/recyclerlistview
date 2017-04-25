@@ -28,6 +28,7 @@ class RecyclerListView extends React.Component {
         this._onScroll = this._onScroll.bind(this);
         this._onSizeChanged = this._onSizeChanged.bind(this);
         this._onVisibleItemsChanged = this._onVisibleItemsChanged.bind(this);
+        this._dataHasChanged = this._dataHasChanged.bind(this);
         this.scrollToOffset = this.scrollToOffset.bind(this);
         this._onEndReachedCalled = false;
         this._virtualRenderer = null;
@@ -197,15 +198,22 @@ class RecyclerListView extends React.Component {
         }
     }
 
+    _dataHasChanged(row1, row2) {
+        return this.props.dataProvider.rowHasChanged(row1, row2);
+    }
+
     _renderRowUsingMeta(itemMeta) {
         let itemRect = this._virtualRenderer.getLayoutManager().getLayouts()[itemMeta.dataIndex];
         let data = this.props.dataProvider.getDataForIndex(itemMeta.dataIndex);
-        //TODO:Talha remove this
         let type = this.props.layoutProvider.getLayoutTypeForIndex(itemMeta.dataIndex);
         this._assertType(type);
         this._checkExpectedDimensionDiscrepancy(itemRect, type, itemMeta.dataIndex);
         return (
-            <ViewHolder key={itemMeta.key} data={data} x={itemRect.x} y={itemRect.y} height={itemRect.height}
+            <ViewHolder key={itemMeta.key} data={data}
+                        dataHasChanged={this._dataHasChanged}
+                        x={itemRect.x}
+                        y={itemRect.y}
+                        height={itemRect.height}
                         width={itemRect.width}>
                 {this.props.rowRenderer(type, data)}
             </ViewHolder>

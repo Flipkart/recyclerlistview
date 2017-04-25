@@ -13,13 +13,17 @@ class DataProvider {
         return this._size;
     }
 
+    rowHasChanged(row1, row2) {
+        return this._rowHasChanged(row1, row2);
+    }
+
     cloneWithRows(newData) {
         let dp = new DataProvider(this._rowHasChanged);
         let newSize = newData.length;
         let iterCount = Math.min(this._size, newSize);
         let i = 0;
         for (i = 0; i < iterCount; i++) {
-            if (this._rowHasChanged(this._data[i], newData[i])) {
+            if (this.rowHasChanged(this._data[i], newData[i])) {
                 break;
             }
         }
