@@ -9,12 +9,16 @@ class NearestBinarySearch {
         let diff = 0;
         let absoluteDiff = 0;
 
-        if (absoluteLastDiff == 0) {
+        if (absoluteLastDiff === 0) {
             return result;
         }
 
-        if (high < 0)
-            throw "The collection cannot be empty";
+        if (high < 0) {
+            throw {
+                message: "The collection cannot be empty",
+                type: "InvalidStateException"
+            };
+        }
 
         while (low <= high) {
             mid = Math.floor((low + high) / 2);

@@ -5,7 +5,8 @@ class ViewHolder extends React.Component {
         return (this.props.x !== newProps.x ||
         this.props.y !== newProps.y ||
         this.props.width !== newProps.width ||
-        this.props.height !== newProps.height);
+        this.props.height !== newProps.height ||
+        (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data)));
     }
 
     render() {
@@ -29,6 +30,9 @@ ViewHolder.propTypes = {
     x: React.PropTypes.number.isRequired,
     y: React.PropTypes.number.isRequired,
     height: React.PropTypes.number.isRequired,
-    width: React.PropTypes.number.isRequired
-}
+    width: React.PropTypes.number.isRequired,
+    dataHasChanged: React.PropTypes.func,
+    data: React.PropTypes.object
+
+};
 //#endif
