@@ -9,7 +9,7 @@ class NearestBinarySearch {
         let diff = 0;
         let absoluteDiff = 0;
 
-        if (absoluteLastDiff == 0) {
+        if (absoluteLastDiff === 0) {
             return result;
         }
 

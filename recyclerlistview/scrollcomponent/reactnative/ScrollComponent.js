@@ -55,7 +55,7 @@ ScrollComponent.defaultProps = {
     isHorizontal: false,
     contentHeight: 0,
     contentWidth: 0
-}
+};
 //#if [DEV]
 ScrollComponent.propTypes = {
     contentHeight: React.PropTypes.number,
@@ -64,5 +64,5 @@ ScrollComponent.propTypes = {
     parentProps: React.PropTypes.object,
     isHorizontal: React.PropTypes.bool,
     renderFooter: React.PropTypes.func
-}
+};
 //#endif

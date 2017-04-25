@@ -47,7 +47,7 @@ class ViewabilityTracker {
 
     updateOffset(offset) {
         offset = Math.min(this._maxOffset, Math.max(0, offset));
-        if (this._currentOffset != offset) {
+        if (this._currentOffset !== offset) {
             this._currentOffset = offset;
             this._updateTrackingWindows(offset);
             let startIndex = 0;
