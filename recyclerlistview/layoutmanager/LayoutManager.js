@@ -112,7 +112,7 @@ class LayoutManager {
     }
 
     _locateFirstNeighbourIndex(startIndex) {
-        if (startIndex == 0) {
+        if (startIndex === 0) {
             return 0
         }
         let i = startIndex - 1;

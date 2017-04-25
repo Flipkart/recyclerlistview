@@ -34,5 +34,5 @@ ViewHolder.propTypes = {
     dataHasChanged: React.PropTypes.func,
     data: React.PropTypes.object
 
-}
+};
 //#endif
