@@ -193,7 +193,7 @@ class RecyclerListView extends React.Component {
     }
 
     _assertType(type) {
-        if (!type) {
+        if (!type && type !== 0) {
             throw RecyclerListViewExceptions.itemTypeNullException;
         }
     }
@@ -279,7 +279,7 @@ class RecyclerListView extends React.Component {
                     {this._generateRenderStack()}
                 </ScrollComponent> :
                 <ScrollComponent ref="scrollComponent" parentProps={this.props}
-    onSizeChanged={this._onSizeChanged}/>
+                                 onSizeChanged={this._onSizeChanged}/>
 
         );
     }
