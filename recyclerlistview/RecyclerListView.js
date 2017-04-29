@@ -31,8 +31,8 @@ if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
     ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
 } else if (navigator && navigator.product === "ReactNative") {
-    ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent");
-    ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer");
+    ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent").default;
+    ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer").default;
 }
 else {
     throw RecyclerListViewExceptions.platformNotDetectedException;
@@ -311,7 +311,7 @@ RecyclerListView
     initialOffset: 0,
     isHorizontal: false,
     renderAheadOffset: 250,
-    onEndReachedThreshold: 10,
+    onEndReachedThreshold: 0,
     initialRenderIndex: 0,
     canChangeSize: false
 };
