@@ -27,7 +27,7 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 let ScrollComponent, ViewRenderer;
 
 //TODO: Talha, add documentation
-if (true || process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
+if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
     ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
 } else if (navigator && navigator.product === "ReactNative") {
