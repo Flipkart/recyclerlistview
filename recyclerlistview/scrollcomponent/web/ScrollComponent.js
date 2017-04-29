@@ -1,71 +1,53 @@
-import React from 'react';
+import React from "react";
+import ScrollViewer from "./ScrollViewer";
 class ScrollComponent extends React.Component {
     constructor(args) {
         super(args);
         this._onScroll = this._onScroll.bind(this);
-        //this._onLayout = this._onLayout.bind(this);
+        this._onSizeChanged = this._onSizeChanged.bind(this);
 
         this._height = 0;
         this._width = 0;
     }
 
-    _onScroll() {
-        let sv = this.refs["scrollView"];
-        if (this.props.isHorizontal) {
-            this.props.onScroll(sv.scrollLeft, 0, null);
-        }
-        else {
-            this.props.onScroll(sv.scrollTop, 0, null);
-        }
+    _onScroll(e) {
+        this.props.onScroll(e.offsetX, e.offsetY, e);
     }
 
-    componentDidMount() {
+    _onSizeChanged(event) {
         if (this.props.onSizeChanged) {
-            let sv = this.refs["scrollView"];
-            this.props.onSizeChanged({height: sv.height, width: sv.width});
+            this.props.onSizeChanged(event);
         }
     }
-
-    // _onLayout(event) {
-    //     if (this._height !== event.nativeEvent.layout.height || this._width !== event.nativeEvent.layout.width) {
-    //         this._height = event.nativeEvent.layout.height;
-    //         this._width = event.nativeEvent.layout.width;
-    //         if (this.props.onSizeChanged) {
-    //             this.props.onSizeChanged(event.nativeEvent.layout);
-    //         }
-    //     }
-    //
-    // }
 
     scrollTo(x, y, isAnimated) {
-        let sv = this.refs["scrollView"];
-        if (this.props.isHorizontal) {
-            sv.scollLeft = x;
-        }
-        else {
-            sv.scollTop = y;
-        }
+        this.refs["scrollView"].scrollTo(x, y, isAnimated);
     }
 
     render() {
         return (
-            <div ref="scrollView"
-                 {...this.props.parentProps}
-                 style={{
-                     overflowX: this.props.isHorizontal ? 'auto' : 'hidden',
-                     overflowY: !this.props.isHorizontal ? 'auto' : 'hidden',
-                 }}
-                 onScroll={this._onScroll}>
-                <div style={{flexDirection: this.props.isHorizontal ? 'row' : 'column'}}>
-                    <div style={{
-                        height: this.props.contentHeight,
-                        width: this.props.contentWidth,
-                    }}>
-                        {this.props.children}
-                    </div>
+            <ScrollViewer ref="scrollView"
+                          {...this.props.parentProps}
+                          horizontal={this.props.isHorizontal}
+                          onScroll={this._onScroll}
+                          canChangeSize={this.props.canChangeSize}
+                          scrollThrottle={this.props.scrollThrottle}
+                          onSizeChanged={this._onSizeChanged}>
+
+                <div style={{
+                    height: this.props.contentHeight,
+                    width: this.props.contentWidth,
+                }}>
+                    {this.props.children}
+                </div>
+                <div style={this.props.isHorizontal ? {
+                    position: 'absolute',
+                    top: 0,
+                    left: this.props.contentWidth
+                } : null}>
                     {this.props.renderFooter ? this.props.renderFooter() : null}
                 </div>
-            </div>
+            </ScrollViewer>
         );
     }
 }
@@ -74,8 +56,9 @@ export default ScrollComponent;
 ScrollComponent.defaultProps = {
     isHorizontal: false,
     contentHeight: 0,
-    contentWidth: 0
-}
+    contentWidth: 0,
+    scrollThrottle: 32
+};
 //#if [DEV]
 ScrollComponent.propTypes = {
     contentHeight: React.PropTypes.number,
@@ -83,6 +66,8 @@ ScrollComponent.propTypes = {
     onSizeChanged: React.PropTypes.func,
     parentProps: React.PropTypes.object,
     isHorizontal: React.PropTypes.bool,
-    renderFooter: React.PropTypes.func
-}
+    renderFooter: React.PropTypes.func,
+    scrollThrottle: React.PropTypes.number,
+    canChangeSize: React.PropTypes.bool
+};
 //#endif

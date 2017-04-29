@@ -10,25 +10,32 @@
  * DONE: Add full render logic in cases like change of dimensions
  * DONE: Fix all proptypes
  * DONE: Add Initial render Index support
- * TODO: Heavily reduce isHorizontal checks
+ * TODO: Destroy less frequently used items in recycle pool, this will help in case of too many types.
+ * TODO: Add animated scroll to web scrollviewer
+ * TODO: Animate list view transition, including add/remove
+ * TODO: Implement sticky headers
+ * TODO: Make viewability callbacks configurable
+ * TODO: Observe size changes on web to optimize for reflowability
  */
 import React, {Component} from "react";
-import Messages from "./messages/Messages";
 import VirtualRenderer from "./VirtualRenderer";
 import DataProvider from "./dependencies/DataProvider";
 import LayoutProvider from "./dependencies/LayoutProvider";
 import LayoutManager from "./layoutmanager/LayoutManager";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
 
-let ScrollComponent, ViewHolder;
+let ScrollComponent, ViewRenderer;
 
-if (navigator && navigator.product == "ReactNative") {
+//TODO: Talha, add documentation
+if (true || process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
+    ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
+    ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
+} else if (navigator && navigator.product === "ReactNative") {
     ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent");
-    ViewHolder = require("./viewholder/reactnative/ViewHolder");
+    ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer");
 }
 else {
-    ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
-    ViewHolder = require("./viewholder/web/ViewHolder").default;
+    throw RecyclerListViewExceptions.platformNotDetectedException;
 }
 
 class RecyclerListView extends Component {
@@ -132,12 +139,15 @@ class RecyclerListView extends Component {
         } else if (this._relayoutReqIndex >= 0) {
             this._virtualRenderer.getLayoutManager().reLayoutFromIndex(this._relayoutReqIndex, newProps.dataProvider.getSize());
             this._relayoutReqIndex = -1;
-            this._virtualRenderer.refresh();
-            //TODO:Talha Test this out
-            this.setState((prevState, props) => {
-                return prevState;
-            });
+            this._refreshViewability();
         }
+    }
+
+    _refreshViewability() {
+        this._virtualRenderer.refresh();
+        this.setState((prevState, props) => {
+            return prevState;
+        });
     }
 
     _onSizeChanged(layout) {
@@ -159,9 +169,7 @@ class RecyclerListView extends Component {
                 (hasWidthChanged && !this.props.isHorizontal)) {
                 this._checkAndChangeLayouts(this.props, true);
             } else {
-                this.setState((prevState, props) => {
-                    return prevState;
-                });
+                this._refreshViewability();
             }
         }
     }
@@ -218,14 +226,14 @@ class RecyclerListView extends Component {
         this._assertType(type);
         this._checkExpectedDimensionDiscrepancy(itemRect, type, itemMeta.dataIndex);
         return (
-            <ViewHolder key={itemMeta.key} data={data}
-                        dataHasChanged={this._dataHasChanged}
-                        x={itemRect.x}
-                        y={itemRect.y}
-                        height={itemRect.height}
-                        width={itemRect.width}>
-                {this.props.rowRenderer(type, data)}
-            </ViewHolder>
+            <ViewRenderer key={itemMeta.key} data={data}
+                          dataHasChanged={this._dataHasChanged}
+                          x={itemRect.x}
+                          y={itemRect.y}
+                          layoutType={type}
+                          childRenderer={this.props.rowRenderer}
+                          height={itemRect.height}
+                          width={itemRect.width}/>
         );
     }
 
@@ -284,6 +292,8 @@ class RecyclerListView extends Component {
                                  onScroll={this._onScroll} isHorizontal={this.props.isHorizontal}
                                  onSizeChanged={this._onSizeChanged} renderFooter={this.props.renderFooter}
                                  contentHeight={this._virtualRenderer.getLayoutDimension().height}
+                                 scrollThrottle={this.props.scrollThrottle}
+                                 canChangeSize={this.props.canChangeSize}
                                  contentWidth={this._virtualRenderer.getLayoutDimension().width}>
                     {this._generateRenderStack()}
                 </ScrollComponent> :
@@ -301,8 +311,9 @@ RecyclerListView
     initialOffset: 0,
     isHorizontal: false,
     renderAheadOffset: 250,
-    onEndReachedThreshold: 0,
-    initialRenderIndex: 0
+    onEndReachedThreshold: 10,
+    initialRenderIndex: 0,
+    canChangeSize: false
 };
 
 //#if [DEV]
@@ -319,6 +330,8 @@ RecyclerListView
     onEndReachedThreshold: React.PropTypes.number,
     onVisibleIndexesChanged: React.PropTypes.func,
     renderFooter: React.PropTypes.func,
-    initialRenderIndex: React.PropTypes.number
+    initialRenderIndex: React.PropTypes.number,
+    scrollThrottle: React.PropTypes.number,
+    canChangeSize: React.PropTypes.bool
 };
 //#endif

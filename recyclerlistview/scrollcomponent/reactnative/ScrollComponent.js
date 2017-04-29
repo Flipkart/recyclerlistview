@@ -8,6 +8,8 @@ class ScrollComponent extends React.Component {
 
         this._height = 0;
         this._width = 0;
+
+        this._isSizeChangedCalledOnce = false;
     }
 
     _onScroll(event) {
@@ -19,6 +21,7 @@ class ScrollComponent extends React.Component {
             this._height = event.nativeEvent.layout.height;
             this._width = event.nativeEvent.layout.width;
             if (this.props.onSizeChanged) {
+                this._isSizeChangedCalledOnce = true;
                 this.props.onSizeChanged(event.nativeEvent.layout);
             }
         }
@@ -31,11 +34,11 @@ class ScrollComponent extends React.Component {
 
     render() {
         return (
-            <ScrollView ref="scrollView" removeClippedSubviews={false} scrollEventThrottle={16}
+            <ScrollView ref="scrollView" removeClippedSubviews={false} scrollEventThrottle={this.props.scrollThrottle}
                         {...this.props.parentProps}
                         horizontal={this.props.isHorizontal}
                         onScroll={this._onScroll}
-                        onLayout={this._onLayout}>
+                        onLayout={(!this._isSizeChangedCalledOnce || this.props.canChangeSize) ? this._onLayout : null}>
                 <View style={{flexDirection: this.props.isHorizontal ? 'row' : 'column'}}>
                     <View style={{
                         height: this.props.contentHeight,
@@ -54,7 +57,8 @@ export default ScrollComponent;
 ScrollComponent.defaultProps = {
     isHorizontal: false,
     contentHeight: 0,
-    contentWidth: 0
+    contentWidth: 0,
+    scrollThrottle: 16
 };
 //#if [DEV]
 ScrollComponent.propTypes = {
@@ -63,6 +67,8 @@ ScrollComponent.propTypes = {
     onSizeChanged: React.PropTypes.func,
     parentProps: React.PropTypes.object,
     isHorizontal: React.PropTypes.bool,
-    renderFooter: React.PropTypes.func
+    renderFooter: React.PropTypes.func,
+    scrollThrottle: React.PropTypes.number,
+    canChangeSize: React.PropTypes.bool
 };
 //#endif

@@ -1,3 +1,4 @@
+//Warning: works only on string types
 class RecycleItemPool {
     constructor() {
         this._recyclableObjectMap = {};
@@ -12,7 +13,6 @@ class RecycleItemPool {
         }
         return objectSet;
     }
-
 
     putRecycledObject(objectType, object) {
         let objectSet = this._getRelevantSet(objectType);

@@ -132,12 +132,14 @@ class VirtualRenderer {
             type = this._layoutProvider.getLayoutTypeForIndex(index);
             availableIndex = this._recyclePool.getRecycledObject(type);
             if (availableIndex) {
+                //Recylepool works with string types so we need this conversion
+                availableIndex = parseInt(availableIndex, 10);
                 itemMeta = this._renderStack[availableIndex];
                 itemMeta.key = availableIndex;
             }
             else {
                 itemMeta = {};
-                itemMeta.key = renderStackCount.toString();
+                itemMeta.key = renderStackCount;
                 this._renderStack.push(itemMeta);
                 renderStackCount++;
             }
