@@ -220,21 +220,26 @@ class RecyclerListView extends Component {
     }
 
     _renderRowUsingMeta(itemMeta) {
-        let itemRect = this._virtualRenderer.getLayoutManager().getLayouts()[itemMeta.dataIndex];
-        let data = this.props.dataProvider.getDataForIndex(itemMeta.dataIndex);
-        let type = this.props.layoutProvider.getLayoutTypeForIndex(itemMeta.dataIndex);
-        this._assertType(type);
-        this._checkExpectedDimensionDiscrepancy(itemRect, type, itemMeta.dataIndex);
-        return (
-            <ViewRenderer key={itemMeta.key} data={data}
-                          dataHasChanged={this._dataHasChanged}
-                          x={itemRect.x}
-                          y={itemRect.y}
-                          layoutType={type}
-                          childRenderer={this.props.rowRenderer}
-                          height={itemRect.height}
-                          width={itemRect.width}/>
-        );
+        let dataSize = this.props.dataProvider.getSize();
+        let dataIndex = itemMeta.dataIndex;
+        if (dataIndex < dataSize) {
+            let itemRect = this._virtualRenderer.getLayoutManager().getLayouts()[dataIndex];
+            let data = this.props.dataProvider.getDataForIndex(dataIndex);
+            let type = this.props.layoutProvider.getLayoutTypeForIndex(dataIndex);
+            this._assertType(type);
+            this._checkExpectedDimensionDiscrepancy(itemRect, type, dataIndex);
+            return (
+                <ViewRenderer key={itemMeta.key} data={data}
+                              dataHasChanged={this._dataHasChanged}
+                              x={itemRect.x}
+                              y={itemRect.y}
+                              layoutType={type}
+                              childRenderer={this.props.rowRenderer}
+                              height={itemRect.height}
+                              width={itemRect.width}/>
+            );
+        }
+        return null;
     }
 
     _checkExpectedDimensionDiscrepancy(itemRect, type, index) {

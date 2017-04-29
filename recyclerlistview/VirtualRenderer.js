@@ -14,6 +14,19 @@ class VirtualRenderer {
         this._onVisibleItemsChanged = this._onVisibleItemsChanged.bind(this);
     }
 
+    getLayoutDimension() {
+        return this._layoutManager.getLayoutDimension();
+    }
+
+    updateOffset(offsetX, offsetY) {
+        if (this._params.isHorizontal) {
+            this._viewabilityTracker.updateOffset(offsetX);
+        }
+        else {
+            this._viewabilityTracker.updateOffset(offsetY);
+        }
+    }
+
     attachVisibleItemsListener(callback) {
         this.onVisibleItemsChanged = callback;
     }
@@ -48,15 +61,26 @@ class VirtualRenderer {
     refreshWithAnchor() {
         let firstVisibleIndex = this._viewabilityTracker.findFirstLogicallyVisibleIndex();
         this._prepareViewabilityTracker();
-        let offset = this._layoutManager.getOffsetForIndex(firstVisibleIndex);
-        this._scrollOnNextUpdate(offset);
-        offset = this._params.isHorizontal ? offset.x : offset.y;
+        let offset = 0;
+        try {
+            offset = this._layoutManager.getOffsetForIndex(firstVisibleIndex);
+            this._scrollOnNextUpdate(offset);
+            offset = this._params.isHorizontal ? offset.x : offset.y;
+        } catch (e) {
+        }
         this._viewabilityTracker.forceRefreshWithOffset(offset);
     }
 
     refresh() {
         this._prepareViewabilityTracker();
-        this._viewabilityTracker.forceRefresh();
+        if (this._viewabilityTracker.forceRefresh()) {
+            if (this._params.isHorizontal) {
+                this._scrollOnNextUpdate({x: this._viewabilityTracker.getLastOffset(), y: 0});
+            }
+            else {
+                this._scrollOnNextUpdate({x: 0, y: this._viewabilityTracker.getLastOffset()});
+            }
+        }
     }
 
     init() {
@@ -149,19 +173,6 @@ class VirtualRenderer {
             itemMeta.dataIndex = index;
         }
         //console.log(this._renderStack);
-    }
-
-    getLayoutDimension() {
-        return this._layoutManager.getLayoutDimension();
-    }
-
-    updateOffset(offsetX, offsetY) {
-        if (this._params.isHorizontal) {
-            this._viewabilityTracker.updateOffset(offsetX);
-        }
-        else {
-            this._viewabilityTracker.updateOffset(offsetY);
-        }
     }
 }
 
