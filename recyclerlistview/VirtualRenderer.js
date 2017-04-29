@@ -106,9 +106,11 @@ class VirtualRenderer {
     _onEngagedItemsChanged(all, now, notNow) {
         let count = notNow.length;
         let resolvedIndex = 0;
+        let disengagedIndex = 0
         for (let i = 0; i < count; i++) {
-            resolvedIndex = this._usageMap[notNow[i]];
-            this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(resolvedIndex), resolvedIndex);
+            disengagedIndex = notNow[i];
+            resolvedIndex = this._usageMap[disengagedIndex];
+            this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedIndex);
         }
         this._updateRenderStack(now, notNow);
         this._renderStackChanged(this._renderStack);
