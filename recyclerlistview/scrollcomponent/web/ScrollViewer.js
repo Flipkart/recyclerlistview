@@ -1,5 +1,6 @@
 import React from "react";
-import _throttle from "lodash/throttle"
+import _throttle from "lodash/throttle";
+import PropTypes from "prop-types";
 export default class ScrollViewer extends React.Component {
     constructor(args) {
         super(args);
@@ -40,7 +41,7 @@ export default class ScrollViewer extends React.Component {
 
     render() {
         return (
-            <div ref="mainDiv" {...this.props}
+            <div ref="mainDiv"
                  onScroll={_throttle(this._onScroll, this.props.scrollThrottle, this._throttleParams)}
                  style={{
                      overflowX: this.props.horizontal ? "scroll" : "hidden",
@@ -59,9 +60,9 @@ ScrollViewer.defaultProps = {
     canChangeSize: false
 };
 ScrollViewer.propTypes = {
-    onScroll: React.PropTypes.func,
-    onSizeChanged: React.PropTypes.func,
-    horizontal: React.PropTypes.bool,
-    scrollThrottle: React.PropTypes.number,
-    canChangeSize: React.PropTypes.bool
+    onScroll: PropTypes.func,
+    onSizeChanged: PropTypes.func,
+    horizontal: PropTypes.bool,
+    scrollThrottle: PropTypes.number,
+    canChangeSize: PropTypes.bool
 };

@@ -23,6 +23,7 @@ import DataProvider from "./dependencies/DataProvider";
 import LayoutProvider from "./dependencies/LayoutProvider";
 import LayoutManager from "./layoutmanager/LayoutManager";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
+import PropTypes from "prop-types";
 
 let ScrollComponent, ViewRenderer;
 
@@ -324,19 +325,19 @@ RecyclerListView
 //#if [DEV]
 RecyclerListView
     .propTypes = {
-    layoutProvider: React.PropTypes.instanceOf(LayoutProvider).isRequired,
-    dataProvider: React.PropTypes.instanceOf(DataProvider).isRequired,
-    rowRenderer: React.PropTypes.func.isRequired,
-    initialOffset: React.PropTypes.number,
-    renderAheadOffset: React.PropTypes.number,
-    isHorizontal: React.PropTypes.bool,
-    onScroll: React.PropTypes.func,
-    onEndReached: React.PropTypes.func,
-    onEndReachedThreshold: React.PropTypes.number,
-    onVisibleIndexesChanged: React.PropTypes.func,
-    renderFooter: React.PropTypes.func,
-    initialRenderIndex: React.PropTypes.number,
-    scrollThrottle: React.PropTypes.number,
-    canChangeSize: React.PropTypes.bool
+    layoutProvider: PropTypes.instanceOf(LayoutProvider).isRequired,
+    dataProvider: PropTypes.instanceOf(DataProvider).isRequired,
+    rowRenderer: PropTypes.func.isRequired,
+    initialOffset: PropTypes.number,
+    renderAheadOffset: PropTypes.number,
+    isHorizontal: PropTypes.bool,
+    onScroll: PropTypes.func,
+    onEndReached: PropTypes.func,
+    onEndReachedThreshold: PropTypes.number,
+    onVisibleIndexesChanged: PropTypes.func,
+    renderFooter: PropTypes.func,
+    initialRenderIndex: PropTypes.number,
+    scrollThrottle: PropTypes.number,
+    canChangeSize: PropTypes.bool
 };
 //#endif

@@ -1,5 +1,7 @@
 import React from "react";
 import {View} from "react-native";
+import PropTypes from 'prop-types';
+
 class ViewRenderer extends React.Component {
     shouldComponentUpdate(newProps) {
         return (this.props.x !== newProps.x ||
@@ -27,13 +29,13 @@ class ViewRenderer extends React.Component {
 export default ViewRenderer;
 //#if [DEV]
 ViewRenderer.propTypes = {
-    x: React.PropTypes.number.isRequired,
-    y: React.PropTypes.number.isRequired,
-    height: React.PropTypes.number.isRequired,
-    width: React.PropTypes.number.isRequired,
-    childRenderer: React.PropTypes.func.isRequired,
-    layoutType: React.PropTypes.any,
-    dataHasChanged: React.PropTypes.func,
-    data: React.PropTypes.any
+    x: PropTypes.number.isRequired,
+    y: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
+    width: PropTypes.number.isRequired,
+    childRenderer: PropTypes.func.isRequired,
+    layoutType: PropTypes.any,
+    dataHasChanged: PropTypes.func,
+    data: PropTypes.any
 };
 //#endif

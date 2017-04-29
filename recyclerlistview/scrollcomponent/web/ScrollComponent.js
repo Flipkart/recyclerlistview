@@ -1,5 +1,6 @@
 import React from "react";
 import ScrollViewer from "./ScrollViewer";
+import PropTypes from "prop-types";
 class ScrollComponent extends React.Component {
     constructor(args) {
         super(args);
@@ -61,13 +62,13 @@ ScrollComponent.defaultProps = {
 };
 //#if [DEV]
 ScrollComponent.propTypes = {
-    contentHeight: React.PropTypes.number,
-    contentWidth: React.PropTypes.number,
-    onSizeChanged: React.PropTypes.func,
-    parentProps: React.PropTypes.object,
-    isHorizontal: React.PropTypes.bool,
-    renderFooter: React.PropTypes.func,
-    scrollThrottle: React.PropTypes.number,
-    canChangeSize: React.PropTypes.bool
+    contentHeight: PropTypes.number,
+    contentWidth: PropTypes.number,
+    onSizeChanged: PropTypes.func,
+    parentProps: PropTypes.object,
+    isHorizontal: PropTypes.bool,
+    renderFooter: PropTypes.func,
+    scrollThrottle: PropTypes.number,
+    canChangeSize: PropTypes.bool
 };
 //#endif
