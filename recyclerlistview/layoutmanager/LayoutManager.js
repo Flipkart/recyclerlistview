@@ -85,8 +85,8 @@ class LayoutManager {
                 startX += itemDim.width;
             }
         }
-        if (oldItemCount < itemCount) {
-            this._layouts.splice(itemCount, itemCount - oldItemCount);
+        if (oldItemCount > itemCount) {
+            this._layouts.splice(itemCount, oldItemCount - itemCount);
         }
         this._setFinalDimensions(maxBound);
     }
