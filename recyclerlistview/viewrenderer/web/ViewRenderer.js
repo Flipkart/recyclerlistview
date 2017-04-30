@@ -34,7 +34,7 @@ class ViewRenderer extends React.Component {
                     transform: this._getTransform()
                 }}
             >
-                {this.props.childRenderer(this.props.layoutType, this.props.data)}
+                {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
             </div>
         );
     }
@@ -49,6 +49,7 @@ ViewRenderer.propTypes = {
     childRenderer: PropTypes.func.isRequired,
     layoutType: PropTypes.any,
     dataHasChanged: PropTypes.func,
-    data: PropTypes.any
+    data: PropTypes.any,
+    index: PropTypes.number
 };
 //#endif

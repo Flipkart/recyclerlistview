@@ -235,6 +235,7 @@ class RecyclerListView extends Component {
                               x={itemRect.x}
                               y={itemRect.y}
                               layoutType={type}
+                              index={dataIndex}
                               childRenderer={this.props.rowRenderer}
                               height={itemRect.height}
                               width={itemRect.width}/>

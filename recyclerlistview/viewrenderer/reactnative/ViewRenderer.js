@@ -21,7 +21,7 @@ class ViewRenderer extends React.Component {
                 height: this.props.height,
                 transform: [{translateX: this.props.x}, {translateY: this.props.y}]
             }}>
-                {this.props.childRenderer(this.props.layoutType, this.props.data)}
+                {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
             </View>
         );
     }
@@ -36,6 +36,7 @@ ViewRenderer.propTypes = {
     childRenderer: PropTypes.func.isRequired,
     layoutType: PropTypes.any,
     dataHasChanged: PropTypes.func,
-    data: PropTypes.any
+    data: PropTypes.any,
+    index: PropTypes.number
 };
 //#endif
