@@ -28,7 +28,6 @@ class ScrollComponent extends React.Component {
     render() {
         return (
             <ScrollViewer ref="scrollView"
-                          {...this.props.parentProps}
                           horizontal={this.props.isHorizontal}
                           onScroll={this._onScroll}
                           canChangeSize={this.props.canChangeSize}
@@ -65,7 +64,6 @@ ScrollComponent.propTypes = {
     contentHeight: PropTypes.number,
     contentWidth: PropTypes.number,
     onSizeChanged: PropTypes.func,
-    parentProps: PropTypes.object,
     isHorizontal: PropTypes.bool,
     renderFooter: PropTypes.func,
     scrollThrottle: PropTypes.number,
