@@ -1,6 +1,5 @@
 import React from 'react';
 import {ScrollView, View} from "react-native";
-import _throttle from "lodash/throttle";
 import PropTypes from "prop-types";
 class ScrollComponent extends React.Component {
     constructor(args) {
@@ -11,7 +10,6 @@ class ScrollComponent extends React.Component {
         this._height = 0;
         this._width = 0;
 
-        this._throttleParams = {leading: true, trailing: true};
         this._isSizeChangedCalledOnce = false;
     }
 
@@ -37,10 +35,10 @@ class ScrollComponent extends React.Component {
 
     render() {
         return (
-            <ScrollView ref="scrollView" removeClippedSubviews={false} scrollEventThrottle={16}
+            <ScrollView ref="scrollView" removeClippedSubviews={false} scrollEventThrottle={this.props.scrollThrottle}
                         {...this.props}
                         horizontal={this.props.isHorizontal}
-                        onScroll={_throttle(this._onScroll, this.props.scrollThrottle, this._throttleParams)}
+                        onScroll={this._onScroll}
                         onLayout={(!this._isSizeChangedCalledOnce || this.props.canChangeSize) ? this._onLayout : null}>
                 <View style={{flexDirection: this.props.isHorizontal ? 'row' : 'column'}}>
                     <View style={{
@@ -61,7 +59,7 @@ ScrollComponent.defaultProps = {
     isHorizontal: false,
     contentHeight: 0,
     contentWidth: 0,
-    scrollThrottle: 32
+    scrollThrottle: 16
 };
 //#if [DEV]
 ScrollComponent.propTypes = {
