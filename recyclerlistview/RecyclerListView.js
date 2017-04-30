@@ -63,7 +63,7 @@ class RecyclerListView extends Component {
     componentWillReceiveProps(newProps) {
         this._assertDependencyPresence(newProps);
         this._checkAndChangeLayouts(newProps);
-        if (!this.props.onVisibleItemsChanged) {
+        if (!this.props.onVisibleIndexesChanged) {
             this._virtualRenderer.removeVisibleItemsListener();
         }
         else {
@@ -184,7 +184,7 @@ class RecyclerListView extends Component {
         }, (offset) => {
             this._pendingScrollToOffset = offset;
         });
-        if (this.props.onVisibleItemsChanged) {
+        if (this.props.onVisibleIndexesChanged) {
             this._virtualRenderer.attachVisibleItemsListener(this._onVisibleItemsChanged);
         }
         this._virtualRenderer.setParamsAndDimensions({
@@ -200,7 +200,7 @@ class RecyclerListView extends Component {
     }
 
     _onVisibleItemsChanged(all, now, notNow) {
-        this.props.onVisibleItemsChanged(all, now, notNow);
+        this.props.onVisibleIndexesChanged(all, now, notNow);
 
     }
 
