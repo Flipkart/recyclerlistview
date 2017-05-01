@@ -44,6 +44,7 @@ export default class ScrollViewer extends React.Component {
             <div ref="mainDiv"
                  onScroll={_throttle(this._onScroll, this.props.scrollThrottle, this._throttleParams)}
                  style={{
+                     "-webkit-overflow-scrolling": "touch",
                      overflowX: this.props.horizontal ? "scroll" : "hidden",
                      overflowY: !this.props.horizontal ? "scroll" : "hidden",
                      height: '100%',
