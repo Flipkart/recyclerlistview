@@ -173,7 +173,7 @@ class VirtualRenderer {
             else {
                 itemMeta = {};
                 itemMeta.key = this._getNewKey();
-                this._renderStack.push(itemMeta);
+                this._renderStack[itemMeta.key] = itemMeta;
             }
             this._usageMap[index] = itemMeta.key;
             itemMeta.dataIndex = index;
