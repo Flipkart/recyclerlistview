@@ -151,41 +151,51 @@ class VirtualRenderer {
 
     _updateRenderStack(itemIndexes) {
         let type = null;
-        let availableIndex = null;
+        let availableKey = null;
         let itemMeta = null;
         let count = itemIndexes.length;
         let index = 0;
-        let alreadyRenderedAtIndex = null;
+        let alreadyRenderedAtKey = null;
         for (let i = 0; i < count; i++) {
             index = itemIndexes[i];
-            type = this._layoutProvider.getLayoutTypeForIndex(index);
-            availableIndex = this._recyclePool.getRecycledObject(type);
-            if (availableIndex) {
-
-                //Recylepool works with string types so we need this conversion
-                availableIndex = parseInt(availableIndex, 10);
-                itemMeta = this._renderStack[availableIndex];
-                itemMeta.key = availableIndex;
-
-                //since this data index is no longer being rendered anywhere
-                delete this._renderStackIndexKeyMap[itemMeta.dataIndex];
+            availableKey = this._renderStackIndexKeyMap[index];
+            if (availableKey >= 0) {
+                this._recyclePool.removeFromPool(availableKey);
+                itemMeta = this._renderStack[availableKey];
+                itemMeta.key = availableKey;
             }
             else {
-                itemMeta = {};
-                itemMeta.key = this._getNewKey();
-                this._renderStack[itemMeta.key] = itemMeta;
+                type = this._layoutProvider.getLayoutTypeForIndex(index);
+                availableKey = this._recyclePool.getRecycledObject(type);
+                if (availableKey) {
+
+                    //Recylepool works with string types so we need this conversion
+                    availableKey = parseInt(availableKey, 10);
+                    itemMeta = this._renderStack[availableKey];
+                    itemMeta.key = availableKey;
+
+                    //since this data index is no longer being rendered anywhere
+                    delete this._renderStackIndexKeyMap[itemMeta.dataIndex];
+                }
+                else {
+                    itemMeta = {};
+                    availableKey = this._getNewKey();
+                    itemMeta.key = availableKey;
+                    this._renderStack[availableKey] = itemMeta;
+                }
+
+                //In case of mismatch in pool types we need to make sure only unique data indexes exist in render stack
+                //keys are always integers for all practical purposes
+                alreadyRenderedAtKey = this._renderStackIndexKeyMap[index];
+                if (alreadyRenderedAtKey >= 0) {
+                    this._recyclePool.removeFromPool(alreadyRenderedAtKey);
+                    delete this._renderStack[alreadyRenderedAtKey];
+                }
+                this._renderStackIndexKeyMap[index] = itemMeta.key;
             }
             this._usageMap[index] = itemMeta.key;
             itemMeta.dataIndex = index;
-
-            //In case of mismatch in pool types we need to make sure only unique data indexes exist in render stack
-            alreadyRenderedAtIndex = this._renderStackIndexKeyMap[index];
-            if (alreadyRenderedAtIndex >= 0) {
-                delete this._renderStack[alreadyRenderedAtIndex];
-            }
-            this._renderStackIndexKeyMap[index] = itemMeta.key;
         }
-        //console.log(this._renderStack);
     }
 }
 
