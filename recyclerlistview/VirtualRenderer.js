@@ -2,12 +2,16 @@ import ViewabilityTracker from "./ViewabilityTracker";
 import RecycleItemPool from "../utils/RecycleItemPool";
 class VirtualRenderer {
     constructor(renderStackChanged, scrollOnNextUpdate) {
-        this._renderStack = [];
+        this._renderStack = {};
         this._usageMap = {};
+        this._renderStackIndexKeyMap = {};
         this._renderStackChanged = renderStackChanged;
         this._scrollOnNextUpdate = scrollOnNextUpdate;
         this._dimensions = null;
         this._params = null;
+
+        //Would be surprised if someone exceeds this
+        this._startKey = 0;
 
         this.onVisibleItemsChanged = null;
         this._onEngagedItemsChanged = this._onEngagedItemsChanged.bind(this);
@@ -107,6 +111,10 @@ class VirtualRenderer {
         this._scrollOnNextUpdate(offset);
     }
 
+    _getNewKey() {
+        return this._startKey++;
+    }
+
     _prepareViewabilityTracker() {
         this._viewabilityTracker.onEngagedRowsChanged = this._onEngagedItemsChanged;
         if (this.onVisibleItemsChanged) {
@@ -134,45 +142,60 @@ class VirtualRenderer {
         for (let i = 0; i < count; i++) {
             disengagedIndex = notNow[i];
             resolvedIndex = this._usageMap[disengagedIndex];
+            delete this._usageMap[disengagedIndex];
             this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedIndex);
         }
-        this._updateRenderStack(now, notNow);
+        this._updateRenderStack(now);
         this._renderStackChanged(this._renderStack);
     }
 
-    _updateRenderStack(itemIndexes, notNowIndexes) {
+    _updateRenderStack(itemIndexes) {
         let type = null;
-        let availableIndex = null;
+        let availableKey = null;
         let itemMeta = null;
         let count = itemIndexes.length;
-        let notNowCount = notNowIndexes.length;
-        let renderStackCount = this._renderStack.length;
         let index = 0;
-        let i = 0;
-
-        for (i = 0; i < notNowCount; i++) {
-            delete this._usageMap[notNowIndexes[i]];
-        }
-        for (i = 0; i < count; i++) {
+        let alreadyRenderedAtKey = null;
+        for (let i = 0; i < count; i++) {
             index = itemIndexes[i];
-            type = this._layoutProvider.getLayoutTypeForIndex(index);
-            availableIndex = this._recyclePool.getRecycledObject(type);
-            if (availableIndex) {
-                //Recylepool works with string types so we need this conversion
-                availableIndex = parseInt(availableIndex, 10);
-                itemMeta = this._renderStack[availableIndex];
-                itemMeta.key = availableIndex;
+            availableKey = this._renderStackIndexKeyMap[index];
+            if (availableKey >= 0) {
+                this._recyclePool.removeFromPool(availableKey);
+                itemMeta = this._renderStack[availableKey];
+                itemMeta.key = availableKey;
             }
             else {
-                itemMeta = {};
-                itemMeta.key = renderStackCount;
-                this._renderStack.push(itemMeta);
-                renderStackCount++;
+                type = this._layoutProvider.getLayoutTypeForIndex(index);
+                availableKey = this._recyclePool.getRecycledObject(type);
+                if (availableKey) {
+
+                    //Recylepool works with string types so we need this conversion
+                    availableKey = parseInt(availableKey, 10);
+                    itemMeta = this._renderStack[availableKey];
+                    itemMeta.key = availableKey;
+
+                    //since this data index is no longer being rendered anywhere
+                    delete this._renderStackIndexKeyMap[itemMeta.dataIndex];
+                }
+                else {
+                    itemMeta = {};
+                    availableKey = this._getNewKey();
+                    itemMeta.key = availableKey;
+                    this._renderStack[availableKey] = itemMeta;
+                }
+
+                //In case of mismatch in pool types we need to make sure only unique data indexes exist in render stack
+                //keys are always integers for all practical purposes
+                alreadyRenderedAtKey = this._renderStackIndexKeyMap[index];
+                if (alreadyRenderedAtKey >= 0) {
+                    this._recyclePool.removeFromPool(alreadyRenderedAtKey);
+                    delete this._renderStack[alreadyRenderedAtKey];
+                }
+                this._renderStackIndexKeyMap[index] = itemMeta.key;
             }
             this._usageMap[index] = itemMeta.key;
             itemMeta.dataIndex = index;
         }
-        //console.log(this._renderStack);
     }
 }
 

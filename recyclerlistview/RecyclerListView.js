@@ -259,10 +259,12 @@ class RecyclerListView extends Component {
     }
 
     _generateRenderStack() {
-        let count = this.state.renderStack.length;
         let renderedItems = [];
-        for (let i = 0; i < count; i++) {
-            renderedItems.push(this._renderRowUsingMeta(this.state.renderStack[i]));
+        for (let key in this.state.renderStack) {
+            if (this.state.renderStack.hasOwnProperty(key)) {
+                renderedItems.push(this._renderRowUsingMeta(this.state.renderStack[key]));
+
+            }
         }
         return renderedItems;
     }
