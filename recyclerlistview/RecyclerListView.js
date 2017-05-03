@@ -26,6 +26,7 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 import PropTypes from "prop-types";
 
 let ScrollComponent, ViewRenderer;
+let isReactNative = false;
 
 //TODO: Talha, add documentation
 if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
@@ -34,6 +35,7 @@ if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
 } else if (navigator && navigator.product === "ReactNative") {
     ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer").default;
+    isReactNative = true;
 }
 else {
     throw RecyclerListViewExceptions.platformNotDetectedException;
@@ -177,7 +179,7 @@ class RecyclerListView extends Component {
     }
 
     _renderStackWhenReady(stack) {
-        if (requestAnimationFrame) {
+        if (!isReactNative && requestAnimationFrame) {
             requestAnimationFrame(() => {
                 this.setState((prevState, props) => {
                     return {renderStack: stack};
