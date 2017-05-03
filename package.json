@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/Flipkart/ReactEssentials/issues"
   },
-  "homepage": "https://github.com/Flipkart/ReactEssentials/tree/recyclerlistview-v1.0-alpha#readme"
+  "homepage": "https://github.com/Flipkart/ReactEssentials/tree/recyclerlistview-v1.0-alpha#readme",
+  "dependencies": {
+    "lodash": "4.17.4",
+    "prop-types": "15.5.8"
+  }
 }

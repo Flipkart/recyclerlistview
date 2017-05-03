@@ -2,16 +2,32 @@ import ViewabilityTracker from "./ViewabilityTracker";
 import RecycleItemPool from "../utils/RecycleItemPool";
 class VirtualRenderer {
     constructor(renderStackChanged, scrollOnNextUpdate) {
-        this._renderStack = [];
-        this._usageMap = {};
+        this._renderStack = {};
+        this._renderStackIndexKeyMap = {};
         this._renderStackChanged = renderStackChanged;
         this._scrollOnNextUpdate = scrollOnNextUpdate;
         this._dimensions = null;
         this._params = null;
 
+        //Would be surprised if someone exceeds this
+        this._startKey = 0;
+
         this.onVisibleItemsChanged = null;
         this._onEngagedItemsChanged = this._onEngagedItemsChanged.bind(this);
         this._onVisibleItemsChanged = this._onVisibleItemsChanged.bind(this);
+    }
+
+    getLayoutDimension() {
+        return this._layoutManager.getLayoutDimension();
+    }
+
+    updateOffset(offsetX, offsetY) {
+        if (this._params.isHorizontal) {
+            this._viewabilityTracker.updateOffset(offsetX);
+        }
+        else {
+            this._viewabilityTracker.updateOffset(offsetY);
+        }
     }
 
     attachVisibleItemsListener(callback) {
@@ -48,15 +64,26 @@ class VirtualRenderer {
     refreshWithAnchor() {
         let firstVisibleIndex = this._viewabilityTracker.findFirstLogicallyVisibleIndex();
         this._prepareViewabilityTracker();
-        let offset = this._layoutManager.getOffsetForIndex(firstVisibleIndex);
-        this._scrollOnNextUpdate(offset);
-        offset = this._params.isHorizontal ? offset.x : offset.y;
+        let offset = 0;
+        try {
+            offset = this._layoutManager.getOffsetForIndex(firstVisibleIndex);
+            this._scrollOnNextUpdate(offset);
+            offset = this._params.isHorizontal ? offset.x : offset.y;
+        } catch (e) {
+        }
         this._viewabilityTracker.forceRefreshWithOffset(offset);
     }
 
     refresh() {
         this._prepareViewabilityTracker();
-        this._viewabilityTracker.forceRefresh();
+        if (this._viewabilityTracker.forceRefresh()) {
+            if (this._params.isHorizontal) {
+                this._scrollOnNextUpdate({x: this._viewabilityTracker.getLastOffset(), y: 0});
+            }
+            else {
+                this._scrollOnNextUpdate({x: 0, y: this._viewabilityTracker.getLastOffset()});
+            }
+        }
     }
 
     init() {
@@ -83,6 +110,10 @@ class VirtualRenderer {
         this._scrollOnNextUpdate(offset);
     }
 
+    _getNewKey() {
+        return this._startKey++;
+    }
+
     _prepareViewabilityTracker() {
         this._viewabilityTracker.onEngagedRowsChanged = this._onEngagedItemsChanged;
         if (this.onVisibleItemsChanged) {
@@ -104,60 +135,64 @@ class VirtualRenderer {
     }
 
     _onEngagedItemsChanged(all, now, notNow) {
-        let count = notNow.length;
+        const count = notNow.length;
         let resolvedIndex = 0;
+        let disengagedIndex = 0
         for (let i = 0; i < count; i++) {
-            resolvedIndex = this._usageMap[notNow[i]];
-            this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(resolvedIndex), resolvedIndex);
+            disengagedIndex = notNow[i];
+            resolvedIndex = this._renderStackIndexKeyMap[disengagedIndex];
+            this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedIndex);
         }
-        this._updateRenderStack(now, notNow);
+        this._updateRenderStack(now);
         this._renderStackChanged(this._renderStack);
     }
 
-    _updateRenderStack(itemIndexes, notNowIndexes) {
+    _updateRenderStack(itemIndexes) {
+        const count = itemIndexes.length;
         let type = null;
-        let availableIndex = null;
+        let availableKey = null;
         let itemMeta = null;
-        let count = itemIndexes.length;
-        let notNowCount = notNowIndexes.length;
-        let renderStackCount = this._renderStack.length;
         let index = 0;
-        let i = 0;
-
-        for (i = 0; i < notNowCount; i++) {
-            delete this._usageMap[notNowIndexes[i]];
-        }
-        for (i = 0; i < count; i++) {
+        let alreadyRenderedAtKey = null;
+        for (let i = 0; i < count; i++) {
             index = itemIndexes[i];
-            type = this._layoutProvider.getLayoutTypeForIndex(index);
-            availableIndex = this._recyclePool.getRecycledObject(type);
-            if (availableIndex) {
-                itemMeta = this._renderStack[availableIndex];
-                itemMeta.key = availableIndex;
+            availableKey = this._renderStackIndexKeyMap[index];
+            if (availableKey >= 0) {
+                this._recyclePool.removeFromPool(availableKey);
+                itemMeta = this._renderStack[availableKey];
+                itemMeta.key = availableKey;
             }
             else {
-                itemMeta = {};
-                itemMeta.key = renderStackCount.toString();
-                this._renderStack.push(itemMeta);
-                renderStackCount++;
+                type = this._layoutProvider.getLayoutTypeForIndex(index);
+                availableKey = this._recyclePool.getRecycledObject(type);
+                if (availableKey) {
+                    //Recylepool works with string types so we need this conversion
+                    availableKey = parseInt(availableKey, 10);
+                    itemMeta = this._renderStack[availableKey];
+                    itemMeta.key = availableKey;
+
+                    //since this data index is no longer being rendered anywhere
+                    delete this._renderStackIndexKeyMap[itemMeta.dataIndex];
+                }
+                else {
+                    itemMeta = {};
+                    availableKey = this._getNewKey();
+                    itemMeta.key = availableKey;
+                    this._renderStack[availableKey] = itemMeta;
+                }
+
+                //In case of mismatch in pool types we need to make sure only unique data indexes exist in render stack
+                //keys are always integers for all practical purposes
+                alreadyRenderedAtKey = this._renderStackIndexKeyMap[index];
+                if (alreadyRenderedAtKey >= 0) {
+                    this._recyclePool.removeFromPool(alreadyRenderedAtKey);
+                    delete this._renderStack[alreadyRenderedAtKey];
+                }
             }
-            this._usageMap[index] = itemMeta.key;
+            this._renderStackIndexKeyMap[index] = itemMeta.key;
             itemMeta.dataIndex = index;
         }
         //console.log(this._renderStack);
-    }
-
-    getLayoutDimension() {
-        return this._layoutManager.getLayoutDimension();
-    }
-
-    updateOffset(offsetX, offsetY) {
-        if (this._params.isHorizontal) {
-            this._viewabilityTracker.updateOffset(offsetX);
-        }
-        else {
-            this._viewabilityTracker.updateOffset(offsetY);
-        }
     }
 }
 

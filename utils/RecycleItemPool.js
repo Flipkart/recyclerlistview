@@ -1,3 +1,4 @@
+//Warning: works only on string types
 class RecycleItemPool {
     constructor() {
         this._recyclableObjectMap = {};
@@ -13,12 +14,11 @@ class RecycleItemPool {
         return objectSet;
     }
 
-
     putRecycledObject(objectType, object) {
         let objectSet = this._getRelevantSet(objectType);
-        if (!this._availabilitySet[object]) {
+        if (!this._isPresent(this._availabilitySet[object])) {
             objectSet[object] = null;
-            this._availabilitySet[object] = null;
+            this._availabilitySet[object] = objectType;
         }
     }
 
@@ -33,7 +33,7 @@ class RecycleItemPool {
             }
         }
 
-        if (recycledObject) {
+        if (this._isPresent(recycledObject)) {
             delete objectSet[recycledObject];
             delete this._availabilitySet[recycledObject];
         }
@@ -41,7 +41,7 @@ class RecycleItemPool {
     }
 
     removeFromPool(object) {
-        if (this._availabilitySet[object]) {
+        if (this._isPresent(this._availabilitySet[object])) {
             delete this._getRelevantSet(this._availabilitySet[object])[object];
             delete this._availabilitySet[object];
         }
@@ -50,6 +50,10 @@ class RecycleItemPool {
     clearAll() {
         this._recyclableObjectMap = {};
         this._availabilitySet = {};
+    }
+
+    _isPresent(value) {
+        return value || value === 0;
     }
 
 }

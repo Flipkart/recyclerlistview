@@ -1,5 +1,6 @@
 import React from 'react';
 import {ScrollView, View} from "react-native";
+import PropTypes from "prop-types";
 class ScrollComponent extends React.Component {
     constructor(args) {
         super(args);
@@ -8,6 +9,8 @@ class ScrollComponent extends React.Component {
 
         this._height = 0;
         this._width = 0;
+
+        this._isSizeChangedCalledOnce = false;
     }
 
     _onScroll(event) {
@@ -19,6 +22,7 @@ class ScrollComponent extends React.Component {
             this._height = event.nativeEvent.layout.height;
             this._width = event.nativeEvent.layout.width;
             if (this.props.onSizeChanged) {
+                this._isSizeChangedCalledOnce = true;
                 this.props.onSizeChanged(event.nativeEvent.layout);
             }
         }
@@ -31,11 +35,11 @@ class ScrollComponent extends React.Component {
 
     render() {
         return (
-            <ScrollView ref="scrollView" removeClippedSubviews={false} scrollEventThrottle={16}
-                        {...this.props.parentProps}
+            <ScrollView ref="scrollView" removeClippedSubviews={false} scrollEventThrottle={this.props.scrollThrottle}
+                        {...this.props}
                         horizontal={this.props.isHorizontal}
                         onScroll={this._onScroll}
-                        onLayout={this._onLayout}>
+                        onLayout={(!this._isSizeChangedCalledOnce || this.props.canChangeSize) ? this._onLayout : null}>
                 <View style={{flexDirection: this.props.isHorizontal ? 'row' : 'column'}}>
                     <View style={{
                         height: this.props.contentHeight,
@@ -54,15 +58,17 @@ export default ScrollComponent;
 ScrollComponent.defaultProps = {
     isHorizontal: false,
     contentHeight: 0,
-    contentWidth: 0
+    contentWidth: 0,
+    scrollThrottle: 16
 };
 //#if [DEV]
 ScrollComponent.propTypes = {
-    contentHeight: React.PropTypes.number,
-    contentWidth: React.PropTypes.number,
-    onSizeChanged: React.PropTypes.func,
-    parentProps: React.PropTypes.object,
-    isHorizontal: React.PropTypes.bool,
-    renderFooter: React.PropTypes.func
+    contentHeight: PropTypes.number,
+    contentWidth: PropTypes.number,
+    onSizeChanged: PropTypes.func,
+    isHorizontal: PropTypes.bool,
+    renderFooter: PropTypes.func,
+    scrollThrottle: PropTypes.number,
+    canChangeSize: PropTypes.bool
 };
 //#endif

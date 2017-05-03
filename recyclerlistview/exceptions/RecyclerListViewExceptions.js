@@ -15,5 +15,10 @@ const RecyclerListViewExceptions = {
         type: "UnresolvedDependenciesException",
         message: "missing datasource or layout provider, cannot proceed without it"
     },
+    platformNotDetectedException: {
+        type: "PlatformNotDetectedException",
+        message: "Unable to detect the running platform, if you're trying to run recyclerlistview " +
+        "in browser make sure process.env.RLV_ENV is set to browser in webpack config"
+    }
 }
 export default RecyclerListViewExceptions;

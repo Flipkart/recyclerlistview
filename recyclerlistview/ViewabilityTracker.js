@@ -37,7 +37,9 @@ class ViewabilityTracker {
     }
 
     forceRefresh() {
+        let shouldForceScroll = this._currentOffset >= (this._maxOffset - this._windowBound);
         this.forceRefreshWithOffset(this._currentOffset);
+        return shouldForceScroll;
     }
 
     forceRefreshWithOffset(offset) {

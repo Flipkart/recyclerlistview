@@ -10,19 +10,36 @@
  * DONE: Add full render logic in cases like change of dimensions
  * DONE: Fix all proptypes
  * DONE: Add Initial render Index support
- * TODO: Heavily reduce isHorizontal checks
+ * TODO: Destroy less frequently used items in recycle pool, this will help in case of too many types.
+ * TODO: Add animated scroll to web scrollviewer
+ * TODO: Animate list view transition, including add/remove
+ * TODO: Implement sticky headers
+ * TODO: Make viewability callbacks configurable
+ * TODO: Observe size changes on web to optimize for reflowability
  */
 import React, {Component} from "react";
-import Messages from "./messages/Messages";
-import ScrollComponent from "./scrollcomponent/reactnative/ScrollComponent";
-import ViewHolder from "./viewholder/reactnative/ViewHolder";
 import VirtualRenderer from "./VirtualRenderer";
 import DataProvider from "./dependencies/DataProvider";
 import LayoutProvider from "./dependencies/LayoutProvider";
 import LayoutManager from "./layoutmanager/LayoutManager";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
+import PropTypes from "prop-types";
 
-class RecyclerListView extends React.Component {
+let ScrollComponent, ViewRenderer;
+
+//TODO: Talha, add documentation
+if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
+    ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
+    ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
+} else if (navigator && navigator.product === "ReactNative") {
+    ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent").default;
+    ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer").default;
+}
+else {
+    throw RecyclerListViewExceptions.platformNotDetectedException;
+}
+
+class RecyclerListView extends Component {
     constructor(args) {
         super(args);
         this._onScroll = this._onScroll.bind(this);
@@ -30,6 +47,7 @@ class RecyclerListView extends React.Component {
         this._onVisibleItemsChanged = this._onVisibleItemsChanged.bind(this);
         this._dataHasChanged = this._dataHasChanged.bind(this);
         this.scrollToOffset = this.scrollToOffset.bind(this);
+        this._renderStackWhenReady = this._renderStackWhenReady.bind(this);
         this._onEndReachedCalled = false;
         this._virtualRenderer = null;
         this._initComplete = false;
@@ -46,7 +64,7 @@ class RecyclerListView extends React.Component {
     componentWillReceiveProps(newProps) {
         this._assertDependencyPresence(newProps);
         this._checkAndChangeLayouts(newProps);
-        if (!this.props.onVisibleItemsChanged) {
+        if (!this.props.onVisibleIndexesChanged) {
             this._virtualRenderer.removeVisibleItemsListener();
         }
         else {
@@ -123,12 +141,15 @@ class RecyclerListView extends React.Component {
         } else if (this._relayoutReqIndex >= 0) {
             this._virtualRenderer.getLayoutManager().reLayoutFromIndex(this._relayoutReqIndex, newProps.dataProvider.getSize());
             this._relayoutReqIndex = -1;
-            this._virtualRenderer.refresh();
-            //TODO:Talha Test this out
-            this.setState((prevState, props) => {
-                return prevState;
-            });
+            this._refreshViewability();
         }
+    }
+
+    _refreshViewability() {
+        this._virtualRenderer.refresh();
+        this.setState((prevState, props) => {
+            return prevState;
+        });
     }
 
     _onSizeChanged(layout) {
@@ -150,23 +171,32 @@ class RecyclerListView extends React.Component {
                 (hasWidthChanged && !this.props.isHorizontal)) {
                 this._checkAndChangeLayouts(this.props, true);
             } else {
-                this.setState((prevState, props) => {
-                    return prevState;
-                });
+                this._refreshViewability();
             }
+        }
+    }
+
+    _renderStackWhenReady(stack) {
+        if (requestAnimationFrame) {
+            requestAnimationFrame(() => {
+                this.setState((prevState, props) => {
+                    return {renderStack: stack};
+                });
+            });
+        }
+        else {
+            this.setState((prevState, props) => {
+                return {renderStack: stack};
+            });
         }
     }
 
     _initTrackers() {
         this._assertDependencyPresence(this.props);
-        this._virtualRenderer = new VirtualRenderer((stack) => {
-            this.setState((prevState, props) => {
-                return {renderStack: stack};
-            });
-        }, (offset) => {
+        this._virtualRenderer = new VirtualRenderer(this._renderStackWhenReady, (offset) => {
             this._pendingScrollToOffset = offset;
         });
-        if (this.props.onVisibleItemsChanged) {
+        if (this.props.onVisibleIndexesChanged) {
             this._virtualRenderer.attachVisibleItemsListener(this._onVisibleItemsChanged);
         }
         this._virtualRenderer.setParamsAndDimensions({
@@ -182,7 +212,7 @@ class RecyclerListView extends React.Component {
     }
 
     _onVisibleItemsChanged(all, now, notNow) {
-        this.props.onVisibleItemsChanged(all, now, notNow);
+        this.props.onVisibleIndexesChanged(all, now, notNow);
 
     }
 
@@ -203,21 +233,27 @@ class RecyclerListView extends React.Component {
     }
 
     _renderRowUsingMeta(itemMeta) {
-        let itemRect = this._virtualRenderer.getLayoutManager().getLayouts()[itemMeta.dataIndex];
-        let data = this.props.dataProvider.getDataForIndex(itemMeta.dataIndex);
-        let type = this.props.layoutProvider.getLayoutTypeForIndex(itemMeta.dataIndex);
-        this._assertType(type);
-        this._checkExpectedDimensionDiscrepancy(itemRect, type, itemMeta.dataIndex);
-        return (
-            <ViewHolder key={itemMeta.key} data={data}
-                        dataHasChanged={this._dataHasChanged}
-                        x={itemRect.x}
-                        y={itemRect.y}
-                        height={itemRect.height}
-                        width={itemRect.width}>
-                {this.props.rowRenderer(type, data)}
-            </ViewHolder>
-        );
+        let dataSize = this.props.dataProvider.getSize();
+        let dataIndex = itemMeta.dataIndex;
+        if (dataIndex < dataSize) {
+            let itemRect = this._virtualRenderer.getLayoutManager().getLayouts()[dataIndex];
+            let data = this.props.dataProvider.getDataForIndex(dataIndex);
+            let type = this.props.layoutProvider.getLayoutTypeForIndex(dataIndex);
+            this._assertType(type);
+            this._checkExpectedDimensionDiscrepancy(itemRect, type, dataIndex);
+            return (
+                <ViewRenderer key={itemMeta.key} data={data}
+                              dataHasChanged={this._dataHasChanged}
+                              x={itemRect.x}
+                              y={itemRect.y}
+                              layoutType={type}
+                              index={dataIndex}
+                              childRenderer={this.props.rowRenderer}
+                              height={itemRect.height}
+                              width={itemRect.width}/>
+            );
+        }
+        return null;
     }
 
     _checkExpectedDimensionDiscrepancy(itemRect, type, index) {
@@ -235,10 +271,12 @@ class RecyclerListView extends React.Component {
     }
 
     _generateRenderStack() {
-        let count = this.state.renderStack.length;
         let renderedItems = [];
-        for (let i = 0; i < count; i++) {
-            renderedItems.push(this._renderRowUsingMeta(this.state.renderStack[i]));
+        for (let key in this.state.renderStack) {
+            if (this.state.renderStack.hasOwnProperty(key)) {
+                renderedItems.push(this._renderRowUsingMeta(this.state.renderStack[key]));
+
+            }
         }
         return renderedItems;
     }
@@ -275,6 +313,8 @@ class RecyclerListView extends React.Component {
                                  onScroll={this._onScroll} isHorizontal={this.props.isHorizontal}
                                  onSizeChanged={this._onSizeChanged} renderFooter={this.props.renderFooter}
                                  contentHeight={this._virtualRenderer.getLayoutDimension().height}
+                                 scrollThrottle={this.props.scrollThrottle}
+                                 canChangeSize={this.props.canChangeSize}
                                  contentWidth={this._virtualRenderer.getLayoutDimension().width}>
                     {this._generateRenderStack()}
                 </ScrollComponent> :
@@ -293,23 +333,26 @@ RecyclerListView
     isHorizontal: false,
     renderAheadOffset: 250,
     onEndReachedThreshold: 0,
-    initialRenderIndex: 0
+    initialRenderIndex: 0,
+    canChangeSize: false
 };
 
 //#if [DEV]
 RecyclerListView
     .propTypes = {
-    layoutProvider: React.PropTypes.instanceOf(LayoutProvider).isRequired,
-    dataProvider: React.PropTypes.instanceOf(DataProvider).isRequired,
-    rowRenderer: React.PropTypes.func.isRequired,
-    initialOffset: React.PropTypes.number,
-    renderAheadOffset: React.PropTypes.number,
-    isHorizontal: React.PropTypes.bool,
-    onScroll: React.PropTypes.func,
-    onEndReached: React.PropTypes.func,
-    onEndReachedThreshold: React.PropTypes.number,
-    onVisibleIndexesChanged: React.PropTypes.func,
-    renderFooter: React.PropTypes.func,
-    initialRenderIndex: React.PropTypes.number
+    layoutProvider: PropTypes.instanceOf(LayoutProvider).isRequired,
+    dataProvider: PropTypes.instanceOf(DataProvider).isRequired,
+    rowRenderer: PropTypes.func.isRequired,
+    initialOffset: PropTypes.number,
+    renderAheadOffset: PropTypes.number,
+    isHorizontal: PropTypes.bool,
+    onScroll: PropTypes.func,
+    onEndReached: PropTypes.func,
+    onEndReachedThreshold: PropTypes.number,
+    onVisibleIndexesChanged: PropTypes.func,
+    renderFooter: PropTypes.func,
+    initialRenderIndex: PropTypes.number,
+    scrollThrottle: PropTypes.number,
+    canChangeSize: PropTypes.bool
 };
 //#endif

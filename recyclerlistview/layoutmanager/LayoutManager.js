@@ -1,6 +1,5 @@
-import LayoutProvider from "../dependencies/LayoutProvider";
 class LayoutManager {
-    constructor(layoutProvider: LayoutProvider, dimensions, isHorizontal) {
+    constructor(layoutProvider, dimensions, isHorizontal) {
         this._layoutProvider = layoutProvider;
         this._window = dimensions;
         this._totalHeight = 0;
@@ -85,8 +84,8 @@ class LayoutManager {
                 startX += itemDim.width;
             }
         }
-        if (oldItemCount < itemCount) {
-            this._layouts.splice(itemCount, itemCount - oldItemCount);
+        if (oldItemCount > itemCount) {
+            this._layouts.splice(itemCount, oldItemCount - itemCount);
         }
         this._setFinalDimensions(maxBound);
     }
