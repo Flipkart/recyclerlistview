@@ -3,7 +3,6 @@ import RecycleItemPool from "../utils/RecycleItemPool";
 class VirtualRenderer {
     constructor(renderStackChanged, scrollOnNextUpdate) {
         this._renderStack = {};
-        this._usageMap = {};
         this._renderStackIndexKeyMap = {};
         this._renderStackChanged = renderStackChanged;
         this._scrollOnNextUpdate = scrollOnNextUpdate;
@@ -141,8 +140,7 @@ class VirtualRenderer {
         let disengagedIndex = 0
         for (let i = 0; i < count; i++) {
             disengagedIndex = notNow[i];
-            resolvedIndex = this._usageMap[disengagedIndex];
-            delete this._usageMap[disengagedIndex];
+            resolvedIndex = this._renderStackIndexKeyMap[disengagedIndex];
             this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedIndex);
         }
         this._updateRenderStack(now);
@@ -190,9 +188,8 @@ class VirtualRenderer {
                     this._recyclePool.removeFromPool(alreadyRenderedAtKey);
                     delete this._renderStack[alreadyRenderedAtKey];
                 }
-                this._renderStackIndexKeyMap[index] = itemMeta.key;
             }
-            this._usageMap[index] = itemMeta.key;
+            this._renderStackIndexKeyMap[index] = itemMeta.key;
             itemMeta.dataIndex = index;
         }
         //console.log(this._renderStack);
