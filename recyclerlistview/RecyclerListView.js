@@ -47,6 +47,7 @@ class RecyclerListView extends Component {
         this._onVisibleItemsChanged = this._onVisibleItemsChanged.bind(this);
         this._dataHasChanged = this._dataHasChanged.bind(this);
         this.scrollToOffset = this.scrollToOffset.bind(this);
+        this._renderStackWhenReady = this._renderStackWhenReady.bind(this);
         this._onEndReachedCalled = false;
         this._virtualRenderer = null;
         this._initComplete = false;
@@ -175,13 +176,24 @@ class RecyclerListView extends Component {
         }
     }
 
-    _initTrackers() {
-        this._assertDependencyPresence(this.props);
-        this._virtualRenderer = new VirtualRenderer((stack) => {
+    _renderStackWhenReady(stack) {
+        if (requestAnimationFrame) {
+            requestAnimationFrame(() => {
+                this.setState((prevState, props) => {
+                    return {renderStack: stack};
+                });
+            });
+        }
+        else {
             this.setState((prevState, props) => {
                 return {renderStack: stack};
             });
-        }, (offset) => {
+        }
+    }
+
+    _initTrackers() {
+        this._assertDependencyPresence(this.props);
+        this._virtualRenderer = new VirtualRenderer(this._renderStackWhenReady, (offset) => {
             this._pendingScrollToOffset = offset;
         });
         if (this.props.onVisibleIndexesChanged) {
