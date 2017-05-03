@@ -3,7 +3,6 @@ import RecycleItemPool from "../utils/RecycleItemPool";
 class VirtualRenderer {
     constructor(renderStackChanged, scrollOnNextUpdate) {
         this._renderStack = {};
-        this._usageMap = {};
         this._renderStackIndexKeyMap = {};
         this._renderStackChanged = renderStackChanged;
         this._scrollOnNextUpdate = scrollOnNextUpdate;
@@ -136,13 +135,12 @@ class VirtualRenderer {
     }
 
     _onEngagedItemsChanged(all, now, notNow) {
-        let count = notNow.length;
+        const count = notNow.length;
         let resolvedIndex = 0;
         let disengagedIndex = 0
         for (let i = 0; i < count; i++) {
             disengagedIndex = notNow[i];
-            resolvedIndex = this._usageMap[disengagedIndex];
-            delete this._usageMap[disengagedIndex];
+            resolvedIndex = this._renderStackIndexKeyMap[disengagedIndex];
             this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedIndex);
         }
         this._updateRenderStack(now);
@@ -150,10 +148,10 @@ class VirtualRenderer {
     }
 
     _updateRenderStack(itemIndexes) {
+        const count = itemIndexes.length;
         let type = null;
         let availableKey = null;
         let itemMeta = null;
-        let count = itemIndexes.length;
         let index = 0;
         let alreadyRenderedAtKey = null;
         for (let i = 0; i < count; i++) {
@@ -168,7 +166,6 @@ class VirtualRenderer {
                 type = this._layoutProvider.getLayoutTypeForIndex(index);
                 availableKey = this._recyclePool.getRecycledObject(type);
                 if (availableKey) {
-
                     //Recylepool works with string types so we need this conversion
                     availableKey = parseInt(availableKey, 10);
                     itemMeta = this._renderStack[availableKey];
@@ -191,11 +188,11 @@ class VirtualRenderer {
                     this._recyclePool.removeFromPool(alreadyRenderedAtKey);
                     delete this._renderStack[alreadyRenderedAtKey];
                 }
-                this._renderStackIndexKeyMap[index] = itemMeta.key;
             }
-            this._usageMap[index] = itemMeta.key;
+            this._renderStackIndexKeyMap[index] = itemMeta.key;
             itemMeta.dataIndex = index;
         }
+        //console.log(this._renderStack);
     }
 }
 
