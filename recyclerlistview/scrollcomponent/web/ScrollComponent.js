@@ -28,10 +28,13 @@ class ScrollComponent extends React.Component {
     render() {
         return (
             <ScrollViewer ref="scrollView"
+                          {...this.props}
                           horizontal={this.props.isHorizontal}
                           onScroll={this._onScroll}
+                          distanceFromWindow={this.props.distanceFromWindow}
                           canChangeSize={this.props.canChangeSize}
                           scrollThrottle={this.props.scrollThrottle}
+                          useWindowScroll={this.props.useWindowScroll}
                           onSizeChanged={this._onSizeChanged}>
 
                 <div style={{
@@ -67,6 +70,8 @@ ScrollComponent.propTypes = {
     isHorizontal: PropTypes.bool,
     renderFooter: PropTypes.func,
     scrollThrottle: PropTypes.number,
-    canChangeSize: PropTypes.bool
+    canChangeSize: PropTypes.bool,
+    distanceFromWindow: PropTypes.number,
+    useWindowScroll: PropTypes.bool
 };
 //#endif

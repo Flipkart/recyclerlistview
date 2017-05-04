@@ -310,18 +310,17 @@ class RecyclerListView extends Component {
 
     render() {
         return (
-            this._virtualRenderer ?
-                <ScrollComponent ref="scrollComponent" initialOffset={this.props.initialOffset} parentProps={this.props}
-                                 onScroll={this._onScroll} isHorizontal={this.props.isHorizontal}
-                                 onSizeChanged={this._onSizeChanged} renderFooter={this.props.renderFooter}
-                                 contentHeight={this._virtualRenderer.getLayoutDimension().height}
-                                 scrollThrottle={this.props.scrollThrottle}
-                                 canChangeSize={this.props.canChangeSize}
-                                 contentWidth={this._virtualRenderer.getLayoutDimension().width}>
-                    {this._generateRenderStack()}
-                </ScrollComponent> :
-                <ScrollComponent ref="scrollComponent" parentProps={this.props}
-                                 onSizeChanged={this._onSizeChanged}/>
+            <ScrollComponent ref="scrollComponent" initialOffset={this.props.initialOffset} {...this.props}
+                             onScroll={this._onScroll} isHorizontal={this.props.isHorizontal}
+                             onSizeChanged={this._onSizeChanged} renderFooter={this.props.renderFooter}
+                             contentHeight={this._virtualRenderer ? this._virtualRenderer.getLayoutDimension().height : null}
+                             scrollThrottle={this.props.scrollThrottle}
+                             distanceFromWindow={this.props.distanceFromWindow}
+                             canChangeSize={this.props.canChangeSize}
+                             useWindowScroll={this.props.useWindowScroll}
+                             contentWidth={this._virtualRenderer ? this._virtualRenderer.getLayoutDimension().width : null}>
+                {this._generateRenderStack()}
+            </ScrollComponent>
 
         );
     }
@@ -355,6 +354,8 @@ RecyclerListView
     renderFooter: PropTypes.func,
     initialRenderIndex: PropTypes.number,
     scrollThrottle: PropTypes.number,
-    canChangeSize: PropTypes.bool
+    canChangeSize: PropTypes.bool,
+    distanceFromWindow: PropTypes.number,
+    useWindowScroll: PropTypes.bool
 };
 //#endif
