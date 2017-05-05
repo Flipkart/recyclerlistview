@@ -121,8 +121,7 @@ class RecyclerListView extends Component {
     }
 
     getCurrentScrollOffset() {
-        let offset = this._virtualRenderer.getViewabilityTracker().getLastOffset();
-        return this.props.isHorizontal ? offset.x : offset.y;
+        return this._virtualRenderer.getViewabilityTracker().getLastOffset();
     }
 
     findApproxFirstVisibleIndex() {
