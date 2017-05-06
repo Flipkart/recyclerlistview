@@ -1,4 +1,4 @@
-import NearestBinarySearch from "../utils/NearestBinarySearch";
+import BinarySearch from "../utils/BinarySearch";
 class ViewabilityTracker {
     constructor(renderAheadOffset, initialOffset) {
         this._layouts = null;
@@ -131,7 +131,7 @@ class ViewabilityTracker {
 
     _findFirstVisibleIndexUsingBS(bias = 0) {
         const count = this._layouts.length;
-        return NearestBinarySearch.findClosestHigherValueIndex(count, this._visibleWindow.start + bias, this._valueExtractorForBinarySearch);
+        return BinarySearch.findClosestHigherValueIndex(count, this._visibleWindow.start + bias, this._valueExtractorForBinarySearch);
     }
 
     _valueExtractorForBinarySearch(index) {
@@ -247,11 +247,10 @@ class ViewabilityTracker {
 
     _diffArraysAndCallFunc(newItems, oldItems, func) {
         if (func) {
-            let all = [...newItems];
             let now = this._calculateArrayDiff(newItems, oldItems);
             let notNow = this._calculateArrayDiff(oldItems, newItems);
             if (now.length > 0 || notNow.length > 0) {
-                func(all, now, notNow);
+                func([...newItems], now, notNow);
             }
         }
     }
@@ -260,7 +259,7 @@ class ViewabilityTracker {
         const len = arr1.length;
         let diffArr = [];
         for (let i = 0; i < len; i++) {
-            if (arr2.indexOf(arr1[i]) === -1) {
+            if (BinarySearch.findIndexOf(arr2, arr1[i]) === -1) {
                 diffArr.push(arr1[i]);
             }
         }
