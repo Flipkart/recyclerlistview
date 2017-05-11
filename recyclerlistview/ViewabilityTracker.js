@@ -256,6 +256,7 @@ class ViewabilityTracker {
         }
     }
 
+    //TODO:Talha since arrays are sorted this can be much faster
     _calculateArrayDiff(arr1, arr2) {
         const len = arr1.length;
         let diffArr = [];
