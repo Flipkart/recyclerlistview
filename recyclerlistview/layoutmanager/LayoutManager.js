@@ -66,6 +66,7 @@ class LayoutManager {
 
             maxBound = this._isHorizontal ? Math.max(maxBound, itemDim.width) : Math.max(maxBound, itemDim.height);
 
+            //TODO: Talha creating array upfront will speed this up
             if (i > oldItemCount - 1) {
                 this._layouts.push({x: startX, y: startY, height: itemDim.height, width: itemDim.width});
             }

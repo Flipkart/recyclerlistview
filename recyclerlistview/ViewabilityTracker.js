@@ -190,6 +190,7 @@ class ViewabilityTracker {
             isFound = true;
         }
         else if (this._itemIntersectsEngagedWindow(relevantDim.startBound, relevantDim.endBound)) {
+            //TODO: This needs to be optimized
             if (insertOnTop) {
                 newEngagedIndexes.splice(0, 0, index);
             }
