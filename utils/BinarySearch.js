@@ -1,4 +1,4 @@
-class NearestBinarySearch {
+class BinarySearch {
     findClosestHigherValueIndex(size, targetValue, valueExtractor) {
         let low = 0;
         let high = size - 1;
@@ -39,5 +39,20 @@ class NearestBinarySearch {
         }
         return result;
     }
+    findIndexOf(array, value) {
+        let j = 0, length = array.length;
+        let i = 0;
+        while (j < length) {
+            i = length + j - 1 >> 1;
+            if (value > array[i]) {
+                j = i + 1;
+            } else if (value < array[i]) {
+                length = i;
+            } else {
+                return i;
+            }
+        }
+        return -1;
+    }
 }
-export default new NearestBinarySearch();
+export default new BinarySearch();

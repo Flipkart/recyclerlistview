@@ -10,29 +10,31 @@ export default class ScrollViewer extends React.Component {
         this._setRelevantOffset = this._setRelevantOffset.bind(this);
         this._onWindowResize = this._onWindowResize.bind(this);
 
-        this.scrollEvent = {offsetX: 0, offsetY: 0};
-        this._throttleParams = {leading: true, trailing: true};
+        this.scrollEvent = { offsetX: 0, offsetY: 0 };
+        this._throttleParams = { leading: true, trailing: true };
     }
 
     componentDidMount() {
         if (this.props.onSizeChanged) {
             if (this.props.useWindowScroll) {
                 this._startListeningToWindowEvents();
-                this.props.onSizeChanged({height: window.innerHeight, width: window.innerWidth});
+                this.props.onSizeChanged({ height: window.innerHeight, width: window.innerWidth });
             } else {
                 let divRef = this.refs.mainDiv;
-                this.props.onSizeChanged({height: divRef.clientHeight, width: divRef.clientWidth});
+                this._startListeningToDivEvents();
+                this.props.onSizeChanged({ height: divRef.clientHeight, width: divRef.clientWidth });
             }
         }
     }
 
     componentWillUnmount() {
         if (this._throttleFunction) {
-            window.removeEventListener('scroll', this._throttleFunction);
+            window.removeEventListener("scroll", this._throttleFunction);
+            if (this.refs.mainDiv) {
+                this.refs.mainDiv.removeEventListener("scroll", this._onScroll);
+            }
         }
-        if (this.props.canChangeSize) {
-            window.removeEventListener('resize', this._onWindowResize);
-        }
+        window.removeEventListener("resize", this._onWindowResize);
     }
 
     scrollTo(x, y, isAnimated) {
@@ -50,8 +52,7 @@ export default class ScrollViewer extends React.Component {
             } else {
                 return this.refs.mainDiv.scrollTop;
             }
-        }
-        else {
+        } else {
             if (this.props.isHorizontal) {
                 return window.scrollX;
             } else {
@@ -67,8 +68,7 @@ export default class ScrollViewer extends React.Component {
             } else {
                 this.refs.mainDiv.scrollTop = offset;
             }
-        }
-        else {
+        } else {
             if (this.props.isHorizontal) {
                 window.scrollTo(offset + this.props.distanceFromWindow, 0);
             } else {
@@ -87,17 +87,29 @@ export default class ScrollViewer extends React.Component {
         const change = offset - start;
         const increment = 20;
         const duration = 200;
-        const animateScroll = (elapsedTime) => {
+        const animateScroll = elapsedTime => {
             elapsedTime += increment;
             var position = this._easeInOut(elapsedTime, start, change, duration);
             this._setRelevantOffset(position);
             if (elapsedTime < duration) {
-                window.setTimeout(function () {
-                    animateScroll(elapsedTime);
-                }, increment);
+                window.setTimeout(
+                    function() {
+                        animateScroll(elapsedTime);
+                    },
+                    increment
+                );
             }
         };
         animateScroll(0);
+    }
+
+    _startListeningToDivEvents() {
+        if (this.props.scrollThrottle > 0) {
+            this._throttleFunction = _throttle(this._onScroll, this.props.scrollThrottle, this._throttleParams);
+        } else {
+            this._throttleFunction = this._onScroll;
+        }
+        this.refs.mainDiv.addEventListener("scroll", this._throttleFunction);
     }
 
     _startListeningToWindowEvents() {
@@ -106,15 +118,15 @@ export default class ScrollViewer extends React.Component {
         } else {
             this._throttleFunction = this._windowOnScroll;
         }
-        window.addEventListener('scroll', this._throttleFunction);
+        window.addEventListener("scroll", this._throttleFunction);
         if (this.props.canChangeSize) {
-            window.addEventListener('resize', this._onWindowResize);
+            window.addEventListener("resize", this._onWindowResize);
         }
     }
 
     _onWindowResize() {
         if (this.props.onSizeChanged && this.props.useWindowScroll) {
-            this.props.onSizeChanged({height: window.innerHeight, width: window.innerWidth});
+            this.props.onSizeChanged({ height: window.innerHeight, width: window.innerWidth });
         }
     }
 
@@ -123,8 +135,7 @@ export default class ScrollViewer extends React.Component {
             if (this.props.horizontal) {
                 this.scrollEvent.offsetY = 0;
                 this.scrollEvent.offsetX = window.scrollX - this.props.distanceFromWindow;
-            }
-            else {
+            } else {
                 this.scrollEvent.offsetX = 0;
                 this.scrollEvent.offsetY = window.scrollY - this.props.distanceFromWindow;
             }
@@ -137,8 +148,7 @@ export default class ScrollViewer extends React.Component {
             if (this.props.horizontal) {
                 this.scrollEvent.offsetY = 0;
                 this.scrollEvent.offsetX = this.refs.mainDiv.scrollLeft;
-            }
-            else {
+            } else {
                 this.scrollEvent.offsetX = 0;
                 this.scrollEvent.offsetY = this.refs.mainDiv.scrollTop;
             }
@@ -152,28 +162,28 @@ export default class ScrollViewer extends React.Component {
             return change / 2 * currentTime * currentTime + start;
         }
         currentTime -= 1;
-        return -change / 2 * (currentTime * (currentTime - 2) - 1) + start;
+        return (-change) / 2 * (currentTime * (currentTime - 2) - 1) + start;
     }
 
     render() {
-        return (
-            !this.props.useWindowScroll ?
-                <div ref="mainDiv"
-                     onScroll={_throttle(this._onScroll, this.props.scrollThrottle, this._throttleParams)}
-                     style={{
-                         "-webkit-overflow-scrolling": "touch",
-                         overflowX: this.props.horizontal ? "scroll" : "hidden",
-                         overflowY: !this.props.horizontal ? "scroll" : "hidden",
-                         height: '100%',
-                         width: '100%'
-                     }}>
-                    <div style={{position: 'relative'}}>
-                        {this.props.children}
-                    </div>
-                </div> :
-                <div style={{position: 'relative'}}>
-                    {this.props.children}
-                </div>);
+        return !this.props.useWindowScroll
+            ? <div
+                  ref="mainDiv"
+                  style={{
+                      "-webkit-overflow-scrolling": "touch",
+                      overflowX: this.props.horizontal ? "scroll" : "hidden",
+                      overflowY: !this.props.horizontal ? "scroll" : "hidden",
+                      height: "100%",
+                      width: "100%"
+                  }}
+              >
+                  <div style={{ position: "relative" }}>
+                      {this.props.children}
+                  </div>
+              </div>
+            : <div style={{ position: "relative" }}>
+                  {this.props.children}
+              </div>;
     }
 }
 ScrollViewer.defaultProps = {
@@ -189,5 +199,5 @@ ScrollViewer.propTypes = {
     scrollThrottle: PropTypes.number,
     canChangeSize: PropTypes.bool,
     useWindowScroll: PropTypes.bool,
-    distanceFromWindow: PropTypes.number,
+    distanceFromWindow: PropTypes.number
 };
