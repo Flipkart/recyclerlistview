@@ -26,7 +26,6 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 import PropTypes from "prop-types";
 
 let ScrollComponent, ViewRenderer;
-let isReactNative = false;
 
 //TODO: Talha, add documentation
 if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
@@ -35,7 +34,6 @@ if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
 } else if (navigator && navigator.product === "ReactNative") {
     ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer").default;
-    isReactNative = true;
 }
 else {
     throw RecyclerListViewExceptions.platformNotDetectedException;
@@ -178,25 +176,16 @@ class RecyclerListView extends Component {
     }
 
     _renderStackWhenReady(stack) {
-        if (!isReactNative && requestAnimationFrame) {
-            requestAnimationFrame(() => {
-                this.setState((prevState, props) => {
-                    return {renderStack: stack};
-                });
-            });
-        }
-        else {
-            this.setState((prevState, props) => {
-                return {renderStack: stack};
-            });
-        }
+        this.setState((prevState, props) => {
+            return {renderStack: stack};
+        });
     }
 
     _initTrackers() {
         this._assertDependencyPresence(this.props);
         this._virtualRenderer = new VirtualRenderer(this._renderStackWhenReady, (offset) => {
             this._pendingScrollToOffset = offset;
-        });
+        }, !this.props.disableRecycling);
         if (this.props.onVisibleIndexesChanged) {
             this._virtualRenderer.attachVisibleItemsListener(this._onVisibleItemsChanged);
         }
@@ -285,7 +274,7 @@ class RecyclerListView extends Component {
     _onScroll(offsetX, offsetY, rawEvent) {
         this._virtualRenderer.updateOffset(offsetX, offsetY);
         if (this.props.onScroll) {
-            this.props.onScroll(rawEvent);
+            this.props.onScroll(rawEvent, offsetX, offsetY);
         }
         this._processOnEndReached();
     }
@@ -334,7 +323,8 @@ RecyclerListView
     renderAheadOffset: 250,
     onEndReachedThreshold: 0,
     initialRenderIndex: 0,
-    canChangeSize: false
+    canChangeSize: false,
+    disableRecycling: false
 };
 
 //#if [DEV]
@@ -355,6 +345,7 @@ RecyclerListView
     scrollThrottle: PropTypes.number,
     canChangeSize: PropTypes.bool,
     distanceFromWindow: PropTypes.number,
-    useWindowScroll: PropTypes.bool
+    useWindowScroll: PropTypes.bool,
+    disableRecycling: PropTypes.bool
 };
 //#endif

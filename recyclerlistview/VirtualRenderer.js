@@ -1,13 +1,14 @@
 import ViewabilityTracker from "./ViewabilityTracker";
 import RecycleItemPool from "../utils/RecycleItemPool";
 class VirtualRenderer {
-    constructor(renderStackChanged, scrollOnNextUpdate) {
+    constructor(renderStackChanged, scrollOnNextUpdate, isRecyclingEnabled) {
         this._renderStack = {};
         this._renderStackIndexKeyMap = {};
         this._renderStackChanged = renderStackChanged;
         this._scrollOnNextUpdate = scrollOnNextUpdate;
         this._dimensions = null;
         this._params = null;
+        this._isRecyclingEnabled = isRecyclingEnabled;
 
         //Would be surprised if someone exceeds this
         this._startKey = 0;
@@ -137,14 +138,17 @@ class VirtualRenderer {
     _onEngagedItemsChanged(all, now, notNow) {
         const count = notNow.length;
         let resolvedIndex = 0;
-        let disengagedIndex = 0
-        for (let i = 0; i < count; i++) {
-            disengagedIndex = notNow[i];
-            resolvedIndex = this._renderStackIndexKeyMap[disengagedIndex];
-            this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedIndex);
+        let disengagedIndex = 0;
+        if(this._isRecyclingEnabled) {
+            for (let i = 0; i < count; i++) {
+                disengagedIndex = notNow[i];
+                resolvedIndex = this._renderStackIndexKeyMap[disengagedIndex];
+                this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedIndex);
+            }
         }
-        this._updateRenderStack(now);
-        this._renderStackChanged(this._renderStack);
+        if(this._updateRenderStack(now)) {
+            this._renderStackChanged(this._renderStack);
+        }
     }
 
     _updateRenderStack(itemIndexes) {
@@ -154,15 +158,20 @@ class VirtualRenderer {
         let itemMeta = null;
         let index = 0;
         let alreadyRenderedAtKey = null;
+        let hasRenderStackChanged = false;
         for (let i = 0; i < count; i++) {
             index = itemIndexes[i];
             availableKey = this._renderStackIndexKeyMap[index];
             if (availableKey >= 0) {
                 this._recyclePool.removeFromPool(availableKey);
                 itemMeta = this._renderStack[availableKey];
-                itemMeta.key = availableKey;
+                if (itemMeta.key !== availableKey) {
+                    hasRenderStackChanged = true;
+                    itemMeta.key = availableKey;
+                }
             }
             else {
+                hasRenderStackChanged = true;
                 type = this._layoutProvider.getLayoutTypeForIndex(index);
                 availableKey = this._recyclePool.getRecycledObject(type);
                 if (availableKey) {
@@ -192,7 +201,7 @@ class VirtualRenderer {
             this._renderStackIndexKeyMap[index] = itemMeta.key;
             itemMeta.dataIndex = index;
         }
-        //console.log(this._renderStack);
+        return hasRenderStackChanged;
     }
 }
 
