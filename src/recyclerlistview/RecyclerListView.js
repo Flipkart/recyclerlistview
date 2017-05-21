@@ -51,6 +51,8 @@ else {
  *
  * NOTE: React Native implementation uses ScrollView internally which means you get all ScrollView features as well such as Pull To Refresh, paging enabled
  *       You can easily create a recycling image flip view using one paging enabled flag. Read about ScrollView features in official react native documentation.
+ * NOTE: If you see blank space look at the renderAheadOffset prop and make sure your data provider has a good enough rowHasChanged method.
+ *       Blanks are totally avoidable with this listview.
  * NOTE: Also works on web (experimental)
  * NOTE: For reflowability set canChangeSize to true (experimental)
  */

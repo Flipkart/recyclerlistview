@@ -4,6 +4,10 @@
  * You may need access to data provider here, it might make sense to pass a function which lets you fetch the latest data provider
  * Why only indexes? The answer is to allow data virtualization in the future. Since layouts are accessed much before the actual render assuming having all
  * data upfront will only limit possibilites in the future.
+ *
+ * By design LayoutProvider forces you to think in terms of view types. What that means is that you'll always be dealing with a finite set of view templates
+ * with deterministic dimensions. We want to eliminate unnecessary re-layouts that happen when height, by mistake, is not taken into consideration.
+ * This patters ensures that your scrolling is as smooth as it gets. You can always increase the number of types to handle non deterministic scenarios.
  */
 class LayoutProvider {
     constructor(getLayoutTypeForIndex, setLayoutForType) {
