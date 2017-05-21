@@ -1,6 +1,10 @@
 import React from "react";
 import _throttle from "lodash/throttle";
 import PropTypes from "prop-types";
+/***
+ * A scrollviewer that mimics react native scrollview. Additionally on web it can start listening to window scroll events optionally.
+ * Supports both window scroll and scrollable divs inside other divs.
+ */
 export default class ScrollViewer extends React.Component {
     constructor(args) {
         super(args);
@@ -198,6 +202,7 @@ ScrollViewer.defaultProps = {
     useWindowScroll: false,
     distanceFromWindow: 0
 };
+//#if [DEV]
 ScrollViewer.propTypes = {
     onScroll: PropTypes.func,
     onSizeChanged: PropTypes.func,
@@ -207,3 +212,4 @@ ScrollViewer.propTypes = {
     useWindowScroll: PropTypes.bool,
     distanceFromWindow: PropTypes.number
 };
+//#endif

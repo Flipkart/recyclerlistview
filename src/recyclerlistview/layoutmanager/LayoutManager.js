@@ -1,3 +1,9 @@
+/***
+ * Computes the positions and dimensions of items that will be rendered by the list. The output from this is utilized by viewability tracker to compute the
+ * lists of visible/hidden item.
+ * Note: In future, this will also become an external dependency which means you can write your own layout manager. That will enable everyone to layout their
+ * views just the way they want. Current implementation is a StaggeredList
+ */
 class LayoutManager {
     constructor(layoutProvider, dimensions, isHorizontal) {
         this._layoutProvider = layoutProvider;

@@ -27,7 +27,10 @@ import PropTypes from "prop-types";
 
 let ScrollComponent, ViewRenderer;
 
-//TODO: Talha, add documentation
+/***
+ * Using webpack plugin definitions to choose the scroll component and view renderer
+ * To run in browser specify an extra plugin RLV_ENV: JSON.stringify('browser')
+ */
 if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
     ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
@@ -39,6 +42,18 @@ else {
     throw RecyclerListViewExceptions.platformNotDetectedException;
 }
 
+/***
+ * This is the main component, please refer to samples to understand how to use.
+ * For advanced usage check out prop descriptions below.
+ * You also get common methods such as: scrollToIndex, scrollToItem, scrollToTop, scrollToEnd, scrollToOffset, getCurrentScrollOffset, findApproxFirstVisibleIndex
+ * You'll need a ref to Recycler in order to call these
+ * Needs to have bounded size in all cases other than window scrolling (web).
+ *
+ * NOTE: React Native implementation uses ScrollView internally which means you get all ScrollView features as well such as Pull To Refresh, paging enabled
+ *       You can easily create a recycling image flip view using one paging enabled flag. Read about ScrollView features in official react native documentation.
+ * NOTE: Also works on web (experimental)
+ * NOTE: For reflowability set canChangeSize to true (experimental)
+ */
 class RecyclerListView extends Component {
     constructor(args) {
         super(args);
@@ -330,22 +345,57 @@ RecyclerListView
 //#if [DEV]
 RecyclerListView
     .propTypes = {
+
+    //Refer the sample
     layoutProvider: PropTypes.instanceOf(LayoutProvider).isRequired,
+
+    //Refer the sample
     dataProvider: PropTypes.instanceOf(DataProvider).isRequired,
+
+    //Methods which returns react component to be rendered. You get type of view and data in the callback.
     rowRenderer: PropTypes.func.isRequired,
+
+    //Initial offset you want to start rendering from, very useful if you want to maintain scroll context across pages.
     initialOffset: PropTypes.number,
+
+    //Specify how many pixels in advance do you want views to be rendered. Increasing this value can help reduce blanks (if any). However keeping this as low
+    //as possible should be the intent. Higher values also increase re-render compute
     renderAheadOffset: PropTypes.number,
+
+    //Whether the listview is horizontally scrollable. Both use staggeredGrid implementation
     isHorizontal: PropTypes.bool,
+
+    //On scroll callback onScroll(rawEvent, offsetX, offsetY), note you get offsets no need to read scrollTop/scrollLeft
     onScroll: PropTypes.func,
+
+    //Callback given when user scrolls to the end of the list or footer just becomes visible, useful in incremental loading scenarios
     onEndReached: PropTypes.func,
+
+    //Specify how many pixels in advance you onEndReached callback
     onEndReachedThreshold: PropTypes.number,
+
+    //Provides visible index, helpful in sending impression events etc, onVisibleIndexesChanged(all, now, notNow)
     onVisibleIndexesChanged: PropTypes.func,
+
+    //Provide this method if you want to render a footer. Helpful in showing a loader while doing incremental loads.
     renderFooter: PropTypes.func,
+
+    //Specify the initial item index you want rendering to start from. Preferred over initialOffset if both are specified.
     initialRenderIndex: PropTypes.number,
+
+    //web/iOS only. Scroll throttle duration.
     scrollThrottle: PropTypes.number,
+
+    //Specify if size can change, listview will automatically relayout items. For web, works only with useWindowScroll = true
     canChangeSize: PropTypes.bool,
+
+    //Web only. Specify how far away the first list item is from window top. This is an adjustment for better optimization.
     distanceFromWindow: PropTypes.number,
+
+    //Web only. Layout elements in window instead of a scrollable div.
     useWindowScroll: PropTypes.bool,
+
+    //Turns off recycling. You still get progressive rendering and all other features. Good for lazy rendering. This should not be used in most cases.
     disableRecycling: PropTypes.bool
 };
 //#endif

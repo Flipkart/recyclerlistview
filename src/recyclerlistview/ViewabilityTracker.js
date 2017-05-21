@@ -1,4 +1,11 @@
 import BinarySearch from "../utils/BinarySearch";
+/***
+ * Given an offset this utility can compute visible items. Also tracks previously visible items to compute items which get hidden or visible
+ * Virtual renderer uses callbacks from this utility to main recycle pool and the render stack.
+ * The utility optimizes finding visible indexes by using the last visible items. However, that can be slow if scrollToOffset is explicitly called.
+ * We use binary search to optimize in most cases like while finding first visible item or initial offset. In future we'll also be using BS to speed up
+ * scroll to offset.
+ */
 class ViewabilityTracker {
     constructor(renderAheadOffset, initialOffset) {
         this._layouts = null;

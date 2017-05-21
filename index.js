@@ -1,6 +1,6 @@
-import RecyclerListView from "./recyclerlistview/RecyclerListView";
-import DataProvider from "./recyclerlistview/dependencies/DataProvider";
-import LayoutProvider from "./recyclerlistview/dependencies/LayoutProvider";
+import RecyclerListView from "./src/recyclerlistview/RecyclerListView";
+import DataProvider from "./src/recyclerlistview/dependencies/DataProvider";
+import LayoutProvider from "./src/recyclerlistview/dependencies/LayoutProvider";
 export default{
     RecyclerListView,
     DataProvider,

@@ -1,8 +1,14 @@
 import ViewabilityTracker from "./ViewabilityTracker";
 import RecycleItemPool from "../utils/RecycleItemPool";
+/***
+ * Renderer which keeps track of recyclable items and the currently rendered items. Notifies list view to re render if something changes, like scroll offset
+ */
 class VirtualRenderer {
     constructor(renderStackChanged, scrollOnNextUpdate, isRecyclingEnabled) {
+        //Keeps track of items that need to be rendered in the next render cycle
         this._renderStack = {};
+
+        //Keeps track of keys of all the currently rendered indexes, can eventually replace renderStack as well if no new use cases come up
         this._renderStackIndexKeyMap = {};
         this._renderStackChanged = renderStackChanged;
         this._scrollOnNextUpdate = scrollOnNextUpdate;
@@ -143,14 +149,19 @@ class VirtualRenderer {
             for (let i = 0; i < count; i++) {
                 disengagedIndex = notNow[i];
                 resolvedIndex = this._renderStackIndexKeyMap[disengagedIndex];
+
+                //All the items which are now not visible can go to the recycle pool, the pool only needs to maintain keys since
+                //react can link a view to a key automatically
                 this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedIndex);
             }
         }
         if(this._updateRenderStack(now)) {
+            //Ask Recycler View to update itself
             this._renderStackChanged(this._renderStack);
         }
     }
 
+    //Updates render stack and reports whether anything has changed
     _updateRenderStack(itemIndexes) {
         const count = itemIndexes.length;
         let type = null;
@@ -163,6 +174,7 @@ class VirtualRenderer {
             index = itemIndexes[i];
             availableKey = this._renderStackIndexKeyMap[index];
             if (availableKey >= 0) {
+                //Use if already rendered and remove from pool
                 this._recyclePool.removeFromPool(availableKey);
                 itemMeta = this._renderStack[availableKey];
                 if (itemMeta.key !== availableKey) {
@@ -175,6 +187,7 @@ class VirtualRenderer {
                 type = this._layoutProvider.getLayoutTypeForIndex(index);
                 availableKey = this._recyclePool.getRecycledObject(type);
                 if (availableKey) {
+                    //If available in pool use that key instead
                     //Recylepool works with string types so we need this conversion
                     availableKey = parseInt(availableKey, 10);
                     itemMeta = this._renderStack[availableKey];
@@ -184,6 +197,7 @@ class VirtualRenderer {
                     delete this._renderStackIndexKeyMap[itemMeta.dataIndex];
                 }
                 else {
+                    //Create new if no existing key is available
                     itemMeta = {};
                     availableKey = this._getNewKey();
                     itemMeta.key = availableKey;
