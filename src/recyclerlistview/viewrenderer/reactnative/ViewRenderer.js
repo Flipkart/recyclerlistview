@@ -1,10 +1,13 @@
 import React from "react";
-import PropTypes from "prop-types";
+import {View} from "react-native";
+import PropTypes from 'prop-types';
+/***
+ * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
+ * Also enforces a logic to prevent re renders. RecyclerListView keeps moving these ViewRendereres around using transforms to enable recycling.
+ * View renderer will only update if its position, dimensions or given data changes.
+ * This is second of the two things recycler works on. Implemented both for web and react native.
+ */
 class ViewRenderer extends React.Component {
-    constructor(args) {
-        super(args);
-    }
-
     shouldComponentUpdate(newProps) {
         return (this.props.x !== newProps.x ||
         this.props.y !== newProps.y ||
@@ -13,29 +16,18 @@ class ViewRenderer extends React.Component {
         (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data)));
     }
 
-    _getTransform() {
-        return "translate(" +
-            this.props.x +
-            "px," +
-            this.props.y +
-            "px)";
-    }
-
     render() {
         return (
-            <div
-                ref="mainDiv"
-                style={{
-                    position: "absolute",
-                    left: 0,
-                    top: 0,
-                    width: this.props.width,
-                    height: this.props.height,
-                    transform: this._getTransform()
-                }}
-            >
+            <View style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                width: this.props.width,
+                height: this.props.height,
+                transform: [{translateX: this.props.x}, {translateY: this.props.y}]
+            }}>
                 {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
-            </div>
+            </View>
         );
     }
 }

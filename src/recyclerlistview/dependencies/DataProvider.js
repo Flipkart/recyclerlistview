@@ -1,6 +1,12 @@
+/***
+ * You can create a new instance or inherit and override default methods
+ * Allows access to data and size. Clone with rows creates a new data provider and let listview know where to calculate row layout from.
+ */
 class DataProvider {
     constructor(rowHasChanged) {
-        this._rowHasChanged = rowHasChanged;
+        if (rowHasChanged) {
+            this.rowHasChanged = rowHasChanged;
+        }
         this._firstIndexToProcess = 0;
         this._size = 0;
     }
@@ -13,12 +19,9 @@ class DataProvider {
         return this._size;
     }
 
-    rowHasChanged(row1, row2) {
-        return this._rowHasChanged(row1, row2);
-    }
-
+    //No need to override this one
     cloneWithRows(newData) {
-        let dp = new DataProvider(this._rowHasChanged);
+        let dp = new DataProvider(this.rowHasChanged);
         let newSize = newData.length;
         let iterCount = Math.min(this._size, newSize);
         let i = 0;
