@@ -206,16 +206,25 @@ class RecyclerListView extends Component {
         if (this.props.onVisibleIndexesChanged) {
             this._virtualRenderer.attachVisibleItemsListener(this._onVisibleItemsChanged);
         }
-        this._virtualRenderer.setParamsAndDimensions({
+        this._params = {
             isHorizontal: this.props.isHorizontal,
             itemCount: this.props.dataProvider.getSize(),
             initialOffset: this.props.initialOffset,
             renderAheadOffset: this.props.renderAheadOffset,
             initialRenderIndex: this.props.initialRenderIndex
-        }, this._layout);
+        };
+        this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
         this._virtualRenderer.setLayoutManager(new LayoutManager(this.props.layoutProvider, this._layout, this.props.isHorizontal));
         this._virtualRenderer.setLayoutProvider(this.props.layoutProvider);
         this._virtualRenderer.init();
+        let offset = this._virtualRenderer.getInitialOffset();
+        if (offset.y > 0 || offset.x > 0) {
+            this._pendingScrollToOffset = offset;
+            this.setState({});
+        }
+        else {
+            this._virtualRenderer.startViewabilityTracker();
+        }
     }
 
     _onVisibleItemsChanged(all, now, notNow) {

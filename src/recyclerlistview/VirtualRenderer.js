@@ -16,6 +16,8 @@ class VirtualRenderer {
         this._params = null;
         this._isRecyclingEnabled = isRecyclingEnabled;
 
+        this._isViewTrackerRunning = false;
+
         //Would be surprised if someone exceeds this
         this._startKey = 0;
 
@@ -29,6 +31,9 @@ class VirtualRenderer {
     }
 
     updateOffset(offsetX, offsetY) {
+        if (!this._isViewTrackerRunning) {
+            this.startViewabilityTracker();
+        }
         if (this._params.isHorizontal) {
             this._viewabilityTracker.updateOffset(offsetX);
         }
@@ -93,8 +98,7 @@ class VirtualRenderer {
         }
     }
 
-    init() {
-        this._recyclePool = new RecycleItemPool();
+    getInitialOffset() {
         let offset;
         if (this._params.initialRenderIndex > 0) {
             offset = this._layoutManager.getOffsetForIndex(this._params.initialRenderIndex);
@@ -111,10 +115,18 @@ class VirtualRenderer {
                 offset.x = 0;
             }
         }
+        return offset;
+    }
+
+    init() {
+        this._recyclePool = new RecycleItemPool();
         this._viewabilityTracker = new ViewabilityTracker(this._params.renderAheadOffset, this._params.initialOffset);
         this._prepareViewabilityTracker();
+    }
+
+    startViewabilityTracker() {
+        this._isViewTrackerRunning = true;
         this._viewabilityTracker.init();
-        this._scrollOnNextUpdate(offset);
     }
 
     _getNewKey() {
@@ -145,7 +157,7 @@ class VirtualRenderer {
         const count = notNow.length;
         let resolvedIndex = 0;
         let disengagedIndex = 0;
-        if(this._isRecyclingEnabled) {
+        if (this._isRecyclingEnabled) {
             for (let i = 0; i < count; i++) {
                 disengagedIndex = notNow[i];
                 resolvedIndex = this._renderStackIndexKeyMap[disengagedIndex];
@@ -155,7 +167,7 @@ class VirtualRenderer {
                 this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedIndex);
             }
         }
-        if(this._updateRenderStack(now)) {
+        if (this._updateRenderStack(now)) {
             //Ask Recycler View to update itself
             this._renderStackChanged(this._renderStack);
         }
