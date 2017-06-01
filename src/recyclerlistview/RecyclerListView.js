@@ -233,7 +233,7 @@ class RecyclerListView extends Component {
         this._params = {
             isHorizontal: this.props.isHorizontal,
             itemCount: this.props.dataProvider.getSize(),
-            initialOffset: this.props.initialOffset,
+            initialOffset: this.props.initialOffset ? this.props.initialOffset : this._initialOffset,
             renderAheadOffset: this.props.renderAheadOffset,
             initialRenderIndex: this.props.initialRenderIndex
         };
@@ -349,7 +349,6 @@ class RecyclerListView extends Component {
     render() {
         return (
             <ScrollComponent ref="scrollComponent"
-                             initialOffset={this.props.initialOffset ? this.props.initialOffset : this._initialOffset}
                              {...this.props}
                              onScroll={this._onScroll}
                              onSizeChanged={this._onSizeChanged}
