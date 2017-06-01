@@ -54,7 +54,7 @@ class LayoutManager {
         let itemRect = null;
 
         for (let i = startIndex; i < itemCount; i++) {
-            this._layoutProvider.setLayoutForType(this._layoutProvider.getLayoutTypeForIndex(i), itemDim);
+            this._layoutProvider.setLayoutForType(this._layoutProvider.getLayoutTypeForIndex(i), itemDim, i);
             this._setMaxBounds(itemDim);
             while (!this._checkBounds(startX, startY, itemDim, this._isHorizontal)) {
                 if (this._isHorizontal) {
