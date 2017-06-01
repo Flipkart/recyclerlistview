@@ -36,10 +36,6 @@ class ScrollComponent extends React.Component {
                           {...this.props}
                           horizontal={this.props.isHorizontal}
                           onScroll={this._onScroll}
-                          distanceFromWindow={this.props.distanceFromWindow}
-                          canChangeSize={this.props.canChangeSize}
-                          scrollThrottle={this.props.scrollThrottle}
-                          useWindowScroll={this.props.useWindowScroll}
                           onSizeChanged={this._onSizeChanged}>
 
                 <div style={{
@@ -48,13 +44,13 @@ class ScrollComponent extends React.Component {
                 }}>
                     {this.props.children}
                 </div>
-                <div style={this.props.isHorizontal ? {
+                {this.props.renderFooter ? <div style={this.props.isHorizontal ? {
                     position: 'absolute',
                     top: 0,
                     left: this.props.contentWidth
                 } : null}>
-                    {this.props.renderFooter ? this.props.renderFooter() : null}
-                </div>
+                    {this.props.renderFooter()}
+                </div> : null}
             </ScrollViewer>
         );
     }

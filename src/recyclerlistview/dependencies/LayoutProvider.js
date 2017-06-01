@@ -8,6 +8,8 @@
  * By design LayoutProvider forces you to think in terms of view types. What that means is that you'll always be dealing with a finite set of view templates
  * with deterministic dimensions. We want to eliminate unnecessary re-layouts that happen when height, by mistake, is not taken into consideration.
  * This patters ensures that your scrolling is as smooth as it gets. You can always increase the number of types to handle non deterministic scenarios.
+ *
+ * NOTE: You can also implement features such as ListView/GridView switch by simple changing your layout provider.
  */
 class LayoutProvider {
     constructor(getLayoutTypeForIndex, setLayoutForType) {
@@ -21,6 +23,7 @@ class LayoutProvider {
     }
 
     //Given a type and dimension set the dimension values on given dimension object
+    //You can also get index here if you add an extra argument but we don't recommend using it.
     setLayoutForType(type, dimension) {
         return this._setLayoutForType(type, dimension);
     }

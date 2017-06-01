@@ -24,6 +24,7 @@ import LayoutProvider from "./dependencies/LayoutProvider";
 import LayoutManager from "./layoutmanager/LayoutManager";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
 import PropTypes from "prop-types";
+import ContextProvider from "./dependencies/ContextProvider";
 
 let ScrollComponent, ViewRenderer;
 
@@ -73,6 +74,7 @@ class RecyclerListView extends Component {
         this._layout = {height: 0, width: 0};
         this._pendingScrollToOffset = null;
         this._tempDim = {};
+        this._initialOffset = 0;
         this.state = {
             renderStack: []
         };
@@ -105,6 +107,28 @@ class RecyclerListView extends Component {
         }
         this._processOnEndReached();
         this._checkAndChangeLayouts(this.props);
+    }
+
+    componentWillUnmount() {
+        if (this.props.contextProvider) {
+            let uniqueKey = this.props.contextProvider.getUniqueKey();
+            if (uniqueKey) {
+                this.props.contextProvider.save(uniqueKey, this.getCurrentScrollOffset());
+            }
+        }
+    }
+
+    componentWillMount() {
+        if (this.props.contextProvider) {
+            let uniqueKey = this.props.contextProvider.getUniqueKey();
+            if (uniqueKey) {
+                let offset = this.props.contextProvider.get(uniqueKey);
+                if (offset > 0) {
+                    this._initialOffset = offset;
+                }
+                this.props.contextProvider.remove(uniqueKey);
+            }
+        }
     }
 
     scrollToIndex(index, animate) {
@@ -273,7 +297,7 @@ class RecyclerListView extends Component {
     }
 
     _checkExpectedDimensionDiscrepancy(itemRect, type, index) {
-        this.props.layoutProvider.setLayoutForType(type, this._tempDim);
+        this.props.layoutProvider.setLayoutForType(type, this._tempDim, index);
 
         //TODO:Talha calling private method, find an alternative and remove this
         this._virtualRenderer.getLayoutManager()._setMaxBounds(this._tempDim);
@@ -324,14 +348,12 @@ class RecyclerListView extends Component {
 
     render() {
         return (
-            <ScrollComponent ref="scrollComponent" initialOffset={this.props.initialOffset} {...this.props}
-                             onScroll={this._onScroll} isHorizontal={this.props.isHorizontal}
-                             onSizeChanged={this._onSizeChanged} renderFooter={this.props.renderFooter}
+            <ScrollComponent ref="scrollComponent"
+                             initialOffset={this.props.initialOffset ? this.props.initialOffset : this._initialOffset}
+                             {...this.props}
+                             onScroll={this._onScroll}
+                             onSizeChanged={this._onSizeChanged}
                              contentHeight={this._virtualRenderer ? this._virtualRenderer.getLayoutDimension().height : null}
-                             scrollThrottle={this.props.scrollThrottle}
-                             distanceFromWindow={this.props.distanceFromWindow}
-                             canChangeSize={this.props.canChangeSize}
-                             useWindowScroll={this.props.useWindowScroll}
                              contentWidth={this._virtualRenderer ? this._virtualRenderer.getLayoutDimension().width : null}>
                 {this._generateRenderStack()}
             </ScrollComponent>
@@ -362,6 +384,9 @@ RecyclerListView
 
     //Refer the sample
     dataProvider: PropTypes.instanceOf(DataProvider).isRequired,
+
+    //Used to maintain scroll position in case view gets destroyed e.g, cases of back navigation
+    contextProvider: PropTypes.instanceOf(ContextProvider),
 
     //Methods which returns react component to be rendered. You get type of view and data in the callback.
     rowRenderer: PropTypes.func.isRequired,
