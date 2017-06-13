@@ -162,11 +162,15 @@ class VirtualRenderer {
                 disengagedIndex = notNow[i];
                 resolvedIndex = this._renderStackIndexKeyMap[disengagedIndex];
 
-                //Only add to pool if there is a possibility of a reuse
                 if (disengagedIndex < this._params.itemCount) {
                     //All the items which are now not visible can go to the recycle pool, the pool only needs to maintain keys since
                     //react can link a view to a key automatically
                     this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedIndex);
+                }
+                else {
+                    //Type provider may not be available in this case, use most probable
+                    let itemMeta = this._renderStack[resolvedIndex];
+                    this._recyclePool.putRecycledObject(itemMeta.type, resolvedIndex);
                 }
             }
         }
@@ -183,7 +187,6 @@ class VirtualRenderer {
         let availableKey = null;
         let itemMeta = null;
         let index = 0;
-        let alreadyRenderedAtKey = null;
         let hasRenderStackChanged = false;
         for (let i = 0; i < count; i++) {
             index = itemIndexes[i];
@@ -207,6 +210,7 @@ class VirtualRenderer {
                     availableKey = parseInt(availableKey, 10);
                     itemMeta = this._renderStack[availableKey];
                     itemMeta.key = availableKey;
+                    itemMeta.type = type;
 
                     //since this data index is no longer being rendered anywhere
                     delete this._renderStackIndexKeyMap[itemMeta.dataIndex];
@@ -216,6 +220,7 @@ class VirtualRenderer {
                     itemMeta = {};
                     availableKey = this._getNewKey();
                     itemMeta.key = availableKey;
+                    itemMeta.type = type;
                     this._renderStack[availableKey] = itemMeta;
                 }
 
