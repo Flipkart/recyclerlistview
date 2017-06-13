@@ -162,9 +162,12 @@ class VirtualRenderer {
                 disengagedIndex = notNow[i];
                 resolvedIndex = this._renderStackIndexKeyMap[disengagedIndex];
 
-                //All the items which are now not visible can go to the recycle pool, the pool only needs to maintain keys since
-                //react can link a view to a key automatically
-                this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedIndex);
+                //Only add to pool if there is a possibility of a reuse
+                if (disengagedIndex < this._params.itemCount) {
+                    //All the items which are now not visible can go to the recycle pool, the pool only needs to maintain keys since
+                    //react can link a view to a key automatically
+                    this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedIndex);
+                }
             }
         }
         if (this._updateRenderStack(now)) {
@@ -216,13 +219,14 @@ class VirtualRenderer {
                     this._renderStack[availableKey] = itemMeta;
                 }
 
+                //TODO:Talha validate if this causes an issue
                 //In case of mismatch in pool types we need to make sure only unique data indexes exist in render stack
                 //keys are always integers for all practical purposes
-                alreadyRenderedAtKey = this._renderStackIndexKeyMap[index];
-                if (alreadyRenderedAtKey >= 0) {
-                    this._recyclePool.removeFromPool(alreadyRenderedAtKey);
-                    delete this._renderStack[alreadyRenderedAtKey];
-                }
+                // alreadyRenderedAtKey = this._renderStackIndexKeyMap[index];
+                // if (alreadyRenderedAtKey >= 0) {
+                //     this._recyclePool.removeFromPool(alreadyRenderedAtKey);
+                //     delete this._renderStack[alreadyRenderedAtKey];
+                // }
             }
             this._renderStackIndexKeyMap[index] = itemMeta.key;
             itemMeta.dataIndex = index;
