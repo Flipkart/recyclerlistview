@@ -156,7 +156,10 @@ class RecyclerListView extends Component {
     }
 
     scrollToOffset(x, y, animate = false) {
-        this.refs["scrollComponent"].scrollTo(x, y, animate);
+        let scrollComponent = this.refs["scrollComponent"];
+        if(scrollComponent) {
+            scrollComponent.scrollTo(x, y, animate);
+        }
     }
 
     getCurrentScrollOffset() {
