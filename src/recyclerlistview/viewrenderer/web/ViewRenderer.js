@@ -37,7 +37,8 @@ class ViewRenderer extends React.Component {
                     top: 0,
                     width: this.props.width,
                     height: this.props.height,
-                    transform: this._getTransform()
+                    transform: this._getTransform(),
+                    webkitTransform: this._getTransform()
                 }}
             >
                 {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
