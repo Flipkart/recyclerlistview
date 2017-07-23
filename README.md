@@ -26,7 +26,7 @@ You can still do all sorts of GridViews and ListViews with different types of it
 to do and comes out of the box.
 
 ## Sample Code
-```
+```js
 /***
  Use this component inside your React Native Application.
  A scrollable list with different item type
