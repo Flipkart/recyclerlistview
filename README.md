@@ -25,7 +25,16 @@ is a way to look at the data and compute height upfront so that RecyclerListView
 You can still do all sorts of GridViews and ListViews with different types of items which are all recycled in optimal ways. Type based recycling is very easy
 to do and comes out of the box.
 
+If deterministic heights are possible in your use case then this is the best choice you can make right now.
+
+## Demo
+Web: ..........................
+React Native Android: .................
+React Native iOS: ..................
+
 ## Sample Code
+You can find similar web sample [here](samples/web/Sample1.js).
+
 ```js
 /***
  Use this component inside your React Native Application.
@@ -86,7 +95,7 @@ export default class RecycleTestComponent extends React.Component {
             (type, dim) => {
                 switch (type) {
                     case ViewTypes.HALF_LEFT:
-                        dim.width = width / 2 - 0.0001;
+                        dim.width = width / 2 - 0.0001;  //Safe guarding compute, not needed in most cases
                         dim.height = 160;
                         break;
                     case ViewTypes.HALF_RIGHT:
@@ -172,3 +181,6 @@ const styles = {
     }
 };
 ```
+## Contact Us
+Please open issues if you find any bugs. You can reach out to me on twitter [@naqvitalha](https://www.twitter.com/naqvitalha) or, write to cross-platform@flipkart.com for any questions that
+you might have.
