@@ -33,7 +33,9 @@ React Native Android: .................
 React Native iOS: ..................
 
 ## Sample Code
-You can find similar web sample [here](samples/web/Sample1.js).
+Please go through DataProvider, LayoutProvider and rowRenderer in detail. Those are the basic building blocks of this component. For more details dive into
+the source code, lot of relevant comments have been added to help you out. For full feature set have a look at prop definitions of [RecyclerListView](src/recyclerlistview/RecyclerListView.js)
+(bottom of the file).
 
 ```js
 /***
@@ -181,6 +183,8 @@ const styles = {
     }
 };
 ```
+You can find similar web sample [here](samples/web/Sample1.js).
+
 ## Contact Us
-Please open issues if you find any bugs. You can reach out to me on twitter [@naqvitalha](https://www.twitter.com/naqvitalha) or, write to cross-platform@flipkart.com for any questions that
+Please open issues for any bugs that you encounter. You can reach out to me on twitter [@naqvitalha](https://www.twitter.com/naqvitalha) or, write to cross-platform@flipkart.com for any questions that
 you might have.
