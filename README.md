@@ -12,7 +12,7 @@ Apart from all performance benefits RecyclerListView comes with great features o
 - End reach detections
 - Horizontal Mode
 - Viewability Events
-- Initial render offset support
+- Initial render offset/index support
 - Footer support
 - Reflow support on container size change with first visible item preservation
 - Scroll position preservation
@@ -97,7 +97,7 @@ export default class RecycleTestComponent extends React.Component {
             (type, dim) => {
                 switch (type) {
                     case ViewTypes.HALF_LEFT:
-                        dim.width = width / 2 - 0.0001;  //Safe guarding compute, not needed in most cases
+                        dim.width = width / 2;
                         dim.height = 160;
                         break;
                     case ViewTypes.HALF_RIGHT:
