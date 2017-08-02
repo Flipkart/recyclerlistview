@@ -35,12 +35,9 @@ let ScrollComponent, ViewRenderer;
 if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
     ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
-} else if (navigator && navigator.product === "ReactNative") {
+} else
     ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer").default;
-}
-else {
-    throw RecyclerListViewExceptions.platformNotDetectedException;
 }
 
 /***
@@ -66,6 +63,7 @@ class RecyclerListView extends Component {
         this._dataHasChanged = this._dataHasChanged.bind(this);
         this.scrollToOffset = this.scrollToOffset.bind(this);
         this._renderStackWhenReady = this._renderStackWhenReady.bind(this);
+        this._onViewContainerSizeChange = this._onViewContainerSizeChange.bind(this);
         this._onEndReachedCalled = false;
         this._virtualRenderer = null;
         this._initComplete = false;
@@ -283,7 +281,6 @@ class RecyclerListView extends Component {
             let data = this.props.dataProvider.getDataForIndex(dataIndex);
             let type = this.props.layoutProvider.getLayoutTypeForIndex(dataIndex);
             this._assertType(type);
-            this._checkExpectedDimensionDiscrepancy(itemRect, type, dataIndex);
             return (
                 <ViewRenderer key={itemMeta.key} data={data}
                               dataHasChanged={this._dataHasChanged}
@@ -291,6 +288,7 @@ class RecyclerListView extends Component {
                               y={itemRect.y}
                               layoutType={type}
                               index={dataIndex}
+                              onSizeChanged = {this._onViewContainerSizeChange}
                               childRenderer={this.props.rowRenderer}
                               height={itemRect.height}
                               width={itemRect.width}/>
@@ -299,7 +297,17 @@ class RecyclerListView extends Component {
         return null;
     }
 
+    _onViewContainerSizeChange(dim, index){
+        this._virtualRenderer.getLayoutManager().overrideLayout(index, dim);
+        if (this._relayoutReqIndex === -1) {
+            this._relayoutReqIndex = index;
+        } else {
+            this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
+        }
+    }
+
     _checkExpectedDimensionDiscrepancy(itemRect, type, index) {
+        this._virtualRenderer.getLayoutManager()._setMaxBounds(this._tempDim);
         this.props.layoutProvider.setLayoutForType(type, this._tempDim, index);
 
         //TODO:Talha calling private method, find an alternative and remove this

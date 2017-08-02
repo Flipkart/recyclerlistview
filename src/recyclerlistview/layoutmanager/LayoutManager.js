@@ -33,6 +33,15 @@ class LayoutManager {
         }
     }
 
+    overrideLayout(index, dim){
+        let layout = this._layouts[index];
+        if(layout){
+            layout.isOverridden = true;
+            layout.width = dim.width;
+            layout.height = dim.height;
+        }
+    }
+
     //TODO:Talha laziliy calculate in future revisions
     reLayoutFromIndex(startIndex, itemCount) {
         startIndex = this._locateFirstNeighbourIndex(startIndex);
@@ -53,8 +62,17 @@ class LayoutManager {
         let itemDim = {height: 0, width: 0};
         let itemRect = null;
 
+        let oldLayout = null;
+
         for (let i = startIndex; i < itemCount; i++) {
-            this._layoutProvider.setLayoutForType(this._layoutProvider.getLayoutTypeForIndex(i), itemDim, i);
+            oldLayout = this._layouts[i];
+            if(oldLayout && oldLayout.isOverridden){
+                itemDim.height = oldLayout.height;
+                itemDim.width = oldLayout.width;
+            }
+            else {
+                this._layoutProvider.setLayoutForType(this._layoutProvider.getLayoutTypeForIndex(i), itemDim, i);
+            }
             this._setMaxBounds(itemDim);
             while (!this._checkBounds(startX, startY, itemDim, this._isHorizontal)) {
                 if (this._isHorizontal) {

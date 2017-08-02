@@ -9,6 +9,15 @@ import PropTypes from "prop-types";
 class ViewRenderer extends React.Component {
     constructor(args) {
         super(args);
+        this._dim = {};
+    }
+
+    componentDidMount(){
+        this._checkSizeChange();
+    }
+
+    componentDidUpdate(){
+        this._checkSizeChange();
     }
 
     shouldComponentUpdate(newProps) {
@@ -27,6 +36,19 @@ class ViewRenderer extends React.Component {
             "px)";
     }
 
+    _checkSizeChange(){
+        if(this.props.onSizeChanged) {
+            let mainDiv = this.refs.mainDiv;
+            if (mainDiv) {
+                this._dim.width = mainDiv.clientWidth;
+                this._dim.height = mainDiv.clientHeight;
+                if (this.props.width !== this._dim.width || this.props.height !== this._dim.height) {
+                    this.props.onSizeChanged(this._dim, this.props.index);
+                }
+            }
+        }
+    }
+
     render() {
         return (
             <div
@@ -35,8 +57,6 @@ class ViewRenderer extends React.Component {
                     position: "absolute",
                     left: 0,
                     top: 0,
-                    width: this.props.width,
-                    height: this.props.height,
                     transform: this._getTransform(),
                     webkitTransform: this._getTransform()
                 }}
@@ -56,6 +76,7 @@ ViewRenderer.propTypes = {
     childRenderer: PropTypes.func.isRequired,
     layoutType: PropTypes.any,
     dataHasChanged: PropTypes.func,
+    onSizeChanged: PropTypes.func,
     data: PropTypes.any,
     index: PropTypes.number
 };
