@@ -35,7 +35,7 @@ let ScrollComponent, ViewRenderer;
 if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
     ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
-} else
+} else {
     ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer").default;
 }
@@ -73,6 +73,7 @@ class RecyclerListView extends Component {
         this._pendingScrollToOffset = null;
         this._tempDim = {};
         this._initialOffset = 0;
+        this._nextFrameRenderQueued = false;
         this.state = {
             renderStack: []
         };
@@ -155,7 +156,7 @@ class RecyclerListView extends Component {
 
     scrollToOffset(x, y, animate = false) {
         let scrollComponent = this.refs["scrollComponent"];
-        if(scrollComponent) {
+        if (scrollComponent) {
             scrollComponent.scrollTo(x, y, animate);
         }
     }
@@ -288,7 +289,8 @@ class RecyclerListView extends Component {
                               y={itemRect.y}
                               layoutType={type}
                               index={dataIndex}
-                              onSizeChanged = {this._onViewContainerSizeChange}
+                              isHorizontal={this.props.isHorizontal}
+                              onSizeChanged={this._onViewContainerSizeChange}
                               childRenderer={this.props.rowRenderer}
                               height={itemRect.height}
                               width={itemRect.width}/>
@@ -297,13 +299,29 @@ class RecyclerListView extends Component {
         return null;
     }
 
-    _onViewContainerSizeChange(dim, index){
+    _onViewContainerSizeChange(dim, index) {
         this._virtualRenderer.getLayoutManager().overrideLayout(index, dim);
         if (this._relayoutReqIndex === -1) {
             this._relayoutReqIndex = index;
         } else {
             this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
         }
+        if (requestAnimationFrame) {
+            if(!this._nextFrameRenderQueued) {
+                this._nextFrameRenderQueued = true;
+                requestAnimationFrame(() => {
+                    this.setState((prevState, props) => {
+                        return prevState;
+                    });
+                    this._nextFrameRenderQueued = false;
+                });
+            }
+        }
+        //else{
+        //     this.setState((prevState, props) => {
+        //         return prevState;
+        //     });
+        //}
     }
 
     _checkExpectedDimensionDiscrepancy(itemRect, type, index) {
