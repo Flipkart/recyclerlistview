@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
  * Also enforces a logic to prevent re renders. RecyclerListView keeps moving these ViewRendereres around using transforms to enable recycling.
@@ -10,22 +11,23 @@ class ViewRenderer extends React.Component {
     constructor(args) {
         super(args);
         this._dim = {};
+        this._isFirstLayoutDone = false;
     }
 
-    componentDidMount(){
+    componentDidMount() {
         this._checkSizeChange();
     }
 
-    componentDidUpdate(){
+    componentDidUpdate() {
         this._checkSizeChange();
     }
 
     shouldComponentUpdate(newProps) {
         return (this.props.x !== newProps.x ||
-        this.props.y !== newProps.y ||
-        this.props.width !== newProps.width ||
-        this.props.height !== newProps.height ||
-        (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data)));
+            this.props.y !== newProps.y ||
+            this.props.width !== newProps.width ||
+            this.props.height !== newProps.height ||
+            (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data)));
     }
 
     _getTransform() {
@@ -36,8 +38,8 @@ class ViewRenderer extends React.Component {
             "px)";
     }
 
-    _checkSizeChange(){
-        if(this.props.onSizeChanged) {
+    _checkSizeChange() {
+        if (this.props.forceNonDeterministicRendering && this.props.onSizeChanged) {
             let mainDiv = this.refs.mainDiv;
             if (mainDiv) {
                 this._dim.width = mainDiv.clientWidth;
@@ -45,27 +47,54 @@ class ViewRenderer extends React.Component {
                 if (this.props.width !== this._dim.width || this.props.height !== this._dim.height) {
                     this.props.onSizeChanged(this._dim, this.props.index);
                 }
+                else if (!this._isFirstLayoutDone) {
+                    this._isFirstLayoutDone = true;
+                    this.forceUpdate();
+                }
             }
         }
+        this._isFirstLayoutDone = true;
     }
 
     render() {
-        return (
-            <div
-                ref="mainDiv"
-                style={{
-                    position: "absolute",
-                    left: 0,
-                    top: 0,
-                    transform: this._getTransform(),
-                    webkitTransform: this._getTransform()
-                }}
-            >
-                {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
-            </div>
-        );
+        if (this.props.forceNonDeterministicRendering) {
+            return (
+                <div
+                    ref="mainDiv"
+                    style={{
+                        position: "absolute",
+                        left: 0,
+                        top: 0,
+                        opacity: this._isFirstLayoutDone?1:0,
+                        transform: this._getTransform(),
+                        webkitTransform: this._getTransform()
+                    }}
+                >
+                    {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
+                </div>
+            );
+        }
+        else {
+            return (
+                <div
+                    ref="mainDiv"
+                    style={{
+                        position: "absolute",
+                        left: 0,
+                        top: 0,
+                        width: this.props.width,
+                        height: this.props.height,
+                        transform: this._getTransform(),
+                        webkitTransform: this._getTransform()
+                    }}
+                >
+                    {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
+                </div>
+            );
+        }
     }
 }
+
 export default ViewRenderer;
 //#if [DEV]
 ViewRenderer.propTypes = {
@@ -78,6 +107,7 @@ ViewRenderer.propTypes = {
     dataHasChanged: PropTypes.func,
     onSizeChanged: PropTypes.func,
     data: PropTypes.any,
-    index: PropTypes.number
+    index: PropTypes.number,
+    forceNonDeterministicRendering: PropTypes.bool
 };
 //#endif

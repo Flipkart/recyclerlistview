@@ -33,25 +33,43 @@ class ViewRenderer extends React.Component {
             }
         }
         else if(!this._isFirstLayoutDone){
+            this._isFirstLayoutDone = true;
             this.forceUpdate();
         }
         this._isFirstLayoutDone = true;
     }
 
     render() {
-        return (
-            <View onLayout={this._onLayout}
-                  style={{
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      flexDirection: this.props.isHorizontal ? 'column' : 'row',
-                      opacity: this._isFirstLayoutDone ? 1 : 0,
-                      transform: [{translateX: this.props.x}, {translateY: this.props.y}]
-                  }}>
-                {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
-            </View>
-        );
+        if(this.props.forceNonDeterministicRendering) {
+            return (
+                <View onLayout={this._onLayout}
+                      style={{
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          flexDirection: this.props.isHorizontal ? 'column' : 'row',
+                          opacity: this._isFirstLayoutDone ? 1 : 0,
+                          transform: [{translateX: this.props.x}, {translateY: this.props.y}]
+                      }}>
+                    {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
+                </View>
+            );
+        }
+        else{
+            return (
+                <View
+                      style={{
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          width: this.props.width,
+                          height: this.props.height,
+                          transform: [{translateX: this.props.x}, {translateY: this.props.y}]
+                      }}>
+                    {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
+                </View>
+            );
+        }
     }
 }
 
@@ -68,6 +86,7 @@ ViewRenderer.propTypes = {
     onSizeChanged: PropTypes.func,
     isHorizontal: PropTypes.bool,
     data: PropTypes.any,
-    index: PropTypes.number
+    index: PropTypes.number,
+    forceNonDeterministicRendering: PropTypes.bool
 };
 //#endif

@@ -282,6 +282,9 @@ class RecyclerListView extends Component {
             let data = this.props.dataProvider.getDataForIndex(dataIndex);
             let type = this.props.layoutProvider.getLayoutTypeForIndex(dataIndex);
             this._assertType(type);
+            if (!this.props.forceNonDeterministicRendering) {
+                this._checkExpectedDimensionDiscrepancy(itemRect, type, dataIndex);
+            }
             return (
                 <ViewRenderer key={itemMeta.key} data={data}
                               dataHasChanged={this._dataHasChanged}
@@ -289,6 +292,7 @@ class RecyclerListView extends Component {
                               y={itemRect.y}
                               layoutType={type}
                               index={dataIndex}
+                              forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
                               isHorizontal={this.props.isHorizontal}
                               onSizeChanged={this._onViewContainerSizeChange}
                               childRenderer={this.props.rowRenderer}
@@ -306,9 +310,9 @@ class RecyclerListView extends Component {
         } else {
             this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
         }
-        if (requestAnimationFrame) {
-            if(!this._nextFrameRenderQueued) {
-                this._nextFrameRenderQueued = true;
+        if (!this._nextFrameRenderQueued) {
+            this._nextFrameRenderQueued = true;
+            if (requestAnimationFrame) {
                 requestAnimationFrame(() => {
                     this.setState((prevState, props) => {
                         return prevState;
@@ -316,12 +320,15 @@ class RecyclerListView extends Component {
                     this._nextFrameRenderQueued = false;
                 });
             }
+            else {
+                setTimeout(() => {
+                    this.setState((prevState, props) => {
+                        return prevState;
+                    });
+                    this._nextFrameRenderQueued = false;
+                }, 17);
+            }
         }
-        //else{
-        //     this.setState((prevState, props) => {
-        //         return prevState;
-        //     });
-        //}
     }
 
     _checkExpectedDimensionDiscrepancy(itemRect, type, index) {
@@ -460,6 +467,9 @@ RecyclerListView
     useWindowScroll: PropTypes.bool,
 
     //Turns off recycling. You still get progressive rendering and all other features. Good for lazy rendering. This should not be used in most cases.
-    disableRecycling: PropTypes.bool
+    disableRecycling: PropTypes.bool,
+
+    //Default is false, if enabled dimensions provided in layout provider will not be strictly enforced. Rendered dimensions will be used to relayout items. Slower if enabled.
+    forceNonDeterministicRendering: PropTypes.bool
 };
 //#endif
