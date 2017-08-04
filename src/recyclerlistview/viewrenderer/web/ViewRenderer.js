@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
  * Also enforces a logic to prevent re renders. RecyclerListView keeps moving these ViewRendereres around using transforms to enable recycling.
- * View renderer will only update if its position, dimensions or given data changes.
+ * View renderer will only update if its position, dimensions or given data changes. Make sure to have a relevant shouldComponentUpdate as well.
  * This is second of the two things recycler works on. Implemented both for web and react native.
  */
 class ViewRenderer extends React.Component {
