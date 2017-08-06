@@ -73,6 +73,7 @@ class RecyclerListView extends Component {
         this._pendingScrollToOffset = null;
         this._tempDim = {};
         this._initialOffset = 0;
+        this._cachedLayouts = null;
         this._nextFrameRenderQueued = false;
         this.state = {
             renderStack: []
@@ -113,6 +114,15 @@ class RecyclerListView extends Component {
             let uniqueKey = this.props.contextProvider.getUniqueKey();
             if (uniqueKey) {
                 this.props.contextProvider.save(uniqueKey, this.getCurrentScrollOffset());
+                if (this.props.forceNonDeterministicRendering) {
+                    if (this._virtualRenderer) {
+                        let layoutsToCache = this._virtualRenderer.getLayoutManager().getLayouts();
+                        if (layoutsToCache) {
+                            layoutsToCache = JSON.stringify({layoutArray: layoutsToCache});
+                            this.props.contextProvider.save(uniqueKey + "_layouts", layoutsToCache);
+                        }
+                    }
+                }
             }
         }
     }
@@ -124,6 +134,13 @@ class RecyclerListView extends Component {
                 let offset = this.props.contextProvider.get(uniqueKey);
                 if (offset > 0) {
                     this._initialOffset = offset;
+                }
+                if (this.props.forceNonDeterministicRendering) {
+                    let cachedLayouts = this.props.contextProvider.get(uniqueKey + "_layouts");
+                    if (cachedLayouts) {
+                        cachedLayouts = JSON.parse(cachedLayouts)["layoutArray"];
+                        this._cachedLayouts = cachedLayouts;
+                    }
                 }
                 this.props.contextProvider.remove(uniqueKey);
             }
@@ -240,7 +257,7 @@ class RecyclerListView extends Component {
             initialRenderIndex: this.props.initialRenderIndex
         };
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
-        this._virtualRenderer.setLayoutManager(new LayoutManager(this.props.layoutProvider, this._layout, this.props.isHorizontal));
+        this._virtualRenderer.setLayoutManager(new LayoutManager(this.props.layoutProvider, this._layout, this.props.isHorizontal, this._cachedLayouts));
         this._virtualRenderer.setLayoutProvider(this.props.layoutProvider);
         this._virtualRenderer.init();
         let offset = this._virtualRenderer.getInitialOffset();
@@ -251,6 +268,7 @@ class RecyclerListView extends Component {
         else {
             this._virtualRenderer.startViewabilityTracker();
         }
+        this._cachedLayouts = null;
     }
 
     _onVisibleItemsChanged(all, now, notNow) {

@@ -5,12 +5,12 @@
  * views just the way they want. Current implementation is a StaggeredList
  */
 class LayoutManager {
-    constructor(layoutProvider, dimensions, isHorizontal) {
+    constructor(layoutProvider, dimensions, isHorizontal, cachedLayouts) {
         this._layoutProvider = layoutProvider;
         this._window = dimensions;
         this._totalHeight = 0;
         this._totalWidth = 0;
-        this._layouts = [];
+        this._layouts = cachedLayouts ? cachedLayouts : [];
         this._isHorizontal = isHorizontal;
     }
 
