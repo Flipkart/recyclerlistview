@@ -1,5 +1,5 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
@@ -23,19 +23,17 @@ class ViewRenderer extends React.Component {
     }
 
     shouldComponentUpdate(newProps) {
-        return (this.props.x !== newProps.x ||
+        return (
+            this.props.x !== newProps.x ||
             this.props.y !== newProps.y ||
             this.props.width !== newProps.width ||
             this.props.height !== newProps.height ||
-            (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data)));
+            (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data))
+        );
     }
 
     _getTransform() {
-        return "translate(" +
-            this.props.x +
-            "px," +
-            this.props.y +
-            "px)";
+        return 'translate(' + this.props.x + 'px,' + this.props.y + 'px)';
     }
 
     _checkSizeChange() {
@@ -46,8 +44,7 @@ class ViewRenderer extends React.Component {
                 this._dim.height = mainDiv.clientHeight;
                 if (this.props.width !== this._dim.width || this.props.height !== this._dim.height) {
                     this.props.onSizeChanged(this._dim, this.props.index);
-                }
-                else if (!this._isFirstLayoutDone) {
+                } else if (!this._isFirstLayoutDone) {
                     this._isFirstLayoutDone = true;
                     this.forceUpdate();
                 }
@@ -57,41 +54,29 @@ class ViewRenderer extends React.Component {
     }
 
     render() {
-        if (this.props.forceNonDeterministicRendering) {
-            return (
-                <div
-                    ref="mainDiv"
-                    style={{
-                        position: "absolute",
-                        left: 0,
-                        top: 0,
-                        opacity: this._isFirstLayoutDone?1:0,
-                        transform: this._getTransform(),
-                        webkitTransform: this._getTransform()
-                    }}
-                >
-                    {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
-                </div>
-            );
-        }
-        else {
-            return (
-                <div
-                    ref="mainDiv"
-                    style={{
-                        position: "absolute",
-                        left: 0,
-                        top: 0,
-                        width: this.props.width,
-                        height: this.props.height,
-                        transform: this._getTransform(),
-                        webkitTransform: this._getTransform()
-                    }}
-                >
-                    {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
-                </div>
-            );
-        }
+        let styleObj = this.props.forceNonDeterministicRendering
+            ? {
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  opacity: this._isFirstLayoutDone ? 1 : 0,
+                  transform: this._getTransform(),
+                  webkitTransform: this._getTransform()
+              }
+            : {
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  width: this.props.width,
+                  height: this.props.height,
+                  transform: this._getTransform(),
+                  webkitTransform: this._getTransform()
+              };
+        return (
+            <div ref="mainDiv" style={styleObj}>
+                {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
+            </div>
+        );
     }
 }
 
