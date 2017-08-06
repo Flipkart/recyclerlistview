@@ -1,3 +1,5 @@
+import CustomError from "../recyclerlistview/exceptions/CustomError";
+
 class BinarySearch {
     findClosestHigherValueIndex(size, targetValue, valueExtractor) {
         let low = 0;
@@ -14,10 +16,10 @@ class BinarySearch {
         }
 
         if (high < 0) {
-            throw {
+            throw new CustomError({
                 message: "The collection cannot be empty",
                 type: "InvalidStateException"
-            };
+            });
         }
 
         while (low <= high) {

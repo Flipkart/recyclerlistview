@@ -25,6 +25,7 @@ import LayoutManager from "./layoutmanager/LayoutManager";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
 import PropTypes from "prop-types";
 import ContextProvider from "./dependencies/ContextProvider";
+import CustomError from "./exceptions/CustomError";
 
 let ScrollComponent, ViewRenderer;
 
@@ -217,7 +218,7 @@ class RecyclerListView extends Component {
         this._layout.height = layout.height;
         this._layout.width = layout.width;
         if (layout.height === 0 || layout.width === 0) {
-            throw RecyclerListViewExceptions.layoutException;
+            throw new CustomError(RecyclerListViewExceptions.layoutException);
         }
         if (!this._initComplete) {
             this._initComplete = true;
@@ -278,13 +279,13 @@ class RecyclerListView extends Component {
 
     _assertDependencyPresence(props) {
         if (!props.dataProvider || !props.layoutProvider) {
-            throw RecyclerListViewExceptions.unresolvedDependenciesException;
+            throw new CustomError(RecyclerListViewExceptions.unresolvedDependenciesException);
         }
     }
 
     _assertType(type) {
         if (!type && type !== 0) {
-            throw RecyclerListViewExceptions.itemTypeNullException;
+            throw new CustomError(RecyclerListViewExceptions.itemTypeNullException);
         }
     }
 

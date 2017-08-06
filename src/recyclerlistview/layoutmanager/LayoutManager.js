@@ -4,6 +4,8 @@
  * Note: In future, this will also become an external dependency which means you can write your own layout manager. That will enable everyone to layout their
  * views just the way they want. Current implementation is a StaggeredList
  */
+import CustomError from "../exceptions/CustomError";
+
 class LayoutManager {
     constructor(layoutProvider, dimensions, isHorizontal, cachedLayouts) {
         this._layoutProvider = layoutProvider;
@@ -26,10 +28,10 @@ class LayoutManager {
         if (this._layouts.length > index) {
             return {x: this._layouts[index].x, y: this._layouts[index].y};
         } else {
-            throw {
+            throw new CustomError({
                 type: "LayoutUnavailableException",
                 message: "No layout available for index: " + index
-            }
+            });
         }
     }
 
