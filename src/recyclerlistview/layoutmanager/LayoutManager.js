@@ -4,13 +4,15 @@
  * Note: In future, this will also become an external dependency which means you can write your own layout manager. That will enable everyone to layout their
  * views just the way they want. Current implementation is a StaggeredList
  */
+import CustomError from "../exceptions/CustomError";
+
 class LayoutManager {
-    constructor(layoutProvider, dimensions, isHorizontal) {
+    constructor(layoutProvider, dimensions, isHorizontal, cachedLayouts) {
         this._layoutProvider = layoutProvider;
         this._window = dimensions;
         this._totalHeight = 0;
         this._totalWidth = 0;
-        this._layouts = [];
+        this._layouts = cachedLayouts ? cachedLayouts : [];
         this._isHorizontal = isHorizontal;
     }
 
@@ -26,10 +28,19 @@ class LayoutManager {
         if (this._layouts.length > index) {
             return {x: this._layouts[index].x, y: this._layouts[index].y};
         } else {
-            throw {
+            throw new CustomError({
                 type: "LayoutUnavailableException",
                 message: "No layout available for index: " + index
-            }
+            });
+        }
+    }
+
+    overrideLayout(index, dim){
+        let layout = this._layouts[index];
+        if(layout){
+            layout.isOverridden = true;
+            layout.width = dim.width;
+            layout.height = dim.height;
         }
     }
 
@@ -53,8 +64,17 @@ class LayoutManager {
         let itemDim = {height: 0, width: 0};
         let itemRect = null;
 
+        let oldLayout = null;
+
         for (let i = startIndex; i < itemCount; i++) {
-            this._layoutProvider.setLayoutForType(this._layoutProvider.getLayoutTypeForIndex(i), itemDim, i);
+            oldLayout = this._layouts[i];
+            if(oldLayout && oldLayout.isOverridden){
+                itemDim.height = oldLayout.height;
+                itemDim.width = oldLayout.width;
+            }
+            else {
+                this._layoutProvider.setLayoutForType(this._layoutProvider.getLayoutTypeForIndex(i), itemDim, i);
+            }
             this._setMaxBounds(itemDim);
             while (!this._checkBounds(startX, startY, itemDim, this._isHorizontal)) {
                 if (this._isHorizontal) {

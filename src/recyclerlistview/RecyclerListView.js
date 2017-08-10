@@ -25,6 +25,7 @@ import LayoutManager from "./layoutmanager/LayoutManager";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
 import PropTypes from "prop-types";
 import ContextProvider from "./dependencies/ContextProvider";
+import CustomError from "./exceptions/CustomError";
 
 let ScrollComponent, ViewRenderer;
 
@@ -35,12 +36,9 @@ let ScrollComponent, ViewRenderer;
 if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
     ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
-} else if (navigator && navigator.product === "ReactNative") {
+} else {
     ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer").default;
-}
-else {
-    throw RecyclerListViewExceptions.platformNotDetectedException;
 }
 
 /***
@@ -66,6 +64,7 @@ class RecyclerListView extends Component {
         this._dataHasChanged = this._dataHasChanged.bind(this);
         this.scrollToOffset = this.scrollToOffset.bind(this);
         this._renderStackWhenReady = this._renderStackWhenReady.bind(this);
+        this._onViewContainerSizeChange = this._onViewContainerSizeChange.bind(this);
         this._onEndReachedCalled = false;
         this._virtualRenderer = null;
         this._initComplete = false;
@@ -75,6 +74,8 @@ class RecyclerListView extends Component {
         this._pendingScrollToOffset = null;
         this._tempDim = {};
         this._initialOffset = 0;
+        this._cachedLayouts = null;
+        this._nextFrameRenderQueued = false;
         this.state = {
             renderStack: []
         };
@@ -114,6 +115,15 @@ class RecyclerListView extends Component {
             let uniqueKey = this.props.contextProvider.getUniqueKey();
             if (uniqueKey) {
                 this.props.contextProvider.save(uniqueKey, this.getCurrentScrollOffset());
+                if (this.props.forceNonDeterministicRendering) {
+                    if (this._virtualRenderer) {
+                        let layoutsToCache = this._virtualRenderer.getLayoutManager().getLayouts();
+                        if (layoutsToCache) {
+                            layoutsToCache = JSON.stringify({layoutArray: layoutsToCache});
+                            this.props.contextProvider.save(uniqueKey + "_layouts", layoutsToCache);
+                        }
+                    }
+                }
             }
         }
     }
@@ -125,6 +135,13 @@ class RecyclerListView extends Component {
                 let offset = this.props.contextProvider.get(uniqueKey);
                 if (offset > 0) {
                     this._initialOffset = offset;
+                }
+                if (this.props.forceNonDeterministicRendering) {
+                    let cachedLayouts = this.props.contextProvider.get(uniqueKey + "_layouts");
+                    if (cachedLayouts) {
+                        cachedLayouts = JSON.parse(cachedLayouts)["layoutArray"];
+                        this._cachedLayouts = cachedLayouts;
+                    }
                 }
                 this.props.contextProvider.remove(uniqueKey);
             }
@@ -157,7 +174,7 @@ class RecyclerListView extends Component {
 
     scrollToOffset(x, y, animate = false) {
         let scrollComponent = this.refs["scrollComponent"];
-        if(scrollComponent) {
+        if (scrollComponent) {
             scrollComponent.scrollTo(x, y, animate);
         }
     }
@@ -201,7 +218,7 @@ class RecyclerListView extends Component {
         this._layout.height = layout.height;
         this._layout.width = layout.width;
         if (layout.height === 0 || layout.width === 0) {
-            throw RecyclerListViewExceptions.layoutException;
+            throw new CustomError(RecyclerListViewExceptions.layoutException);
         }
         if (!this._initComplete) {
             this._initComplete = true;
@@ -241,7 +258,7 @@ class RecyclerListView extends Component {
             initialRenderIndex: this.props.initialRenderIndex
         };
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
-        this._virtualRenderer.setLayoutManager(new LayoutManager(this.props.layoutProvider, this._layout, this.props.isHorizontal));
+        this._virtualRenderer.setLayoutManager(new LayoutManager(this.props.layoutProvider, this._layout, this.props.isHorizontal, this._cachedLayouts));
         this._virtualRenderer.setLayoutProvider(this.props.layoutProvider);
         this._virtualRenderer.init();
         let offset = this._virtualRenderer.getInitialOffset();
@@ -252,6 +269,7 @@ class RecyclerListView extends Component {
         else {
             this._virtualRenderer.startViewabilityTracker();
         }
+        this._cachedLayouts = null;
     }
 
     _onVisibleItemsChanged(all, now, notNow) {
@@ -261,13 +279,13 @@ class RecyclerListView extends Component {
 
     _assertDependencyPresence(props) {
         if (!props.dataProvider || !props.layoutProvider) {
-            throw RecyclerListViewExceptions.unresolvedDependenciesException;
+            throw new CustomError(RecyclerListViewExceptions.unresolvedDependenciesException);
         }
     }
 
     _assertType(type) {
         if (!type && type !== 0) {
-            throw RecyclerListViewExceptions.itemTypeNullException;
+            throw new CustomError(RecyclerListViewExceptions.itemTypeNullException);
         }
     }
 
@@ -283,7 +301,9 @@ class RecyclerListView extends Component {
             let data = this.props.dataProvider.getDataForIndex(dataIndex);
             let type = this.props.layoutProvider.getLayoutTypeForIndex(dataIndex);
             this._assertType(type);
-            this._checkExpectedDimensionDiscrepancy(itemRect, type, dataIndex);
+            if (!this.props.forceNonDeterministicRendering) {
+                this._checkExpectedDimensionDiscrepancy(itemRect, type, dataIndex);
+            }
             return (
                 <ViewRenderer key={itemMeta.key} data={data}
                               dataHasChanged={this._dataHasChanged}
@@ -291,6 +311,9 @@ class RecyclerListView extends Component {
                               y={itemRect.y}
                               layoutType={type}
                               index={dataIndex}
+                              forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
+                              isHorizontal={this.props.isHorizontal}
+                              onSizeChanged={this._onViewContainerSizeChange}
                               childRenderer={this.props.rowRenderer}
                               height={itemRect.height}
                               width={itemRect.width}/>
@@ -299,7 +322,36 @@ class RecyclerListView extends Component {
         return null;
     }
 
+    _onViewContainerSizeChange(dim, index) {
+        this._virtualRenderer.getLayoutManager().overrideLayout(index, dim);
+        if (this._relayoutReqIndex === -1) {
+            this._relayoutReqIndex = index;
+        } else {
+            this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
+        }
+        if (!this._nextFrameRenderQueued) {
+            this._nextFrameRenderQueued = true;
+            if (requestAnimationFrame) {
+                requestAnimationFrame(() => {
+                    this.setState((prevState, props) => {
+                        return prevState;
+                    });
+                    this._nextFrameRenderQueued = false;
+                });
+            }
+            else {
+                setTimeout(() => {
+                    this.setState((prevState, props) => {
+                        return prevState;
+                    });
+                    this._nextFrameRenderQueued = false;
+                }, 17);
+            }
+        }
+    }
+
     _checkExpectedDimensionDiscrepancy(itemRect, type, index) {
+        this._virtualRenderer.getLayoutManager()._setMaxBounds(this._tempDim);
         this.props.layoutProvider.setLayoutForType(type, this._tempDim, index);
 
         //TODO:Talha calling private method, find an alternative and remove this
@@ -434,6 +486,9 @@ RecyclerListView
     useWindowScroll: PropTypes.bool,
 
     //Turns off recycling. You still get progressive rendering and all other features. Good for lazy rendering. This should not be used in most cases.
-    disableRecycling: PropTypes.bool
+    disableRecycling: PropTypes.bool,
+
+    //Default is false, if enabled dimensions provided in layout provider will not be strictly enforced. Rendered dimensions will be used to relayout items. Slower if enabled.
+    forceNonDeterministicRendering: PropTypes.bool
 };
 //#endif

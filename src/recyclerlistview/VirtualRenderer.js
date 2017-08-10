@@ -209,6 +209,10 @@ class VirtualRenderer {
                     //Recylepool works with string types so we need this conversion
                     availableKey = parseInt(availableKey, 10);
                     itemMeta = this._renderStack[availableKey];
+                    if (!itemMeta) {
+                        itemMeta = {};
+                        this._renderStack[availableKey] = itemMeta;
+                    }
                     itemMeta.key = availableKey;
                     itemMeta.type = type;
 
