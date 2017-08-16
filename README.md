@@ -4,7 +4,15 @@ and UICollectionView on iOS.
 
 `npm install --save recyclerlistview`
 
+* **[Overview and features](#overview-and-features)**
+* **[Why?](#why)**
+* **[Demo](#demo)**
+* **[Sample Code](#sample-code)**
+* **[License](#license)**
+* **[Contact us](#contact-us)**
+
 Note: Documentation will be upgraded soon, for now check code comments for clarity and exploring features.
+
 
 ## Overview and features
 RecyclerListView uses "cell recycling" to reuse views that are no longer visible to render items instead of creating new view objects. Creation of objects
@@ -39,9 +47,11 @@ not be as fast.
 
 
 ## Demo
-Web: TBA
-React Native Android: TBA
-React Native iOS: TBA
+Watch Demo Video: https://www.youtube.com/watch?v=Tnv4HMmPgMc
+
+[![Watch Video](https://img.youtube.com/vi/Tnv4HMmPgMc/0.jpg)](https://www.youtube.com/watch?v=Tnv4HMmPgMc)
+
+Sample project: https://github.com/naqvitalha/travelMate
 
 ## Sample Code
 Please go through DataProvider, LayoutProvider and rowRenderer in detail. Those are the basic building blocks of this component. For more details dive into
