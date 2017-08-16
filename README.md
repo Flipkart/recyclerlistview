@@ -1,5 +1,12 @@
 # RecyclerListView
-## Why?
+This is a high performance listview for React Native and Web with support for complex layouts. JS only with no native dependencies, inspired by both RecyclerView on Android
+and UICollectionView on iOS.
+
+`npm install --save recyclerlistview`
+
+Note: Documentation will be upgraded soon, for now check code comments for clarity and exploring features.
+
+## Overview and features
 RecyclerListView uses "cell recycling" to reuse views that are no longer visible to render items instead of creating new view objects. Creation of objects
 is very expensive and comes with a memory overhead which means as you scroll through the list the memory footprint keeps going up. Releasing invisible items off
 memory is another technique but that leads to creation of even more objects and lot of garbage collections. Recycling is the best way to render infinite lists
@@ -17,8 +24,9 @@ Apart from all performance benefits RecyclerListView comes with great features o
 - Reflow support on container size change with first visible item preservation
 - Scroll position preservation
 - Window scrolling support for web
+- Non deterministic rendering mode on demand (height cannot be determined before rendering)
 
-## Is it relevant to you?
+## Why?
 
 RecyclerListView was built with performance in mind which means no blanks while quick scrolls or frame drops.
 RecyclerListView encourages you to have deterministic heights for items you need to render. This does not mean that you need to have all items of same height and stuff, all you need
@@ -26,14 +34,14 @@ is a way to look at the data and compute height upfront so that RecyclerListView
 You can still do all sorts of GridViews and ListViews with different types of items which are all recycled in optimal ways. Type based recycling is very easy
 to do and comes out of the box.
 
-In case you really need non deterministic rendering set forceNonDeterministicRendering prop to true on RecyclerListView. This increases layout thrashing and thus, will
+In case you really need non deterministic rendering set `forceNonDeterministicRendering` prop to true on RecyclerListView. This increases layout thrashing and thus, will
 not be as fast.
 
 
 ## Demo
-Web: ..........................
-React Native Android: .................
-React Native iOS: ..................
+Web: TBA
+React Native Android: TBA
+React Native iOS: TBA
 
 ## Sample Code
 Please go through DataProvider, LayoutProvider and rowRenderer in detail. Those are the basic building blocks of this component. For more details dive into
@@ -188,6 +196,10 @@ const styles = {
 };
 ```
 You can find similar web sample [here](samples/web/Sample1.js).
+Note: Works with React Native Web out of the box, to use with ReactJS add an extra webpack plugin  `RLV_ENV: JSON.stringify('browser')`
+
+##License
+Apache v2.0
 
 ## Contact Us
 Please open issues for any bugs that you encounter. You can reach out to me on twitter [@naqvitalha](https://www.twitter.com/naqvitalha) or, write to cross-platform@flipkart.com for any questions that
