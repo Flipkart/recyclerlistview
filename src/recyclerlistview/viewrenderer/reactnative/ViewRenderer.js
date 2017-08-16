@@ -45,11 +45,10 @@ class ViewRenderer extends React.Component {
                 <View onLayout={this._onLayout}
                       style={{
                           position: 'absolute',
-                          left: 0,
-                          top: 0,
+                          left: this.props.x,
+                          top: this.props.y,
                           flexDirection: this.props.isHorizontal ? 'column' : 'row',
-                          opacity: this._isFirstLayoutDone ? 1 : 0,
-                          transform: [{translateX: this.props.x}, {translateY: this.props.y}]
+                          opacity: this._isFirstLayoutDone ? 1 : 0
                       }}>
                     {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
                 </View>
