@@ -194,7 +194,10 @@ const styles = {
 };
 ```
 You can find similar web sample [here](samples/web/Sample1.js).
-Note: Works with React Native Web out of the box, to use with ReactJS add an extra webpack plugin `RLV_ENV: JSON.stringify('browser')`
+Note: Works with React Native Web out of the box, to use with ReactJS add an extra webpack plugin  `RLV_ENV: JSON.stringify('browser')`
+
+##License
+Apache v2.0
 
 ## Contact Us
 Please open issues for any bugs that you encounter. You can reach out to me on twitter [@naqvitalha](https://www.twitter.com/naqvitalha) or, write to cross-platform@flipkart.com for any questions that

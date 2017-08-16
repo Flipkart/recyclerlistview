@@ -1,6 +1,6 @@
 {
   "name": "recyclerlistview",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The listview that you need and deserve. It was built for performance, uses cell recycling to achieve smooth scrolling.",
   "main": "index.js",
   "scripts": {
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Flipkart/ReactEssentials/tree/recyclerlistview-v1.0.1"
+    "url": "https://github.com/Flipkart/ReactEssentials"
   },
   "author": "naqvitalha <naqvitalha@gmail.com>",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/Flipkart/ReactEssentials/issues"
   },
-  "homepage": "https://github.com/Flipkart/ReactEssentials/tree/recyclerlistview-v1.0.1#readme",
+  "homepage": "https://github.com/Flipkart/ReactEssentials",
   "dependencies": {
     "lodash": "4.17.4",
     "prop-types": "15.5.8"
