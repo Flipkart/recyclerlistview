@@ -47,11 +47,11 @@ not be as fast.
 
 
 ## Demo
+Sample project: https://github.com/naqvitalha/travelMate
+
 Watch Demo Video: https://www.youtube.com/watch?v=Tnv4HMmPgMc
 
 [![Watch Video](https://img.youtube.com/vi/Tnv4HMmPgMc/0.jpg)](https://www.youtube.com/watch?v=Tnv4HMmPgMc)
-
-Sample project: https://github.com/naqvitalha/travelMate
 
 ## Sample Code
 Please go through DataProvider, LayoutProvider and rowRenderer in detail. Those are the basic building blocks of this component. For more details dive into
@@ -208,7 +208,7 @@ const styles = {
 You can find similar web sample [here](samples/web/Sample1.js).
 Note: Works with React Native Web out of the box, to use with ReactJS add an extra webpack plugin  `RLV_ENV: JSON.stringify('browser')`
 
-##License
+## License
 Apache v2.0
 
 ## Contact Us
