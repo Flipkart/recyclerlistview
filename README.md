@@ -1,11 +1,12 @@
 # RecyclerListView
-This is a high performance listview for React Native and Web with support for complex layouts. Inspired by both RecyclerView on Android and UICollectionView on iOS.
+This is a high performance listview for React Native and Web with support for complex layouts. JS only with no native dependencies, inspired by both RecyclerView on Android
+and UICollectionView on iOS.
 
 `npm install --save recyclerlistview`
 
 Note: Documentation will be upgraded soon, for now check code comments for clarity and exploring features.
 
-## Why?
+## Overview and features
 RecyclerListView uses "cell recycling" to reuse views that are no longer visible to render items instead of creating new view objects. Creation of objects
 is very expensive and comes with a memory overhead which means as you scroll through the list the memory footprint keeps going up. Releasing invisible items off
 memory is another technique but that leads to creation of even more objects and lot of garbage collections. Recycling is the best way to render infinite lists
@@ -23,6 +24,7 @@ Apart from all performance benefits RecyclerListView comes with great features o
 - Reflow support on container size change with first visible item preservation
 - Scroll position preservation
 - Window scrolling support for web
+- Non deterministic rendering mode on demand (height cannot be determined before rendering)
 
 ## Why?
 
@@ -32,7 +34,7 @@ is a way to look at the data and compute height upfront so that RecyclerListView
 You can still do all sorts of GridViews and ListViews with different types of items which are all recycled in optimal ways. Type based recycling is very easy
 to do and comes out of the box.
 
-In case you really need non deterministic rendering set forceNonDeterministicRendering prop to true on RecyclerListView. This increases layout thrashing and thus, will
+In case you really need non deterministic rendering set `forceNonDeterministicRendering` prop to true on RecyclerListView. This increases layout thrashing and thus, will
 not be as fast.
 
 
