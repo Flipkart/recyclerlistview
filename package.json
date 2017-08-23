@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "babel src --out-dir dist",
-    "release": "npm build && npm publish"
+    "release": "rm -rf dist && npm run build && npm publish"
   },
   "repository": {
     "type": "git",
