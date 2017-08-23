@@ -36,6 +36,9 @@ captures/
 *.iml
 .idea/
 
+# Distribution
+dist/
+
 # Keystore files
 *.jks
 
