@@ -44,7 +44,7 @@ class ScrollComponent extends React.Component {
                         {...this.props}
                         horizontal={this.props.isHorizontal}
                         onScroll={this._onScroll}
-                        onLayout={(!this._isSizeChangedCalledOnce || this.props.canChangeSize) ? this._onLayout : null}>
+                        onLayout={ !this.props.containerLayout && (!this._isSizeChangedCalledOnce || this.props.canChangeSize) ? this._onLayout : null}>
                 <View style={{flexDirection: this.props.isHorizontal ? 'row' : 'column'}}>
                     <View style={{
                         height: this.props.contentHeight,

@@ -152,6 +152,9 @@ class RecyclerListView extends Component {
                 this.props.contextProvider.remove(uniqueKey);
             }
         }
+        if(this.props.containerLayout){
+            this._onSizeChanged(this.props.containerLayout)
+        }
     }
 
     scrollToIndex(index, animate) {
