@@ -153,8 +153,10 @@ class RecyclerListView extends Component {
     }
 
     scrollToIndex(index, animate) {
-        let offsets = this._virtualRenderer.getLayoutManager().getOffsetForIndex(index);
-        this.scrollToOffset(offsets.x, offsets.y, animate);
+        if(this._virtualRenderer.getLayoutManager()) {
+            let offsets = this._virtualRenderer.getLayoutManager().getOffsetForIndex(index);
+            this.scrollToOffset(offsets.x, offsets.y, animate);
+        }
     }
 
     scrollToItem(data, animate) {
