@@ -26,6 +26,7 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 import PropTypes from "prop-types";
 import ContextProvider from "./dependencies/ContextProvider";
 import CustomError from "./exceptions/CustomError";
+import Messages from "./messages/Messages";
 
 let ScrollComponent, ViewRenderer;
 
@@ -153,9 +154,11 @@ class RecyclerListView extends Component {
     }
 
     scrollToIndex(index, animate) {
-        if(this._virtualRenderer.getLayoutManager()) {
+        if (this._virtualRenderer.getLayoutManager()) {
             let offsets = this._virtualRenderer.getLayoutManager().getOffsetForIndex(index);
             this.scrollToOffset(offsets.x, offsets.y, animate);
+        } else {
+            console.warn(Messages.WARN_SCROLL_TO_INDEX);
         }
     }
 
