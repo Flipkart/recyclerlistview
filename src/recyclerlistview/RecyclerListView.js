@@ -56,8 +56,8 @@ if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
  * NOTE: For reflowability set canChangeSize to true (experimental)
  */
 class RecyclerListView extends Component {
-    constructor(args) {
-        super(args);
+    constructor(props) {
+        super(props);
         this._onScroll = this._onScroll.bind(this);
         this._onSizeChanged = this._onSizeChanged.bind(this);
         this._onVisibleItemsChanged = this._onVisibleItemsChanged.bind(this);
@@ -66,7 +66,11 @@ class RecyclerListView extends Component {
         this._renderStackWhenReady = this._renderStackWhenReady.bind(this);
         this._onViewContainerSizeChange = this._onViewContainerSizeChange.bind(this);
         this._onEndReachedCalled = false;
-        this._virtualRenderer = null;
+
+        this._virtualRenderer = new VirtualRenderer(this._renderStackWhenReady, (offset) => {
+            this._pendingScrollToOffset = offset;
+        }, !props.disableRecycling);
+
         this._initComplete = false;
         this._relayoutReqIndex = -1;
         this._params = {};
@@ -180,11 +184,13 @@ class RecyclerListView extends Component {
     }
 
     getCurrentScrollOffset() {
-        return this._virtualRenderer.getViewabilityTracker().getLastOffset();
+        const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
+        return viewabilityTracker ? viewabilityTracker.getLastOffset() : 0;
     }
 
     findApproxFirstVisibleIndex() {
-        return this._virtualRenderer.getViewabilityTracker().findFirstLogicallyVisibleIndex();
+        const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
+        return viewabilityTracker ? viewabilityTracker.findFirstLogicallyVisibleIndex() : 0;
     }
 
     _checkAndChangeLayouts(newProps, forceFullRender) {
@@ -244,9 +250,6 @@ class RecyclerListView extends Component {
 
     _initTrackers() {
         this._assertDependencyPresence(this.props);
-        this._virtualRenderer = new VirtualRenderer(this._renderStackWhenReady, (offset) => {
-            this._pendingScrollToOffset = offset;
-        }, !this.props.disableRecycling);
         if (this.props.onVisibleIndexesChanged) {
             this._virtualRenderer.attachVisibleItemsListener(this._onVisibleItemsChanged);
         }
