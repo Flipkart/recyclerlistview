@@ -410,8 +410,8 @@ class RecyclerListView extends Component {
                              {...this.props}
                              onScroll={this._onScroll}
                              onSizeChanged={this._onSizeChanged}
-                             contentHeight={this._virtualRenderer ? this._virtualRenderer.getLayoutDimension().height : null}
-                             contentWidth={this._virtualRenderer ? this._virtualRenderer.getLayoutDimension().width : null}>
+                             contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : null}
+                             contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : null}>
                 {this._generateRenderStack()}
             </ScrollComponent>
 
