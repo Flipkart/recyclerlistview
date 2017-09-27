@@ -1,6 +1,6 @@
 {
   "name": "recyclerlistview",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "description": "The listview that you need and deserve. It was built for performance, uses cell recycling to achieve smooth scrolling.",
   "main": "dist/index.js",
   "scripts": {

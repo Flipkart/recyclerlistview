@@ -48,6 +48,7 @@ not be as fast.
 
 ## Demo
 Sample project: https://github.com/naqvitalha/travelMate
+
 Context Preservation Sample: https://github.com/naqvitalha/recyclerlistview-context-preservation-demo
 
 Watch Demo Video: https://www.youtube.com/watch?v=Tnv4HMmPgMc
