@@ -81,6 +81,7 @@ class RecyclerListView extends Component {
         this._initialOffset = 0;
         this._cachedLayouts = null;
         this._nextFrameRenderQueued = false;
+        this._renderStackUpdateProcessQueued = false;
         this.state = {
             renderStack: []
         };
@@ -248,9 +249,29 @@ class RecyclerListView extends Component {
     }
 
     _renderStackWhenReady(stack) {
-        this.setState((prevState, props) => {
-            return {renderStack: stack};
-        });
+        if (!this._renderStackUpdateProcessQueued) {
+            this._renderStackUpdateProcessQueued = true;
+            if(requestIdleCallback) {
+                requestIdleCallback(() => {
+                    this.setState(
+                        (prevState, props) => {
+                            return {renderStack: stack};
+                        }
+                    );
+                    this._renderStackUpdateProcessQueued = false;
+                });
+            }
+            else{
+                setTimeout(() => {
+                    this.setState(
+                        (prevState, props) => {
+                            return {renderStack: stack};
+                        }
+                    );
+                    this._renderStackUpdateProcessQueued = false;
+                }, 50);
+            }
+        }
     }
 
     _initTrackers() {
@@ -339,8 +360,8 @@ class RecyclerListView extends Component {
         }
         if (!this._nextFrameRenderQueued) {
             this._nextFrameRenderQueued = true;
-            if (requestAnimationFrame) {
-                requestAnimationFrame(() => {
+            if (requestIdleCallback) {
+                requestIdleCallback(() => {
                     this.setState((prevState, props) => {
                         return prevState;
                     });
@@ -353,7 +374,7 @@ class RecyclerListView extends Component {
                         return prevState;
                     });
                     this._nextFrameRenderQueued = false;
-                }, 17);
+                }, 50);
             }
         }
     }
