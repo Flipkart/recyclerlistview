@@ -1,4 +1,9 @@
 # RecyclerListView
+
+[![npm version](https://img.shields.io/npm/v/recyclerlistview.svg)](https://www.npmjs.com/package/recyclerlistview)
+[![travis](https://img.shields.io/travis/Flipkart/ReactEssentials.svg)](https://travis-ci.org/Flipkart/ReactEssentials)
+[![license](https://img.shields.io/github/license/Flipkart/ReactEssentials.svg)](https://opensource.org/licenses/Apache-2.0)
+
 This is a high performance listview for React Native and Web with support for complex layouts. JS only with no native dependencies, inspired by both RecyclerView on Android
 and UICollectionView on iOS.
 
