@@ -1,5 +1,6 @@
 import ViewabilityTracker from "./ViewabilityTracker";
 import RecycleItemPool from "../utils/RecycleItemPool";
+
 /***
  * Renderer which keeps track of recyclable items and the currently rendered items. Notifies list view to re render if something changes, like scroll offset
  */
@@ -48,7 +49,10 @@ class VirtualRenderer {
 
     removeVisibleItemsListener() {
         this.onVisibleItemsChanged = null;
-        this._viewabilityTracker.onVisibleRowsChanged = null;
+
+        if (this._viewabilityTracker) {
+            this._viewabilityTracker.onVisibleRowsChanged = null;
+        }
     }
 
     getLayoutManager() {
@@ -87,13 +91,15 @@ class VirtualRenderer {
     }
 
     refresh() {
-        this._prepareViewabilityTracker();
-        if (this._viewabilityTracker.forceRefresh()) {
-            if (this._params.isHorizontal) {
-                this._scrollOnNextUpdate({x: this._viewabilityTracker.getLastOffset(), y: 0});
-            }
-            else {
-                this._scrollOnNextUpdate({x: 0, y: this._viewabilityTracker.getLastOffset()});
+        if (this._viewabilityTracker) {
+            this._prepareViewabilityTracker();
+            if (this._viewabilityTracker.forceRefresh()) {
+                if (this._params.isHorizontal) {
+                    this._scrollOnNextUpdate({x: this._viewabilityTracker.getLastOffset(), y: 0});
+                }
+                else {
+                    this._scrollOnNextUpdate({x: 0, y: this._viewabilityTracker.getLastOffset()});
+                }
             }
         }
     }
@@ -244,6 +250,4 @@ class VirtualRenderer {
     }
 }
 
-export
-default
-VirtualRenderer;
+export default VirtualRenderer;
