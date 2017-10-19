@@ -34,7 +34,7 @@ let relayoutDebouncer = requestAnimationFrame;
 
 /***
  * Using webpack plugin definitions to choose the scroll component and view renderer
- * To run in browser specify an extra plugin RLV_ENV: JSON.stringify('browser')
+ * To run in browser specify an extra plugin RLV_ENV: JSON.stringify('browser')  
  */
 if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
     ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
