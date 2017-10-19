@@ -87,6 +87,9 @@ class RecyclerListView extends Component {
     }
 
     componentWillReceiveProps(newProps) {
+        if(!this._initComplete){
+            return
+        }
         this._assertDependencyPresence(newProps);
         this._checkAndChangeLayouts(newProps);
         if (!this.props.onVisibleIndexesChanged) {
@@ -99,6 +102,9 @@ class RecyclerListView extends Component {
 
 
     componentDidUpdate() {
+        if(!this._initComplete){
+            return
+        }
         if (this._pendingScrollToOffset) {
             let offset = this._pendingScrollToOffset;
             this._pendingScrollToOffset = null;
@@ -150,6 +156,9 @@ class RecyclerListView extends Component {
                 }
                 this.props.contextProvider.remove(uniqueKey);
             }
+        }
+        if(this.props.containerLayout){
+            this._onSizeChanged(this.props.containerLayout)
         }
     }
 
