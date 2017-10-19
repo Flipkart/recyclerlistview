@@ -1,4 +1,7 @@
 language: node_js
+branches:
+  only: 
+    - master
 node_js:
   - 'stable'
 script: npm run build
