@@ -30,6 +30,8 @@ import Messages from "./messages/Messages";
 
 let ScrollComponent, ViewRenderer;
 
+let relayoutDebouncer = requestAnimationFrame;
+
 /***
  * Using webpack plugin definitions to choose the scroll component and view renderer
  * To run in browser specify an extra plugin RLV_ENV: JSON.stringify('browser')
@@ -40,6 +42,12 @@ if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
 } else {
     ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer").default;
+
+    let { Platform } = require("react-native");
+
+    if (Platform.OS !== "android") {
+        relayoutDebouncer = requestIdleCallback;
+    }
 }
 
 /***
@@ -81,7 +89,6 @@ class RecyclerListView extends Component {
         this._initialOffset = 0;
         this._cachedLayouts = null;
         this._nextFrameRenderQueued = false;
-        this._renderStackUpdateProcessQueued = false;
         this.state = {
             renderStack: []
         };
@@ -249,29 +256,9 @@ class RecyclerListView extends Component {
     }
 
     _renderStackWhenReady(stack) {
-        if (!this._renderStackUpdateProcessQueued) {
-            this._renderStackUpdateProcessQueued = true;
-            if(requestIdleCallback) {
-                requestIdleCallback(() => {
-                    this.setState(
-                        (prevState, props) => {
-                            return {renderStack: stack};
-                        }
-                    );
-                    this._renderStackUpdateProcessQueued = false;
-                });
-            }
-            else{
-                setTimeout(() => {
-                    this.setState(
-                        (prevState, props) => {
-                            return {renderStack: stack};
-                        }
-                    );
-                    this._renderStackUpdateProcessQueued = false;
-                }, 50);
-            }
-        }
+        this.setState((prevState, props) => {
+            return {renderStack: stack};
+        });
     }
 
     _initTrackers() {
@@ -360,8 +347,8 @@ class RecyclerListView extends Component {
         }
         if (!this._nextFrameRenderQueued) {
             this._nextFrameRenderQueued = true;
-            if (requestIdleCallback) {
-                requestIdleCallback(() => {
+            if (relayoutDebouncer) {
+                relayoutDebouncer(() => {
                     this.setState((prevState, props) => {
                         return prevState;
                     });
@@ -374,7 +361,7 @@ class RecyclerListView extends Component {
                         return prevState;
                     });
                     this._nextFrameRenderQueued = false;
-                }, 50);
+                }, 45);
             }
         }
     }
