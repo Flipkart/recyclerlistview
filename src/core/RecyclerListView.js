@@ -59,8 +59,10 @@ if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
 // ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
 //#endif
 
-if (platform !== "android") {
-    refreshRequestThrottler = requestIdleCallback;
+if (platform === "android") {
+    refreshRequestThrottler = (executable) => {
+        executable()
+    };
 }
 
 /***
