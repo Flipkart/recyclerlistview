@@ -197,7 +197,7 @@ export default class ScrollViewer extends React.Component {
     }
 }
 ScrollViewer.defaultProps = {
-    scrollThrottle: 32,
+    scrollThrottle: 0,
     canChangeSize: false,
     useWindowScroll: false,
     distanceFromWindow: 0
