@@ -30,7 +30,7 @@ import Messages from "./messages/Messages";
 
 let ScrollComponent, ViewRenderer;
 
-let relayoutDebouncer = requestAnimationFrame;
+let relayoutRequestThrottler = requestAnimationFrame;
 
 /***
  * Using webpack plugin definitions to choose the scroll component and view renderer
@@ -46,7 +46,7 @@ if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
     let { Platform } = require("react-native");
 
     if (Platform.OS !== "android") {
-        relayoutDebouncer = requestIdleCallback;
+        relayoutRequestThrottler = requestIdleCallback;
     }
 }
 
@@ -347,8 +347,8 @@ class RecyclerListView extends Component {
         }
         if (!this._nextFrameRenderQueued) {
             this._nextFrameRenderQueued = true;
-            if (relayoutDebouncer) {
-                relayoutDebouncer(() => {
+            if (relayoutRequestThrottler) {
+                relayoutRequestThrottler(() => {
                     this.setState((prevState, props) => {
                         return prevState;
                     });
