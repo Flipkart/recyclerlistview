@@ -290,13 +290,11 @@ class RecyclerListView extends Component {
         }
     }
 
-    //#if [REACT-NATIVE]
     _renderStackWhenReady(stack) {
         this.setState((prevState, props) => {
             return {renderStack: stack};
         });
     }
-    //#endif
 
     _initTrackers() {
         this._assertDependencyPresence(this.props);
