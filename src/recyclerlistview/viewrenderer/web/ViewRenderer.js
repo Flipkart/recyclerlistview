@@ -61,7 +61,7 @@ class ViewRenderer extends React.Component {
                   top: 0,
                   opacity: this._isFirstLayoutDone ? 1 : 0,
                   transform: this._getTransform(),
-                  webkitTransform: this._getTransform()
+                  WebkitTransform: this._getTransform()
               }
             : {
                   position: 'absolute',
