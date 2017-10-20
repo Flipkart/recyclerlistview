@@ -32,11 +32,16 @@ let ScrollComponent, ViewRenderer;
 
 let relayoutRequestThrottler = requestAnimationFrame;
 
+let platform = "android";
+
 /***
  * Using webpack plugin definitions to choose the scroll component and view renderer
  * To run in browser specify an extra plugin RLV_ENV: JSON.stringify('browser')
+ * Alternatively, you can start importing from recyclerlistview/web
  */
+//#if [REACT-NATIVE]
 if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
+    platform = "web";
     ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
 } else {
@@ -44,10 +49,18 @@ if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
     ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer").default;
 
     let { Platform } = require("react-native");
+    platform = Platform.OS;
+}
+//#endif
 
-    if (Platform.OS !== "android") {
-        relayoutRequestThrottler = requestIdleCallback;
-    }
+//#if [WEB]
+//platform = "web";
+//ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
+//ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
+//#endif
+
+if (platform !== "android") {
+    relayoutRequestThrottler = requestIdleCallback;
 }
 
 /***
@@ -445,9 +458,7 @@ RecyclerListView
     disableRecycling: false
 };
 
-//#if [DEV]
-RecyclerListView
-    .propTypes = {
+RecyclerListView.propTypes = {
 
     //Refer the sample
     layoutProvider: PropTypes.instanceOf(LayoutProvider).isRequired,
@@ -507,4 +518,3 @@ RecyclerListView
     //Default is false, if enabled dimensions provided in layout provider will not be strictly enforced. Rendered dimensions will be used to relayout items. Slower if enabled.
     forceNonDeterministicRendering: PropTypes.bool
 };
-//#endif

@@ -1,4 +1,4 @@
-import CustomError from "../recyclerlistview/exceptions/CustomError";
+import CustomError from "../core/exceptions/CustomError";
 
 class BinarySearch {
     findClosestHigherValueIndex(size, targetValue, valueExtractor) {
