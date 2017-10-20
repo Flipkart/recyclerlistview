@@ -30,7 +30,7 @@ import Messages from "./messages/Messages";
 
 let ScrollComponent, ViewRenderer;
 
-let relayoutRequestThrottler = requestAnimationFrame;
+let refreshRequestThrottler = requestAnimationFrame;
 
 let platform = "android";
 
@@ -48,19 +48,19 @@ if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
     ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer").default;
 
-    let { Platform } = require("react-native");
+    let {Platform} = require("react-native");
     platform = Platform.OS;
 }
 //#endif
 
 //#if [WEB]
-//platform = "web";
-//ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
-//ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
+// platform = "web";
+// ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
+// ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
 //#endif
 
 if (platform !== "android") {
-    relayoutRequestThrottler = requestIdleCallback;
+    refreshRequestThrottler = requestIdleCallback;
 }
 
 /***
@@ -101,7 +101,7 @@ class RecyclerListView extends Component {
         this._tempDim = {};
         this._initialOffset = 0;
         this._cachedLayouts = null;
-        this._nextFrameRenderQueued = false;
+        this._nextFrameRefreshQueued = false;
         this.state = {
             renderStack: []
         };
@@ -239,9 +239,29 @@ class RecyclerListView extends Component {
 
     _refreshViewability() {
         this._virtualRenderer.refresh();
-        this.setState((prevState, props) => {
-            return prevState;
-        });
+        this._queueStateRefresh();
+
+    }
+
+    _queueStateRefresh() {
+        if (!this._nextFrameRefreshQueued) {
+            this._nextFrameRefreshQueued = true;
+            if (refreshRequestThrottler) {
+                refreshRequestThrottler(() => {
+                    this.setState((prevState, props) => {
+                        return prevState;
+                    });
+                    this._nextFrameRefreshQueued = false;
+                });
+            } else {
+                setTimeout(() => {
+                    this.setState((prevState, props) => {
+                        return prevState;
+                    });
+                    this._nextFrameRefreshQueued = false;
+                }, 15);
+            }
+        }
     }
 
     _onSizeChanged(layout) {
@@ -268,11 +288,13 @@ class RecyclerListView extends Component {
         }
     }
 
+    //#if [REACT-NATIVE]
     _renderStackWhenReady(stack) {
         this.setState((prevState, props) => {
             return {renderStack: stack};
         });
     }
+    //#endif
 
     _initTrackers() {
         this._assertDependencyPresence(this.props);
@@ -358,25 +380,7 @@ class RecyclerListView extends Component {
         } else {
             this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
         }
-        if (!this._nextFrameRenderQueued) {
-            this._nextFrameRenderQueued = true;
-            if (relayoutRequestThrottler) {
-                relayoutRequestThrottler(() => {
-                    this.setState((prevState, props) => {
-                        return prevState;
-                    });
-                    this._nextFrameRenderQueued = false;
-                });
-            }
-            else {
-                setTimeout(() => {
-                    this.setState((prevState, props) => {
-                        return prevState;
-                    });
-                    this._nextFrameRenderQueued = false;
-                }, 45);
-            }
-        }
+        this._queueStateRefresh();
     }
 
     _checkExpectedDimensionDiscrepancy(itemRect, type, index) {
