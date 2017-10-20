@@ -179,7 +179,7 @@ export default class ScrollViewer extends React.Component {
         return !this.props.useWindowScroll
             ? <div
                 ref="mainDiv"
-                style={[this.props.style ? this.prop.style : {}, {
+                style={[this.props.style ? this.props.style : {}, {
                     WebkitOverflowScrolling: "touch",
                     overflowX: this.props.horizontal ? "scroll" : "hidden",
                     overflowY: !this.props.horizontal ? "scroll" : "hidden",

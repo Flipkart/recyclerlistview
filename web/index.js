@@ -1,1 +1,1 @@
-module.exports = require("dist/web");
+module.exports = require("../dist/web");
