@@ -1,4 +1,6 @@
 node_modules/
 samples/
+scripts/
 .idea/
 .babelrc
+package-lock.json

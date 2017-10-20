@@ -213,7 +213,8 @@ const styles = {
 };
 ```
 You can find similar web sample [here](samples/web/Sample1.js).
-Note: Works with React Native Web out of the box, to use with ReactJS add an extra webpack plugin  `RLV_ENV: JSON.stringify('browser')`
+Note: Works with React Native Web out of the box, to use with ReactJS add an extra webpack plugin  `RLV_ENV: JSON.stringify('browser')` or start importing from
+`recyclerlistview/web` e.g., `import { RecyclerListView } from "recyclerlistview/web"`
 
 ## License
 Apache v2.0
