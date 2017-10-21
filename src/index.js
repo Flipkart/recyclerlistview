@@ -1,7 +1,7 @@
-import RecyclerListView from "./recyclerlistview/RecyclerListView";
-import DataProvider from "./recyclerlistview/dependencies/DataProvider";
-import LayoutProvider from "./recyclerlistview/dependencies/LayoutProvider";
-import ContextProvider from "./recyclerlistview/dependencies/ContextProvider";
+import RecyclerListView from "./core/RecyclerListView";
+import DataProvider from "./core/dependencies/DataProvider";
+import LayoutProvider from "./core/dependencies/LayoutProvider";
+import ContextProvider from "./core/dependencies/ContextProvider";
 
 module.exports = {
     RecyclerListView,

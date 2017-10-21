@@ -1,4 +1,7 @@
 node_modules/
 samples/
+scripts/
 .idea/
 .babelrc
+.travis.yml
+package-lock.json

@@ -1,11 +1,12 @@
 {
   "name": "recyclerlistview",
-  "version": "1.1.0",
+  "version": "1.1.5",
   "description": "The listview that you need and deserve. It was built for performance, uses cell recycling to achieve smooth scrolling.",
-  "main": "dist/index.js",
+  "main": "dist/reactnative/index.js",
   "scripts": {
-    "build": "rm -rf dist && babel src --out-dir dist",
-    "release": "npm run build && npm publish"
+    "build": "sh scripts/build.sh",
+    "release": "npm run build && npm publish",
+    "release-beta": "npm run build && npm publish --tag beta"
   },
   "repository": {
     "type": "git",

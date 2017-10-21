@@ -1,7 +1,9 @@
 language: node_js
 branches:
-  only: 
-    - master
+  only:
+    - 'recyclerlistview-master'
 node_js:
   - 'stable'
+before_script:
+    - npm install -g file-directives@1.4.1
 script: npm run build

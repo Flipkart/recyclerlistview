@@ -30,16 +30,39 @@ import Messages from "./messages/Messages";
 
 let ScrollComponent, ViewRenderer;
 
+let refreshRequestThrottler = requestAnimationFrame;
+
+let platform = "android";
+
 /***
  * Using webpack plugin definitions to choose the scroll component and view renderer
  * To run in browser specify an extra plugin RLV_ENV: JSON.stringify('browser')
+ * Alternatively, you can start importing from recyclerlistview/web
  */
+//#if [REACT-NATIVE]
 if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
+    platform = "web";
     ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
 } else {
     ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer").default;
+
+    let {Platform} = require("react-native");
+    platform = Platform.OS;
+}
+//#endif
+
+//#if [WEB]
+// platform = "web";
+// ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
+// ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
+//#endif
+
+if (platform === "android") {
+    refreshRequestThrottler = (executable) => {
+        executable()
+    };
 }
 
 /***
@@ -80,7 +103,7 @@ class RecyclerListView extends Component {
         this._tempDim = {};
         this._initialOffset = 0;
         this._cachedLayouts = null;
-        this._nextFrameRenderQueued = false;
+        this._nextFrameRefreshQueued = false;
         this.state = {
             renderStack: []
         };
@@ -218,9 +241,29 @@ class RecyclerListView extends Component {
 
     _refreshViewability() {
         this._virtualRenderer.refresh();
-        this.setState((prevState, props) => {
-            return prevState;
-        });
+        this._queueStateRefresh();
+
+    }
+
+    _queueStateRefresh() {
+        if (!this._nextFrameRefreshQueued) {
+            this._nextFrameRefreshQueued = true;
+            if (refreshRequestThrottler) {
+                refreshRequestThrottler(() => {
+                    this.setState((prevState, props) => {
+                        return prevState;
+                    });
+                    this._nextFrameRefreshQueued = false;
+                });
+            } else {
+                setTimeout(() => {
+                    this.setState((prevState, props) => {
+                        return prevState;
+                    });
+                    this._nextFrameRefreshQueued = false;
+                }, 15);
+            }
+        }
     }
 
     _onSizeChanged(layout) {
@@ -337,25 +380,7 @@ class RecyclerListView extends Component {
         } else {
             this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
         }
-        if (!this._nextFrameRenderQueued) {
-            this._nextFrameRenderQueued = true;
-            if (requestAnimationFrame) {
-                requestAnimationFrame(() => {
-                    this.setState((prevState, props) => {
-                        return prevState;
-                    });
-                    this._nextFrameRenderQueued = false;
-                });
-            }
-            else {
-                setTimeout(() => {
-                    this.setState((prevState, props) => {
-                        return prevState;
-                    });
-                    this._nextFrameRenderQueued = false;
-                }, 17);
-            }
-        }
+        this._queueStateRefresh();
     }
 
     _checkExpectedDimensionDiscrepancy(itemRect, type, index) {
@@ -437,9 +462,7 @@ RecyclerListView
     disableRecycling: false
 };
 
-//#if [DEV]
-RecyclerListView
-    .propTypes = {
+RecyclerListView.propTypes = {
 
     //Refer the sample
     layoutProvider: PropTypes.instanceOf(LayoutProvider).isRequired,
@@ -499,4 +522,3 @@ RecyclerListView
     //Default is false, if enabled dimensions provided in layout provider will not be strictly enforced. Rendered dimensions will be used to relayout items. Slower if enabled.
     forceNonDeterministicRendering: PropTypes.bool
 };
-//#endif
