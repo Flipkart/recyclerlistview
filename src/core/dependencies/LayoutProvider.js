@@ -24,8 +24,8 @@ class LayoutProvider {
 
     //Given a type and dimension set the dimension values on given dimension object
     //You can also get index here if you add an extra argument but we don't recommend using it.
-    setLayoutForType(type, dimension) {
-        return this._setLayoutForType(type, dimension);
+    setLayoutForType(type, dimension, index) {
+        return this._setLayoutForType(type, dimension, index);
     }
 }
 export default LayoutProvider;
