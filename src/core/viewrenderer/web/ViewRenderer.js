@@ -64,14 +64,15 @@ class ViewRenderer extends React.Component {
                   WebkitTransform: this._getTransform()
               }
             : {
-                  position: 'absolute',
-                  left: 0,
-                  top: 0,
-                  width: this.props.width,
-                  height: this.props.height,
-                  transform: this._getTransform(),
-                  webkitTransform: this._getTransform()
-              };
+                position: 'absolute',
+                overflow: 'hidden',
+                left: 0,
+                top: 0,
+                width: this.props.width,
+                height: this.props.height,
+                transform: this._getTransform(),
+                webkitTransform: this._getTransform()
+            };
         return (
             <div ref="mainDiv" style={styleObj}>
                 {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
