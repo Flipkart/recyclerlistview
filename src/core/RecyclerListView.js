@@ -27,12 +27,13 @@ import PropTypes from "prop-types";
 import ContextProvider from "./dependencies/ContextProvider";
 import CustomError from "./exceptions/CustomError";
 import Messages from "./messages/Messages";
+import _debounce from "lodash/debounce";
 
 let ScrollComponent, ViewRenderer;
 
-let refreshRequestThrottler = requestAnimationFrame;
-
-let platform = "android";
+let refreshRequestDebouncer = _debounce(executable => {
+    executable();
+});
 
 /***
  * Using webpack plugin definitions to choose the scroll component and view renderer
@@ -48,22 +49,13 @@ if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
     ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer").default;
 
-    let {Platform} = require("react-native");
-    platform = Platform.OS;
 }
 //#endif
 
 //#if [WEB]
-// platform = "web";
 // ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
 // ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
 //#endif
-
-if (platform === "android") {
-    refreshRequestThrottler = (executable) => {
-        executable()
-    };
-}
 
 /***
  * This is the main component, please refer to samples to understand how to use.
@@ -103,7 +95,6 @@ class RecyclerListView extends Component {
         this._tempDim = {};
         this._initialOffset = 0;
         this._cachedLayouts = null;
-        this._nextFrameRefreshQueued = false;
         this.state = {
             renderStack: []
         };
@@ -246,24 +237,11 @@ class RecyclerListView extends Component {
     }
 
     _queueStateRefresh() {
-        if (!this._nextFrameRefreshQueued) {
-            this._nextFrameRefreshQueued = true;
-            if (refreshRequestThrottler) {
-                refreshRequestThrottler(() => {
-                    this.setState((prevState, props) => {
-                        return prevState;
-                    });
-                    this._nextFrameRefreshQueued = false;
-                });
-            } else {
-                setTimeout(() => {
-                    this.setState((prevState, props) => {
-                        return prevState;
-                    });
-                    this._nextFrameRefreshQueued = false;
-                }, 15);
-            }
-        }
+        refreshRequestDebouncer(() => {
+            this.setState((prevState) => {
+                return prevState;
+            });
+        });
     }
 
     _onSizeChanged(layout) {
@@ -291,7 +269,7 @@ class RecyclerListView extends Component {
     }
 
     _renderStackWhenReady(stack) {
-        this.setState((prevState, props) => {
+        this.setState(() => {
             return {renderStack: stack};
         });
     }
