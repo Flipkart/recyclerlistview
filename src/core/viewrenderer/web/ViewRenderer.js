@@ -56,13 +56,13 @@ class ViewRenderer extends React.Component {
     render() {
         let styleObj = this.props.forceNonDeterministicRendering
             ? {
-                  position: 'absolute',
-                  left: 0,
-                  top: 0,
-                  opacity: this._isFirstLayoutDone ? 1 : 0,
-                  transform: this._getTransform(),
-                  WebkitTransform: this._getTransform()
-              }
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                opacity: this._isFirstLayoutDone ? 1 : 0,
+                transform: this._getTransform(),
+                WebkitTransform: this._getTransform()
+            }
             : {
                 position: 'absolute',
                 overflow: 'hidden',
@@ -71,7 +71,7 @@ class ViewRenderer extends React.Component {
                 width: this.props.width,
                 height: this.props.height,
                 transform: this._getTransform(),
-                webkitTransform: this._getTransform()
+                WebkitTransform: this._getTransform()
             };
         return (
             <div ref="mainDiv" style={styleObj}>
