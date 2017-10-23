@@ -5,7 +5,7 @@
   "main": "dist/reactnative/index.js",
   "scripts": {
     "build": "sh scripts/build.sh",
-    "release": "npm run build && npm publish",
+    "release": "sh scripts/publish-latest.sh",
     "release-beta": "npm run build && npm publish --tag beta"
   },
   "repository": {

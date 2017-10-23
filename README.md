@@ -52,6 +52,9 @@ not be as fast.
 
 
 ## Demo
+
+Expo snack demo: https://snack.expo.io/B1GYad52b
+
 Sample project: https://github.com/naqvitalha/travelMate
 
 Context Preservation Sample: https://github.com/naqvitalha/recyclerlistview-context-preservation-demo
