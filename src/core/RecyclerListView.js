@@ -345,7 +345,8 @@ class RecyclerListView extends Component {
                               onSizeChanged={this._onViewContainerSizeChange}
                               childRenderer={this.props.rowRenderer}
                               height={itemRect.height}
-                              width={itemRect.width}/>
+                              width={itemRect.width}
+                              inverted={this.props.inverted}/>
             );
         }
         return null;
@@ -430,73 +431,77 @@ class RecyclerListView extends Component {
 export default RecyclerListView;
 
 RecyclerListView
-    .defaultProps = {
-    initialOffset: 0,
-    isHorizontal: false,
-    renderAheadOffset: 250,
-    onEndReachedThreshold: 0,
-    initialRenderIndex: 0,
-    canChangeSize: false,
-    disableRecycling: false
+.defaultProps = {
+  initialOffset: 0,
+  isHorizontal: false,
+  renderAheadOffset: 250,
+  onEndReachedThreshold: 0,
+  initialRenderIndex: 0,
+  canChangeSize: false,
+  disableRecycling: false,
+  inverted: false
 };
 
 RecyclerListView.propTypes = {
+  
+  //Refer the sample
+  layoutProvider: PropTypes.instanceOf(LayoutProvider).isRequired,
 
-    //Refer the sample
-    layoutProvider: PropTypes.instanceOf(LayoutProvider).isRequired,
+  //Refer the sample
+  dataProvider: PropTypes.instanceOf(DataProvider).isRequired,
 
-    //Refer the sample
-    dataProvider: PropTypes.instanceOf(DataProvider).isRequired,
+  //Used to maintain scroll position in case view gets destroyed e.g, cases of back navigation
+  contextProvider: PropTypes.instanceOf(ContextProvider),
 
-    //Used to maintain scroll position in case view gets destroyed e.g, cases of back navigation
-    contextProvider: PropTypes.instanceOf(ContextProvider),
+  //Methods which returns react component to be rendered. You get type of view and data in the callback.
+  rowRenderer: PropTypes.func.isRequired,
 
-    //Methods which returns react component to be rendered. You get type of view and data in the callback.
-    rowRenderer: PropTypes.func.isRequired,
+  //Initial offset you want to start rendering from, very useful if you want to maintain scroll context across pages.
+  initialOffset: PropTypes.number,
 
-    //Initial offset you want to start rendering from, very useful if you want to maintain scroll context across pages.
-    initialOffset: PropTypes.number,
+  //Specify how many pixels in advance do you want views to be rendered. Increasing this value can help reduce blanks (if any). However keeping this as low
+  //as possible should be the intent. Higher values also increase re-render compute
+  renderAheadOffset: PropTypes.number,
 
-    //Specify how many pixels in advance do you want views to be rendered. Increasing this value can help reduce blanks (if any). However keeping this as low
-    //as possible should be the intent. Higher values also increase re-render compute
-    renderAheadOffset: PropTypes.number,
+  //Whether the listview is horizontally scrollable. Both use staggeredGrid implementation
+  isHorizontal: PropTypes.bool,
 
-    //Whether the listview is horizontally scrollable. Both use staggeredGrid implementation
-    isHorizontal: PropTypes.bool,
+  //On scroll callback onScroll(rawEvent, offsetX, offsetY), note you get offsets no need to read scrollTop/scrollLeft
+  onScroll: PropTypes.func,
 
-    //On scroll callback onScroll(rawEvent, offsetX, offsetY), note you get offsets no need to read scrollTop/scrollLeft
-    onScroll: PropTypes.func,
+  //Callback given when user scrolls to the end of the list or footer just becomes visible, useful in incremental loading scenarios
+  onEndReached: PropTypes.func,
 
-    //Callback given when user scrolls to the end of the list or footer just becomes visible, useful in incremental loading scenarios
-    onEndReached: PropTypes.func,
+  //Specify how many pixels in advance you onEndReached callback
+  onEndReachedThreshold: PropTypes.number,
 
-    //Specify how many pixels in advance you onEndReached callback
-    onEndReachedThreshold: PropTypes.number,
+  //Provides visible index, helpful in sending impression events etc, onVisibleIndexesChanged(all, now, notNow)
+  onVisibleIndexesChanged: PropTypes.func,
 
-    //Provides visible index, helpful in sending impression events etc, onVisibleIndexesChanged(all, now, notNow)
-    onVisibleIndexesChanged: PropTypes.func,
+  //Provide this method if you want to render a footer. Helpful in showing a loader while doing incremental loads.
+  renderFooter: PropTypes.func,
 
-    //Provide this method if you want to render a footer. Helpful in showing a loader while doing incremental loads.
-    renderFooter: PropTypes.func,
+  //Specify the initial item index you want rendering to start from. Preferred over initialOffset if both are specified.
+  initialRenderIndex: PropTypes.number,
 
-    //Specify the initial item index you want rendering to start from. Preferred over initialOffset if both are specified.
-    initialRenderIndex: PropTypes.number,
+  //web/iOS only. Scroll throttle duration.
+  scrollThrottle: PropTypes.number,
 
-    //web/iOS only. Scroll throttle duration.
-    scrollThrottle: PropTypes.number,
+  //Specify if size can change, listview will automatically relayout items. For web, works only with useWindowScroll = true
+  canChangeSize: PropTypes.bool,
 
-    //Specify if size can change, listview will automatically relayout items. For web, works only with useWindowScroll = true
-    canChangeSize: PropTypes.bool,
+  //Web only. Specify how far away the first list item is from window top. This is an adjustment for better optimization.
+  distanceFromWindow: PropTypes.number,
 
-    //Web only. Specify how far away the first list item is from window top. This is an adjustment for better optimization.
-    distanceFromWindow: PropTypes.number,
+  //Web only. Layout elements in window instead of a scrollable div.
+  useWindowScroll: PropTypes.bool,
 
-    //Web only. Layout elements in window instead of a scrollable div.
-    useWindowScroll: PropTypes.bool,
+  //Turns off recycling. You still get progressive rendering and all other features. Good for lazy rendering. This should not be used in most cases.
+  disableRecycling: PropTypes.bool,
 
-    //Turns off recycling. You still get progressive rendering and all other features. Good for lazy rendering. This should not be used in most cases.
-    disableRecycling: PropTypes.bool,
+  //Default is false, if enabled dimensions provided in layout provider will not be strictly enforced. Rendered dimensions will be used to relayout items. Slower if enabled.
+  forceNonDeterministicRendering: PropTypes.bool,
 
-    //Default is false, if enabled dimensions provided in layout provider will not be strictly enforced. Rendered dimensions will be used to relayout items. Slower if enabled.
-    forceNonDeterministicRendering: PropTypes.bool
+  //Web only. Invert scrollable view. Default  is false
+  inverted: PropTypes.bool
 };
