@@ -345,7 +345,8 @@ class RecyclerListView extends Component {
                               onSizeChanged={this._onViewContainerSizeChange}
                               childRenderer={this.props.rowRenderer}
                               height={itemRect.height}
-                              width={itemRect.width}/>
+                              width={itemRect.width}
+                              inverted={this.props.inverted}/>
             );
         }
         return null;
@@ -437,7 +438,8 @@ RecyclerListView
     onEndReachedThreshold: 0,
     initialRenderIndex: 0,
     canChangeSize: false,
-    disableRecycling: false
+    disableRecycling: false,
+    inverted: false
 };
 
 RecyclerListView.propTypes = {
@@ -498,5 +500,8 @@ RecyclerListView.propTypes = {
     disableRecycling: PropTypes.bool,
 
     //Default is false, if enabled dimensions provided in layout provider will not be strictly enforced. Rendered dimensions will be used to relayout items. Slower if enabled.
-    forceNonDeterministicRendering: PropTypes.bool
+    forceNonDeterministicRendering: PropTypes.bool,
+
+    //Web only. Invert scrollable view. Default  is false
+    inverted: PropTypes.bool
 };

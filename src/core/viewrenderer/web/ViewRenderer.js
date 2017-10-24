@@ -33,7 +33,7 @@ class ViewRenderer extends React.Component {
     }
 
     _getTransform() {
-        return 'translate(' + this.props.x + 'px,' + this.props.y + 'px)';
+        return 'translate(' + this.props.x + 'px,' + this.props.y + 'px) ' + (this.props.inverted ? this.props.isHorizontal ? "scaleX(-1)" : "scaleY(-1)" : "");
     }
 
     _checkSizeChange() {
@@ -94,6 +94,7 @@ ViewRenderer.propTypes = {
     onSizeChanged: PropTypes.func,
     data: PropTypes.any,
     index: PropTypes.number,
-    forceNonDeterministicRendering: PropTypes.bool
+    forceNonDeterministicRendering: PropTypes.bool,
+	isHorizontal: PropTypes.bool
 };
 //#endif

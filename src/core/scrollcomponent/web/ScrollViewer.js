@@ -9,6 +9,7 @@ export default class ScrollViewer extends React.Component {
     constructor(args) {
         super(args);
         this._onScroll = this._onScroll.bind(this);
+        this._onWheel = this._onWheel.bind(this);
         this._windowOnScroll = this._windowOnScroll.bind(this);
         this._getRelevantOffset = this._getRelevantOffset.bind(this);
         this._setRelevantOffset = this._setRelevantOffset.bind(this);
@@ -41,7 +42,13 @@ export default class ScrollViewer extends React.Component {
         if (this._throttleFunction) {
             window.removeEventListener("scroll", this._throttleFunction);
             if (this.refs.mainDiv) {
-                this.refs.mainDiv.removeEventListener("scroll", this._onScroll);
+                this.refs.mainDiv.removeEventListener("scroll", this._throttleFunction);
+            }
+        }
+        if (this._throttleWheelFunction) {
+            window.removeEventListener("wheel", this._throttleWheelFunction);
+            if (this.refs.mainDiv) {
+                this.refs.mainDiv.removeEventListener("wheel", this._throttleWheelFunction);
             }
         }
         window.removeEventListener("resize", this._onWindowResize);
@@ -120,6 +127,11 @@ export default class ScrollViewer extends React.Component {
             this._throttleFunction = this._onScroll;
         }
         this.refs.mainDiv.addEventListener("scroll", this._throttleFunction);
+        if (this.props.inverted) {
+            // Do we need a throttled function?
+            this._throttleWheelFunction = this._onWheel;
+            this.refs.mainDiv.addEventListener("wheel", this._throttleWheelFunction);
+        }
     }
 
     _startListeningToWindowEvents() {
@@ -166,6 +178,15 @@ export default class ScrollViewer extends React.Component {
         }
     }
 
+    _onWheel(evt) {
+        evt.preventDefault();
+        if (this.props.horizontal) {
+            this.refs.mainDiv.scrollLeft -= evt.deltaX;
+        } else {
+            this.refs.mainDiv.scrollTop -= evt.deltaY;
+        }
+    }
+
     _easeInOut(currentTime, start, change, duration) {
         currentTime /= duration / 2;
         if (currentTime < 1) {
@@ -184,7 +205,10 @@ export default class ScrollViewer extends React.Component {
                     overflowX: this.props.horizontal ? "scroll" : "hidden",
                     overflowY: !this.props.horizontal ? "scroll" : "hidden",
                     height: "100%",
-                    width: "100%"
+                    width: "100%",
+                    transform: this.props.inverted
+                            ? !this.props.horizontal ? "scaleY(-1)" : "scaleX(-1)"
+                            : null
                 }, this.props.style)}
             >
                 <div style={{position: "relative"}}>
@@ -200,7 +224,8 @@ ScrollViewer.defaultProps = {
     scrollThrottle: 0,
     canChangeSize: false,
     useWindowScroll: false,
-    distanceFromWindow: 0
+    distanceFromWindow: 0,
+    inverted: false
 };
 //#if [DEV]
 ScrollViewer.propTypes = {
@@ -210,6 +235,7 @@ ScrollViewer.propTypes = {
     scrollThrottle: PropTypes.number,
     canChangeSize: PropTypes.bool,
     useWindowScroll: PropTypes.bool,
-    distanceFromWindow: PropTypes.number
+    distanceFromWindow: PropTypes.number,
+    inverted: PropTypes.bool
 };
 //#endif

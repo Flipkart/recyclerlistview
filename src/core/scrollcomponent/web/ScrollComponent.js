@@ -31,6 +31,16 @@ class ScrollComponent extends React.Component {
     }
 
     render() {
+        const invertedStyles = this.props.inverted
+        ? { transform: this.props.isHorizontal ? "scaleX(-1)" : "scaleY(-1)" }
+        : null;
+    const horizontalStyle = this.props.isHorizontal
+        ? {
+                position: "absolute",
+                top: 0,
+                left: this.props.contentWidth
+            }
+        : null;
         return (
             <ScrollViewer ref="scrollView"
                           {...this.props}
@@ -44,11 +54,7 @@ class ScrollComponent extends React.Component {
                 }}>
                     {this.props.children}
                 </div>
-                {this.props.renderFooter ? <div style={this.props.isHorizontal ? {
-                    position: 'absolute',
-                    top: 0,
-                    left: this.props.contentWidth
-                } : null}>
+                {this.props.renderFooter ? <div style={{ ...horizontalStyle, ...invertedStyles }}>
                     {this.props.renderFooter()}
                 </div> : null}
             </ScrollViewer>
@@ -61,7 +67,8 @@ ScrollComponent.defaultProps = {
     isHorizontal: false,
     contentHeight: 0,
     contentWidth: 0,
-    scrollThrottle: 0
+    scrollThrottle: 0,
+    inverted: false
 };
 //#if [DEV]
 ScrollComponent.propTypes = {
@@ -73,6 +80,7 @@ ScrollComponent.propTypes = {
     scrollThrottle: PropTypes.number,
     canChangeSize: PropTypes.bool,
     distanceFromWindow: PropTypes.number,
-    useWindowScroll: PropTypes.bool
+    useWindowScroll: PropTypes.bool,
+    inverted: PropTypes.bool
 };
 //#endif
