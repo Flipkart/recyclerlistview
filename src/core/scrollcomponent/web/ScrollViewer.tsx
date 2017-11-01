@@ -1,12 +1,38 @@
-import React from "react";
+import * as React from "react";
 import _throttle from "lodash/throttle";
 import PropTypes from "prop-types";
+import { Dimension } from "../../dependencies/LayoutProvider";
+import { ThrottleSettings } from "lodash";
 /***
  * A scrollviewer that mimics react native scrollview. Additionally on web it can start listening to window scroll events optionally.
  * Supports both window scroll and scrollable divs inside other divs.
  */
-export default class ScrollViewer extends React.Component {
-    constructor(args) {
+export interface WebScrollEvent {
+    offsetX: number,
+    offsetY: number
+}
+export interface ScrollViewerProps {
+    onSizeChanged: (dimensions: Dimension) => void,
+    isHorizontal: boolean,
+    scrollThrottle: number,
+    canChangeSize: boolean,
+    distanceFromWindow: number,
+    useWindowScroll: boolean,
+    onScroll: (offsetX: number, offsetY: number, rawEvent: any) => void
+};
+export default class ScrollViewer extends React.Component<ScrollViewerProps, {}> {
+    static defaultProps = {
+        scrollThrottle: 0,
+        canChangeSize: false,
+        useWindowScroll: false,
+        distanceFromWindow: 0
+    };
+
+    private scrollEvent: WebScrollEvent;
+    private _throttleParams: ThrottleSettings;
+    private _throttleFunction: ()=> void;
+
+    constructor(args: ScrollViewerProps) {
         super(args);
         this._onScroll = this._onScroll.bind(this);
         this._windowOnScroll = this._windowOnScroll.bind(this);
@@ -166,7 +192,7 @@ export default class ScrollViewer extends React.Component {
         }
     }
 
-    _easeInOut(currentTime, start, change, duration) {
+    _easeInOut(currentTime: number, start: number, change: number, duration: number) {
         currentTime /= duration / 2;
         if (currentTime < 1) {
             return change / 2 * currentTime * currentTime + start;
@@ -197,12 +223,6 @@ export default class ScrollViewer extends React.Component {
             </div>;
     }
 }
-ScrollViewer.defaultProps = {
-    scrollThrottle: 0,
-    canChangeSize: false,
-    useWindowScroll: false,
-    distanceFromWindow: 0
-};
 //#if [DEV]
 ScrollViewer.propTypes = {
     onScroll: PropTypes.func,

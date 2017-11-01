@@ -1,4 +1,6 @@
-const RecyclerListViewExceptions = {
+import { Exception } from "./CustomError";
+
+const RecyclerListViewExceptions: {[key: string]: Exception} = {
     layoutException: {
         type: "LayoutException",
         message: "RecyclerListView needs to have a bounded size. Currently height or, width is 0"

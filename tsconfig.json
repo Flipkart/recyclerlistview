@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "lib": [
+      "es6",
+      "dom"
+    ], // target Node.js(v6)
+    "module": "commonjs", // export compatibility
+    "target": "es5", // target Node.js(v6)
+    "moduleResolution": "node", // target Node.js(v6)
+    "declaration": true, // generate TypeScript definitions
+    "rootDir": "src",
+    "outDir": "dist",
+    "strict": true,
+    "removeComments": false,
+    "jsx": "react"
+  }
+}

@@ -5,9 +5,17 @@
  * views just the way they want. Current implementation is a StaggeredList
  */
 import CustomError from "../exceptions/CustomError";
+import LayoutProvider, { Dimension } from "../dependencies/LayoutProvider";
 
-class LayoutManager {
-    constructor(layoutProvider, dimensions, isHorizontal, cachedLayouts) {
+export default class LayoutManager {
+    private _layoutProvider: LayoutProvider;
+    private _window: Dimension;
+    private _totalHeight: number;
+    private _totalWidth: number;
+    private _layouts: Rect[];
+    private _isHorizontal: boolean;
+
+    constructor(layoutProvider: LayoutProvider, dimensions: Dimension, isHorizontal: boolean, cachedLayouts: Rect[]) {
         this._layoutProvider = layoutProvider;
         this._window = dimensions;
         this._totalHeight = 0;
@@ -16,15 +24,15 @@ class LayoutManager {
         this._isHorizontal = isHorizontal;
     }
 
-    getLayoutDimension() {
+    getLayoutDimension(): Dimension {
         return {height: this._totalHeight, width: this._totalWidth};
     }
 
-    getLayouts() {
+    getLayouts(): Rect[] {
         return this._layouts;
     }
 
-    getOffsetForIndex(index) {
+    getOffsetForIndex(index: number): Point {
         if (this._layouts.length > index) {
             return {x: this._layouts[index].x, y: this._layouts[index].y};
         } else {
@@ -35,7 +43,7 @@ class LayoutManager {
         }
     }
 
-    overrideLayout(index, dim){
+    overrideLayout(index: number, dim: Dimension){
         let layout = this._layouts[index];
         if(layout){
             layout.isOverridden = true;
@@ -45,7 +53,7 @@ class LayoutManager {
     }
 
     //TODO:Talha laziliy calculate in future revisions
-    reLayoutFromIndex(startIndex, itemCount) {
+    reLayoutFromIndex(startIndex: number, itemCount: number) {
         startIndex = this._locateFirstNeighbourIndex(startIndex);
         let startX = 0;
         let startY = 0;
@@ -117,7 +125,7 @@ class LayoutManager {
         this._setFinalDimensions(maxBound);
     }
 
-    _pointDimensionsToRect(itemRect) {
+    _pointDimensionsToRect(itemRect: Rect) {
         if (this._isHorizontal) {
             this._totalWidth = itemRect.x;
         }
@@ -126,7 +134,7 @@ class LayoutManager {
         }
     }
 
-    _setFinalDimensions(maxBound) {
+    _setFinalDimensions(maxBound: number) {
         if (this._isHorizontal) {
             this._totalHeight = this._window.height;
             this._totalWidth += maxBound;
@@ -137,7 +145,7 @@ class LayoutManager {
         }
     }
 
-    _locateFirstNeighbourIndex(startIndex) {
+    _locateFirstNeighbourIndex(startIndex: number) {
         if (startIndex === 0) {
             return 0
         }
@@ -155,7 +163,7 @@ class LayoutManager {
         return i;
     }
 
-    _setMaxBounds(itemDim) {
+    _setMaxBounds(itemDim: Dimension) {
         if (this._isHorizontal) {
             itemDim.height = Math.min(this._window.height, itemDim.height);
         }
@@ -164,9 +172,15 @@ class LayoutManager {
         }
     }
 
-    _checkBounds(itemX, itemY, itemDim, isHorizontal) {
+    _checkBounds(itemX: number, itemY: number, itemDim: Dimension, isHorizontal: boolean) {
         return isHorizontal ? (itemY + itemDim.height <= this._window.height) : (itemX + itemDim.width <= this._window.width);
     }
 }
 
-export default LayoutManager;
+export interface Rect extends Dimension, Point{
+    isOverridden?: boolean
+}
+export interface Point {
+    x:number,
+    y:number
+}
