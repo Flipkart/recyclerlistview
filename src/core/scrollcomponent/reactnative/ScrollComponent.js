@@ -55,7 +55,7 @@ class ScrollComponent extends React.Component {
                     </View>
                     {this.props.renderFooter ? this.props.renderFooter() : null}
                 </View>
-            </ScrollView>
+            </ScrollViewer>
         );
     }
 }
