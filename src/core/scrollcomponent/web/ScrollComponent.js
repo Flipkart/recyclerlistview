@@ -31,7 +31,7 @@ class ScrollComponent extends React.Component {
     }
 
     render() {
-        let ScrollViewer = this.props.externalScrollViewer ? this.props.externalScrollViewer : ScrollView;
+        let ScrollViewer = this.props.externalScrollViewer ? this.props.externalScrollViewer : ScrollViewer;
         return (
             <ScrollViewer ref="scrollView"
                           {...this.props}
