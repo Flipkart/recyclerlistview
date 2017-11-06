@@ -15,8 +15,6 @@ export default class ScrollViewer extends React.Component {
         this._onWindowResize = this._onWindowResize.bind(this);
 
         this.scrollEvent = {};
-        this.scrollEvent.nativeEvent.contentOffset.x = 0;
-        this.scrollEvent.nativeEvent.contentOffset.y = 0;
         this._throttleParams = {leading: true, trailing: true};
     }
 
@@ -101,7 +99,7 @@ export default class ScrollViewer extends React.Component {
         const duration = 200;
         const animateScroll = elapsedTime => {
             elapsedTime += increment;
-            var position = this._easeInOut(elapsedTime, start, change, duration);
+            let position = this._easeInOut(elapsedTime, start, change, duration);
             this._setRelevantOffset(position);
             if (elapsedTime < duration) {
                 window.setTimeout(
