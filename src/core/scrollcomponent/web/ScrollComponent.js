@@ -1,5 +1,4 @@
 import React from "react";
-import ScrollViewer from "./ScrollViewer";
 import PropTypes from "prop-types";
 /***
  * The responsibility of a scroll component is to report its size, scroll events and provide a way to scroll to a given offset.
@@ -31,7 +30,7 @@ class ScrollComponent extends React.Component {
     }
 
     render() {
-        let ScrollViewer = this.props.externalScrollViewer ? this.props.externalScrollViewer : ScrollViewer;
+        let ScrollViewer = this.props.externalScrollViewer;
         return (
             <ScrollViewer ref="scrollView"
                           {...this.props}
