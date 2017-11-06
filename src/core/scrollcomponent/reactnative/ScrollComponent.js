@@ -65,7 +65,8 @@ ScrollComponent.defaultProps = {
     isHorizontal: false,
     contentHeight: 0,
     contentWidth: 0,
-    scrollThrottle: 16
+    scrollThrottle: 16,
+    externalScrollViewer: ScrollView
 };
 //#if [DEV]
 ScrollComponent.propTypes = {

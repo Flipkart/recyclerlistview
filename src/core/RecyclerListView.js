@@ -28,9 +28,8 @@ import ContextProvider from "./dependencies/ContextProvider";
 import CustomError from "./exceptions/CustomError";
 import Messages from "./messages/Messages";
 import _debounce from "lodash/debounce";
-import { ScrollView } from "react-native";
 
-let ScrollComponent, ViewRenderer, ScrollViewer;
+let ScrollComponent, ViewRenderer;
 
 let refreshRequestDebouncer = _debounce(executable => {
     executable();
@@ -46,11 +45,9 @@ if (process.env.RLV_ENV && process.env.RLV_ENV === 'browser') {
     platform = "web";
     ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
-    ScrollViewer = require("./scrollcomponent/web/ScrollViewer").default;
 } else {
     ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent").default;
     ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer").default;
-    ScrollViewer = ScrollView;
 }
 //#endif
 
@@ -440,7 +437,6 @@ RecyclerListView
     initialRenderIndex: 0,
     canChangeSize: false,
     disableRecycling: false,
-    externalScrollViewer: ScrollViewer,
 };
 
 RecyclerListView.propTypes = {

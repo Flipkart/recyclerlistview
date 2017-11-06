@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import ScrollViewer from "./ScrollViewer";
 /***
  * The responsibility of a scroll component is to report its size, scroll events and provide a way to scroll to a given offset.
  * RecyclerListView works on top of this interface and doesn't care about the implementation. To support web we only had to provide
@@ -16,7 +17,7 @@ class ScrollComponent extends React.Component {
     }
 
     _onScroll(e) {
-        this.props.onScroll(e.offsetX, e.offsetY, e);
+        this.props.onScroll(e.nativeEvent.contentOffset.x, e.nativeEvent.contentOffset.y, e);
     }
 
     _onSizeChanged(event) {
@@ -61,7 +62,8 @@ ScrollComponent.defaultProps = {
     isHorizontal: false,
     contentHeight: 0,
     contentWidth: 0,
-    scrollThrottle: 0
+    scrollThrottle: 0,
+    externalScrollViewer: ScrollViewer
 };
 //#if [DEV]
 ScrollComponent.propTypes = {
