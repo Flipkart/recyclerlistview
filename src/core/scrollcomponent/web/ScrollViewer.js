@@ -14,7 +14,14 @@ export default class ScrollViewer extends React.Component {
         this._setRelevantOffset = this._setRelevantOffset.bind(this);
         this._onWindowResize = this._onWindowResize.bind(this);
 
-        this.scrollEvent = {};
+        this.scrollEvent = {
+            nativeEvent: {
+                contentOffset: {
+                    x: 0,
+                    y: 0
+                }
+            }
+        };
         this._throttleParams = {leading: true, trailing: true};
     }
 
@@ -143,11 +150,15 @@ export default class ScrollViewer extends React.Component {
     _windowOnScroll() {
         if (this.props.onScroll) {
             if (this.props.horizontal) {
-                this.scrollEvent.nativeEvent.contentOffset.y = 0;
-                this.scrollEvent.nativeEvent.contentOffset.x = window.scrollX - this.props.distanceFromWindow;
+                if(this.scrollEvent && this.scrollEvent.nativeEvent && this.scrollEvent.nativeEvent.contentOffset) {
+                    this.scrollEvent.nativeEvent.contentOffset.y = 0;
+                    this.scrollEvent.nativeEvent.contentOffset.x = window.scrollX - this.props.distanceFromWindow;
+                }
             } else {
-                this.scrollEvent.nativeEvent.contentOffset.x = 0;
-                this.scrollEvent.nativeEvent.contentOffset.y = window.scrollY - this.props.distanceFromWindow;
+                if(this.scrollEvent && this.scrollEvent.nativeEvent && this.scrollEvent.nativeEvent.contentOffset) {
+                    this.scrollEvent.nativeEvent.contentOffset.x = 0;
+                    this.scrollEvent.nativeEvent.contentOffset.y = window.scrollY - this.props.distanceFromWindow;
+                }
             }
             this.props.onScroll(this.scrollEvent);
         }

@@ -467,8 +467,8 @@ RecyclerListView.propTypes = {
     onScroll: PropTypes.func,
 
     //Provide your own ScrollView Component. The contract for the scroll event should match the native scroll event contract, i.e.
-    // event = { nativeEvent: { contentOffset: { x: offset, y: offset } } }
-    externalScrollViewer: PropTypes.func,
+    // scrollEvent = { nativeEvent: { contentOffset: { x: offset, y: offset } } }
+    externalScrollView: PropTypes.func,
 
     //Callback given when user scrolls to the end of the list or footer just becomes visible, useful in incremental loading scenarios
     onEndReached: PropTypes.func,

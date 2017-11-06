@@ -31,9 +31,9 @@ class ScrollComponent extends React.Component {
     }
 
     render() {
-        let ScrollViewer = this.props.externalScrollViewer;
+        const ScrollView = this.props.externalScrollView;
         return (
-            <ScrollViewer ref="scrollView"
+            <ScrollView ref="scrollView"
                           {...this.props}
                           horizontal={this.props.isHorizontal}
                           onScroll={this._onScroll}
@@ -52,7 +52,7 @@ class ScrollComponent extends React.Component {
                 } : null}>
                     {this.props.renderFooter()}
                 </div> : null}
-            </ScrollViewer>
+            </ScrollView>
         );
     }
 }
@@ -63,7 +63,7 @@ ScrollComponent.defaultProps = {
     contentHeight: 0,
     contentWidth: 0,
     scrollThrottle: 0,
-    externalScrollViewer: ScrollViewer
+    externalScrollView: ScrollViewer
 };
 //#if [DEV]
 ScrollComponent.propTypes = {
