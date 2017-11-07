@@ -150,15 +150,11 @@ export default class ScrollViewer extends React.Component {
     _windowOnScroll() {
         if (this.props.onScroll) {
             if (this.props.horizontal) {
-                if(this.scrollEvent && this.scrollEvent.nativeEvent && this.scrollEvent.nativeEvent.contentOffset) {
-                    this.scrollEvent.nativeEvent.contentOffset.y = 0;
-                    this.scrollEvent.nativeEvent.contentOffset.x = window.scrollX - this.props.distanceFromWindow;
-                }
+                this.scrollEvent.nativeEvent.contentOffset.y = 0;
+                this.scrollEvent.nativeEvent.contentOffset.x = window.scrollX - this.props.distanceFromWindow;
             } else {
-                if(this.scrollEvent && this.scrollEvent.nativeEvent && this.scrollEvent.nativeEvent.contentOffset) {
-                    this.scrollEvent.nativeEvent.contentOffset.x = 0;
-                    this.scrollEvent.nativeEvent.contentOffset.y = window.scrollY - this.props.distanceFromWindow;
-                }
+                this.scrollEvent.nativeEvent.contentOffset.x = 0;
+                this.scrollEvent.nativeEvent.contentOffset.y = window.scrollY - this.props.distanceFromWindow;
             }
             this.props.onScroll(this.scrollEvent);
         }
