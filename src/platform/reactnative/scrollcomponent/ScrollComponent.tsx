@@ -62,6 +62,7 @@ export default class ScrollComponent extends BaseScrollComponent {
     }
 
     public render(): JSX.Element {
+        const ScrollView = this.props.externalScrollView;
         return (
             <ScrollView ref={(scrollView) => this._scrollViewRef = scrollView as (ScrollView | null)} removeClippedSubviews={false}
                         scrollEventThrottle={this.props.scrollThrottle}

@@ -46,6 +46,7 @@ export default class ScrollComponent extends BaseScrollComponent {
     }
 
     public render() {
+        const ScrollView = this.props.externalScrollView;
         return (
             <ScrollViewer ref={(scrollView) => this._scrollViewRef as (ScrollViewer | null)}
                           {...this.props}
@@ -66,7 +67,7 @@ export default class ScrollComponent extends BaseScrollComponent {
                 } : undefined}>
                     {this.props.renderFooter()}
                 </div> : null}
-            </ScrollViewer>
+            </ScrollView>
         );
     }
 }
