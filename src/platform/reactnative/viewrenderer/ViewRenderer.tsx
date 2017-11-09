@@ -1,7 +1,7 @@
 import * as React from "react";
 import { LayoutChangeEvent, View } from "react-native";
-import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
 import { Dimension } from "../../../core/dependencies/LayoutProvider";
+import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
@@ -18,7 +18,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         this._onLayout = this._onLayout.bind(this);
     }
 
-    shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
+    public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
         return (this.props.x !== newProps.x ||
             this.props.y !== newProps.y ||
             this.props.width !== newProps.width ||
@@ -26,46 +26,44 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data)));
     }
 
-    _onLayout(event: LayoutChangeEvent) {
+    public _onLayout(event: LayoutChangeEvent) {
         if (this.props.height !== event.nativeEvent.layout.height || this.props.width !== event.nativeEvent.layout.width) {
             this._dim.height = event.nativeEvent.layout.height;
             this._dim.width = event.nativeEvent.layout.width;
             if (this.props.onSizeChanged) {
                 this.props.onSizeChanged(this._dim, this.props.index);
             }
-        }
-        else if(!this._isFirstLayoutDone){
+        } else if (!this._isFirstLayoutDone) {
             this._isFirstLayoutDone = true;
             this.forceUpdate();
         }
         this._isFirstLayoutDone = true;
     }
 
-    render() {
-        if(this.props.forceNonDeterministicRendering) {
+    public render() {
+        if (this.props.forceNonDeterministicRendering) {
             return (
                 <View onLayout={this._onLayout}
                       style={{
-                          position: 'absolute',
+                          flexDirection: this.props.isHorizontal ? "column" : "row",
                           left: this.props.x,
+                          opacity: this._isFirstLayoutDone ? 1 : 0,
+                          position: "absolute",
                           top: this.props.y,
-                          flexDirection: this.props.isHorizontal ? 'column' : 'row',
-                          opacity: this._isFirstLayoutDone ? 1 : 0
                       }}>
                     {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
                 </View>
             );
-        }
-        else{
+        } else {
             return (
                 <View
                       style={{
-                          position: 'absolute',
-                          left: 0,
-                          top: 0,
-                          width: this.props.width,
                           height: this.props.height,
-                          transform: [{translateX: this.props.x}, {translateY: this.props.y}]
+                          left: 0,
+                          position: "absolute",
+                          top: 0,
+                          transform: [{translateX: this.props.x}, {translateY: this.props.y}],
+                          width: this.props.width,
                       }}>
                     {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
                 </View>

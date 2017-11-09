@@ -1,7 +1,7 @@
 import * as React from "react";
-import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
-import { Dimension } from "../../../core/dependencies/LayoutProvider";
 import { CSSProperties } from "react";
+import { Dimension } from "../../../core/dependencies/LayoutProvider";
+import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
@@ -15,15 +15,15 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     private _isFirstLayoutDone: boolean = false;
     private _mainDiv: HTMLDivElement | null;
 
-    componentDidMount() {
+    public componentDidMount() {
         this._checkSizeChange();
     }
 
-    componentDidUpdate() {
+    public componentDidUpdate() {
         this._checkSizeChange();
     }
 
-    shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
+    public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
         return (
             this.props.x !== newProps.x ||
             this.props.y !== newProps.y ||
@@ -33,13 +33,13 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         );
     }
 
-    _getTransform() {
-        return 'translate(' + this.props.x + 'px,' + this.props.y + 'px)';
+    public _getTransform() {
+        return "translate(" + this.props.x + "px," + this.props.y + "px)";
     }
 
-    _checkSizeChange() {
+    public _checkSizeChange() {
         if (this.props.forceNonDeterministicRendering && this.props.onSizeChanged) {
-            let mainDiv = this._mainDiv;
+            const mainDiv = this._mainDiv;
             if (mainDiv) {
                 this._dim.width = mainDiv.clientWidth;
                 this._dim.height = mainDiv.clientHeight;
@@ -54,25 +54,25 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         this._isFirstLayoutDone = true;
     }
 
-    render(): JSX.Element {
+    public render(): JSX.Element {
         const styleObj: CSSProperties = this.props.forceNonDeterministicRendering
             ? {
-                position: 'absolute',
+                WebkitTransform: this._getTransform(),
                 left: 0,
-                top: 0,
                 opacity: this._isFirstLayoutDone ? 1 : 0,
+                position: "absolute",
+                top: 0,
                 transform: this._getTransform(),
-                WebkitTransform: this._getTransform()
             }
             : {
-                position: 'absolute',
-                overflow: 'hidden',
-                left: 0,
-                top: 0,
-                width: this.props.width,
+                WebkitTransform: this._getTransform(),
                 height: this.props.height,
+                left: 0,
+                overflow: "hidden",
+                position: "absolute",
+                top: 0,
                 transform: this._getTransform(),
-                WebkitTransform: this._getTransform()
+                width: this.props.width,
             };
         return (
             <div ref={(div) => this._mainDiv = div as HTMLDivElement | null} style={styleObj}>

@@ -1,8 +1,8 @@
 import * as React from "react";
-import ScrollViewer from "./ScrollViewer";
 import { Dimension } from "../../../core/dependencies/LayoutProvider";
 import BaseScrollComponent, { ScrollComponentProps } from "../../../core/scrollcomponent/BaseScrollComponent";
 import { ScrollEvent } from "../../../core/scrollcomponent/BaseScrollView";
+import ScrollViewer from "./ScrollViewer";
 /***
  * The responsibility of a scroll component is to report its size, scroll events and provide a way to scroll to a given offset.
  * RecyclerListView works on top of this interface and doesn't care about the implementation. To support web we only had to provide
@@ -10,11 +10,11 @@ import { ScrollEvent } from "../../../core/scrollcomponent/BaseScrollView";
  */
 
 export default class ScrollComponent extends BaseScrollComponent {
-    static defaultProps = {
-        isHorizontal: false,
+    public static defaultProps = {
         contentHeight: 0,
         contentWidth: 0,
-        scrollThrottle: 0
+        isHorizontal: false,
+        scrollThrottle: 0,
     };
     private _height: number;
     private _width: number;
@@ -29,23 +29,23 @@ export default class ScrollComponent extends BaseScrollComponent {
         this._width = 0;
     }
 
-    _onScroll(e: ScrollEvent) {
+    public _onScroll(e: ScrollEvent) {
         this.props.onScroll(e.nativeEvent.contentOffset.x, e.nativeEvent.contentOffset.y, e);
     }
 
-    _onSizeChanged(event: Dimension) {
+    public _onSizeChanged(event: Dimension) {
         if (this.props.onSizeChanged) {
             this.props.onSizeChanged(event);
         }
     }
 
-    scrollTo(x: number, y: number, animated: boolean) {
+    public scrollTo(x: number, y: number, animated: boolean) {
         if (this._scrollViewRef) {
             this._scrollViewRef.scrollTo({x, y, animated});
         }
     }
 
-    render() {
+    public render() {
         return (
             <ScrollViewer ref={(scrollView) => this._scrollViewRef as (ScrollViewer | null)}
                           {...this.props}
@@ -60,9 +60,9 @@ export default class ScrollComponent extends BaseScrollComponent {
                     {this.props.children}
                 </div>
                 {this.props.renderFooter ? <div style={this.props.isHorizontal ? {
-                    position: 'absolute',
+                    left: this.props.contentWidth,
+                    position: "absolute",
                     top: 0,
-                    left: this.props.contentWidth
                 } : undefined}>
                     {this.props.renderFooter()}
                 </div> : null}

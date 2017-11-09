@@ -1,10 +1,10 @@
-import * as React from 'react';
+import * as React from "react";
 import {
     LayoutChangeEvent,
     NativeScrollEvent,
     NativeSyntheticEvent,
     ScrollView,
-    View
+    View,
 } from "react-native";
 import BaseScrollComponent, { ScrollComponentProps } from "../../../core/scrollcomponent/BaseScrollComponent";
 /***
@@ -13,14 +13,13 @@ import BaseScrollComponent, { ScrollComponentProps } from "../../../core/scrollc
  * another component written on top of web elements
  */
 
-
-export default class ScrollComponent extends BaseScrollComponent{
-    static defaultProps = {
-        isHorizontal: false,
+export default class ScrollComponent extends BaseScrollComponent {
+    public static defaultProps = {
         contentHeight: 0,
         contentWidth: 0,
-        scrollThrottle: 0
-    }
+        isHorizontal: false,
+        scrollThrottle: 0,
+    };
 
     private _height: number;
     private _width: number;
@@ -39,13 +38,13 @@ export default class ScrollComponent extends BaseScrollComponent{
         this._isSizeChangedCalledOnce = false;
     }
 
-    _onScroll(event?: NativeSyntheticEvent<NativeScrollEvent>) {
+    public _onScroll(event?: NativeSyntheticEvent<NativeScrollEvent>) {
         if (event) {
             this.props.onScroll(event.nativeEvent.contentOffset.x, event.nativeEvent.contentOffset.y, event);
         }
     }
 
-    _onLayout(event: LayoutChangeEvent) {
+    public _onLayout(event: LayoutChangeEvent) {
         if (this._height !== event.nativeEvent.layout.height || this._width !== event.nativeEvent.layout.width) {
             this._height = event.nativeEvent.layout.height;
             this._width = event.nativeEvent.layout.width;
@@ -56,13 +55,13 @@ export default class ScrollComponent extends BaseScrollComponent{
         }
     }
 
-    scrollTo(x: number, y: number, isAnimated: boolean) {
-        if(this._scrollViewRef) {
-            this._scrollViewRef.scrollTo({x: x, y: y, animated: isAnimated});
+    public scrollTo(x: number, y: number, isAnimated: boolean) {
+        if (this._scrollViewRef) {
+            this._scrollViewRef.scrollTo({x, y, animated: isAnimated});
         }
     }
 
-    render(): JSX.Element {
+    public render(): JSX.Element {
         return (
             <ScrollView ref={(scrollView) => this._scrollViewRef = scrollView as (ScrollView | null)} removeClippedSubviews={false}
                         scrollEventThrottle={this.props.scrollThrottle}
@@ -70,7 +69,7 @@ export default class ScrollComponent extends BaseScrollComponent{
                         horizontal={this.props.isHorizontal}
                         onScroll={this._onScroll}
                         onLayout={(!this._isSizeChangedCalledOnce || this.props.canChangeSize) ? this._onLayout : this._dummyOnLayout}>
-                <View style={{flexDirection: this.props.isHorizontal ? 'row' : 'column'}}>
+                <View style={{flexDirection: this.props.isHorizontal ? "row" : "column"}}>
                     <View style={{
                         height: this.props.contentHeight,
                         width: this.props.contentWidth,

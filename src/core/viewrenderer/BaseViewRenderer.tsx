@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from "react";
 import { Dimension } from "../dependencies/LayoutProvider";
 
 /***
@@ -8,18 +8,18 @@ import { Dimension } from "../dependencies/LayoutProvider";
  * This is second of the two things recycler works on. Implemented both for web and react native.
  */
 export interface ViewRendererProps<T> {
-    x: number,
-    y: number,
-    height: number,
-    width: number,
-    childRenderer: (type: string | number, data: T, index: number) => JSX.Element,
-    layoutType: string | number,
-    dataHasChanged: (r1: T, r2: T) => boolean,
-    onSizeChanged: (dim: Dimension, index: number) => void,
-    data: any,
-    index: number,
-    forceNonDeterministicRendering?: boolean,
-    isHorizontal?: boolean
+    x: number;
+    y: number;
+    height: number;
+    width: number;
+    childRenderer: (type: string | number, data: T, index: number) => JSX.Element;
+    layoutType: string | number;
+    dataHasChanged: (r1: T, r2: T) => boolean;
+    onSizeChanged: (dim: Dimension, index: number) => void;
+    data: any;
+    index: number;
+    forceNonDeterministicRendering?: boolean;
+    isHorizontal?: boolean;
 }
 export default class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {
 

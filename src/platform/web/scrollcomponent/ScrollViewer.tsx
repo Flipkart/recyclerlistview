@@ -4,16 +4,16 @@ import { default as BaseScrollView, ScrollEvent, ScrollViewDefaultProps } from "
  * A scrollviewer that mimics react native scrollview. Additionally on web it can start listening to window scroll events optionally.
  * Supports both window scroll and scrollable divs inside other divs.
  */
-export interface ScrollViewerProps extends ScrollViewDefaultProps{
-    distanceFromWindow: number,
-    useWindowScroll: boolean
-};
+export interface ScrollViewerProps extends ScrollViewDefaultProps {
+    distanceFromWindow: number;
+    useWindowScroll: boolean;
+}
 export default class ScrollViewer extends BaseScrollView<ScrollViewerProps> {
     public static defaultProps: Partial<ScrollViewerProps> = {
         canChangeSize: false,
-        useWindowScroll: false,
         distanceFromWindow: 0,
-        style: null
+        style: null,
+        useWindowScroll: false,
     };
 
     private scrollEvent: ScrollEvent;
@@ -31,7 +31,7 @@ export default class ScrollViewer extends BaseScrollView<ScrollViewerProps> {
         this.scrollEvent = {nativeEvent: {contentOffset: {x: 0, y: 0}}};
     }
 
-    componentDidMount() {
+    public componentDidMount() {
         if (this.props.onSizeChanged) {
             if (!this.props.useWindowScroll && this._mainDivRef) {
                 this._startListeningToDivEvents();
@@ -40,7 +40,7 @@ export default class ScrollViewer extends BaseScrollView<ScrollViewerProps> {
         }
     }
 
-    componentWillMount() {
+    public componentWillMount() {
         if (this.props.onSizeChanged) {
             if (this.props.useWindowScroll) {
                 this._startListeningToWindowEvents();
@@ -49,7 +49,7 @@ export default class ScrollViewer extends BaseScrollView<ScrollViewerProps> {
         }
     }
 
-    componentWillUnmount() {
+    public componentWillUnmount() {
         if (this._throttleFunction) {
             window.removeEventListener("scroll", this._throttleFunction);
             if (this._mainDivRef) {
@@ -59,7 +59,7 @@ export default class ScrollViewer extends BaseScrollView<ScrollViewerProps> {
         window.removeEventListener("resize", this._onWindowResize);
     }
 
-    scrollTo(scrollInput: {x: number, y: number, animated: boolean}) {
+    public scrollTo(scrollInput: {x: number, y: number, animated: boolean}) {
         if (scrollInput.animated) {
             this._doAnimatedScroll(this.props.horizontal ? scrollInput.x : scrollInput.y);
         } else {
@@ -67,7 +67,7 @@ export default class ScrollViewer extends BaseScrollView<ScrollViewerProps> {
         }
     }
 
-    _getRelevantOffset(): number {
+    public _getRelevantOffset(): number {
         if (!this.props.useWindowScroll) {
             if (this._mainDivRef) {
                 if (this.props.horizontal) {
@@ -86,7 +86,7 @@ export default class ScrollViewer extends BaseScrollView<ScrollViewerProps> {
         }
     }
 
-    _setRelevantOffset(offset: number): void {
+    public _setRelevantOffset(offset: number): void {
         if (!this.props.useWindowScroll) {
             if (this._mainDivRef) {
                 if (this.props.horizontal) {
@@ -104,7 +104,7 @@ export default class ScrollViewer extends BaseScrollView<ScrollViewerProps> {
         }
     }
 
-    _doAnimatedScroll(offset: number) {
+    public _doAnimatedScroll(offset: number) {
         let start = this._getRelevantOffset();
         if (offset > start) {
             start = Math.max(offset - 800, start);
@@ -116,28 +116,23 @@ export default class ScrollViewer extends BaseScrollView<ScrollViewerProps> {
         const duration = 200;
         const animateScroll = (elapsedTime: number) => {
             elapsedTime += increment;
-            var position = this._easeInOut(elapsedTime, start, change, duration);
+            const position = this._easeInOut(elapsedTime, start, change, duration);
             this._setRelevantOffset(position);
             if (elapsedTime < duration) {
-                window.setTimeout(
-                    function () {
-                        animateScroll(elapsedTime);
-                    },
-                    increment
-                );
+                window.setTimeout(() => animateScroll(elapsedTime), increment);
             }
         };
         animateScroll(0);
     }
 
-    _startListeningToDivEvents() {
+    public _startListeningToDivEvents() {
         this._throttleFunction = this._onScroll;
         if (this._mainDivRef) {
             this._mainDivRef.addEventListener("scroll", this._throttleFunction);
         }
     }
 
-    _startListeningToWindowEvents() {
+    public _startListeningToWindowEvents() {
         this._throttleFunction = this._windowOnScroll;
         window.addEventListener("scroll", this._throttleFunction);
         if (this.props.canChangeSize) {
@@ -145,13 +140,13 @@ export default class ScrollViewer extends BaseScrollView<ScrollViewerProps> {
         }
     }
 
-    _onWindowResize() {
+    public _onWindowResize() {
         if (this.props.onSizeChanged && this.props.useWindowScroll) {
             this.props.onSizeChanged({height: window.innerHeight, width: window.innerWidth});
         }
     }
 
-    _windowOnScroll() {
+    public _windowOnScroll() {
         if (this.props.onScroll) {
             if (this.props.horizontal) {
                 this.scrollEvent.nativeEvent.contentOffset.y = 0;
@@ -164,7 +159,7 @@ export default class ScrollViewer extends BaseScrollView<ScrollViewerProps> {
         }
     }
 
-    _onScroll() {
+    public _onScroll() {
         if (this.props.onScroll) {
             if (this.props.horizontal) {
                 this.scrollEvent.nativeEvent.contentOffset.y = 0;
@@ -177,7 +172,7 @@ export default class ScrollViewer extends BaseScrollView<ScrollViewerProps> {
         }
     }
 
-    _easeInOut(currentTime: number, start: number, change: number, duration: number) {
+    public _easeInOut(currentTime: number, start: number, change: number, duration: number): number {
         currentTime /= duration / 2;
         if (currentTime < 1) {
             return change / 2 * currentTime * currentTime + start;
@@ -186,17 +181,17 @@ export default class ScrollViewer extends BaseScrollView<ScrollViewerProps> {
         return (-change) / 2 * (currentTime * (currentTime - 2) - 1) + start;
     }
 
-    render() {
+    public render() {
         return !this.props.useWindowScroll
             ? <div
                 ref={(div) => this._mainDivRef = div as HTMLDivElement | null}
                 style={{
                     WebkitOverflowScrolling: "touch",
+                    height: "100%",
                     overflowX: this.props.horizontal ? "scroll" : "hidden",
                     overflowY: !this.props.horizontal ? "scroll" : "hidden",
-                    height: "100%",
                     width: "100%",
-                    ...this.props.style
+                    ...this.props.style,
                 }}
             >
                 <div style={{position: "relative"}}>
