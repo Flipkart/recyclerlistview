@@ -15,7 +15,7 @@ export default class LayoutManager {
     private _layouts: Rect[];
     private _isHorizontal: boolean;
 
-    constructor(layoutProvider: LayoutProvider, dimensions: Dimension, isHorizontal: boolean, cachedLayouts: Rect[]) {
+    constructor(layoutProvider: LayoutProvider, dimensions: Dimension, isHorizontal: boolean, cachedLayouts: Rect[] | null) {
         this._layoutProvider = layoutProvider;
         this._window = dimensions;
         this._totalHeight = 0;

@@ -26,6 +26,10 @@ export default class DataProvider<T> {
         return this._size;
     }
 
+    getFirstIndexToProcessInternal() {
+        return this._firstIndexToProcess;
+    }
+
     //No need to override this one
     cloneWithRows(newData: T[]) {
         let dp = new DataProvider(this.rowHasChanged);

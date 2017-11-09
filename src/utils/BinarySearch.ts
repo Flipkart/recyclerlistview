@@ -1,7 +1,7 @@
 import CustomError from "../core/exceptions/CustomError";
 
-class BinarySearch {
-    findClosestHigherValueIndex(size, targetValue, valueExtractor) {
+export default class BinarySearch {
+    public static findClosestHigherValueIndex(size: number, targetValue: number, valueExtractor: (index: number)=> number): number {
         let low = 0;
         let high = size - 1;
         let mid = Math.floor((low + high) / 2);
@@ -41,7 +41,7 @@ class BinarySearch {
         }
         return result;
     }
-    findIndexOf(array, value) {
+    public static findIndexOf(array: number[], value: number): number {
         let j = 0, length = array.length;
         let i = 0;
         while (j < length) {
@@ -57,4 +57,3 @@ class BinarySearch {
         return -1;
     }
 }
-export default new BinarySearch();

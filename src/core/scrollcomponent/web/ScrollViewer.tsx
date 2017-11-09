@@ -1,36 +1,24 @@
 import * as React from "react";
-import _throttle from "lodash/throttle";
-import PropTypes from "prop-types";
-import { Dimension } from "../../dependencies/LayoutProvider";
-import { ThrottleSettings } from "lodash";
+import { default as BaseScrollView, ScrollEvent, ScrollViewDefaultProps } from "../BaseScrollView";
 /***
  * A scrollviewer that mimics react native scrollview. Additionally on web it can start listening to window scroll events optionally.
  * Supports both window scroll and scrollable divs inside other divs.
  */
-export interface WebScrollEvent {
-    offsetX: number,
-    offsetY: number
-}
-export interface ScrollViewerProps {
-    onSizeChanged: (dimensions: Dimension) => void,
-    isHorizontal: boolean,
-    scrollThrottle: number,
-    canChangeSize: boolean,
+export interface ScrollViewerProps extends ScrollViewDefaultProps{
     distanceFromWindow: number,
-    useWindowScroll: boolean,
-    onScroll: (offsetX: number, offsetY: number, rawEvent: any) => void
+    useWindowScroll: boolean
 };
-export default class ScrollViewer extends React.Component<ScrollViewerProps, {}> {
-    static defaultProps = {
-        scrollThrottle: 0,
+export default class ScrollViewer extends BaseScrollView<ScrollViewerProps> {
+    public static defaultProps: Partial<ScrollViewerProps> = {
         canChangeSize: false,
         useWindowScroll: false,
-        distanceFromWindow: 0
+        distanceFromWindow: 0,
+        style: null
     };
 
-    private scrollEvent: WebScrollEvent;
-    private _throttleParams: ThrottleSettings;
-    private _throttleFunction: ()=> void;
+    private scrollEvent: ScrollEvent;
+    private _throttleFunction: () => void;
+    private _mainDivRef: HTMLDivElement | null;
 
     constructor(args: ScrollViewerProps) {
         super(args);
@@ -40,16 +28,14 @@ export default class ScrollViewer extends React.Component<ScrollViewerProps, {}>
         this._setRelevantOffset = this._setRelevantOffset.bind(this);
         this._onWindowResize = this._onWindowResize.bind(this);
 
-        this.scrollEvent = {offsetX: 0, offsetY: 0};
-        this._throttleParams = {leading: true, trailing: true};
+        this.scrollEvent = {nativeEvent: {contentOffset: {x: 0, y: 0}}};
     }
 
     componentDidMount() {
         if (this.props.onSizeChanged) {
-            if (!this.props.useWindowScroll) {
-                let divRef = this.refs.mainDiv;
+            if (!this.props.useWindowScroll && this._mainDivRef) {
                 this._startListeningToDivEvents();
-                this.props.onSizeChanged({height: divRef.clientHeight, width: divRef.clientWidth});
+                this.props.onSizeChanged({height: this._mainDivRef.clientHeight, width: this._mainDivRef.clientWidth});
             }
         }
     }
@@ -66,30 +52,33 @@ export default class ScrollViewer extends React.Component<ScrollViewerProps, {}>
     componentWillUnmount() {
         if (this._throttleFunction) {
             window.removeEventListener("scroll", this._throttleFunction);
-            if (this.refs.mainDiv) {
-                this.refs.mainDiv.removeEventListener("scroll", this._onScroll);
+            if (this._mainDivRef) {
+                this._mainDivRef.removeEventListener("scroll", this._onScroll);
             }
         }
         window.removeEventListener("resize", this._onWindowResize);
     }
 
-    scrollTo(x, y, isAnimated) {
-        if (isAnimated) {
-            this._doAnimatedScroll(this.props.isHorizontal ? x : y);
+    scrollTo(scrollInput: {x: number, y: number, animated: boolean}) {
+        if (scrollInput.animated) {
+            this._doAnimatedScroll(this.props.horizontal ? scrollInput.x : scrollInput.y);
         } else {
-            this._setRelevantOffset(this.props.isHorizontal ? x : y);
+            this._setRelevantOffset(this.props.horizontal ? scrollInput.x : scrollInput.y);
         }
     }
 
-    _getRelevantOffset() {
+    _getRelevantOffset(): number {
         if (!this.props.useWindowScroll) {
-            if (this.props.isHorizontal) {
-                return this.refs.mainDiv.scrollLeft;
-            } else {
-                return this.refs.mainDiv.scrollTop;
+            if (this._mainDivRef) {
+                if (this.props.horizontal) {
+                    return this._mainDivRef.scrollLeft;
+                } else {
+                    return this._mainDivRef.scrollTop;
+                }
             }
+            return 0;
         } else {
-            if (this.props.isHorizontal) {
+            if (this.props.horizontal) {
                 return window.scrollX;
             } else {
                 return window.scrollY;
@@ -97,15 +86,17 @@ export default class ScrollViewer extends React.Component<ScrollViewerProps, {}>
         }
     }
 
-    _setRelevantOffset(offset) {
+    _setRelevantOffset(offset: number): void {
         if (!this.props.useWindowScroll) {
-            if (this.props.isHorizontal) {
-                this.refs.mainDiv.scrollLeft = offset;
-            } else {
-                this.refs.mainDiv.scrollTop = offset;
+            if (this._mainDivRef) {
+                if (this.props.horizontal) {
+                    this._mainDivRef.scrollLeft = offset;
+                } else {
+                    this._mainDivRef.scrollTop = offset;
+                }
             }
         } else {
-            if (this.props.isHorizontal) {
+            if (this.props.horizontal) {
                 window.scrollTo(offset + this.props.distanceFromWindow, 0);
             } else {
                 window.scrollTo(0, offset + this.props.distanceFromWindow);
@@ -113,7 +104,7 @@ export default class ScrollViewer extends React.Component<ScrollViewerProps, {}>
         }
     }
 
-    _doAnimatedScroll(offset) {
+    _doAnimatedScroll(offset: number) {
         let start = this._getRelevantOffset();
         if (offset > start) {
             start = Math.max(offset - 800, start);
@@ -123,7 +114,7 @@ export default class ScrollViewer extends React.Component<ScrollViewerProps, {}>
         const change = offset - start;
         const increment = 20;
         const duration = 200;
-        const animateScroll = elapsedTime => {
+        const animateScroll = (elapsedTime: number) => {
             elapsedTime += increment;
             var position = this._easeInOut(elapsedTime, start, change, duration);
             this._setRelevantOffset(position);
@@ -140,20 +131,14 @@ export default class ScrollViewer extends React.Component<ScrollViewerProps, {}>
     }
 
     _startListeningToDivEvents() {
-        if (this.props.scrollThrottle > 0) {
-            this._throttleFunction = _throttle(this._onScroll, this.props.scrollThrottle, this._throttleParams);
-        } else {
-            this._throttleFunction = this._onScroll;
+        this._throttleFunction = this._onScroll;
+        if (this._mainDivRef) {
+            this._mainDivRef.addEventListener("scroll", this._throttleFunction);
         }
-        this.refs.mainDiv.addEventListener("scroll", this._throttleFunction);
     }
 
     _startListeningToWindowEvents() {
-        if (this.props.scrollThrottle > 0) {
-            this._throttleFunction = _throttle(this._windowOnScroll, this.props.scrollThrottle, this._throttleParams);
-        } else {
-            this._throttleFunction = this._windowOnScroll;
-        }
+        this._throttleFunction = this._windowOnScroll;
         window.addEventListener("scroll", this._throttleFunction);
         if (this.props.canChangeSize) {
             window.addEventListener("resize", this._onWindowResize);
@@ -169,11 +154,11 @@ export default class ScrollViewer extends React.Component<ScrollViewerProps, {}>
     _windowOnScroll() {
         if (this.props.onScroll) {
             if (this.props.horizontal) {
-                this.scrollEvent.offsetY = 0;
-                this.scrollEvent.offsetX = window.scrollX - this.props.distanceFromWindow;
+                this.scrollEvent.nativeEvent.contentOffset.y = 0;
+                this.scrollEvent.nativeEvent.contentOffset.x = window.scrollX - this.props.distanceFromWindow;
             } else {
-                this.scrollEvent.offsetX = 0;
-                this.scrollEvent.offsetY = window.scrollY - this.props.distanceFromWindow;
+                this.scrollEvent.nativeEvent.contentOffset.x = 0;
+                this.scrollEvent.nativeEvent.contentOffset.y = window.scrollY - this.props.distanceFromWindow;
             }
             this.props.onScroll(this.scrollEvent);
         }
@@ -182,11 +167,11 @@ export default class ScrollViewer extends React.Component<ScrollViewerProps, {}>
     _onScroll() {
         if (this.props.onScroll) {
             if (this.props.horizontal) {
-                this.scrollEvent.offsetY = 0;
-                this.scrollEvent.offsetX = this.refs.mainDiv.scrollLeft;
+                this.scrollEvent.nativeEvent.contentOffset.y = 0;
+                this.scrollEvent.nativeEvent.contentOffset.x = this._mainDivRef ? this._mainDivRef.scrollLeft : 0;
             } else {
-                this.scrollEvent.offsetX = 0;
-                this.scrollEvent.offsetY = this.refs.mainDiv.scrollTop;
+                this.scrollEvent.nativeEvent.contentOffset.x = 0;
+                this.scrollEvent.nativeEvent.contentOffset.y = this._mainDivRef ? this._mainDivRef.scrollTop : 0;
             }
             this.props.onScroll(this.scrollEvent);
         }
@@ -204,7 +189,7 @@ export default class ScrollViewer extends React.Component<ScrollViewerProps, {}>
     render() {
         return !this.props.useWindowScroll
             ? <div
-                ref="mainDiv"
+                ref={(div) => this._mainDivRef = div as HTMLDivElement | null}
                 style={{
                     WebkitOverflowScrolling: "touch",
                     overflowX: this.props.horizontal ? "scroll" : "hidden",
@@ -223,14 +208,3 @@ export default class ScrollViewer extends React.Component<ScrollViewerProps, {}>
             </div>;
     }
 }
-//#if [DEV]
-ScrollViewer.propTypes = {
-    onScroll: PropTypes.func,
-    onSizeChanged: PropTypes.func,
-    horizontal: PropTypes.bool,
-    scrollThrottle: PropTypes.number,
-    canChangeSize: PropTypes.bool,
-    useWindowScroll: PropTypes.bool,
-    distanceFromWindow: PropTypes.number
-};
-//#endif

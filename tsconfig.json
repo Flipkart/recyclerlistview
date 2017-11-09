@@ -11,6 +11,7 @@
     "rootDir": "src",
     "outDir": "dist",
     "strict": true,
+    "noImplicitReturns": true,
     "removeComments": false,
     "jsx": "react"
   }

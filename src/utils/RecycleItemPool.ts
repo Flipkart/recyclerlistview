@@ -1,15 +1,21 @@
-//Warning: works only on string types
 /***
  * Recycle pool for maintaining recyclable items, supports segregation by type as well.
  * Availability check, add/remove etc are all O(1), uses two maps to achieve constant time operation
  */
-class RecycleItemPool {
+
+type PseudoSet = {[key:string]:string}
+type NullablePseudoSet = {[key:string]:string|null}
+
+export default class RecycleItemPool {
+    private _recyclableObjectMap: { [key: string]: NullablePseudoSet }
+    private _availabilitySet: PseudoSet;
+
     constructor() {
         this._recyclableObjectMap = {};
         this._availabilitySet = {};
     }
 
-    _getRelevantSet(objectType) {
+    private _getRelevantSet(objectType: string): NullablePseudoSet {
         let objectSet = this._recyclableObjectMap[objectType];
         if (!objectSet) {
             objectSet = {};
@@ -18,16 +24,25 @@ class RecycleItemPool {
         return objectSet;
     }
 
-    putRecycledObject(objectType, object) {
+    private _stringify(objectType: string | number): string {
+        if (typeof objectType === "number") {
+            objectType = objectType.toString();
+        }
+        return objectType;
+    }
+
+    public putRecycledObject(objectType: string | number, object: number) {
+        objectType = this._stringify(objectType);
         let objectSet = this._getRelevantSet(objectType);
-        if (!this._isPresent(this._availabilitySet[object])) {
+        if (!this._availabilitySet[object]) {
             objectSet[object] = null;
             this._availabilitySet[object] = objectType;
         }
     }
 
 
-    getRecycledObject(objectType) {
+    public getRecycledObject(objectType: string | number): string | null {
+        objectType = this._stringify(objectType);
         let objectSet = this._getRelevantSet(objectType);
         let recycledObject = null;
         for (let property in objectSet) {
@@ -37,28 +52,22 @@ class RecycleItemPool {
             }
         }
 
-        if (this._isPresent(recycledObject)) {
+        if (recycledObject) {
             delete objectSet[recycledObject];
             delete this._availabilitySet[recycledObject];
         }
         return recycledObject;
     }
 
-    removeFromPool(object) {
-        if (this._isPresent(this._availabilitySet[object])) {
+    public removeFromPool(object: number) {
+        if (this._availabilitySet[object]) {
             delete this._getRelevantSet(this._availabilitySet[object])[object];
             delete this._availabilitySet[object];
         }
     }
 
-    clearAll() {
+    public clearAll() {
         this._recyclableObjectMap = {};
         this._availabilitySet = {};
     }
-
-    _isPresent(value) {
-        return value || value === 0;
-    }
-
 }
-export default RecycleItemPool;

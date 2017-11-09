@@ -21,6 +21,10 @@ const RecyclerListViewExceptions: {[key: string]: Exception} = {
         type: "PlatformNotDetectedException",
         message: "Unable to detect the running platform, if you're trying to run recyclerlistview " +
         "in browser make sure process.env.RLV_ENV is set to browser in webpack config"
+    },
+    initializationException: {
+        type: "Initialization essentials missing",
+        message: "Parameters required for initializing the module are missing"
     }
-}
+};
 export default RecyclerListViewExceptions;

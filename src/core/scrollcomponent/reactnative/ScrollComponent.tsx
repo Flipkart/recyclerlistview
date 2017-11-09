@@ -6,29 +6,20 @@ import {
     ScrollView,
     View
 } from "react-native";
-import { Dimension } from "../../dependencies/LayoutProvider";
+import BaseScrollComponent, { ScrollComponentProps } from "../BaseScrollComponent";
 /***
  * The responsibility of a scroll component is to report its size, scroll events and provide a way to scroll to a given offset.
  * RecyclerListView works on top of this interface and doesn't care about the implementation. To support web we only had to provide
  * another component written on top of web elements
  */
 
-export interface ScrollComponentProps {
-    contentHeight: number,
-    contentWidth: number,
-    onSizeChanged: (dimensions: Dimension) => void,
-    isHorizontal?: boolean,
-    renderFooter?: () => JSX.Element,
-    scrollThrottle?: number,
-    canChangeSize?: boolean,
-    onScroll: (offsetX: number, offsetY: number, rawEvent: any) => void
-}
-export default class ScrollComponent extends React.Component<ScrollComponentProps, {}> {
+
+export default class ScrollComponent extends BaseScrollComponent{
     static defaultProps = {
         isHorizontal: false,
         contentHeight: 0,
         contentWidth: 0,
-        scrollThrottle: 16
+        scrollThrottle: 0
     }
 
     private _height: number;
@@ -63,7 +54,7 @@ export default class ScrollComponent extends React.Component<ScrollComponentProp
         }
     }
 
-    scrollTo(x: number, y?: number, isAnimated?: boolean) {
+    scrollTo(x: number, y: number, isAnimated: boolean) {
         if(this._scrollViewRef) {
             this._scrollViewRef.scrollTo({x: x, y: y, animated: isAnimated});
         }

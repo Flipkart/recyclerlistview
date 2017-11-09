@@ -1,24 +1,15 @@
 import * as React from "react";
-import ScrollViewer, { WebScrollEvent } from "./ScrollViewer";
+import ScrollViewer from "./ScrollViewer";
 import { Dimension } from "../../dependencies/LayoutProvider";
+import BaseScrollComponent, { ScrollComponentProps } from "../BaseScrollComponent";
+import { ScrollEvent } from "../BaseScrollView";
 /***
  * The responsibility of a scroll component is to report its size, scroll events and provide a way to scroll to a given offset.
  * RecyclerListView works on top of this interface and doesn't care about the implementation. To support web we only had to provide
  * another component written on top of web elements
  */
-export interface ScrollComponentProps {
-    contentHeight: number,
-    contentWidth: number,
-    onSizeChanged: (dimensions: Dimension) => void,
-    isHorizontal: boolean,
-    renderFooter?: () => JSX.Element,
-    scrollThrottle: number,
-    canChangeSize: boolean,
-    distanceFromWindow: number,
-    useWindowScroll: boolean,
-    onScroll: (offsetX: number, offsetY: number, rawEvent: any) => void
-};
-export default class ScrollComponent extends React.Component<ScrollComponentProps, {}> {
+
+export default class ScrollComponent extends BaseScrollComponent {
     static defaultProps = {
         isHorizontal: false,
         contentHeight: 0,
@@ -38,8 +29,8 @@ export default class ScrollComponent extends React.Component<ScrollComponentProp
         this._width = 0;
     }
 
-    _onScroll(e: WebScrollEvent) {
-        this.props.onScroll(e.offsetX, e.offsetY, e);
+    _onScroll(e: ScrollEvent) {
+        this.props.onScroll(e.nativeEvent.contentOffset.x, e.nativeEvent.contentOffset.y, e);
     }
 
     _onSizeChanged(event: Dimension) {
@@ -48,15 +39,15 @@ export default class ScrollComponent extends React.Component<ScrollComponentProp
         }
     }
 
-    scrollTo(x: number, y?: number, isAnimated?: boolean) {
-        if(this._scrollViewRef) {
-            this._scrollViewRef.scrollTo(x, y, isAnimated);
+    scrollTo(x: number, y: number, animated: boolean) {
+        if (this._scrollViewRef) {
+            this._scrollViewRef.scrollTo({x, y, animated});
         }
     }
 
-    render(): JSX.Element {
+    render() {
         return (
-            <ScrollViewer ref={(scrollView)=> this._scrollViewRef as (ScrollViewer | null)}
+            <ScrollViewer ref={(scrollView) => this._scrollViewRef as (ScrollViewer | null)}
                           {...this.props}
                           horizontal={this.props.isHorizontal}
                           onScroll={this._onScroll}
@@ -72,7 +63,7 @@ export default class ScrollComponent extends React.Component<ScrollComponentProp
                     position: 'absolute',
                     top: 0,
                     left: this.props.contentWidth
-                } : null}>
+                } : undefined}>
                     {this.props.renderFooter()}
                 </div> : null}
             </ScrollViewer>

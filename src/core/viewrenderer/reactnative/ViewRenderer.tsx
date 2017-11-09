@@ -1,6 +1,7 @@
-import React from "react";
-import {View} from "react-native";
-import PropTypes from 'prop-types';
+import * as React from "react";
+import { LayoutChangeEvent, View } from "react-native";
+import BaseViewRenderer, { ViewRendererProps } from "../BaseViewRenderer";
+import { Dimension } from "../../dependencies/LayoutProvider";
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
@@ -8,15 +9,16 @@ import PropTypes from 'prop-types';
  * View renderer will only update if its position, dimensions or given data changes. Make sure to have a relevant shouldComponentUpdate as well.
  * This is second of the two things recycler works on. Implemented both for web and react native.
  */
-class ViewRenderer extends React.Component {
-    constructor(args) {
-        super(args);
-        this._dim = {};
-        this._isFirstLayoutDone = false;
+export default class ViewRenderer extends BaseViewRenderer<any> {
+    private _dim: Dimension = {width: 0, height: 0};
+    private _isFirstLayoutDone: boolean = false;
+
+    constructor(props: ViewRendererProps<any>) {
+        super(props);
         this._onLayout = this._onLayout.bind(this);
     }
 
-    shouldComponentUpdate(newProps, newState) {
+    shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
         return (this.props.x !== newProps.x ||
             this.props.y !== newProps.y ||
             this.props.width !== newProps.width ||
@@ -24,7 +26,7 @@ class ViewRenderer extends React.Component {
             (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data)));
     }
 
-    _onLayout(event) {
+    _onLayout(event: LayoutChangeEvent) {
         if (this.props.height !== event.nativeEvent.layout.height || this.props.width !== event.nativeEvent.layout.width) {
             this._dim.height = event.nativeEvent.layout.height;
             this._dim.width = event.nativeEvent.layout.width;
@@ -71,21 +73,3 @@ class ViewRenderer extends React.Component {
         }
     }
 }
-
-export default ViewRenderer;
-//#if [DEV]
-ViewRenderer.propTypes = {
-    x: PropTypes.number.isRequired,
-    y: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    width: PropTypes.number.isRequired,
-    childRenderer: PropTypes.func.isRequired,
-    layoutType: PropTypes.any,
-    dataHasChanged: PropTypes.func,
-    onSizeChanged: PropTypes.func,
-    isHorizontal: PropTypes.bool,
-    data: PropTypes.any,
-    index: PropTypes.number,
-    forceNonDeterministicRendering: PropTypes.bool
-};
-//#endif
