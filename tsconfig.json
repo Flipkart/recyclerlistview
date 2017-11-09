@@ -12,6 +12,7 @@
     "strict": true,
     "noImplicitReturns": true,
     "removeComments": false,
-    "jsx": "react"
+    "jsx": "react",
+    "sourceMap": true
   }
 }

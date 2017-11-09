@@ -5,5 +5,5 @@ branches:
 node_js:
   - 'stable'
 before_script:
-    - npm install -g file-directives@1.4.1
+    - npm install -g file-directives@1.4.6
 script: npm run build

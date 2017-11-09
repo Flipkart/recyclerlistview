@@ -39,8 +39,10 @@ export default class ScrollComponent extends BaseScrollComponent{
         this._isSizeChangedCalledOnce = false;
     }
 
-    _onScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
-        this.props.onScroll(event.nativeEvent.contentOffset.x, event.nativeEvent.contentOffset.y, event);
+    _onScroll(event?: NativeSyntheticEvent<NativeScrollEvent>) {
+        if (event) {
+            this.props.onScroll(event.nativeEvent.contentOffset.x, event.nativeEvent.contentOffset.y, event);
+        }
     }
 
     _onLayout(event: LayoutChangeEvent) {

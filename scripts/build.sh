@@ -1,32 +1,34 @@
 #!/usr/bin/env bash
+set -e
 
-echo "Build started..." &&
-echo "Removing old builds..." &&
-rm -rf dist &&
+echo "Build started..."
+echo "Removing old builds..."
+rm -rf dist
 
-echo "Isolating WEB code..." &&
-cd src &&
-file-directives WEB,RELEASE &&
+echo "Removing DEV mode code..."
+echo "Isolating WEB code..."
+cd src
+file-directives WEB,RELEASE
 
-echo "TSC: Building ES5 web package..." &&
-cd .. &&
-tsc --outDir dist/web &&
+echo "TSC: Building ES5 web package..."
+cd ..
+tsc --outDir dist/web
 
-echo "Isolating REACT-NATIVE code..." &&
-cd src &&
-file-directives REACT-NATIVE,RELEASE &&
+echo "Isolating REACT-NATIVE code..."
+cd src
+file-directives REACT-NATIVE,RELEASE
 
-echo "TSC: Building ES6 react-native package..." &&
-cd .. &&
-tsc --outDir dist/reactnative &&
+echo "TSC: Building ES6 react-native package..."
+cd ..
+tsc --outDir dist/reactnative
 
 echo "Removing unnecessary files..."
-rm -rf dist/reactnative/platform/web &&
-rm -rf dist/web/platform/reactnative &&
+rm -rf dist/reactnative/platform/web
+rm -rf dist/web/platform/reactnative
 
 echo "Resetting code state..."
-cd src &&
-file-directives REACT-NATIVE,DEV &&
+cd src
+file-directives REACT-NATIVE,DEV
 cd ..
 
 echo "BUILD SUCCESS!"

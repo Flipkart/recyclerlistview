@@ -1,5 +1,7 @@
-echo "Deleting old packages..." &&
-rm -rf node_modules &&
+set -e
 
-echo "Reinstalling packages..." &&
+echo "Deleting old packages..."
+rm -rf node_modules
+
+echo "Reinstalling packages..."
 npm install
