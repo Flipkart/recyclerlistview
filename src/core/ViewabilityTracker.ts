@@ -9,12 +9,15 @@ import { Dimension } from "./dependencies/LayoutProvider";
  * scroll to offset.
  */
 export interface Range {
-    start: number,
-    end: number
+    start: number;
+    end: number;
 }
 export type TOnItemStatusChanged = ((all: number[], now: number[], notNow: number[]) => void);
 
 export default class ViewabilityTracker {
+    public onVisibleRowsChanged: TOnItemStatusChanged | null;
+    public onEngagedRowsChanged: TOnItemStatusChanged | null;
+
     private _currentOffset: number;
     private _maxOffset: number;
     private _renderAheadOffset: number;
@@ -25,11 +28,7 @@ export default class ViewabilityTracker {
     private _windowBound: number;
     private _visibleIndexes: number[];
     private _engagedIndexes: number[];
-
     private _layouts: Rect[];
-
-    public onVisibleRowsChanged: TOnItemStatusChanged | null;
-    public onEngagedRowsChanged: TOnItemStatusChanged | null;
 
     constructor(renderAheadOffset: number, initialOffset:number) {
         this._currentOffset = Math.max(0, initialOffset);

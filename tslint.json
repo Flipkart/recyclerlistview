@@ -1,10 +1,12 @@
 {
-    "defaultSeverity": "error",
     "extends": [
         "tslint:recommended"
     ],
-    "jsRules": {},
-    "rules": {},
-    "rulesDirectory": [],
-    "project": "tsconfig.json"
+    "rules": {
+        "max-line-length": {
+            "options": [160]
+        },
+        "interface-name": false,
+        "variable-name": false
+    }
 }

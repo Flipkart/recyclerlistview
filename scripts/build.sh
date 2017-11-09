@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+echo "Running TSLint..."
+tslint 'src/**/*.ts'
+
 echo "Build started..."
 echo "Removing old builds..."
 rm -rf dist
