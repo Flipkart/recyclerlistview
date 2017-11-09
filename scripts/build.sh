@@ -21,7 +21,7 @@ echo "Isolating REACT-NATIVE code..."
 cd src
 file-directives REACT-NATIVE,RELEASE
 
-echo "TSC: Building ES6 react-native package..."
+echo "TSC: Building ES5 react-native package..."
 cd ..
 tsc --outDir dist/reactnative
 

@@ -18,23 +18,23 @@ export default class DataProvider<T> {
         this._size = 0;
     }
 
-    getDataForIndex(index: number): T {
+    public getDataForIndex(index: number): T {
         return this._data[index];
     }
 
-    getSize(): number {
+    public getSize(): number {
         return this._size;
     }
 
-    getFirstIndexToProcessInternal() {
+    public getFirstIndexToProcessInternal() {
         return this._firstIndexToProcess;
     }
 
     //No need to override this one
-    cloneWithRows(newData: T[]) {
-        let dp = new DataProvider(this.rowHasChanged);
-        let newSize = newData.length;
-        let iterCount = Math.min(this._size, newSize);
+    public cloneWithRows(newData: T[]) {
+        const dp = new DataProvider(this.rowHasChanged);
+        const newSize = newData.length;
+        const iterCount = Math.min(this._size, newSize);
         let i = 0;
         for (i = 0; i < iterCount; i++) {
             if (this.rowHasChanged(this._data[i], newData[i])) {

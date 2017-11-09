@@ -3,11 +3,11 @@
  * Availability check, add/remove etc are all O(1), uses two maps to achieve constant time operation
  */
 
-type PseudoSet = {[key:string]:string}
-type NullablePseudoSet = {[key:string]:string|null}
+interface PseudoSet {[key: string]: string; }
+interface NullablePseudoSet {[key: string]: string|null; }
 
 export default class RecycleItemPool {
-    private _recyclableObjectMap: { [key: string]: NullablePseudoSet }
+    private _recyclableObjectMap: { [key: string]: NullablePseudoSet };
     private _availabilitySet: PseudoSet;
 
     constructor() {
@@ -15,37 +15,20 @@ export default class RecycleItemPool {
         this._availabilitySet = {};
     }
 
-    private _getRelevantSet(objectType: string): NullablePseudoSet {
-        let objectSet = this._recyclableObjectMap[objectType];
-        if (!objectSet) {
-            objectSet = {};
-            this._recyclableObjectMap[objectType] = objectSet;
-        }
-        return objectSet;
-    }
-
-    private _stringify(objectType: string | number): string {
-        if (typeof objectType === "number") {
-            objectType = objectType.toString();
-        }
-        return objectType;
-    }
-
     public putRecycledObject(objectType: string | number, object: number) {
         objectType = this._stringify(objectType);
-        let objectSet = this._getRelevantSet(objectType);
+        const objectSet = this._getRelevantSet(objectType);
         if (!this._availabilitySet[object]) {
             objectSet[object] = null;
             this._availabilitySet[object] = objectType;
         }
     }
 
-
     public getRecycledObject(objectType: string | number): string | null {
         objectType = this._stringify(objectType);
-        let objectSet = this._getRelevantSet(objectType);
+        const objectSet = this._getRelevantSet(objectType);
         let recycledObject = null;
-        for (let property in objectSet) {
+        for (const property in objectSet) {
             if (objectSet.hasOwnProperty(property)) {
                 recycledObject = property;
                 break;
@@ -69,5 +52,21 @@ export default class RecycleItemPool {
     public clearAll() {
         this._recyclableObjectMap = {};
         this._availabilitySet = {};
+    }
+
+    private _getRelevantSet(objectType: string): NullablePseudoSet {
+        let objectSet = this._recyclableObjectMap[objectType];
+        if (!objectSet) {
+            objectSet = {};
+            this._recyclableObjectMap[objectType] = objectSet;
+        }
+        return objectSet;
+    }
+
+    private _stringify(objectType: string | number): string {
+        if (typeof objectType === "number") {
+            objectType = objectType.toString();
+        }
+        return objectType;
     }
 }

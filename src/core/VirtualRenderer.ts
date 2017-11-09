@@ -1,29 +1,31 @@
-import ViewabilityTracker, { TOnItemStatusChanged } from "./ViewabilityTracker";
 import RecycleItemPool from "../utils/RecycleItemPool";
-import { Dimension, default as LayoutProvider } from "./dependencies/LayoutProvider";
-import LayoutManager, { Point } from "./layoutmanager/LayoutManager";
+import { default as LayoutProvider, Dimension } from "./dependencies/LayoutProvider";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
+import LayoutManager, { Point } from "./layoutmanager/LayoutManager";
+import ViewabilityTracker, { TOnItemStatusChanged } from "./ViewabilityTracker";
 
 /***
  * Renderer which keeps track of recyclable items and the currently rendered items. Notifies list view to re render if something changes, like scroll offset
  */
 export interface RenderStackItem {
-    key?: number,
-    type?: string | number,
-    dataIndex?: number
+    key?: number;
+    type?: string | number;
+    dataIndex?: number;
 }
-export type RenderStack = {[key: string]: RenderStackItem};
+export interface RenderStack { [key: string]: RenderStackItem; }
 
 export interface RenderStackParams {
-    isHorizontal: boolean,
-    itemCount: number,
-    initialOffset: number,
-    initialRenderIndex: number,
-    renderAheadOffset: number
+    isHorizontal: boolean;
+    itemCount: number;
+    initialOffset: number;
+    initialRenderIndex: number;
+    renderAheadOffset: number;
 }
 
 export default class VirtualRenderer {
+
+    public onVisibleItemsChanged: TOnItemStatusChanged | null;
 
     private _scrollOnNextUpdate: (point: Point) => void;
     private _renderStackIndexKeyMap: { [key: number]: number };
@@ -39,8 +41,6 @@ export default class VirtualRenderer {
     private _layoutManager: LayoutManager | null;
     private _viewabilityTracker: ViewabilityTracker | null;
     private _dimensions: Dimension | null;
-
-    public onVisibleItemsChanged: TOnItemStatusChanged | null;
 
     constructor(renderStackChanged: (renderStack: RenderStack) => void, scrollOnNextUpdate: (point: Point) => void, isRecyclingEnabled: boolean) {
         //Keeps track of items that need to be rendered in the next render cycle
@@ -64,32 +64,31 @@ export default class VirtualRenderer {
         this._onVisibleItemsChanged = this._onVisibleItemsChanged.bind(this);
     }
 
-    getLayoutDimension(): Dimension {
+    public getLayoutDimension(): Dimension {
         if (this._layoutManager) {
             return this._layoutManager.getLayoutDimension();
         }
         return {height: 0, width: 0};
     }
 
-    updateOffset(offsetX: number, offsetY: number) {
+    public updateOffset(offsetX: number, offsetY: number) {
         if (this._viewabilityTracker) {
             if (!this._isViewTrackerRunning) {
                 this.startViewabilityTracker();
             }
             if (this._params && this._params.isHorizontal) {
                 this._viewabilityTracker.updateOffset(offsetX);
-            }
-            else {
+            } else {
                 this._viewabilityTracker.updateOffset(offsetY);
             }
         }
     }
 
-    attachVisibleItemsListener(callback: TOnItemStatusChanged) {
+    public attachVisibleItemsListener(callback: TOnItemStatusChanged) {
         this.onVisibleItemsChanged = callback;
     }
 
-    removeVisibleItemsListener() {
+    public removeVisibleItemsListener() {
         this.onVisibleItemsChanged = null;
 
         if (this._viewabilityTracker) {
@@ -97,37 +96,37 @@ export default class VirtualRenderer {
         }
     }
 
-    getLayoutManager() {
+    public getLayoutManager() {
         return this._layoutManager;
     }
 
-    setParamsAndDimensions(params: RenderStackParams, dim: Dimension) {
+    public setParamsAndDimensions(params: RenderStackParams, dim: Dimension) {
         this._params = params;
         this._dimensions = dim;
     }
 
-    setLayoutManager(layoutManager: LayoutManager) {
+    public setLayoutManager(layoutManager: LayoutManager) {
         this._layoutManager = layoutManager;
         if (this._params) {
             this._layoutManager.reLayoutFromIndex(0, this._params.itemCount);
         }
     }
 
-    setLayoutProvider(layoutProvider: LayoutProvider) {
+    public setLayoutProvider(layoutProvider: LayoutProvider) {
         this._layoutProvider = layoutProvider;
     }
 
-    getViewabilityTracker() {
+    public getViewabilityTracker() {
         return this._viewabilityTracker;
     }
 
-    refreshWithAnchor() {
+    public refreshWithAnchor() {
         if (this._viewabilityTracker) {
-            let firstVisibleIndex = this._viewabilityTracker.findFirstLogicallyVisibleIndex();
+            const firstVisibleIndex = this._viewabilityTracker.findFirstLogicallyVisibleIndex();
             this._prepareViewabilityTracker();
             let offset = 0;
             if (this._layoutManager && this._params) {
-                let point = this._layoutManager.getOffsetForIndex(firstVisibleIndex);
+                const point = this._layoutManager.getOffsetForIndex(firstVisibleIndex);
                 this._scrollOnNextUpdate(point);
                 offset = this._params.isHorizontal ? point.x : point.y;
             }
@@ -135,33 +134,30 @@ export default class VirtualRenderer {
         }
     }
 
-    refresh() {
+    public refresh() {
         if (this._viewabilityTracker) {
             this._prepareViewabilityTracker();
             if (this._viewabilityTracker.forceRefresh()) {
                 if (this._params && this._params.isHorizontal) {
                     this._scrollOnNextUpdate({x: this._viewabilityTracker.getLastOffset(), y: 0});
-                }
-                else {
+                } else {
                     this._scrollOnNextUpdate({x: 0, y: this._viewabilityTracker.getLastOffset()});
                 }
             }
         }
     }
 
-    getInitialOffset(): Point {
+    public getInitialOffset(): Point {
         let offset = {x: 0, y: 0};
         if (this._params) {
             if (this._params.initialRenderIndex > 0 && this._layoutManager) {
                 offset = this._layoutManager.getOffsetForIndex(this._params.initialRenderIndex);
                 this._params.initialOffset = this._params.isHorizontal ? offset.x : offset.y;
-            }
-            else {
+            } else {
                 if (this._params.isHorizontal) {
                     offset.x = this._params.initialOffset;
                     offset.y = 0;
-                }
-                else {
+                } else {
                     offset.y = this._params.initialOffset;
                     offset.x = 0;
                 }
@@ -170,29 +166,28 @@ export default class VirtualRenderer {
         return offset;
     }
 
-    init() {
+    public init() {
         this._recyclePool = new RecycleItemPool();
         if (this._params) {
             this._viewabilityTracker = new ViewabilityTracker(this._params.renderAheadOffset, this._params.initialOffset);
-        }
-        else {
+        } else {
             this._viewabilityTracker = new ViewabilityTracker(0, 0);
         }
         this._prepareViewabilityTracker();
     }
 
-    startViewabilityTracker() {
+    public startViewabilityTracker() {
         if (this._viewabilityTracker) {
             this._isViewTrackerRunning = true;
             this._viewabilityTracker.init();
         }
     }
 
-    _getNewKey() {
+    private _getNewKey() {
         return this._startKey++;
     }
 
-    _prepareViewabilityTracker() {
+    private _prepareViewabilityTracker() {
         if (this._viewabilityTracker && this._layoutManager && this._dimensions && this._params) {
             this._viewabilityTracker.onEngagedRowsChanged = this._onEngagedItemsChanged;
             if (this.onVisibleItemsChanged) {
@@ -203,21 +198,20 @@ export default class VirtualRenderer {
                 this._layoutManager.getLayoutDimension().height);
             this._viewabilityTracker.setDimensions({
                 height: this._dimensions.height,
-                width: this._dimensions.width
+                width: this._dimensions.width,
             }, this._params.isHorizontal);
-        }
-        else {
+        } else {
             throw new CustomError(RecyclerListViewExceptions.initializationException);
         }
     }
 
-    _onVisibleItemsChanged(all: number[], now: number[], notNow: number[]) {
+    private _onVisibleItemsChanged(all: number[], now: number[], notNow: number[]) {
         if (this.onVisibleItemsChanged) {
             this.onVisibleItemsChanged(all, now, notNow);
         }
     }
 
-    _onEngagedItemsChanged(all: number[], now: number[], notNow: number[]) {
+    private _onEngagedItemsChanged(all: number[], now: number[], notNow: number[]) {
         const count = notNow.length;
         let resolvedIndex = 0;
         let disengagedIndex = 0;
@@ -230,10 +224,9 @@ export default class VirtualRenderer {
                     //All the items which are now not visible can go to the recycle pool, the pool only needs to maintain keys since
                     //react can link a view to a key automatically
                     this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedIndex);
-                }
-                else {
+                } else {
                     //Type provider may not be available in this case, use most probable
-                    let itemMeta = this._renderStack[resolvedIndex];
+                    const itemMeta = this._renderStack[resolvedIndex];
                     this._recyclePool.putRecycledObject(itemMeta.type ? itemMeta.type : 0, resolvedIndex);
                 }
             }
@@ -245,7 +238,7 @@ export default class VirtualRenderer {
     }
 
     //Updates render stack and reports whether anything has changed
-    _updateRenderStack(itemIndexes: number[]) {
+    private _updateRenderStack(itemIndexes: number[]) {
         const count = itemIndexes.length;
         let type = null;
         let availableKey = null;
@@ -263,8 +256,7 @@ export default class VirtualRenderer {
                     hasRenderStackChanged = true;
                     itemMeta.key = availableKey;
                 }
-            }
-            else {
+            } else {
                 hasRenderStackChanged = true;
                 type = this._layoutProvider.getLayoutTypeForIndex(index);
                 availableKey = this._recyclePool.getRecycledObject(type);
@@ -283,8 +275,7 @@ export default class VirtualRenderer {
                     if (itemMeta.dataIndex) {
                         delete this._renderStackIndexKeyMap[itemMeta.dataIndex];
                     }
-                }
-                else {
+                } else {
                     //Create new if no existing key is available
                     itemMeta = {};
                     availableKey = this._getNewKey();

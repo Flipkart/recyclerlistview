@@ -413,11 +413,11 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     _checkExpectedDimensionDiscrepancy(itemRect: Dimension, type: string | number, index: number) {
         //Cannot be null here
         let layoutManager = this._virtualRenderer.getLayoutManager() as LayoutManager;
-        layoutManager._setMaxBounds(this._tempDim);
+        layoutManager.setMaxBounds(this._tempDim);
         this.props.layoutProvider.setLayoutForType(type, this._tempDim, index);
 
         //TODO:Talha calling private method, find an alternative and remove this
-        layoutManager._setMaxBounds(this._tempDim);
+        layoutManager.setMaxBounds(this._tempDim);
         if (itemRect.height !== this._tempDim.height || itemRect.width !== this._tempDim.width) {
             if (this._relayoutReqIndex === -1) {
                 this._relayoutReqIndex = index;

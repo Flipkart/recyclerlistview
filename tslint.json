@@ -7,6 +7,9 @@
             "options": [160]
         },
         "interface-name": false,
-        "variable-name": false
+        "variable-name": false,
+        "comment-format": false,
+        "no-bitwise": false,
+        "member-access": true
     }
 }

@@ -16,5 +16,5 @@ export default abstract class ContextProvider {
     public abstract get(key: string): string | number;
 
     //Remove key value pair
-    public abstract remove(key: string): void
+    public abstract remove(key: string): void;
 }
