@@ -39,6 +39,7 @@ class ScrollComponent extends React.Component {
     }
 
     render() {
+        const ScrollView = this.props.externalScrollView;
         return (
             <ScrollView ref="scrollView" removeClippedSubviews={false} scrollEventThrottle={this.props.scrollThrottle}
                         {...this.props}
@@ -64,7 +65,8 @@ ScrollComponent.defaultProps = {
     isHorizontal: false,
     contentHeight: 0,
     contentWidth: 0,
-    scrollThrottle: 16
+    scrollThrottle: 16,
+    externalScrollView: ScrollView
 };
 //#if [DEV]
 ScrollComponent.propTypes = {

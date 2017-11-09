@@ -14,7 +14,14 @@ export default class ScrollViewer extends React.Component {
         this._setRelevantOffset = this._setRelevantOffset.bind(this);
         this._onWindowResize = this._onWindowResize.bind(this);
 
-        this.scrollEvent = {offsetX: 0, offsetY: 0};
+        this.scrollEvent = {
+            nativeEvent: {
+                contentOffset: {
+                    x: 0,
+                    y: 0
+                }
+            }
+        };
         this._throttleParams = {leading: true, trailing: true};
     }
 
@@ -99,7 +106,7 @@ export default class ScrollViewer extends React.Component {
         const duration = 200;
         const animateScroll = elapsedTime => {
             elapsedTime += increment;
-            var position = this._easeInOut(elapsedTime, start, change, duration);
+            let position = this._easeInOut(elapsedTime, start, change, duration);
             this._setRelevantOffset(position);
             if (elapsedTime < duration) {
                 window.setTimeout(
@@ -143,11 +150,11 @@ export default class ScrollViewer extends React.Component {
     _windowOnScroll() {
         if (this.props.onScroll) {
             if (this.props.horizontal) {
-                this.scrollEvent.offsetY = 0;
-                this.scrollEvent.offsetX = window.scrollX - this.props.distanceFromWindow;
+                this.scrollEvent.nativeEvent.contentOffset.y = 0;
+                this.scrollEvent.nativeEvent.contentOffset.x = window.scrollX - this.props.distanceFromWindow;
             } else {
-                this.scrollEvent.offsetX = 0;
-                this.scrollEvent.offsetY = window.scrollY - this.props.distanceFromWindow;
+                this.scrollEvent.nativeEvent.contentOffset.x = 0;
+                this.scrollEvent.nativeEvent.contentOffset.y = window.scrollY - this.props.distanceFromWindow;
             }
             this.props.onScroll(this.scrollEvent);
         }
@@ -156,11 +163,11 @@ export default class ScrollViewer extends React.Component {
     _onScroll() {
         if (this.props.onScroll) {
             if (this.props.horizontal) {
-                this.scrollEvent.offsetY = 0;
-                this.scrollEvent.offsetX = this.refs.mainDiv.scrollLeft;
+                this.scrollEvent.nativeEvent.contentOffset.y = 0;
+                this.scrollEvent.nativeEvent.contentOffset.x = this.refs.mainDiv.scrollLeft;
             } else {
-                this.scrollEvent.offsetX = 0;
-                this.scrollEvent.offsetY = this.refs.mainDiv.scrollTop;
+                this.scrollEvent.nativeEvent.contentOffset.x = 0;
+                this.scrollEvent.nativeEvent.contentOffset.y = this.refs.mainDiv.scrollTop;
             }
             this.props.onScroll(this.scrollEvent);
         }
