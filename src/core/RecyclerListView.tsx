@@ -32,43 +32,24 @@ import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import { ScrollEvent } from "./scrollcomponent/BaseScrollView";
 
 //#if [REACT-NATIVE]
-import ScrollComponent from "./scrollcomponent/reactnative/ScrollComponent";
-import ViewRenderer from "./viewrenderer/reactnative/ViewRenderer";
+import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
+import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 //#endif
-
-//#if [WEB]
-//import ScrollComponent from "./scrollcomponent/web/ScrollComponent";
-//import ViewRenderer from "./viewrenderer/web/ViewRenderer";
-//#endif
-
-let _debounce = require("lodash/debounce");
-
-// let ScrollComponent;
-// let ViewRenderer;
-
-let refreshRequestDebouncer = _debounce((executable: ()=> void) => {
-    executable();
-});
 
 /***
- * Using webpack plugin definitions to choose the scroll component and view renderer
- * To run in browser specify an extra plugin RLV_ENV: JSON.stringify('browser')
- * Alternatively, you can start importing from recyclerlistview/web
+ * To use on web, start importing from recyclerlistview/web. To make it even easier specify an alias in you builder of choice.
  */
-//#if [REACT-NATIVE]
-// if ((process as any).env.RLV_ENV && (process as any).env.RLV_ENV === 'browser') {
-//     ScrollComponent = require("./scrollcomponent/web/ScrollComponent");
-//     ViewRenderer = require("./viewrenderer/web/ViewRenderer");
-// } else {
-//     ScrollComponent = require("./scrollcomponent/reactnative/ScrollComponent");
-//     ViewRenderer = require("./viewrenderer/reactnative/ViewRenderer");
-// }
-//#endif
 
 //#if [WEB]
-// ScrollComponent = require("./scrollcomponent/web/ScrollComponent").default;
-// ViewRenderer = require("./viewrenderer/web/ViewRenderer").default;
+//import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
+//import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
 //#endif
+
+const _debounce = require("lodash/debounce");
+
+const refreshRequestDebouncer = _debounce((executable: ()=> void) => {
+    executable();
+});
 
 /***
  * This is the main component, please refer to samples to understand how to use.
@@ -487,12 +468,12 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     render() {
         return (
             <ScrollComponent
-                ref={(scrollComponent: BaseScrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
+                ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
                 {...this.props}
                 onScroll={this._onScroll}
                 onSizeChanged={this._onSizeChanged}
-                contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : null}
-                contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : null}>
+                contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
+                contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}>
                 {this._generateRenderStack()}
             </ScrollComponent>
 

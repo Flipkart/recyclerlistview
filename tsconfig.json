@@ -9,7 +9,6 @@
     "moduleResolution": "node", // target Node.js(v6)
     "declaration": true, // generate TypeScript definitions
     "rootDir": "src",
-    "outDir": "dist",
     "strict": true,
     "noImplicitReturns": true,
     "removeComments": false,

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { default as BaseScrollView, ScrollEvent, ScrollViewDefaultProps } from "../BaseScrollView";
+import { default as BaseScrollView, ScrollEvent, ScrollViewDefaultProps } from "../../../core/scrollcomponent/BaseScrollView";
 /***
  * A scrollviewer that mimics react native scrollview. Additionally on web it can start listening to window scroll events optionally.
  * Supports both window scroll and scrollable divs inside other divs.

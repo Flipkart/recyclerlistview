@@ -6,7 +6,7 @@ import {
     ScrollView,
     View
 } from "react-native";
-import BaseScrollComponent, { ScrollComponentProps } from "../BaseScrollComponent";
+import BaseScrollComponent, { ScrollComponentProps } from "../../../core/scrollcomponent/BaseScrollComponent";
 /***
  * The responsibility of a scroll component is to report its size, scroll events and provide a way to scroll to a given offset.
  * RecyclerListView works on top of this interface and doesn't care about the implementation. To support web we only had to provide

@@ -3,7 +3,7 @@ import DataProvider from "./core/dependencies/DataProvider";
 import LayoutProvider from "./core/dependencies/LayoutProvider";
 import ContextProvider from "./core/dependencies/ContextProvider";
 
-module.exports = {
+export= {
     RecyclerListView,
     DataProvider,
     LayoutProvider,

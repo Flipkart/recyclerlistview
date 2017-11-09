@@ -1,6 +1,6 @@
 import * as React from "react";
-import BaseViewRenderer, { ViewRendererProps } from "../BaseViewRenderer";
-import { Dimension } from "../../dependencies/LayoutProvider";
+import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
+import { Dimension } from "../../../core/dependencies/LayoutProvider";
 import { CSSProperties } from "react";
 
 /***

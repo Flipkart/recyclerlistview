@@ -1,7 +1,7 @@
 import * as React from "react";
 import { LayoutChangeEvent, View } from "react-native";
-import BaseViewRenderer, { ViewRendererProps } from "../BaseViewRenderer";
-import { Dimension } from "../../dependencies/LayoutProvider";
+import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
+import { Dimension } from "../../../core/dependencies/LayoutProvider";
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
