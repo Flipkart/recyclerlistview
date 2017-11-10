@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Dimension } from "../../../core/dependencies/LayoutProvider";
 import BaseScrollComponent, { ScrollComponentProps } from "../../../core/scrollcomponent/BaseScrollComponent";
-import { ScrollEvent } from "../../../core/scrollcomponent/BaseScrollView";
+import BaseScrollView, { ScrollEvent } from "../../../core/scrollcomponent/BaseScrollView";
 import ScrollViewer from "./ScrollViewer";
 /***
  * The responsibility of a scroll component is to report its size, scroll events and provide a way to scroll to a given offset.
@@ -13,12 +13,13 @@ export default class ScrollComponent extends BaseScrollComponent {
     public static defaultProps = {
         contentHeight: 0,
         contentWidth: 0,
+        externalScrollView: ScrollViewer,
         isHorizontal: false,
         scrollThrottle: 0,
     };
     private _height: number;
     private _width: number;
-    private _scrollViewRef: ScrollViewer | null;
+    private _scrollViewRef: BaseScrollView | null;
 
     constructor(args: ScrollComponentProps) {
         super(args);
@@ -29,26 +30,16 @@ export default class ScrollComponent extends BaseScrollComponent {
         this._width = 0;
     }
 
-    public _onScroll(e: ScrollEvent) {
-        this.props.onScroll(e.nativeEvent.contentOffset.x, e.nativeEvent.contentOffset.y, e);
-    }
-
-    public _onSizeChanged(event: Dimension) {
-        if (this.props.onSizeChanged) {
-            this.props.onSizeChanged(event);
-        }
-    }
-
     public scrollTo(x: number, y: number, animated: boolean) {
         if (this._scrollViewRef) {
             this._scrollViewRef.scrollTo({x, y, animated});
         }
     }
 
-    public render() {
-        const ScrollView = this.props.externalScrollView;
+    public render(): JSX.Element {
+        const Scroller = this.props.externalScrollView as any; //TSI
         return (
-            <ScrollViewer ref={(scrollView) => this._scrollViewRef as (ScrollViewer | null)}
+            <Scroller ref={(scrollView: BaseScrollView) => this._scrollViewRef as (BaseScrollView | null)}
                           {...this.props}
                           horizontal={this.props.isHorizontal}
                           onScroll={this._onScroll}
@@ -67,7 +58,17 @@ export default class ScrollComponent extends BaseScrollComponent {
                 } : undefined}>
                     {this.props.renderFooter()}
                 </div> : null}
-            </ScrollView>
+            </Scroller>
         );
+    }
+
+    private _onScroll(e: ScrollEvent) {
+        this.props.onScroll(e.nativeEvent.contentOffset.x, e.nativeEvent.contentOffset.y, e);
+    }
+
+    private _onSizeChanged(event: Dimension) {
+        if (this.props.onSizeChanged) {
+            this.props.onSizeChanged(event);
+        }
     }
 }

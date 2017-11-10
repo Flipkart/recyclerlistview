@@ -8,6 +8,8 @@ export interface ScrollViewDefaultProps {
     horizontal: boolean;
     canChangeSize: boolean;
     style?: CSSProperties | null;
+    distanceFromWindow: number;
+    useWindowScroll: boolean;
 }
 export interface ScrollEvent {
     nativeEvent: {
@@ -19,6 +21,10 @@ export interface ScrollEvent {
         contentSize?: Dimension,
     };
 }
-export default abstract class BaseScrollView<T extends ScrollViewDefaultProps> extends React.Component<T, {}> {
+export default abstract class BaseScrollView extends React.Component<ScrollViewDefaultProps, {}> {
+    constructor(props: ScrollViewDefaultProps) {
+        super(props);
+    }
+
     public abstract scrollTo(scrollInput: { x: number, y: number, animated: boolean }): void;
 }

@@ -33,27 +33,6 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         );
     }
 
-    public _getTransform() {
-        return "translate(" + this.props.x + "px," + this.props.y + "px)";
-    }
-
-    public _checkSizeChange() {
-        if (this.props.forceNonDeterministicRendering && this.props.onSizeChanged) {
-            const mainDiv = this._mainDiv;
-            if (mainDiv) {
-                this._dim.width = mainDiv.clientWidth;
-                this._dim.height = mainDiv.clientHeight;
-                if (this.props.width !== this._dim.width || this.props.height !== this._dim.height) {
-                    this.props.onSizeChanged(this._dim, this.props.index);
-                } else if (!this._isFirstLayoutDone) {
-                    this._isFirstLayoutDone = true;
-                    this.forceUpdate();
-                }
-            }
-        }
-        this._isFirstLayoutDone = true;
-    }
-
     public render(): JSX.Element {
         const styleObj: CSSProperties = this.props.forceNonDeterministicRendering
             ? {
@@ -79,5 +58,26 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
             </div>
         );
+    }
+
+    private _getTransform() {
+        return "translate(" + this.props.x + "px," + this.props.y + "px)";
+    }
+
+    private _checkSizeChange() {
+        if (this.props.forceNonDeterministicRendering && this.props.onSizeChanged) {
+            const mainDiv = this._mainDiv;
+            if (mainDiv) {
+                this._dim.width = mainDiv.clientWidth;
+                this._dim.height = mainDiv.clientHeight;
+                if (this.props.width !== this._dim.width || this.props.height !== this._dim.height) {
+                    this.props.onSizeChanged(this._dim, this.props.index);
+                } else if (!this._isFirstLayoutDone) {
+                    this._isFirstLayoutDone = true;
+                    this.forceUpdate();
+                }
+            }
+        }
+        this._isFirstLayoutDone = true;
     }
 }

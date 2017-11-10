@@ -1,16 +1,17 @@
 import * as React from "react";
 import { Dimension } from "../dependencies/LayoutProvider";
-import { ScrollEvent } from "./BaseScrollView";
+import BaseScrollView, { ScrollEvent } from "./BaseScrollView";
 
 export interface ScrollComponentProps {
+    canChangeSize: boolean;
     contentHeight: number;
     contentWidth: number;
+    externalScrollView: BaseScrollView;
     onSizeChanged: (dimensions: Dimension) => void;
     onScroll: (offsetX: number, offsetY: number, rawEvent: ScrollEvent) => void;
     isHorizontal: boolean;
     renderFooter: () => JSX.Element;
     scrollThrottle: number;
-    canChangeSize: boolean;
     distanceFromWindow: number;
     useWindowScroll: boolean;
 }

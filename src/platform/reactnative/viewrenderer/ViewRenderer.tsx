@@ -26,20 +26,6 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data)));
     }
 
-    public _onLayout(event: LayoutChangeEvent) {
-        if (this.props.height !== event.nativeEvent.layout.height || this.props.width !== event.nativeEvent.layout.width) {
-            this._dim.height = event.nativeEvent.layout.height;
-            this._dim.width = event.nativeEvent.layout.width;
-            if (this.props.onSizeChanged) {
-                this.props.onSizeChanged(this._dim, this.props.index);
-            }
-        } else if (!this._isFirstLayoutDone) {
-            this._isFirstLayoutDone = true;
-            this.forceUpdate();
-        }
-        this._isFirstLayoutDone = true;
-    }
-
     public render() {
         if (this.props.forceNonDeterministicRendering) {
             return (
@@ -57,17 +43,31 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         } else {
             return (
                 <View
-                      style={{
-                          height: this.props.height,
-                          left: 0,
-                          position: "absolute",
-                          top: 0,
-                          transform: [{translateX: this.props.x}, {translateY: this.props.y}],
-                          width: this.props.width,
-                      }}>
+                    style={{
+                        height: this.props.height,
+                        left: 0,
+                        position: "absolute",
+                        top: 0,
+                        transform: [{translateX: this.props.x}, {translateY: this.props.y}],
+                        width: this.props.width,
+                    }}>
                     {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
                 </View>
             );
         }
+    }
+
+    private _onLayout(event: LayoutChangeEvent) {
+        if (this.props.height !== event.nativeEvent.layout.height || this.props.width !== event.nativeEvent.layout.width) {
+            this._dim.height = event.nativeEvent.layout.height;
+            this._dim.width = event.nativeEvent.layout.width;
+            if (this.props.onSizeChanged) {
+                this.props.onSizeChanged(this._dim, this.props.index);
+            }
+        } else if (!this._isFirstLayoutDone) {
+            this._isFirstLayoutDone = true;
+            this.forceUpdate();
+        }
+        this._isFirstLayoutDone = true;
     }
 }
