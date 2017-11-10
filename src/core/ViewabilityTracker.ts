@@ -51,32 +51,32 @@ export default class ViewabilityTracker {
         this._valueExtractorForBinarySearch = this._valueExtractorForBinarySearch.bind(this);
     }
 
-    public init() {
+    public init(): void {
         this._doInitialFit(this._currentOffset);
     }
 
-    public setLayouts(layouts: Rect[], maxOffset: number) {
+    public setLayouts(layouts: Rect[], maxOffset: number): void  {
         this._layouts = layouts;
         this._maxOffset = maxOffset;
     }
 
-    public setDimensions(dimension: Dimension, isHorizontal: boolean) {
+    public setDimensions(dimension: Dimension, isHorizontal: boolean): void  {
         this._isHorizontal = isHorizontal;
         this._windowBound = isHorizontal ? dimension.width : dimension.height;
     }
 
-    public forceRefresh() {
+    public forceRefresh(): boolean  {
         const shouldForceScroll = this._currentOffset >= (this._maxOffset - this._windowBound);
         this.forceRefreshWithOffset(this._currentOffset);
         return shouldForceScroll;
     }
 
-    public forceRefreshWithOffset(offset: number) {
+    public forceRefreshWithOffset(offset: number): void  {
         this._currentOffset = -1;
         this.updateOffset(offset);
     }
 
-    public updateOffset(offset: number) {
+    public updateOffset(offset: number): void  {
         offset = Math.min(this._maxOffset, Math.max(0, offset));
         if (this._currentOffset !== offset) {
             this._currentOffset = offset;
@@ -89,7 +89,7 @@ export default class ViewabilityTracker {
         }
     }
 
-    public getLastOffset() {
+    public getLastOffset(): number {
         return this._currentOffset;
     }
 
@@ -126,7 +126,7 @@ export default class ViewabilityTracker {
         return firstVisibleIndex;
     }
 
-    private _fitAndUpdate(startIndex: number) {
+    private _fitAndUpdate(startIndex: number): void  {
         const newVisibleItems: number[] = [];
         const newEngagedItems: number[] = [];
         this._fitIndexes(newVisibleItems, newEngagedItems, startIndex, true);
@@ -134,7 +134,7 @@ export default class ViewabilityTracker {
         this._diffUpdateOriginalIndexesAndRaiseEvents(newVisibleItems, newEngagedItems);
     }
 
-    private _doInitialFit(offset: number) {
+    private _doInitialFit(offset: number): void  {
         offset = Math.min(this._maxOffset, Math.max(0, offset));
         this._updateTrackingWindows(offset);
         const firstVisibleIndex = this._findFirstVisibleIndexOptimally();
@@ -157,19 +157,19 @@ export default class ViewabilityTracker {
         return 0;
     }
 
-    private _findFirstVisibleIndexUsingBS(bias = 0) {
+    private _findFirstVisibleIndexUsingBS(bias = 0): number {
         const count = this._layouts.length;
         return BinarySearch.findClosestHigherValueIndex(count, this._visibleWindow.start + bias, this._valueExtractorForBinarySearch);
     }
 
-    private _valueExtractorForBinarySearch(index: number) {
+    private _valueExtractorForBinarySearch(index: number): number {
         const itemRect = this._layouts[index];
         this._setRelevantBounds(itemRect, this._relevantDim);
         return this._relevantDim.end;
     }
 
     //TODO:Talha Optimize further in later revisions, alteast once logic can be replace with a BS lookup
-    private _fitIndexes(newVisibleIndexes: number[], newEngagedIndexes: number[], startIndex: number, isReverse: boolean) {
+    private _fitIndexes(newVisibleIndexes: number[], newEngagedIndexes: number[], startIndex: number, isReverse: boolean): void  {
         const count = this._layouts.length;
         const relevantDim: Range = {start: 0, end: 0};
         let i = 0;
@@ -199,7 +199,11 @@ export default class ViewabilityTracker {
         }
     }
 
-    private _checkIntersectionAndReport(index: number, insertOnTop: boolean, relevantDim: Range, newVisibleIndexes: number[], newEngagedIndexes: number[]) {
+    private _checkIntersectionAndReport(index: number,
+                                        insertOnTop: boolean,
+                                        relevantDim: Range,
+                                        newVisibleIndexes: number[],
+                                        newEngagedIndexes: number[]): boolean  {
         const itemRect = this._layouts[index];
         let isFound = false;
         this._setRelevantBounds(itemRect, relevantDim);
@@ -225,7 +229,7 @@ export default class ViewabilityTracker {
         return isFound;
     }
 
-    private _setRelevantBounds(itemRect: Rect, relevantDim: Range) {
+    private _setRelevantBounds(itemRect: Rect, relevantDim: Range): void  {
         if (this._isHorizontal) {
             relevantDim.end = itemRect.x + itemRect.width;
             relevantDim.start = itemRect.x;
@@ -235,23 +239,23 @@ export default class ViewabilityTracker {
         }
     }
 
-    private _isItemInBounds(window: Range, itemBound: number) {
+    private _isItemInBounds(window: Range, itemBound: number): boolean {
         return (window.start <= itemBound && window.end >= itemBound);
     }
 
-    private _itemIntersectsWindow(window: Range, startBound: number, endBound: number) {
+    private _itemIntersectsWindow(window: Range, startBound: number, endBound: number): boolean {
         return this._isItemInBounds(window, startBound) || this._isItemInBounds(window, endBound);
     }
 
-    private _itemIntersectsEngagedWindow(startBound: number, endBound: number) {
+    private _itemIntersectsEngagedWindow(startBound: number, endBound: number): boolean {
         return this._itemIntersectsWindow(this._engagedWindow, startBound, endBound);
     }
 
-    private _itemIntersectsVisibleWindow(startBound: number, endBound: number) {
+    private _itemIntersectsVisibleWindow(startBound: number, endBound: number): boolean {
         return this._itemIntersectsWindow(this._visibleWindow, startBound, endBound);
     }
 
-    private _updateTrackingWindows(newOffset: number) {
+    private _updateTrackingWindows(newOffset: number): void  {
         this._engagedWindow.start = Math.max(0, newOffset - this._renderAheadOffset);
         this._engagedWindow.end = newOffset + this._windowBound + this._renderAheadOffset;
 
@@ -260,14 +264,14 @@ export default class ViewabilityTracker {
     }
 
     //TODO:Talha optimize this
-    private _diffUpdateOriginalIndexesAndRaiseEvents(newVisibleItems: number[], newEngagedItems: number[]) {
+    private _diffUpdateOriginalIndexesAndRaiseEvents(newVisibleItems: number[], newEngagedItems: number[]): void  {
         this._diffArraysAndCallFunc(newVisibleItems, this._visibleIndexes, this.onVisibleRowsChanged);
         this._diffArraysAndCallFunc(newEngagedItems, this._engagedIndexes, this.onEngagedRowsChanged);
         this._visibleIndexes = newVisibleItems;
         this._engagedIndexes = newEngagedItems;
     }
 
-    private _diffArraysAndCallFunc(newItems: number[], oldItems: number[], func: TOnItemStatusChanged | null) {
+    private _diffArraysAndCallFunc(newItems: number[], oldItems: number[], func: TOnItemStatusChanged | null): void  {
         if (func) {
             const now = this._calculateArrayDiff(newItems, oldItems);
             const notNow = this._calculateArrayDiff(oldItems, newItems);
@@ -278,7 +282,7 @@ export default class ViewabilityTracker {
     }
 
     //TODO:Talha since arrays are sorted this can be much faster
-    private _calculateArrayDiff(arr1: number[], arr2: number[]) {
+    private _calculateArrayDiff(arr1: number[], arr2: number[]): number[]  {
         const len = arr1.length;
         const diffArr = [];
         for (let i = 0; i < len; i++) {

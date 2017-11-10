@@ -30,7 +30,7 @@ export default class LayoutProvider {
 
     //Given a type and dimension set the dimension values on given dimension object
     //You can also get index here if you add an extra argument but we don't recommend using it.
-    public setLayoutForType(type: string | number, dimension: Dimension, index: number) {
+    public setLayoutForType(type: string | number, dimension: Dimension, index: number): void {
         return this._setLayoutForType(type, dimension, index);
     }
 }

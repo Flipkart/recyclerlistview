@@ -6,6 +6,12 @@
         "max-line-length": {
             "options": [160]
         },
+        "typedef": [
+            true,
+            "call-signature",
+            "property-declaration"
+        ],
+        "typeof-compare": true,
         "interface-name": false,
         "variable-name": false,
         "comment-format": false,

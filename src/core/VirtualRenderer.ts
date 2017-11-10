@@ -71,7 +71,7 @@ export default class VirtualRenderer {
         return {height: 0, width: 0};
     }
 
-    public updateOffset(offsetX: number, offsetY: number) {
+    public updateOffset(offsetX: number, offsetY: number): void  {
         if (this._viewabilityTracker) {
             if (!this._isViewTrackerRunning) {
                 this.startViewabilityTracker();
@@ -84,11 +84,11 @@ export default class VirtualRenderer {
         }
     }
 
-    public attachVisibleItemsListener(callback: TOnItemStatusChanged) {
+    public attachVisibleItemsListener(callback: TOnItemStatusChanged): void  {
         this.onVisibleItemsChanged = callback;
     }
 
-    public removeVisibleItemsListener() {
+    public removeVisibleItemsListener(): void  {
         this.onVisibleItemsChanged = null;
 
         if (this._viewabilityTracker) {
@@ -96,31 +96,31 @@ export default class VirtualRenderer {
         }
     }
 
-    public getLayoutManager() {
+    public getLayoutManager(): LayoutManager | null {
         return this._layoutManager;
     }
 
-    public setParamsAndDimensions(params: RenderStackParams, dim: Dimension) {
+    public setParamsAndDimensions(params: RenderStackParams, dim: Dimension): void  {
         this._params = params;
         this._dimensions = dim;
     }
 
-    public setLayoutManager(layoutManager: LayoutManager) {
+    public setLayoutManager(layoutManager: LayoutManager): void  {
         this._layoutManager = layoutManager;
         if (this._params) {
             this._layoutManager.reLayoutFromIndex(0, this._params.itemCount);
         }
     }
 
-    public setLayoutProvider(layoutProvider: LayoutProvider) {
+    public setLayoutProvider(layoutProvider: LayoutProvider): void  {
         this._layoutProvider = layoutProvider;
     }
 
-    public getViewabilityTracker() {
+    public getViewabilityTracker(): ViewabilityTracker | null {
         return this._viewabilityTracker;
     }
 
-    public refreshWithAnchor() {
+    public refreshWithAnchor(): void  {
         if (this._viewabilityTracker) {
             const firstVisibleIndex = this._viewabilityTracker.findFirstLogicallyVisibleIndex();
             this._prepareViewabilityTracker();
@@ -134,7 +134,7 @@ export default class VirtualRenderer {
         }
     }
 
-    public refresh() {
+    public refresh(): void  {
         if (this._viewabilityTracker) {
             this._prepareViewabilityTracker();
             if (this._viewabilityTracker.forceRefresh()) {
@@ -166,7 +166,7 @@ export default class VirtualRenderer {
         return offset;
     }
 
-    public init() {
+    public init(): void  {
         this._recyclePool = new RecycleItemPool();
         if (this._params) {
             this._viewabilityTracker = new ViewabilityTracker(this._params.renderAheadOffset, this._params.initialOffset);
@@ -176,18 +176,18 @@ export default class VirtualRenderer {
         this._prepareViewabilityTracker();
     }
 
-    public startViewabilityTracker() {
+    public startViewabilityTracker(): void  {
         if (this._viewabilityTracker) {
             this._isViewTrackerRunning = true;
             this._viewabilityTracker.init();
         }
     }
 
-    private _getNewKey() {
+    private _getNewKey(): number {
         return this._startKey++;
     }
 
-    private _prepareViewabilityTracker() {
+    private _prepareViewabilityTracker(): void  {
         if (this._viewabilityTracker && this._layoutManager && this._dimensions && this._params) {
             this._viewabilityTracker.onEngagedRowsChanged = this._onEngagedItemsChanged;
             if (this.onVisibleItemsChanged) {
@@ -205,13 +205,13 @@ export default class VirtualRenderer {
         }
     }
 
-    private _onVisibleItemsChanged(all: number[], now: number[], notNow: number[]) {
+    private _onVisibleItemsChanged(all: number[], now: number[], notNow: number[]): void  {
         if (this.onVisibleItemsChanged) {
             this.onVisibleItemsChanged(all, now, notNow);
         }
     }
 
-    private _onEngagedItemsChanged(all: number[], now: number[], notNow: number[]) {
+    private _onEngagedItemsChanged(all: number[], now: number[], notNow: number[]): void  {
         const count = notNow.length;
         let resolvedIndex = 0;
         let disengagedIndex = 0;
@@ -238,7 +238,7 @@ export default class VirtualRenderer {
     }
 
     //Updates render stack and reports whether anything has changed
-    private _updateRenderStack(itemIndexes: number[]) {
+    private _updateRenderStack(itemIndexes: number[]): boolean  {
         const count = itemIndexes.length;
         let type = null;
         let availableKey = null;

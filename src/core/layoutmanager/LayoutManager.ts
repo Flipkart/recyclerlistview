@@ -43,7 +43,7 @@ export default class LayoutManager {
         }
     }
 
-    public overrideLayout(index: number, dim: Dimension) {
+    public overrideLayout(index: number, dim: Dimension): void {
         const layout = this._layouts[index];
         if (layout) {
             layout.isOverridden = true;
@@ -52,7 +52,7 @@ export default class LayoutManager {
         }
     }
 
-    public setMaxBounds(itemDim: Dimension) {
+    public setMaxBounds(itemDim: Dimension): void {
         if (this._isHorizontal) {
             itemDim.height = Math.min(this._window.height, itemDim.height);
         } else {
@@ -61,7 +61,7 @@ export default class LayoutManager {
     }
 
     //TODO:Talha laziliy calculate in future revisions
-    public reLayoutFromIndex(startIndex: number, itemCount: number) {
+    public reLayoutFromIndex(startIndex: number, itemCount: number): void {
         startIndex = this._locateFirstNeighbourIndex(startIndex);
         let startX = 0;
         let startY = 0;
@@ -129,7 +129,7 @@ export default class LayoutManager {
         this._setFinalDimensions(maxBound);
     }
 
-    private _pointDimensionsToRect(itemRect: Rect) {
+    private _pointDimensionsToRect(itemRect: Rect): void {
         if (this._isHorizontal) {
             this._totalWidth = itemRect.x;
         } else {
@@ -137,7 +137,7 @@ export default class LayoutManager {
         }
     }
 
-    private _setFinalDimensions(maxBound: number) {
+    private _setFinalDimensions(maxBound: number): void {
         if (this._isHorizontal) {
             this._totalHeight = this._window.height;
             this._totalWidth += maxBound;
@@ -147,7 +147,7 @@ export default class LayoutManager {
         }
     }
 
-    private _locateFirstNeighbourIndex(startIndex: number) {
+    private _locateFirstNeighbourIndex(startIndex: number): number {
         if (startIndex === 0) {
             return 0;
         }
@@ -164,7 +164,7 @@ export default class LayoutManager {
         return i;
     }
 
-    private _checkBounds(itemX: number, itemY: number, itemDim: Dimension, isHorizontal: boolean) {
+    private _checkBounds(itemX: number, itemY: number, itemDim: Dimension, isHorizontal: boolean): boolean {
         return isHorizontal ? (itemY + itemDim.height <= this._window.height) : (itemX + itemDim.width <= this._window.width);
     }
 }

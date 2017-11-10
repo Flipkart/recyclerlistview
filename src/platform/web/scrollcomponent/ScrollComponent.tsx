@@ -30,7 +30,7 @@ export default class ScrollComponent extends BaseScrollComponent {
         this._width = 0;
     }
 
-    public scrollTo(x: number, y: number, animated: boolean) {
+    public scrollTo(x: number, y: number, animated: boolean): void {
         if (this._scrollViewRef) {
             this._scrollViewRef.scrollTo({x, y, animated});
         }
@@ -62,11 +62,11 @@ export default class ScrollComponent extends BaseScrollComponent {
         );
     }
 
-    private _onScroll(e: ScrollEvent) {
+    private _onScroll(e: ScrollEvent): void {
         this.props.onScroll(e.nativeEvent.contentOffset.x, e.nativeEvent.contentOffset.y, e);
     }
 
-    private _onSizeChanged(event: Dimension) {
+    private _onSizeChanged(event: Dimension): void {
         if (this.props.onSizeChanged) {
             this.props.onSizeChanged(event);
         }

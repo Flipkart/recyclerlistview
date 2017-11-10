@@ -15,7 +15,7 @@ export default class RecycleItemPool {
         this._availabilitySet = {};
     }
 
-    public putRecycledObject(objectType: string | number, object: number) {
+    public putRecycledObject(objectType: string | number, object: number): void  {
         objectType = this._stringify(objectType);
         const objectSet = this._getRelevantSet(objectType);
         if (!this._availabilitySet[object]) {
@@ -42,14 +42,16 @@ export default class RecycleItemPool {
         return recycledObject;
     }
 
-    public removeFromPool(object: number) {
+    public removeFromPool(object: number): boolean  {
         if (this._availabilitySet[object]) {
             delete this._getRelevantSet(this._availabilitySet[object])[object];
             delete this._availabilitySet[object];
+            return true;
         }
+        return false;
     }
 
-    public clearAll() {
+    public clearAll(): void  {
         this._recyclableObjectMap = {};
         this._availabilitySet = {};
     }

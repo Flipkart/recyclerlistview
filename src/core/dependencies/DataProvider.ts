@@ -26,12 +26,12 @@ export default class DataProvider<T> {
         return this._size;
     }
 
-    public getFirstIndexToProcessInternal() {
+    public getFirstIndexToProcessInternal(): number {
         return this._firstIndexToProcess;
     }
 
     //No need to override this one
-    public cloneWithRows(newData: T[]) {
+    public cloneWithRows(newData: T[]): DataProvider<T> {
         const dp = new DataProvider(this.rowHasChanged);
         const newSize = newData.length;
         const iterCount = Math.min(this._size, newSize);

@@ -28,7 +28,7 @@ export default class ScrollViewer extends BaseScrollView {
         this.scrollEvent = {nativeEvent: {contentOffset: {x: 0, y: 0}}};
     }
 
-    public componentDidMount() {
+    public componentDidMount(): void {
         if (this.props.onSizeChanged) {
             if (!this.props.useWindowScroll && this._mainDivRef) {
                 this._startListeningToDivEvents();
@@ -37,7 +37,7 @@ export default class ScrollViewer extends BaseScrollView {
         }
     }
 
-    public componentWillMount() {
+    public componentWillMount(): void {
         if (this.props.onSizeChanged) {
             if (this.props.useWindowScroll) {
                 this._startListeningToWindowEvents();
@@ -46,7 +46,7 @@ export default class ScrollViewer extends BaseScrollView {
         }
     }
 
-    public componentWillUnmount() {
+    public componentWillUnmount(): void {
         if (this._throttleFunction) {
             window.removeEventListener("scroll", this._throttleFunction);
             if (this._mainDivRef) {
@@ -56,7 +56,7 @@ export default class ScrollViewer extends BaseScrollView {
         window.removeEventListener("resize", this._onWindowResize);
     }
 
-    public scrollTo(scrollInput: {x: number, y: number, animated: boolean}) {
+    public scrollTo(scrollInput: {x: number, y: number, animated: boolean}): void {
         if (scrollInput.animated) {
             this._doAnimatedScroll(this.props.horizontal ? scrollInput.x : scrollInput.y);
         } else {
@@ -64,7 +64,7 @@ export default class ScrollViewer extends BaseScrollView {
         }
     }
 
-    public render() {
+    public render(): JSX.Element {
         return !this.props.useWindowScroll
             ? <div
                 ref={(div) => this._mainDivRef = div as HTMLDivElement | null}
@@ -123,7 +123,7 @@ export default class ScrollViewer extends BaseScrollView {
         }
     }
 
-    private _doAnimatedScroll(offset: number) {
+    private _doAnimatedScroll(offset: number): void {
         let start = this._getRelevantOffset();
         if (offset > start) {
             start = Math.max(offset - 800, start);
@@ -144,14 +144,14 @@ export default class ScrollViewer extends BaseScrollView {
         animateScroll(0);
     }
 
-    private _startListeningToDivEvents() {
+    private _startListeningToDivEvents(): void {
         this._throttleFunction = this._onScroll;
         if (this._mainDivRef) {
             this._mainDivRef.addEventListener("scroll", this._throttleFunction);
         }
     }
 
-    private _startListeningToWindowEvents() {
+    private _startListeningToWindowEvents(): void {
         this._throttleFunction = this._windowOnScroll;
         window.addEventListener("scroll", this._throttleFunction);
         if (this.props.canChangeSize) {
@@ -159,13 +159,13 @@ export default class ScrollViewer extends BaseScrollView {
         }
     }
 
-    private _onWindowResize() {
+    private _onWindowResize(): void {
         if (this.props.onSizeChanged && this.props.useWindowScroll) {
             this.props.onSizeChanged({height: window.innerHeight, width: window.innerWidth});
         }
     }
 
-    private _windowOnScroll() {
+    private _windowOnScroll(): void {
         if (this.props.onScroll) {
             if (this.props.horizontal) {
                 this.scrollEvent.nativeEvent.contentOffset.y = 0;
@@ -178,7 +178,7 @@ export default class ScrollViewer extends BaseScrollView {
         }
     }
 
-    private _onScroll() {
+    private _onScroll(): void {
         if (this.props.onScroll) {
             if (this.props.horizontal) {
                 this.scrollEvent.nativeEvent.contentOffset.y = 0;

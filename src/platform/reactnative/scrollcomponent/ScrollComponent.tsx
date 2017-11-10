@@ -40,7 +40,7 @@ export default class ScrollComponent extends BaseScrollComponent {
         this._isSizeChangedCalledOnce = false;
     }
 
-    public scrollTo(x: number, y: number, isAnimated: boolean) {
+    public scrollTo(x: number, y: number, isAnimated: boolean): void {
         if (this._scrollViewRef) {
             this._scrollViewRef.scrollTo({x, y, animated: isAnimated});
         }
@@ -69,13 +69,13 @@ export default class ScrollComponent extends BaseScrollComponent {
         );
     }
 
-    private _onScroll(event?: NativeSyntheticEvent<NativeScrollEvent>) {
+    private _onScroll(event?: NativeSyntheticEvent<NativeScrollEvent>): void {
         if (event) {
             this.props.onScroll(event.nativeEvent.contentOffset.x, event.nativeEvent.contentOffset.y, event);
         }
     }
 
-    private _onLayout(event: LayoutChangeEvent) {
+    private _onLayout(event: LayoutChangeEvent): void {
         if (this._height !== event.nativeEvent.layout.height || this._width !== event.nativeEvent.layout.width) {
             this._height = event.nativeEvent.layout.height;
             this._width = event.nativeEvent.layout.width;

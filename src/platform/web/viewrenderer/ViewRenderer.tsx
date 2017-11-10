@@ -15,11 +15,11 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     private _isFirstLayoutDone: boolean = false;
     private _mainDiv: HTMLDivElement | null;
 
-    public componentDidMount() {
+    public componentDidMount(): void {
         this._checkSizeChange();
     }
 
-    public componentDidUpdate() {
+    public componentDidUpdate(): void {
         this._checkSizeChange();
     }
 
@@ -60,11 +60,11 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         );
     }
 
-    private _getTransform() {
+    private _getTransform(): string {
         return "translate(" + this.props.x + "px," + this.props.y + "px)";
     }
 
-    private _checkSizeChange() {
+    private _checkSizeChange(): void {
         if (this.props.forceNonDeterministicRendering && this.props.onSizeChanged) {
             const mainDiv = this._mainDiv;
             if (mainDiv) {

@@ -146,7 +146,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         };
     }
 
-    public componentWillReceiveProps(newProps: RecyclerListViewProps) {
+    public componentWillReceiveProps(newProps: RecyclerListViewProps): void {
         this._assertDependencyPresence(newProps);
         this._checkAndChangeLayouts(newProps);
         if (!this.props.onVisibleIndexesChanged) {
@@ -156,7 +156,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         }
     }
 
-    public componentDidUpdate() {
+    public componentDidUpdate(): void {
         if (this._pendingScrollToOffset) {
             const offset = this._pendingScrollToOffset;
             this._pendingScrollToOffset = null;
@@ -173,7 +173,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         this._checkAndChangeLayouts(this.props);
     }
 
-    public componentWillUnmount() {
+    public componentWillUnmount(): void {
         if (this.props.contextProvider) {
             const uniqueKey = this.props.contextProvider.getUniqueKey();
             if (uniqueKey) {
@@ -191,7 +191,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         }
     }
 
-    public componentWillMount() {
+    public componentWillMount(): void {
         if (this.props.contextProvider) {
             const uniqueKey = this.props.contextProvider.getUniqueKey();
             if (uniqueKey) {
@@ -210,7 +210,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         }
     }
 
-    public scrollToIndex(index: number, animate?: boolean) {
+    public scrollToIndex(index: number, animate?: boolean): void {
         const layoutManager = this._virtualRenderer.getLayoutManager();
         if (layoutManager) {
             const offsets = layoutManager.getOffsetForIndex(index);
@@ -220,7 +220,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         }
     }
 
-    public scrollToItem(data: any, animate?: boolean) {
+    public scrollToItem(data: any, animate?: boolean): void {
         const count = this.props.dataProvider.getSize();
         for (let i = 0; i < count; i++) {
             if (this.props.dataProvider.getDataForIndex(i) === data) {
@@ -230,16 +230,16 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         }
     }
 
-    public scrollToTop(animate?: boolean) {
+    public scrollToTop(animate?: boolean): void {
         this.scrollToOffset(0, 0, animate);
     }
 
-    public scrollToEnd(animate?: boolean) {
+    public scrollToEnd(animate?: boolean): void {
         const lastIndex = this.props.dataProvider.getSize() - 1;
         this.scrollToIndex(lastIndex, animate);
     }
 
-    public scrollToOffset(x: number, y: number, animate: boolean = false) {
+    public scrollToOffset(x: number, y: number, animate: boolean = false): void {
         if (this._scrollComponent) {
             this._scrollComponent.scrollTo(x, y, animate);
         }
@@ -255,7 +255,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         return viewabilityTracker ? viewabilityTracker.findFirstLogicallyVisibleIndex() : 0;
     }
 
-    public render() {
+    public render(): JSX.Element {
         return (
             <ScrollComponent
                 ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
@@ -270,7 +270,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         );
     }
 
-    private _checkAndChangeLayouts(newProps: RecyclerListViewProps, forceFullRender?: boolean) {
+    private _checkAndChangeLayouts(newProps: RecyclerListViewProps, forceFullRender?: boolean): void {
         this._params.isHorizontal = newProps.isHorizontal;
         this._params.itemCount = newProps.dataProvider.getSize();
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
@@ -295,13 +295,13 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         }
     }
 
-    private _refreshViewability() {
+    private _refreshViewability(): void {
         this._virtualRenderer.refresh();
         this._queueStateRefresh();
 
     }
 
-    private _queueStateRefresh() {
+    private _queueStateRefresh(): void {
         refreshRequestDebouncer(() => {
             this.setState((prevState) => {
                 return prevState;
@@ -309,7 +309,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         });
     }
 
-    private _onSizeChanged(layout: Dimension) {
+    private _onSizeChanged(layout: Dimension): void {
         const hasHeightChanged = this._layout.height !== layout.height;
         const hasWidthChanged = this._layout.width !== layout.width;
         this._layout.height = layout.height;
@@ -332,13 +332,13 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         }
     }
 
-    private _renderStackWhenReady(stack: RenderStack) {
+    private _renderStackWhenReady(stack: RenderStack): void {
         this.setState(() => {
             return {renderStack: stack};
         });
     }
 
-    private _initTrackers() {
+    private _initTrackers(): void {
         this._assertDependencyPresence(this.props);
         if (this.props.onVisibleIndexesChanged) {
             this._virtualRenderer.attachVisibleItemsListener(this._onVisibleItemsChanged);
@@ -364,24 +364,24 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         this._cachedLayouts = null;
     }
 
-    private _onVisibleItemsChanged(all: number[], now: number[], notNow: number[]) {
+    private _onVisibleItemsChanged(all: number[], now: number[], notNow: number[]): void {
         this.props.onVisibleIndexesChanged(all, now, notNow);
 
     }
 
-    private _assertDependencyPresence(props: RecyclerListViewProps) {
+    private _assertDependencyPresence(props: RecyclerListViewProps): void {
         if (!props.dataProvider || !props.layoutProvider) {
             throw new CustomError(RecyclerListViewExceptions.unresolvedDependenciesException);
         }
     }
 
-    private _assertType(type: string | number) {
+    private _assertType(type: string | number): void {
         if (!type && type !== 0) {
             throw new CustomError(RecyclerListViewExceptions.itemTypeNullException);
         }
     }
 
-    private _dataHasChanged(row1: any, row2: any) {
+    private _dataHasChanged(row1: any, row2: any): boolean {
         return this.props.dataProvider.rowHasChanged(row1, row2);
     }
 
@@ -414,7 +414,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         return null;
     }
 
-    private _onViewContainerSizeChange(dim: Dimension, index: number) {
+    private _onViewContainerSizeChange(dim: Dimension, index: number): void {
         //Cannot be null here
         (this._virtualRenderer.getLayoutManager() as LayoutManager).overrideLayout(index, dim);
         if (this._relayoutReqIndex === -1) {
@@ -425,7 +425,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         this._queueStateRefresh();
     }
 
-    private _checkExpectedDimensionDiscrepancy(itemRect: Dimension, type: string | number, index: number) {
+    private _checkExpectedDimensionDiscrepancy(itemRect: Dimension, type: string | number, index: number): void {
         //Cannot be null here
         const layoutManager = this._virtualRenderer.getLayoutManager() as LayoutManager;
         layoutManager.setMaxBounds(this._tempDim);
@@ -442,7 +442,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         }
     }
 
-    private _generateRenderStack() {
+    private _generateRenderStack(): Array<JSX.Element | null> {
         const renderedItems = [];
         for (const key in this.state.renderStack) {
             if (this.state.renderStack.hasOwnProperty(key)) {
@@ -453,7 +453,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         return renderedItems;
     }
 
-    private _onScroll(offsetX: number, offsetY: number, rawEvent: ScrollEvent) {
+    private _onScroll(offsetX: number, offsetY: number, rawEvent: ScrollEvent): void {
         this._virtualRenderer.updateOffset(offsetX, offsetY);
         if (this.props.onScroll) {
             this.props.onScroll(rawEvent, offsetX, offsetY);
@@ -461,7 +461,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         this._processOnEndReached();
     }
 
-    private _processOnEndReached() {
+    private _processOnEndReached(): void {
         if (this.props.onEndReached && this._virtualRenderer) {
             const layout = this._virtualRenderer.getLayoutDimension();
             const windowBound = this.props.isHorizontal ? layout.width - this._layout.width : layout.height - this._layout.height;

@@ -26,7 +26,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data)));
     }
 
-    public render() {
+    public render(): JSX.Element {
         if (this.props.forceNonDeterministicRendering) {
             return (
                 <View onLayout={this._onLayout}
@@ -57,7 +57,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         }
     }
 
-    private _onLayout(event: LayoutChangeEvent) {
+    private _onLayout(event: LayoutChangeEvent): void {
         if (this.props.height !== event.nativeEvent.layout.height || this.props.width !== event.nativeEvent.layout.width) {
             this._dim.height = event.nativeEvent.layout.height;
             this._dim.width = event.nativeEvent.layout.width;
