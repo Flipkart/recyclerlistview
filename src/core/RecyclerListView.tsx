@@ -284,7 +284,6 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             if (layoutManager) {
                 layoutManager.reLayoutFromIndex(newProps.dataProvider.getFirstIndexToProcessInternal(), newProps.dataProvider.getSize());
                 this._virtualRenderer.refresh();
-                this._refreshViewability();
             }
         } else if (this._relayoutReqIndex >= 0) {
             const layoutManager = this._virtualRenderer.getLayoutManager();
