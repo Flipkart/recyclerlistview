@@ -21,6 +21,7 @@
 import debounce from "lodash-es/debounce";
 import * as PropTypes from "prop-types";
 import * as React from "react";
+import Type from "ts-null-or-undefined";
 import ContextProvider from "./dependencies/ContextProvider";
 import DataProvider from "./dependencies/DataProvider";
 import LayoutProvider, { Dimension } from "./dependencies/LayoutProvider";
@@ -29,7 +30,7 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 import LayoutManager, { Point, Rect } from "./layoutmanager/LayoutManager";
 import Messages from "./messages/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
-import { default as BaseScrollView, ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
+import { default as BaseScrollView, ScrollEvent } from "./scrollcomponent/BaseScrollView";
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 
@@ -388,7 +389,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     private _renderRowUsingMeta(itemMeta: RenderStackItem): JSX.Element | null {
         const dataSize = this.props.dataProvider.getSize();
         const dataIndex = itemMeta.dataIndex;
-        if (dataIndex && dataIndex < dataSize) {
+        if (!Type.isNullOrUndefined(dataIndex) && dataIndex < dataSize) {
             const itemRect = (this._virtualRenderer.getLayoutManager() as LayoutManager).getLayouts()[dataIndex];
             const data = this.props.dataProvider.getDataForIndex(dataIndex);
             const type = this.props.layoutProvider.getLayoutTypeForIndex(dataIndex);
