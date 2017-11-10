@@ -16,6 +16,7 @@
  * TODO: Implement sticky headers
  * TODO: Make viewability callbacks configurable
  * TODO: Observe size changes on web to optimize for reflowability
+ * TODO: Solve //TSI
  */
 import debounce from "lodash-es/debounce";
 import * as PropTypes from "prop-types";
