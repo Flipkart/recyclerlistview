@@ -15,7 +15,7 @@ export default class ScrollComponent extends BaseScrollComponent {
         contentWidth: 0,
         externalScrollView: ScrollViewer,
         isHorizontal: false,
-        scrollThrottle: 0,
+        scrollThrottle: 16,
     };
     private _height: number;
     private _width: number;

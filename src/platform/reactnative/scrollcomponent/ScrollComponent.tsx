@@ -20,7 +20,7 @@ export default class ScrollComponent extends BaseScrollComponent {
         contentWidth: 0,
         externalScrollView: TSCast.cast(ScrollView), //TSI
         isHorizontal: false,
-        scrollThrottle: 0,
+        scrollThrottle: 16,
     };
 
     private _height: number;
