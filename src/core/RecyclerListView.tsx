@@ -278,6 +278,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             //TODO:Talha use old layout manager
             this._virtualRenderer.setLayoutManager(new LayoutManager(newProps.layoutProvider, this._layout, newProps.isHorizontal, null));
             this._virtualRenderer.refreshWithAnchor();
+            this._refreshViewability();
         } else if (this.props.dataProvider !== newProps.dataProvider) {
             const layoutManager = this._virtualRenderer.getLayoutManager();
             if (layoutManager) {
