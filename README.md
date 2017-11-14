@@ -220,7 +220,7 @@ Note: Works with React Native Web out of the box, to use with ReactJS start impo
 want to preserve import path. Only platform specific code is part of the build so, no unnecessary code will ship with your app.
 
 ## License
-Apache v2.0
+[Apache v2.0](https://github.com/Flipkart/recyclerlistview/blob/master/LICENSE.md)
 
 ## Contact Us
 Please open issues for any bugs that you encounter. You can reach out to me on twitter [@naqvitalha](https://www.twitter.com/naqvitalha) or, write to cross-platform@flipkart.com for any questions that
