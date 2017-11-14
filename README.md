@@ -1,7 +1,7 @@
 # RecyclerListView
 
 [![npm version](https://img.shields.io/npm/v/recyclerlistview.svg)](https://www.npmjs.com/package/recyclerlistview)
-[![travis](https://travis-ci.org/Flipkart/ReactEssentials.svg?branch=recyclerlistview-master)](https://travis-ci.org/Flipkart/ReactEssentials)
+[![travis](https://travis-ci.org/Flipkart/recyclerlistview.svg?branch=recyclerlistview-master)](https://travis-ci.org/Flipkart/recyclerlistview)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
 This is a high performance listview for React Native and Web with support for complex layouts. JS only with no native dependencies, inspired by both RecyclerView on Android
