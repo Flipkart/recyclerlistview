@@ -4,6 +4,7 @@ import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
 import LayoutManager, { Point } from "./layoutmanager/LayoutManager";
 import ViewabilityTracker, { TOnItemStatusChanged } from "./ViewabilityTracker";
+import Type from "ts-null-or-undefined/dist/Type";
 
 /***
  * Renderer which keeps track of recyclable items and the currently rendered items. Notifies list view to re render if something changes, like scroll offset
@@ -272,7 +273,7 @@ export default class VirtualRenderer {
                     itemMeta.type = type;
 
                     //since this data index is no longer being rendered anywhere
-                    if (itemMeta.dataIndex) {
+                    if (!Type.isNullOrUndefined(itemMeta.dataIndex)) {
                         delete this._renderStackIndexKeyMap[itemMeta.dataIndex];
                     }
                 } else {
