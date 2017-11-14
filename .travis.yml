@@ -1,7 +1,7 @@
 language: node_js
 branches:
   only:
-    - 'recyclerlistview-master'
+    - 'master'
 node_js:
   - 'stable'
 before_script:

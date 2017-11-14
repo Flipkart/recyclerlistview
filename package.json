@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Flipkart/ReactEssentials"
+    "url": "https://github.com/Flipkart/recyclerlistview"
   },
   "author": "naqvitalha <naqvitalha@gmail.com>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/Flipkart/ReactEssentials/issues"
+    "url": "https://github.com/Flipkart/recyclerlistview/issues"
   },
-  "homepage": "https://github.com/Flipkart/ReactEssentials",
+  "homepage": "https://github.com/Flipkart/recyclerlistview",
   "dependencies": {
     "lodash-es": "^4.17.4",
     "prop-types": "^15.5.8",
