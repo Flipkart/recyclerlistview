@@ -168,6 +168,7 @@ export default class VirtualRenderer {
     }
 
     public init(): void  {
+        this.getInitialOffset();
         this._recyclePool = new RecycleItemPool();
         if (this._params) {
             this._viewabilityTracker = new ViewabilityTracker(this._params.renderAheadOffset, this._params.initialOffset);
