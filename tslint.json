@@ -16,6 +16,8 @@
         "variable-name": false,
         "comment-format": false,
         "no-bitwise": false,
-        "member-access": true
+        "member-access": true,
+        "ordered-imports": false,
+        "object-literal-sort-keys": false
     }
 }

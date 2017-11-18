@@ -21,7 +21,7 @@
 import debounce from "lodash-es/debounce";
 import * as PropTypes from "prop-types";
 import * as React from "react";
-import Type from "ts-null-or-undefined";
+import { ObjectUtil } from "ts-null-or-undefined";
 import ContextProvider from "./dependencies/ContextProvider";
 import DataProvider from "./dependencies/DataProvider";
 import LayoutProvider, { Dimension } from "./dependencies/LayoutProvider";
@@ -389,7 +389,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     private _renderRowUsingMeta(itemMeta: RenderStackItem): JSX.Element | null {
         const dataSize = this.props.dataProvider.getSize();
         const dataIndex = itemMeta.dataIndex;
-        if (!Type.isNullOrUndefined(dataIndex) && dataIndex < dataSize) {
+        if (!ObjectUtil.isNullOrUndefined(dataIndex) && dataIndex < dataSize) {
             const itemRect = (this._virtualRenderer.getLayoutManager() as LayoutManager).getLayouts()[dataIndex];
             const data = this.props.dataProvider.getDataForIndex(dataIndex);
             const type = this.props.layoutProvider.getLayoutTypeForIndex(dataIndex);
