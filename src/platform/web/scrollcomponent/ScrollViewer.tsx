@@ -14,7 +14,6 @@ export default class ScrollViewer extends BaseScrollView {
     };
 
     private scrollEvent: ScrollEvent;
-    private _throttleFunction: () => void;
     private _mainDivRef: HTMLDivElement | null;
 
     constructor(args: ScrollViewDefaultProps) {
@@ -47,11 +46,9 @@ export default class ScrollViewer extends BaseScrollView {
     }
 
     public componentWillUnmount(): void {
-        if (this._throttleFunction) {
-            window.removeEventListener("scroll", this._throttleFunction);
-            if (this._mainDivRef) {
-                this._mainDivRef.removeEventListener("scroll", this._onScroll);
-            }
+        window.removeEventListener("scroll", this._windowOnScroll);
+        if (this._mainDivRef) {
+            this._mainDivRef.removeEventListener("scroll", this._onScroll);
         }
         window.removeEventListener("resize", this._onWindowResize);
     }
@@ -145,15 +142,13 @@ export default class ScrollViewer extends BaseScrollView {
     }
 
     private _startListeningToDivEvents(): void {
-        this._throttleFunction = this._onScroll;
         if (this._mainDivRef) {
-            this._mainDivRef.addEventListener("scroll", this._throttleFunction);
+            this._mainDivRef.addEventListener("scroll", this._onScroll);
         }
     }
 
     private _startListeningToWindowEvents(): void {
-        this._throttleFunction = this._windowOnScroll;
-        window.addEventListener("scroll", this._throttleFunction);
+        window.addEventListener("scroll", this._windowOnScroll);
         if (this.props.canChangeSize) {
             window.addEventListener("resize", this._onWindowResize);
         }
