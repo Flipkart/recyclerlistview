@@ -4,10 +4,18 @@
  * Note: In future, this will also become an external dependency which means you can write your own layout manager. That will enable everyone to layout their
  * views just the way they want. Current implementation is a StaggeredList
  */
+import LayoutProvider, { Dimension } from "../dependencies/LayoutProvider";
 import CustomError from "../exceptions/CustomError";
 
-class LayoutManager {
-    constructor(layoutProvider, dimensions, isHorizontal, cachedLayouts) {
+export default class LayoutManager {
+    private _layoutProvider: LayoutProvider;
+    private _window: Dimension;
+    private _totalHeight: number;
+    private _totalWidth: number;
+    private _layouts: Rect[];
+    private _isHorizontal: boolean;
+
+    constructor(layoutProvider: LayoutProvider, dimensions: Dimension, isHorizontal: boolean, cachedLayouts: Rect[] | null) {
         this._layoutProvider = layoutProvider;
         this._window = dimensions;
         this._totalHeight = 0;
@@ -16,42 +24,50 @@ class LayoutManager {
         this._isHorizontal = isHorizontal;
     }
 
-    getLayoutDimension() {
+    public getLayoutDimension(): Dimension {
         return {height: this._totalHeight, width: this._totalWidth};
     }
 
-    getLayouts() {
+    public getLayouts(): Rect[] {
         return this._layouts;
     }
 
-    getOffsetForIndex(index) {
+    public getOffsetForIndex(index: number): Point {
         if (this._layouts.length > index) {
             return {x: this._layouts[index].x, y: this._layouts[index].y};
         } else {
             throw new CustomError({
+                message: "No layout available for index: " + index,
                 type: "LayoutUnavailableException",
-                message: "No layout available for index: " + index
             });
         }
     }
 
-    overrideLayout(index, dim){
-        let layout = this._layouts[index];
-        if(layout){
+    public overrideLayout(index: number, dim: Dimension): void {
+        const layout = this._layouts[index];
+        if (layout) {
             layout.isOverridden = true;
             layout.width = dim.width;
             layout.height = dim.height;
         }
     }
 
+    public setMaxBounds(itemDim: Dimension): void {
+        if (this._isHorizontal) {
+            itemDim.height = Math.min(this._window.height, itemDim.height);
+        } else {
+            itemDim.width = Math.min(this._window.width, itemDim.width);
+        }
+    }
+
     //TODO:Talha laziliy calculate in future revisions
-    reLayoutFromIndex(startIndex, itemCount) {
+    public reLayoutFromIndex(startIndex: number, itemCount: number): void {
         startIndex = this._locateFirstNeighbourIndex(startIndex);
         let startX = 0;
         let startY = 0;
         let maxBound = 0;
 
-        let startVal = this._layouts[startIndex];
+        const startVal = this._layouts[startIndex];
 
         if (startVal) {
             startX = startVal.x;
@@ -59,30 +75,28 @@ class LayoutManager {
             this._pointDimensionsToRect(startVal);
         }
 
-        let oldItemCount = this._layouts.length;
+        const oldItemCount = this._layouts.length;
 
-        let itemDim = {height: 0, width: 0};
+        const itemDim = {height: 0, width: 0};
         let itemRect = null;
 
         let oldLayout = null;
 
         for (let i = startIndex; i < itemCount; i++) {
             oldLayout = this._layouts[i];
-            if(oldLayout && oldLayout.isOverridden){
+            if (oldLayout && oldLayout.isOverridden) {
                 itemDim.height = oldLayout.height;
                 itemDim.width = oldLayout.width;
-            }
-            else {
+            } else {
                 this._layoutProvider.setLayoutForType(this._layoutProvider.getLayoutTypeForIndex(i), itemDim, i);
             }
-            this._setMaxBounds(itemDim);
+            this.setMaxBounds(itemDim);
             while (!this._checkBounds(startX, startY, itemDim, this._isHorizontal)) {
                 if (this._isHorizontal) {
                     startX += maxBound;
                     startY = 0;
                     this._totalWidth += maxBound;
-                }
-                else {
+                } else {
                     startX = 0;
                     startY += maxBound;
                     this._totalHeight += maxBound;
@@ -95,8 +109,7 @@ class LayoutManager {
             //TODO: Talha creating array upfront will speed this up
             if (i > oldItemCount - 1) {
                 this._layouts.push({x: startX, y: startY, height: itemDim.height, width: itemDim.width});
-            }
-            else {
+            } else {
                 itemRect = this._layouts[i];
                 itemRect.x = startX;
                 itemRect.y = startY;
@@ -106,8 +119,7 @@ class LayoutManager {
 
             if (this._isHorizontal) {
                 startY += itemDim.height;
-            }
-            else {
+            } else {
                 startX += itemDim.width;
             }
         }
@@ -117,29 +129,27 @@ class LayoutManager {
         this._setFinalDimensions(maxBound);
     }
 
-    _pointDimensionsToRect(itemRect) {
+    private _pointDimensionsToRect(itemRect: Rect): void {
         if (this._isHorizontal) {
             this._totalWidth = itemRect.x;
-        }
-        else {
+        } else {
             this._totalHeight = itemRect.y;
         }
     }
 
-    _setFinalDimensions(maxBound) {
+    private _setFinalDimensions(maxBound: number): void {
         if (this._isHorizontal) {
             this._totalHeight = this._window.height;
             this._totalWidth += maxBound;
-        }
-        else {
+        } else {
             this._totalWidth = this._window.width;
             this._totalHeight += maxBound;
         }
     }
 
-    _locateFirstNeighbourIndex(startIndex) {
+    private _locateFirstNeighbourIndex(startIndex: number): number {
         if (startIndex === 0) {
-            return 0
+            return 0;
         }
         let i = startIndex - 1;
         for (; i >= 0; i--) {
@@ -147,26 +157,22 @@ class LayoutManager {
                 if (this._layouts[i].y === 0) {
                     break;
                 }
-            }
-            else if (this._layouts[i].x === 0) {
+            } else if (this._layouts[i].x === 0) {
                 break;
             }
         }
         return i;
     }
 
-    _setMaxBounds(itemDim) {
-        if (this._isHorizontal) {
-            itemDim.height = Math.min(this._window.height, itemDim.height);
-        }
-        else {
-            itemDim.width = Math.min(this._window.width, itemDim.width);
-        }
-    }
-
-    _checkBounds(itemX, itemY, itemDim, isHorizontal) {
+    private _checkBounds(itemX: number, itemY: number, itemDim: Dimension, isHorizontal: boolean): boolean {
         return isHorizontal ? (itemY + itemDim.height <= this._window.height) : (itemX + itemDim.width <= this._window.width);
     }
 }
 
-export default LayoutManager;
+export interface Rect extends Dimension, Point {
+    isOverridden?: boolean;
+}
+export interface Point {
+    x: number;
+    y: number;
+}

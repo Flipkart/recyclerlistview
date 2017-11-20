@@ -1,7 +1,7 @@
 import CustomError from "../core/exceptions/CustomError";
 
-class BinarySearch {
-    findClosestHigherValueIndex(size, targetValue, valueExtractor) {
+export default class BinarySearch {
+    public static findClosestHigherValueIndex(size: number, targetValue: number, valueExtractor: (index: number) => number): number {
         let low = 0;
         let high = size - 1;
         let mid = Math.floor((low + high) / 2);
@@ -18,7 +18,7 @@ class BinarySearch {
         if (high < 0) {
             throw new CustomError({
                 message: "The collection cannot be empty",
-                type: "InvalidStateException"
+                type: "InvalidStateException",
             });
         }
 
@@ -41,8 +41,9 @@ class BinarySearch {
         }
         return result;
     }
-    findIndexOf(array, value) {
-        let j = 0, length = array.length;
+    public static findIndexOf(array: number[], value: number): number {
+        let j = 0;
+        let length = array.length;
         let i = 0;
         while (j < length) {
             i = length + j - 1 >> 1;
@@ -57,4 +58,3 @@ class BinarySearch {
         return -1;
     }
 }
-export default new BinarySearch();

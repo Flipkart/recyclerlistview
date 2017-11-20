@@ -11,21 +11,31 @@
  *
  * NOTE: You can also implement features such as ListView/GridView switch by simple changing your layout provider.
  */
-class LayoutProvider {
-    constructor(getLayoutTypeForIndex, setLayoutForType) {
+
+export default class LayoutProvider {
+
+    private _getLayoutTypeForIndex: (index: number) => string | number;
+    private _setLayoutForType: (type: string | number, dim: Dimension, index: number) => void;
+
+    constructor(getLayoutTypeForIndex: (index: number) => string | number,
+                setLayoutForType: (type: string | number, dim: Dimension, index: number) => void) {
         this._getLayoutTypeForIndex = getLayoutTypeForIndex;
         this._setLayoutForType = setLayoutForType;
     }
 
     //Provide a type for index, something which identifies the template of view about to load
-    getLayoutTypeForIndex(index) {
+    public getLayoutTypeForIndex(index: number): string | number {
         return this._getLayoutTypeForIndex(index);
     }
 
     //Given a type and dimension set the dimension values on given dimension object
     //You can also get index here if you add an extra argument but we don't recommend using it.
-    setLayoutForType(type, dimension, index) {
+    public setLayoutForType(type: string | number, dimension: Dimension, index: number): void {
         return this._setLayoutForType(type, dimension, index);
     }
 }
-export default LayoutProvider;
+
+export interface Dimension {
+    height: number;
+    width: number;
+}

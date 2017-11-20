@@ -1,0 +1,197 @@
+import * as React from "react";
+import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "../../../core/scrollcomponent/BaseScrollView";
+/***
+ * A scrollviewer that mimics react native scrollview. Additionally on web it can start listening to window scroll events optionally.
+ * Supports both window scroll and scrollable divs inside other divs.
+ */
+export default class ScrollViewer extends BaseScrollView {
+    public static defaultProps = {
+        canChangeSize: false,
+        distanceFromWindow: 0,
+        horizontal: false,
+        style: null,
+        useWindowScroll: false,
+    };
+
+    private scrollEvent: ScrollEvent;
+    private _mainDivRef: HTMLDivElement | null;
+
+    constructor(args: ScrollViewDefaultProps) {
+        super(args);
+        this._onScroll = this._onScroll.bind(this);
+        this._windowOnScroll = this._windowOnScroll.bind(this);
+        this._getRelevantOffset = this._getRelevantOffset.bind(this);
+        this._setRelevantOffset = this._setRelevantOffset.bind(this);
+        this._onWindowResize = this._onWindowResize.bind(this);
+
+        this.scrollEvent = {nativeEvent: {contentOffset: {x: 0, y: 0}}};
+    }
+
+    public componentDidMount(): void {
+        if (this.props.onSizeChanged) {
+            if (!this.props.useWindowScroll && this._mainDivRef) {
+                this._startListeningToDivEvents();
+                this.props.onSizeChanged({height: this._mainDivRef.clientHeight, width: this._mainDivRef.clientWidth});
+            }
+        }
+    }
+
+    public componentWillMount(): void {
+        if (this.props.onSizeChanged) {
+            if (this.props.useWindowScroll) {
+                this._startListeningToWindowEvents();
+                this.props.onSizeChanged({height: window.innerHeight, width: window.innerWidth});
+            }
+        }
+    }
+
+    public componentWillUnmount(): void {
+        window.removeEventListener("scroll", this._windowOnScroll);
+        if (this._mainDivRef) {
+            this._mainDivRef.removeEventListener("scroll", this._onScroll);
+        }
+        window.removeEventListener("resize", this._onWindowResize);
+    }
+
+    public scrollTo(scrollInput: {x: number, y: number, animated: boolean}): void {
+        if (scrollInput.animated) {
+            this._doAnimatedScroll(this.props.horizontal ? scrollInput.x : scrollInput.y);
+        } else {
+            this._setRelevantOffset(this.props.horizontal ? scrollInput.x : scrollInput.y);
+        }
+    }
+
+    public render(): JSX.Element {
+        return !this.props.useWindowScroll
+            ? <div
+                ref={(div) => this._mainDivRef = div as HTMLDivElement | null}
+                style={{
+                    WebkitOverflowScrolling: "touch",
+                    height: "100%",
+                    overflowX: this.props.horizontal ? "scroll" : "hidden",
+                    overflowY: !this.props.horizontal ? "scroll" : "hidden",
+                    width: "100%",
+                    ...this.props.style,
+                }}
+            >
+                <div style={{position: "relative"}}>
+                    {this.props.children}
+                </div>
+            </div>
+            : <div style={{position: "relative"}}>
+                {this.props.children}
+            </div>;
+    }
+
+    private _getRelevantOffset(): number {
+        if (!this.props.useWindowScroll) {
+            if (this._mainDivRef) {
+                if (this.props.horizontal) {
+                    return this._mainDivRef.scrollLeft;
+                } else {
+                    return this._mainDivRef.scrollTop;
+                }
+            }
+            return 0;
+        } else {
+            if (this.props.horizontal) {
+                return window.scrollX;
+            } else {
+                return window.scrollY;
+            }
+        }
+    }
+
+    private _setRelevantOffset(offset: number): void {
+        if (!this.props.useWindowScroll) {
+            if (this._mainDivRef) {
+                if (this.props.horizontal) {
+                    this._mainDivRef.scrollLeft = offset;
+                } else {
+                    this._mainDivRef.scrollTop = offset;
+                }
+            }
+        } else {
+            if (this.props.horizontal) {
+                window.scrollTo(offset + this.props.distanceFromWindow, 0);
+            } else {
+                window.scrollTo(0, offset + this.props.distanceFromWindow);
+            }
+        }
+    }
+
+    private _doAnimatedScroll(offset: number): void {
+        let start = this._getRelevantOffset();
+        if (offset > start) {
+            start = Math.max(offset - 800, start);
+        } else {
+            start = Math.min(offset + 800, start);
+        }
+        const change = offset - start;
+        const increment = 20;
+        const duration = 200;
+        const animateScroll = (elapsedTime: number) => {
+            elapsedTime += increment;
+            const position = this._easeInOut(elapsedTime, start, change, duration);
+            this._setRelevantOffset(position);
+            if (elapsedTime < duration) {
+                window.setTimeout(() => animateScroll(elapsedTime), increment);
+            }
+        };
+        animateScroll(0);
+    }
+
+    private _startListeningToDivEvents(): void {
+        if (this._mainDivRef) {
+            this._mainDivRef.addEventListener("scroll", this._onScroll);
+        }
+    }
+
+    private _startListeningToWindowEvents(): void {
+        window.addEventListener("scroll", this._windowOnScroll);
+        if (this.props.canChangeSize) {
+            window.addEventListener("resize", this._onWindowResize);
+        }
+    }
+
+    private _onWindowResize(): void {
+        if (this.props.onSizeChanged && this.props.useWindowScroll) {
+            this.props.onSizeChanged({height: window.innerHeight, width: window.innerWidth});
+        }
+    }
+
+    private _windowOnScroll(): void {
+        if (this.props.onScroll) {
+            if (this.props.horizontal) {
+                this.scrollEvent.nativeEvent.contentOffset.y = 0;
+                this.scrollEvent.nativeEvent.contentOffset.x = window.scrollX - this.props.distanceFromWindow;
+            } else {
+                this.scrollEvent.nativeEvent.contentOffset.x = 0;
+                this.scrollEvent.nativeEvent.contentOffset.y = window.scrollY - this.props.distanceFromWindow;
+            }
+            this.props.onScroll(this.scrollEvent);
+        }
+    }
+
+    private _onScroll(): void {
+        if (this.props.onScroll) {
+            if (this.props.horizontal) {
+                this.scrollEvent.nativeEvent.contentOffset.y = 0;
+                this.scrollEvent.nativeEvent.contentOffset.x = this._mainDivRef ? this._mainDivRef.scrollLeft : 0;
+            } else {
+                this.scrollEvent.nativeEvent.contentOffset.x = 0;
+                this.scrollEvent.nativeEvent.contentOffset.y = this._mainDivRef ? this._mainDivRef.scrollTop : 0;
+            }
+            this.props.onScroll(this.scrollEvent);
+        }
+    }
+
+    private _easeInOut(currentTime: number, start: number, change: number, duration: number): number {
+        currentTime /= duration / 2;
+        if (currentTime < 1) {
+            return change / 2 * currentTime * currentTime + start;
+        }
+        currentTime -= 1;
+        return (-change) / 2 * (currentTime * (currentTime - 2) - 1) + start;
+    }
+}

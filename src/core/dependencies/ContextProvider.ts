@@ -3,26 +3,18 @@
  * back navigation in android when previous fragments onDestroyView has already been called. Since recyclerlistview only renders visible items you
  * can instantly jump to any location.
  *
- * Extend this class and implement the given methods to preserve context.
+ * Use this interface and implement the given methods to preserve context.
  */
-export default class ContextProvider {
+export default abstract class ContextProvider {
     //Should be of string type, anything which is unique in global scope of your application
-    getUniqueKey() {
-
-    }
+    public abstract getUniqueKey(): string;
 
     //Let recycler view save a value, you can use apis like session storage/async storage here
-    save(key, value) {
-
-    }
+    public abstract save(key: string, value: string | number): void;
 
     //Get value for a key
-    get(key) {
-
-    }
+    public abstract get(key: string): string | number;
 
     //Remove key value pair
-    remove(key) {
-
-    }
+    public abstract remove(key: string): void;
 }

@@ -1,31 +1,37 @@
 {
   "name": "recyclerlistview",
-  "version": "1.1.5",
+  "version": "1.2.0-beta.8",
   "description": "The listview that you need and deserve. It was built for performance, uses cell recycling to achieve smooth scrolling.",
   "main": "dist/reactnative/index.js",
+  "types": "dist/reactnative/index.d.ts",
   "scripts": {
     "build": "sh scripts/build.sh",
+    "clean": "sh scripts/clean.sh",
     "release": "sh scripts/publish-latest.sh",
-    "release-beta": "npm run build && npm publish --tag beta"
+    "release-beta": "sh scripts/publish-beta.sh"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Flipkart/ReactEssentials"
+    "url": "https://github.com/Flipkart/recyclerlistview"
   },
   "author": "naqvitalha <naqvitalha@gmail.com>",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/Flipkart/ReactEssentials/issues"
+    "url": "https://github.com/Flipkart/recyclerlistview/issues"
   },
-  "homepage": "https://github.com/Flipkart/ReactEssentials",
+  "homepage": "https://github.com/Flipkart/recyclerlistview",
   "dependencies": {
-    "lodash": "4.17.4",
-    "prop-types": "15.5.8"
+    "lodash-es": "4.17.4",
+    "prop-types": "15.5.8",
+    "ts-null-or-undefined": "0.0.5"
+  },
+  "peerDependencies": {
+    "react": ">= 15.2.1",
+    "react-native": ">= 0.30.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-preset-env": "^1.6.0",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-0": "^6.24.1"
+    "@types/lodash-es": "4.17.0",
+    "@types/prop-types": "15.5.2",
+    "@types/react-native": "0.49.5"
   }
 }
