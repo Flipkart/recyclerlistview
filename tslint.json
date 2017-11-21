@@ -4,7 +4,9 @@
     ],
     "rules": {
         "max-line-length": {
-            "options": [160]
+            "options": [
+                160
+            ]
         },
         "typedef": [
             true,
