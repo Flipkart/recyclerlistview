@@ -151,16 +151,16 @@ export default class VirtualRenderer {
     public getInitialOffset(): Point {
         let offset = { x: 0, y: 0 };
         if (this._params) {
-            const initialRenderIndex = Default.value(this._params.initialRenderIndex, 0);
+            const initialRenderIndex = Default.value<number>(this._params.initialRenderIndex, 0);
             if (initialRenderIndex > 0 && this._layoutManager) {
                 offset = this._layoutManager.getOffsetForIndex(initialRenderIndex);
                 this._params.initialOffset = this._params.isHorizontal ? offset.x : offset.y;
             } else {
                 if (this._params.isHorizontal) {
-                    offset.x = Default.value(this._params.initialOffset, 0);
+                    offset.x = Default.value<number>(this._params.initialOffset, 0);
                     offset.y = 0;
                 } else {
-                    offset.y = Default.value(this._params.initialOffset, 0);
+                    offset.y = Default.value<number>(this._params.initialOffset, 0);
                     offset.x = 0;
                 }
             }
@@ -172,7 +172,9 @@ export default class VirtualRenderer {
         this.getInitialOffset();
         this._recyclePool = new RecycleItemPool();
         if (this._params) {
-            this._viewabilityTracker = new ViewabilityTracker(Default.value(this._params.renderAheadOffset, 0), Default.value(this._params.initialOffset, 0));
+            this._viewabilityTracker = new ViewabilityTracker(
+                Default.value<number>(this._params.renderAheadOffset, 0),
+                Default.value<number>(this._params.initialOffset, 0));
         } else {
             this._viewabilityTracker = new ViewabilityTracker(0, 0);
         }
@@ -202,7 +204,7 @@ export default class VirtualRenderer {
             this._viewabilityTracker.setDimensions({
                 height: this._dimensions.height,
                 width: this._dimensions.width,
-            }, Default.value(this._params.isHorizontal, false));
+            }, Default.value<boolean>(this._params.isHorizontal, false));
         } else {
             throw new CustomError(RecyclerListViewExceptions.initializationException);
         }

@@ -461,7 +461,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             const windowBound = this.props.isHorizontal ? layout.width - this._layout.width : layout.height - this._layout.height;
             const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
             const lastOffset = viewabilityTracker ? viewabilityTracker.getLastOffset() : 0;
-            if (windowBound - lastOffset <= Default.value(this.props.onEndReachedThreshold, 0)) {
+            if (windowBound - lastOffset <= Default.value<number>(this.props.onEndReachedThreshold, 0)) {
                 if (!this._onEndReachedCalled) {
                     this._onEndReachedCalled = true;
                     this.props.onEndReached();

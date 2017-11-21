@@ -23,7 +23,7 @@
   "dependencies": {
     "lodash-es": "4.17.4",
     "prop-types": "15.5.8",
-    "ts-object-utils": "0.0.4"
+    "ts-object-utils": "0.0.5"
   },
   "peerDependencies": {
     "react": ">= 15.2.1",
