@@ -71,9 +71,9 @@ const refreshRequestDebouncer = debounce((executable: () => void) => {
 
 export interface RecyclerListViewProps {
     layoutProvider: LayoutProvider;
-    dataProvider: DataProvider<any>;
+    dataProvider: DataProvider;
     contextProvider: ContextProvider;
-    rowRenderer: (type: string | number, data: any, index: number) => JSX.Element;
+    rowRenderer: (type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null;
     renderAheadOffset: number;
     isHorizontal: boolean;
     onScroll: (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => void;
@@ -121,9 +121,9 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         itemCount: 0,
         renderAheadOffset: 250,
     };
-    private _layout: Dimension = {height: 0, width: 0};
+    private _layout: Dimension = { height: 0, width: 0 };
     private _pendingScrollToOffset: Point | null = null;
-    private _tempDim: Dimension = { height : 0, width : 0};
+    private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
     private _cachedLayouts: Rect[] | null = null;
     private _scrollComponent: BaseScrollComponent | null;
@@ -184,7 +184,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                         const layoutManager = this._virtualRenderer.getLayoutManager();
                         if (layoutManager) {
                             const layoutsToCache = layoutManager.getLayouts();
-                            this.props.contextProvider.save(uniqueKey + "_layouts", JSON.stringify({layoutArray: layoutsToCache}));
+                            this.props.contextProvider.save(uniqueKey + "_layouts", JSON.stringify({ layoutArray: layoutsToCache }));
                         }
                     }
                 }
@@ -335,7 +335,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
     private _renderStackWhenReady(stack: RenderStack): void {
         this.setState(() => {
-            return {renderStack: stack};
+            return { renderStack: stack };
         });
     }
 
@@ -399,17 +399,17 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             }
             return (
                 <ViewRenderer key={itemMeta.key} data={data}
-                              dataHasChanged={this._dataHasChanged}
-                              x={itemRect.x}
-                              y={itemRect.y}
-                              layoutType={type}
-                              index={dataIndex}
-                              forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
-                              isHorizontal={this.props.isHorizontal}
-                              onSizeChanged={this._onViewContainerSizeChange}
-                              childRenderer={this.props.rowRenderer}
-                              height={itemRect.height}
-                              width={itemRect.width}/>
+                    dataHasChanged={this._dataHasChanged}
+                    x={itemRect.x}
+                    y={itemRect.y}
+                    layoutType={type}
+                    index={dataIndex}
+                    forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
+                    isHorizontal={this.props.isHorizontal}
+                    onSizeChanged={this._onViewContainerSizeChange}
+                    childRenderer={this.props.rowRenderer}
+                    height={itemRect.height}
+                    width={itemRect.width} />
             );
         }
         return null;

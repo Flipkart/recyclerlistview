@@ -2,15 +2,15 @@
  * You can create a new instance or inherit and override default methods
  * Allows access to data and size. Clone with rows creates a new data provider and let listview know where to calculate row layout from.
  */
-export default class DataProvider<T> {
+export default class DataProvider {
 
-    public rowHasChanged: (r1: T, r2: T) => boolean;
+    public rowHasChanged: (r1: any, r2: any) => boolean;
 
     private _firstIndexToProcess: number;
     private _size: number;
-    private _data: T[];
+    private _data: any[];
 
-    constructor(rowHasChanged: (r1: T, r2: T) => boolean) {
+    constructor(rowHasChanged: (r1: any, r2: any) => boolean) {
         if (rowHasChanged) {
             this.rowHasChanged = rowHasChanged;
         }
@@ -18,7 +18,7 @@ export default class DataProvider<T> {
         this._size = 0;
     }
 
-    public getDataForIndex(index: number): T {
+    public getDataForIndex(index: number): any {
         return this._data[index];
     }
 
@@ -31,7 +31,7 @@ export default class DataProvider<T> {
     }
 
     //No need to override this one
-    public cloneWithRows(newData: T[]): DataProvider<T> {
+    public cloneWithRows(newData: any[]): DataProvider {
         const dp = new DataProvider(this.rowHasChanged);
         const newSize = newData.length;
         const iterCount = Math.min(this._size, newSize);
