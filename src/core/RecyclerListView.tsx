@@ -21,7 +21,7 @@
 import debounce from "lodash-es/debounce";
 import * as PropTypes from "prop-types";
 import * as React from "react";
-import { ObjectUtil } from "ts-null-or-undefined";
+import { ObjectUtil } from "ts-object-utils";
 import ContextProvider from "./dependencies/ContextProvider";
 import DataProvider from "./dependencies/DataProvider";
 import LayoutProvider, { Dimension } from "./dependencies/LayoutProvider";
@@ -30,7 +30,7 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 import LayoutManager, { Point, Rect } from "./layoutmanager/LayoutManager";
 import Messages from "./messages/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
-import { default as BaseScrollView, ScrollEvent } from "./scrollcomponent/BaseScrollView";
+import BaseScrollView, { ScrollEvent } from "./scrollcomponent/BaseScrollView";
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 
@@ -72,24 +72,24 @@ const refreshRequestDebouncer = debounce((executable: () => void) => {
 export interface RecyclerListViewProps {
     layoutProvider: LayoutProvider;
     dataProvider: DataProvider;
-    contextProvider: ContextProvider;
     rowRenderer: (type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null;
-    renderAheadOffset: number;
-    isHorizontal: boolean;
-    onScroll: (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => void;
-    onEndReached: () => void;
-    onEndReachedThreshold: number;
-    onVisibleIndexesChanged: TOnItemStatusChanged;
-    renderFooter: () => JSX.Element;
-    externalScrollView: BaseScrollView;
-    initialOffset: number;
-    initialRenderIndex: number;
-    scrollThrottle: number;
-    canChangeSize: boolean;
-    distanceFromWindow: number;
-    useWindowScroll: boolean;
-    disableRecycling: boolean;
-    forceNonDeterministicRendering: boolean;
+    contextProvider?: ContextProvider;
+    renderAheadOffset?: number;
+    isHorizontal?: boolean;
+    onScroll?: (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => void;
+    onEndReached?: () => void;
+    onEndReachedThreshold?: number;
+    onVisibleIndexesChanged?: TOnItemStatusChanged;
+    renderFooter?: () => JSX.Element | JSX.Element[] | null;
+    externalScrollView?: BaseScrollView;
+    initialOffset?: number;
+    initialRenderIndex?: number;
+    scrollThrottle?: number;
+    canChangeSize?: boolean;
+    distanceFromWindow?: number;
+    useWindowScroll?: boolean;
+    disableRecycling?: boolean;
+    forceNonDeterministicRendering?: boolean;
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
@@ -125,14 +125,13 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     private _pendingScrollToOffset: Point | null = null;
     private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
-    private _cachedLayouts: Rect[] | null = null;
+    private _cachedLayouts?: Rect[];
     private _scrollComponent: BaseScrollComponent | null;
 
     constructor(props: RecyclerListViewProps) {
         super(props);
         this._onScroll = this._onScroll.bind(this);
         this._onSizeChanged = this._onSizeChanged.bind(this);
-        this._onVisibleItemsChanged = this._onVisibleItemsChanged.bind(this);
         this._dataHasChanged = this._dataHasChanged.bind(this);
         this.scrollToOffset = this.scrollToOffset.bind(this);
         this._renderStackWhenReady = this._renderStackWhenReady.bind(this);
@@ -153,7 +152,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         if (!this.props.onVisibleIndexesChanged) {
             this._virtualRenderer.removeVisibleItemsListener();
         } else {
-            this._virtualRenderer.attachVisibleItemsListener(this._onVisibleItemsChanged);
+            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged);
         }
     }
 
@@ -277,7 +276,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
         if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
-            this._virtualRenderer.setLayoutManager(new LayoutManager(newProps.layoutProvider, this._layout, newProps.isHorizontal, null));
+            this._virtualRenderer.setLayoutManager(new LayoutManager(newProps.layoutProvider, this._layout, newProps.isHorizontal));
             this._virtualRenderer.refreshWithAnchor();
             this._refreshViewability();
         } else if (this.props.dataProvider !== newProps.dataProvider) {
@@ -342,7 +341,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     private _initTrackers(): void {
         this._assertDependencyPresence(this.props);
         if (this.props.onVisibleIndexesChanged) {
-            this._virtualRenderer.attachVisibleItemsListener(this._onVisibleItemsChanged);
+            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged);
         }
         this._params = {
             initialOffset: this.props.initialOffset ? this.props.initialOffset : this._initialOffset,
@@ -362,12 +361,6 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         } else {
             this._virtualRenderer.startViewabilityTracker();
         }
-        this._cachedLayouts = null;
-    }
-
-    private _onVisibleItemsChanged(all: number[], now: number[], notNow: number[]): void {
-        this.props.onVisibleIndexesChanged(all, now, notNow);
-
     }
 
     private _assertDependencyPresence(props: RecyclerListViewProps): void {
@@ -468,7 +461,8 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             const windowBound = this.props.isHorizontal ? layout.width - this._layout.width : layout.height - this._layout.height;
             const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
             const lastOffset = viewabilityTracker ? viewabilityTracker.getLastOffset() : 0;
-            if (windowBound - lastOffset <= this.props.onEndReachedThreshold) {
+            const endThreshold = !ObjectUtil.isNullOrUndefined(this.props.onEndReachedThreshold) ? this.props.onEndReachedThreshold : 0;
+            if (windowBound - lastOffset <= endThreshold) {
                 if (!this._onEndReachedCalled) {
                     this._onEndReachedCalled = true;
                     this.props.onEndReached();

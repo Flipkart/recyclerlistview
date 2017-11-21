@@ -16,6 +16,7 @@ export default class ScrollComponent extends BaseScrollComponent {
         externalScrollView: ScrollViewer,
         isHorizontal: false,
         scrollThrottle: 16,
+        canChangeSize: false,
     };
     private _height: number;
     private _width: number;
@@ -32,7 +33,7 @@ export default class ScrollComponent extends BaseScrollComponent {
 
     public scrollTo(x: number, y: number, animated: boolean): void {
         if (this._scrollViewRef) {
-            this._scrollViewRef.scrollTo({x, y, animated});
+            this._scrollViewRef.scrollTo({ x, y, animated });
         }
     }
 
@@ -40,10 +41,10 @@ export default class ScrollComponent extends BaseScrollComponent {
         const Scroller = this.props.externalScrollView as any; //TSI
         return (
             <Scroller ref={(scrollView: BaseScrollView) => this._scrollViewRef as (BaseScrollView | null)}
-                          {...this.props}
-                          horizontal={this.props.isHorizontal}
-                          onScroll={this._onScroll}
-                          onSizeChanged={this._onSizeChanged}>
+                {...this.props}
+                horizontal={this.props.isHorizontal}
+                onScroll={this._onScroll}
+                onSizeChanged={this._onSizeChanged}>
 
                 <div style={{
                     height: this.props.contentHeight,

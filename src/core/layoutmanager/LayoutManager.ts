@@ -15,7 +15,7 @@ export default class LayoutManager {
     private _layouts: Rect[];
     private _isHorizontal: boolean;
 
-    constructor(layoutProvider: LayoutProvider, dimensions: Dimension, isHorizontal: boolean, cachedLayouts: Rect[] | null) {
+    constructor(layoutProvider: LayoutProvider, dimensions: Dimension, isHorizontal: boolean = false, cachedLayouts?: Rect[]) {
         this._layoutProvider = layoutProvider;
         this._window = dimensions;
         this._totalHeight = 0;
@@ -25,7 +25,7 @@ export default class LayoutManager {
     }
 
     public getLayoutDimension(): Dimension {
-        return {height: this._totalHeight, width: this._totalWidth};
+        return { height: this._totalHeight, width: this._totalWidth };
     }
 
     public getLayouts(): Rect[] {
@@ -34,7 +34,7 @@ export default class LayoutManager {
 
     public getOffsetForIndex(index: number): Point {
         if (this._layouts.length > index) {
-            return {x: this._layouts[index].x, y: this._layouts[index].y};
+            return { x: this._layouts[index].x, y: this._layouts[index].y };
         } else {
             throw new CustomError({
                 message: "No layout available for index: " + index,
@@ -77,7 +77,7 @@ export default class LayoutManager {
 
         const oldItemCount = this._layouts.length;
 
-        const itemDim = {height: 0, width: 0};
+        const itemDim = { height: 0, width: 0 };
         let itemRect = null;
 
         let oldLayout = null;
@@ -108,7 +108,7 @@ export default class LayoutManager {
 
             //TODO: Talha creating array upfront will speed this up
             if (i > oldItemCount - 1) {
-                this._layouts.push({x: startX, y: startY, height: itemDim.height, width: itemDim.width});
+                this._layouts.push({ x: startX, y: startY, height: itemDim.height, width: itemDim.width });
             } else {
                 itemRect = this._layouts[i];
                 itemRect.x = startX;
