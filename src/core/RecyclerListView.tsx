@@ -21,7 +21,7 @@
 import debounce from "lodash-es/debounce";
 import * as PropTypes from "prop-types";
 import * as React from "react";
-import { ObjectUtil } from "ts-object-utils";
+import { ObjectUtil, Default } from "ts-object-utils";
 import ContextProvider from "./dependencies/ContextProvider";
 import DataProvider from "./dependencies/DataProvider";
 import LayoutProvider, { Dimension } from "./dependencies/LayoutProvider";
@@ -461,8 +461,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             const windowBound = this.props.isHorizontal ? layout.width - this._layout.width : layout.height - this._layout.height;
             const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
             const lastOffset = viewabilityTracker ? viewabilityTracker.getLastOffset() : 0;
-            const endThreshold = !ObjectUtil.isNullOrUndefined(this.props.onEndReachedThreshold) ? this.props.onEndReachedThreshold : 0;
-            if (windowBound - lastOffset <= endThreshold) {
+            if (windowBound - lastOffset <= Default.value(this.props.onEndReachedThreshold, 0)) {
                 if (!this._onEndReachedCalled) {
                     this._onEndReachedCalled = true;
                     this.props.onEndReached();

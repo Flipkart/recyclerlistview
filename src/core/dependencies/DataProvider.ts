@@ -6,20 +6,22 @@ export default class DataProvider {
 
     public rowHasChanged: (r1: any, r2: any) => boolean;
 
-    private _firstIndexToProcess: number;
-    private _size: number;
-    private _data: any[];
+    private _firstIndexToProcess: number = 0;
+    private _size: number = 0;
+    private _data: any[] = [];
 
     constructor(rowHasChanged: (r1: any, r2: any) => boolean) {
         if (rowHasChanged) {
             this.rowHasChanged = rowHasChanged;
         }
-        this._firstIndexToProcess = 0;
-        this._size = 0;
     }
 
     public getDataForIndex(index: number): any {
         return this._data[index];
+    }
+
+    public getAllData(): any[] {
+        return this._data;
     }
 
     public getSize(): number {

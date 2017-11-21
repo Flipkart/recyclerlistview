@@ -157,10 +157,10 @@ export default class VirtualRenderer {
                 this._params.initialOffset = this._params.isHorizontal ? offset.x : offset.y;
             } else {
                 if (this._params.isHorizontal) {
-                    offset.x = this._params.initialOffset ? this._params.initialOffset : 0;
+                    offset.x = Default.value(this._params.initialOffset, 0);
                     offset.y = 0;
                 } else {
-                    offset.y = this._params.initialOffset ? this._params.initialOffset : 0;
+                    offset.y = Default.value(this._params.initialOffset, 0);
                     offset.x = 0;
                 }
             }
