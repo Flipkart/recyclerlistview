@@ -20,7 +20,17 @@ export interface ViewRendererProps<T> {
     index: number;
     forceNonDeterministicRendering?: boolean;
     isHorizontal?: boolean;
+    extendedState?: object;
 }
 export default class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {
-
+    public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
+        return (
+            this.props.x !== newProps.x ||
+            this.props.y !== newProps.y ||
+            this.props.width !== newProps.width ||
+            this.props.height !== newProps.height ||
+            this.props.extendedState !== newProps.extendedState ||
+            (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data))
+        );
+    }
 }

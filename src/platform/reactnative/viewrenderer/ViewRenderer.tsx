@@ -10,7 +10,7 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
  * This is second of the two things recycler works on. Implemented both for web and react native.
  */
 export default class ViewRenderer extends BaseViewRenderer<any> {
-    private _dim: Dimension = {width: 0, height: 0};
+    private _dim: Dimension = { width: 0, height: 0 };
     private _isFirstLayoutDone: boolean = false;
 
     constructor(props: ViewRendererProps<any>) {
@@ -18,25 +18,17 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         this._onLayout = this._onLayout.bind(this);
     }
 
-    public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
-        return (this.props.x !== newProps.x ||
-            this.props.y !== newProps.y ||
-            this.props.width !== newProps.width ||
-            this.props.height !== newProps.height ||
-            (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data)));
-    }
-
     public render(): JSX.Element {
         if (this.props.forceNonDeterministicRendering) {
             return (
                 <View onLayout={this._onLayout}
-                      style={{
-                          flexDirection: this.props.isHorizontal ? "column" : "row",
-                          left: this.props.x,
-                          opacity: this._isFirstLayoutDone ? 1 : 0,
-                          position: "absolute",
-                          top: this.props.y,
-                      }}>
+                    style={{
+                        flexDirection: this.props.isHorizontal ? "column" : "row",
+                        left: this.props.x,
+                        opacity: this._isFirstLayoutDone ? 1 : 0,
+                        position: "absolute",
+                        top: this.props.y,
+                    }}>
                     {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
                 </View>
             );
@@ -48,7 +40,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                         left: 0,
                         position: "absolute",
                         top: 0,
-                        transform: [{translateX: this.props.x}, {translateY: this.props.y}],
+                        transform: [{ translateX: this.props.x }, { translateY: this.props.y }],
                         width: this.props.width,
                     }}>
                     {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
