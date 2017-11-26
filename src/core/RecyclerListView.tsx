@@ -540,8 +540,8 @@ RecyclerListView.propTypes = {
     //Rendered dimensions will be used to relayout items. Slower if enabled.
     forceNonDeterministicRendering: PropTypes.bool,
 
-    //In some cases the data passed at row level may not have all state the item depends on, you can keep all other states
-    //externally and pass it down via this prop. Changing this object will cause everything to re-render. Make sure you don't change
+    //In some cases the data passed at row level may not contain all the info that the item depends upon, you can keep all other info
+    //outside and pass it down via this prop. Changing this object will cause everything to re-render. Make sure you don't change
     //it often to ensure performance. Re-renders are heavy.
     extendedState: PropTypes.object,
 };
