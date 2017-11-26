@@ -29,7 +29,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                         position: "absolute",
                         top: this.props.y,
                     }}>
-                    {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
+                    {this.renderChild()}
                 </View>
             );
         } else {
@@ -43,7 +43,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                         transform: [{ translateX: this.props.x }, { translateY: this.props.y }],
                         width: this.props.width,
                     }}>
-                    {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
+                    {this.renderChild()}
                 </View>
             );
         }

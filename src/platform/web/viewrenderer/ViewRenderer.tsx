@@ -45,7 +45,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             };
         return (
             <div ref={(div) => this._mainDiv = div as HTMLDivElement | null} style={styleObj}>
-                {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
+                {this.renderChild()}
             </div>
         );
     }
