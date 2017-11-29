@@ -50,7 +50,11 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     }
 
     private _onLayout(event: LayoutChangeEvent): void {
-        if (this.props.height !== event.nativeEvent.layout.height || this.props.width !== event.nativeEvent.layout.width) {
+        const xDiff = Math.abs(this.props.x - event.nativeEvent.layout.x);
+        const yDiff = Math.abs(this.props.y - event.nativeEvent.layout.y);
+        if (xDiff < 1 && yDiff < 1 &&
+            (this.props.height !== event.nativeEvent.layout.height ||
+                this.props.width !== event.nativeEvent.layout.width)) {
             this._dim.height = event.nativeEvent.layout.height;
             this._dim.width = event.nativeEvent.layout.width;
             if (this.props.onSizeChanged) {
