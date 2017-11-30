@@ -90,6 +90,7 @@ export interface RecyclerListViewProps {
     useWindowScroll?: boolean;
     disableRecycling?: boolean;
     forceNonDeterministicRendering?: boolean;
+    extendedState?: object;
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
@@ -402,7 +403,8 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                     onSizeChanged={this._onViewContainerSizeChange}
                     childRenderer={this.props.rowRenderer}
                     height={itemRect.height}
-                    width={itemRect.width} />
+                    width={itemRect.width}
+                    extendedState={this.props.extendedState} />
             );
         }
         return null;
@@ -537,4 +539,9 @@ RecyclerListView.propTypes = {
     //Default is false, if enabled dimensions provided in layout provider will not be strictly enforced.
     //Rendered dimensions will be used to relayout items. Slower if enabled.
     forceNonDeterministicRendering: PropTypes.bool,
+
+    //In some cases the data passed at row level may not contain all the info that the item depends upon, you can keep all other info
+    //outside and pass it down via this prop. Changing this object will cause everything to re-render. Make sure you don't change
+    //it often to ensure performance. Re-renders are heavy.
+    extendedState: PropTypes.object,
 };

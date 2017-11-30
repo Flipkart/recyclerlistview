@@ -11,7 +11,7 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
  */
 export default class ViewRenderer extends BaseViewRenderer<any> {
 
-    private _dim: Dimension = {width: 0, height: 0};
+    private _dim: Dimension = { width: 0, height: 0 };
     private _isFirstLayoutDone: boolean = false;
     private _mainDiv: HTMLDivElement | null;
 
@@ -21,16 +21,6 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
 
     public componentDidUpdate(): void {
         this._checkSizeChange();
-    }
-
-    public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
-        return (
-            this.props.x !== newProps.x ||
-            this.props.y !== newProps.y ||
-            this.props.width !== newProps.width ||
-            this.props.height !== newProps.height ||
-            (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data))
-        );
     }
 
     public render(): JSX.Element {
@@ -55,7 +45,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             };
         return (
             <div ref={(div) => this._mainDiv = div as HTMLDivElement | null} style={styleObj}>
-                {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
+                {this.renderChild()}
             </div>
         );
     }

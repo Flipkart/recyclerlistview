@@ -10,7 +10,7 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
  * This is second of the two things recycler works on. Implemented both for web and react native.
  */
 export default class ViewRenderer extends BaseViewRenderer<any> {
-    private _dim: Dimension = {width: 0, height: 0};
+    private _dim: Dimension = { width: 0, height: 0 };
     private _isFirstLayoutDone: boolean = false;
 
     constructor(props: ViewRendererProps<any>) {
@@ -18,26 +18,18 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         this._onLayout = this._onLayout.bind(this);
     }
 
-    public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
-        return (this.props.x !== newProps.x ||
-            this.props.y !== newProps.y ||
-            this.props.width !== newProps.width ||
-            this.props.height !== newProps.height ||
-            (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data)));
-    }
-
     public render(): JSX.Element {
         if (this.props.forceNonDeterministicRendering) {
             return (
                 <View onLayout={this._onLayout}
-                      style={{
-                          flexDirection: this.props.isHorizontal ? "column" : "row",
-                          left: this.props.x,
-                          opacity: this._isFirstLayoutDone ? 1 : 0,
-                          position: "absolute",
-                          top: this.props.y,
-                      }}>
-                    {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
+                    style={{
+                        flexDirection: this.props.isHorizontal ? "column" : "row",
+                        left: this.props.x,
+                        opacity: this._isFirstLayoutDone ? 1 : 0,
+                        position: "absolute",
+                        top: this.props.y,
+                    }}>
+                    {this.renderChild()}
                 </View>
             );
         } else {
@@ -48,17 +40,22 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                         left: 0,
                         position: "absolute",
                         top: 0,
-                        transform: [{translateX: this.props.x}, {translateY: this.props.y}],
+                        transform: [{ translateX: this.props.x }, { translateY: this.props.y }],
                         width: this.props.width,
                     }}>
-                    {this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index)}
+                    {this.renderChild()}
                 </View>
             );
         }
     }
 
     private _onLayout(event: LayoutChangeEvent): void {
-        if (this.props.height !== event.nativeEvent.layout.height || this.props.width !== event.nativeEvent.layout.width) {
+        //Preventing layout thrashing in super fast scrolls where RN messes up onLayout event
+        const xDiff = Math.abs(this.props.x - event.nativeEvent.layout.x);
+        const yDiff = Math.abs(this.props.y - event.nativeEvent.layout.y);
+        if (xDiff < 1 && yDiff < 1 &&
+            (this.props.height !== event.nativeEvent.layout.height ||
+                this.props.width !== event.nativeEvent.layout.width)) {
             this._dim.height = event.nativeEvent.layout.height;
             this._dim.width = event.nativeEvent.layout.width;
             if (this.props.onSizeChanged) {

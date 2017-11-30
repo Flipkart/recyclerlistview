@@ -12,7 +12,7 @@ export interface ViewRendererProps<T> {
     y: number;
     height: number;
     width: number;
-    childRenderer: (type: string | number, data: T, index: number) => JSX.Element | JSX.Element[] | null;
+    childRenderer: (type: string | number, data: T, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
     layoutType: string | number;
     dataHasChanged: (r1: T, r2: T) => boolean;
     onSizeChanged: (dim: Dimension, index: number) => void;
@@ -20,7 +20,20 @@ export interface ViewRendererProps<T> {
     index: number;
     forceNonDeterministicRendering?: boolean;
     isHorizontal?: boolean;
+    extendedState?: object;
 }
 export default class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {
-
+    public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
+        return (
+            this.props.x !== newProps.x ||
+            this.props.y !== newProps.y ||
+            this.props.width !== newProps.width ||
+            this.props.height !== newProps.height ||
+            this.props.extendedState !== newProps.extendedState ||
+            (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data))
+        );
+    }
+    protected renderChild(): JSX.Element | JSX.Element[] | null {
+        return this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index, this.props.extendedState);
+    }
 }
