@@ -12,6 +12,7 @@ and UICollectionView on iOS.
 * **[Overview and features](#overview-and-features)**
 * **[Why?](#why)**
 * **[Demo](#demo)**
+* **[Props](#props)**
 * **[Sample Code](#sample-code)**
 * **[License](#license)**
 * **[Contact us](#contact-us)**
@@ -53,7 +54,9 @@ not be as fast.
 
 ## Demo
 
-Expo snack demo: https://snack.expo.io/B1GYad52b
+Expo snack demos: 
+https://snack.expo.io/rksoUdx-f
+https://snack.expo.io/B1GYad52b
 
 Sample project: https://github.com/naqvitalha/travelMate
 
@@ -63,10 +66,13 @@ Watch Demo Video: https://www.youtube.com/watch?v=Tnv4HMmPgMc
 
 [![Watch Video](https://img.youtube.com/vi/Tnv4HMmPgMc/0.jpg)](https://www.youtube.com/watch?v=Tnv4HMmPgMc)
 
+## Props
+For full feature set have a look at prop definitions of [RecyclerListView](https://github.com/Flipkart/recyclerlistview/blob/593b7636264a49eb17bf75f88513420b8f0c9b85/src/core/RecyclerListView.tsx#L478-L547)
+(bottom of the file).
+
 ## Sample Code
 Please go through DataProvider, LayoutProvider and rowRenderer in detail. Those are the basic building blocks of this component. For more details dive into
-the source code, lot of relevant comments have been added to help you out. For full feature set have a look at prop definitions of [RecyclerListView](src/recyclerlistview/RecyclerListView.js)
-(bottom of the file).
+the source code, lot of relevant comments have been added to help you out. 
 
 ```js
 /***
