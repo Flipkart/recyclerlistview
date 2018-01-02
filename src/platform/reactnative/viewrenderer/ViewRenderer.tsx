@@ -27,6 +27,7 @@ const customAnimFrame = isWeb ?
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _isFirstLayoutDone: boolean = false;
+    private _isUnmounted: boolean = false;
     private _animated = {
         opacity: new Animated.Value(0),
         opacityTracker: 0,
@@ -61,6 +62,9 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         this._animated.x.setValue(this.props.x);
         this._animated.y.setValue(this.props.y);
     }
+    public componentWillUnmount(): void {
+        this._isUnmounted = true;
+    }
     public render(): JSX.Element {
         if (this.props.forceNonDeterministicRendering) {
             return (
@@ -93,8 +97,10 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     }
 
     private _setOpacity(opacity: number): void {
-        this._animated.opacity.setValue(opacity);
-        this._animated.opacityTracker = opacity;
+        if (!this._isUnmounted) {
+            this._animated.opacity.setValue(opacity);
+            this._animated.opacityTracker = opacity;
+        }
     }
 
     private _onLayout(event: LayoutChangeEvent): void {
