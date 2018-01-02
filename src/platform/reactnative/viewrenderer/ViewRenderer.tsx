@@ -43,7 +43,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             this._animated.x.setValue(newProps.x);
             this._animated.y.setValue(newProps.y);
         }
-        if (this.props.forceNonDeterministicRendering && this._animated.opacityTracker === 0 && this._isFirstLayoutDone) {
+        if (newProps.forceNonDeterministicRendering && this._animated.opacityTracker === 0 && this._isFirstLayoutDone) {
             customAnimFrame(() => {
                 this._setOpacity(1);
             });
