@@ -37,6 +37,8 @@ import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
+import { Platform } from "react-native";
+const IS_WEB = Platform.OS === "web";
 //#endif
 
 /***
@@ -46,6 +48,7 @@ import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 //#if [WEB]
 //import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
 //import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
+//const IS_WEB = true;
 //#endif
 
 const refreshRequestDebouncer = debounce((executable: () => void) => {
@@ -104,7 +107,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         initialRenderIndex: 0,
         isHorizontal: false,
         onEndReachedThreshold: 0,
-        renderAheadOffset: 250,
+        renderAheadOffset: IS_WEB ? 1000 : 250,
     };
 
     public static propTypes = {};

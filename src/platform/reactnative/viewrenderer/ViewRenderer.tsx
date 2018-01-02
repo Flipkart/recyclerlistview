@@ -3,9 +3,8 @@ import { LayoutChangeEvent, View, Animated, Platform } from "react-native";
 import { Dimension } from "../../../core/dependencies/LayoutProvider";
 import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
 
-const isWeb = Platform.OS === "web";
 const requestDeferrer = requestAnimationFrame ? requestAnimationFrame : (func: () => void) => { setTimeout(func, 20); };
-const customAnimFrame = isWeb ?
+const customAnimFrame = Platform.OS === "web" ?
     (func: () => void) => {
         requestDeferrer(() => {
             requestDeferrer(() => {
