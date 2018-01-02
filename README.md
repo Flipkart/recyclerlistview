@@ -17,7 +17,7 @@ and UICollectionView on iOS.
 * **[License](#license)**
 * **[Contact us](#contact-us)**
 
-Note: Documentation will be upgraded soon, for now check code comments for clarity and exploring features.
+Note: Documentation will be upgraded soon, for now check code comments for clarity and exploring features. This component is actively tested with React Native Web as well.
 
 
 ## Overview and features
