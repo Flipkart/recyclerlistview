@@ -75,7 +75,7 @@ Please go through DataProvider, LayoutProvider and rowRenderer in detail. Those 
 the source code, lot of relevant comments have been added to help you out. 
 
 ## Other projects:
-[Mini calendar Expo project by SudoPlz](https://expo.io/@sudoplz/minicalexample)
+[Mini calendar Expo project](https://expo.io/@sudoplz/minicalexample) by [SudoPlz](https://github.com/SudoPlz)
 ```js
 /***
  Use this component inside your React Native Application.
