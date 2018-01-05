@@ -74,6 +74,8 @@ For full feature set have a look at prop definitions of [RecyclerListView](https
 Please go through DataProvider, LayoutProvider and rowRenderer in detail. Those are the basic building blocks of this component. For more details dive into
 the source code, lot of relevant comments have been added to help you out. 
 
+## Other projects:
+[Mini calendar Expo project by SudoPlz](https://expo.io/@sudoplz/minicalexample)
 ```js
 /***
  Use this component inside your React Native Application.
