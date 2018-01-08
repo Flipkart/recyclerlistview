@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Dimension } from "../dependencies/LayoutProvider";
+import LayoutProvider, { Dimension } from "../dependencies/LayoutProvider";
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
@@ -21,6 +21,7 @@ export interface ViewRendererProps<T> {
     forceNonDeterministicRendering?: boolean;
     isHorizontal?: boolean;
     extendedState?: object;
+    layoutProvider?: LayoutProvider;
 }
 export default class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
@@ -29,6 +30,7 @@ export default class BaseViewRenderer<T> extends React.Component<ViewRendererPro
             this.props.y !== newProps.y ||
             this.props.width !== newProps.width ||
             this.props.height !== newProps.height ||
+            this.props.layoutProvider !== newProps.layoutProvider ||
             this.props.extendedState !== newProps.extendedState ||
             (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data))
         );
