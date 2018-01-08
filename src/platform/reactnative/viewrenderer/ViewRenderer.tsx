@@ -1,21 +1,7 @@
 import * as React from "react";
-import { LayoutChangeEvent, View, Animated, Platform } from "react-native";
+import { LayoutChangeEvent, View } from "react-native";
 import { Dimension } from "../../../core/dependencies/LayoutProvider";
 import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
-
-const requestDeferrer = requestAnimationFrame ? requestAnimationFrame : (func: () => void) => { setTimeout(func, 20); };
-const customAnimFrame = Platform.OS === "web" ?
-    (func: () => void) => {
-        requestDeferrer(() => {
-            requestDeferrer(() => {
-                requestDeferrer(func);
-            });
-        });
-    }
-    :
-    (func: () => void) => {
-        func();
-    };
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
@@ -26,81 +12,40 @@ const customAnimFrame = Platform.OS === "web" ?
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _isFirstLayoutDone: boolean = false;
-    private _isUnmounted: boolean = false;
-    private _animated = {
-        opacity: new Animated.Value(0),
-        opacityTracker: 0,
-        x: new Animated.Value(0),
-        y: new Animated.Value(0),
-    };
+
     constructor(props: ViewRendererProps<any>) {
         super(props);
         this._onLayout = this._onLayout.bind(this);
     }
 
-    public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
-        if (this.props.x !== newProps.x || this.props.y !== newProps.y) {
-            this._animated.x.setValue(newProps.x);
-            this._animated.y.setValue(newProps.y);
-        }
-        if (newProps.forceNonDeterministicRendering && this._animated.opacityTracker === 0 && this._isFirstLayoutDone) {
-            customAnimFrame(() => {
-                this._setOpacity(1);
-            });
-        }
-        if (this.props.extendedState !== newProps.extendedState ||
-            (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data)) ||
-            this.props.layoutProvider !== newProps.layoutProvider) {
-            return true;
-        }
-        if (!newProps.forceNonDeterministicRendering && (this.props.width !== newProps.width ||
-            this.props.height !== newProps.height)) {
-            return true;
-        }
-        return false;
-    }
-    public componentWillMount(): void {
-        this._animated.x.setValue(this.props.x);
-        this._animated.y.setValue(this.props.y);
-    }
-    public componentWillUnmount(): void {
-        this._isUnmounted = true;
-    }
     public render(): JSX.Element {
         if (this.props.forceNonDeterministicRendering) {
             return (
-                <Animated.View onLayout={this._onLayout}
+                <View onLayout={this._onLayout}
                     style={{
                         flexDirection: this.props.isHorizontal ? "column" : "row",
-                        left: this._animated.x,
-                        opacity: this._animated.opacity,
+                        left: this.props.x,
+                        opacity: this._isFirstLayoutDone ? 1 : 0,
                         position: "absolute",
-                        top: this._animated.y,
+                        top: this.props.y,
                     }}>
                     {this.renderChild()}
-                </Animated.View>
+                </View>
             );
         } else {
             return (
-                <Animated.View
+                <View
                     style={{
                         height: this.props.height,
                         left: 0,
                         position: "absolute",
                         top: 0,
-                        transform: [{ translateX: this._animated.x }, { translateY: this._animated.y }],
+                        transform: [{ translateX: this.props.x }, { translateY: this.props.y }],
                         width: this.props.width,
                     }}>
                     {this.renderChild()}
-                </Animated.View>
+                </View>
             );
-        }
-    }
-
-    private _setOpacity(opacity: number): void {
-        if (!this._isUnmounted) {
-            this._animated.opacity.setValue(opacity);
-            this._animated.opacityTracker = opacity;
         }
     }
 
@@ -118,7 +63,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             }
         } else if (!this._isFirstLayoutDone) {
             this._isFirstLayoutDone = true;
-            this._setOpacity(1);
+            this.forceUpdate();
         }
         this._isFirstLayoutDone = true;
     }
