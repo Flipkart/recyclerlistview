@@ -48,7 +48,9 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 this._setOpacity(1);
             });
         }
-        if (this.props.extendedState !== newProps.extendedState || (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data))) {
+        if (this.props.extendedState !== newProps.extendedState ||
+            (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data)) ||
+            this.props.layoutProvider !== newProps.layoutProvider) {
             return true;
         }
         if (!newProps.forceNonDeterministicRendering && (this.props.width !== newProps.width ||

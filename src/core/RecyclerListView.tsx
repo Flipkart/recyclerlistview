@@ -401,6 +401,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                     y={itemRect.y}
                     layoutType={type}
                     index={dataIndex}
+                    layoutProvider={this.props.layoutProvider}
                     forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
                     isHorizontal={this.props.isHorizontal}
                     onSizeChanged={this._onViewContainerSizeChange}
