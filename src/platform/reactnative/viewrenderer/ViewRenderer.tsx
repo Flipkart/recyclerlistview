@@ -11,13 +11,7 @@ const customAnimFrame = Platform.OS === "web" ?
                 requestDeferrer(func);
             });
         });
-    }
-    :
-    (func: () => void) => {
-        requestDeferrer(() => {
-            requestDeferrer(func);
-        });
-    };
+    } : requestDeferrer;
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
@@ -28,12 +22,8 @@ const customAnimFrame = Platform.OS === "web" ?
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _isFirstLayoutDone: boolean = false;
-    private _isUnmounted: boolean = false;
     private _container: View | null = null;
-    private _animated = {
-        opacity: new Animated.Value(0),
-        opacityTracker: 0,
-    };
+    private _opacity: number = 0;
     constructor(props: ViewRendererProps<any>) {
         super(props);
         this._onLayout = this._onLayout.bind(this);
@@ -41,10 +31,8 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     }
 
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
-        if (newProps.forceNonDeterministicRendering && this._animated.opacityTracker === 0 && this._isFirstLayoutDone) {
-            customAnimFrame(() => {
-                this._setOpacity(1);
-            });
+        if (newProps.forceNonDeterministicRendering && this._opacity === 0 && this._isFirstLayoutDone) {
+            this._setOpacity(1);
         }
         if (this.props.extendedState !== newProps.extendedState ||
             (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data)) ||
@@ -66,44 +54,40 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         }
         return false;
     }
-    public componentWillUnmount(): void {
-        this._isUnmounted = true;
-    }
     public render(): JSX.Element {
-        if (this.props.forceNonDeterministicRendering) {
-            return (
-                <Animated.View ref={this._refGrabber} onLayout = { this._onLayout }
-                    style={{
-                        flexDirection: this.props.isHorizontal ? "column" : "row",
-                        left: this.props.x,
-                        opacity: this._animated.opacity,
-                        position: "absolute",
-                        top: this.props.y,
-                    }}>
-                    {this.renderChild()}
-                </Animated.View>
-            );
-        } else {
-            return (
-                <View ref={this._refGrabber}
-                    style={{
-                        height: this.props.height,
-                        left: this.props.x,
-                        position: "absolute",
-                        top: this.props.y,
-                        width: this.props.width,
-                    }}>
-                    {this.renderChild()}
-                </View>
-            );
-        }
+        return this.props.forceNonDeterministicRendering ?
+            <View ref={this._refGrabber} onLayout={this._onLayout}
+                style={{
+                    flexDirection: this.props.isHorizontal ? "column" : "row",
+                    left: this.props.x,
+                    opacity: this._opacity,
+                    position: "absolute",
+                    top: this.props.y,
+                }}>
+                {this.renderChild()}
+            </View>
+            :
+            <View ref={this._refGrabber}
+                style={{
+                    height: this.props.height,
+                    left: this.props.x,
+                    position: "absolute",
+                    top: this.props.y,
+                    width: this.props.width,
+                }}>
+                {this.renderChild()}
+            </View>;
     }
 
-    private _setOpacity(opacity: number): void {
-        if (!this._isUnmounted) {
-            this._animated.opacity.setValue(opacity);
-            this._animated.opacityTracker = opacity;
-        }
+    private _setOpacity(opacityVal: number): void {
+        this._opacity = opacityVal;
+        customAnimFrame(() => {
+            if (this._container) {
+                this._container.setNativeProps({
+                    opacity: opacityVal,
+                });
+            }
+        });
     }
 
     private _refGrabber(ref: any): void {
@@ -124,9 +108,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             }
         } else if (!this._isFirstLayoutDone) {
             this._isFirstLayoutDone = true;
-            customAnimFrame(() => {
-                this._setOpacity(1);
-            });
+            this._setOpacity(1);
         }
         this._isFirstLayoutDone = true;
     }
