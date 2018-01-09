@@ -5,5 +5,5 @@ branches:
 node_js:
   - 'stable'
 before_script:
-    - npm install -g file-directives@1.4.6 typescript tslint@5.8.0
+    - npm run setup
 script: npm run build
