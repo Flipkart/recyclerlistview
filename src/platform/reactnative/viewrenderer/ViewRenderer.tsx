@@ -14,7 +14,9 @@ const customAnimFrame = Platform.OS === "web" ?
     }
     :
     (func: () => void) => {
-        func();
+        requestDeferrer(() => {
+            requestDeferrer(func);
+        });
     };
 
 /***
@@ -27,22 +29,18 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _isFirstLayoutDone: boolean = false;
     private _isUnmounted: boolean = false;
+    private _container: View | null = null;
     private _animated = {
         opacity: new Animated.Value(0),
         opacityTracker: 0,
-        x: new Animated.Value(0),
-        y: new Animated.Value(0),
     };
     constructor(props: ViewRendererProps<any>) {
         super(props);
         this._onLayout = this._onLayout.bind(this);
+        this._refGrabber = this._refGrabber.bind(this);
     }
 
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
-        if (this.props.x !== newProps.x || this.props.y !== newProps.y) {
-            this._animated.x.setValue(newProps.x);
-            this._animated.y.setValue(newProps.y);
-        }
         if (newProps.forceNonDeterministicRendering && this._animated.opacityTracker === 0 && this._isFirstLayoutDone) {
             customAnimFrame(() => {
                 this._setOpacity(1);
@@ -57,11 +55,16 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             this.props.height !== newProps.height)) {
             return true;
         }
+        //Only if not re-rendering
+        if (this.props.x !== newProps.x || this.props.y !== newProps.y) {
+            if (this._container) {
+                this._container.setNativeProps({
+                    left: newProps.x,
+                    top: newProps.y,
+                });
+            }
+        }
         return false;
-    }
-    public componentWillMount(): void {
-        this._animated.x.setValue(this.props.x);
-        this._animated.y.setValue(this.props.y);
     }
     public componentWillUnmount(): void {
         this._isUnmounted = true;
@@ -69,30 +72,29 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     public render(): JSX.Element {
         if (this.props.forceNonDeterministicRendering) {
             return (
-                <Animated.View onLayout={this._onLayout}
+                <Animated.View ref={this._refGrabber} onLayout = { this._onLayout }
                     style={{
                         flexDirection: this.props.isHorizontal ? "column" : "row",
-                        left: this._animated.x,
+                        left: this.props.x,
                         opacity: this._animated.opacity,
                         position: "absolute",
-                        top: this._animated.y,
+                        top: this.props.y,
                     }}>
                     {this.renderChild()}
                 </Animated.View>
             );
         } else {
             return (
-                <Animated.View
+                <View ref={this._refGrabber}
                     style={{
                         height: this.props.height,
-                        left: 0,
+                        left: this.props.x,
                         position: "absolute",
-                        top: 0,
-                        transform: [{ translateX: this._animated.x }, { translateY: this._animated.y }],
+                        top: this.props.y,
                         width: this.props.width,
                     }}>
                     {this.renderChild()}
-                </Animated.View>
+                </View>
             );
         }
     }
@@ -102,6 +104,10 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             this._animated.opacity.setValue(opacity);
             this._animated.opacityTracker = opacity;
         }
+    }
+
+    private _refGrabber(ref: any): void {
+        this._container = ref;
     }
 
     private _onLayout(event: LayoutChangeEvent): void {
@@ -118,7 +124,9 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             }
         } else if (!this._isFirstLayoutDone) {
             this._isFirstLayoutDone = true;
-            this._setOpacity(1);
+            customAnimFrame(() => {
+                this._setOpacity(1);
+            });
         }
         this._isFirstLayoutDone = true;
     }
