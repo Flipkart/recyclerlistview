@@ -30,6 +30,8 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 left: 0,
                 opacity: this._isFirstLayoutDone ? 1 : 0,
                 position: "absolute",
+                display: 'flex',
+                flexDirection: 'column',
                 top: 0,
                 transform: this._getTransform(),
             }
@@ -39,6 +41,8 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 left: 0,
                 overflow: "hidden",
                 position: "absolute",
+                display: 'flex',
+                flexDirection: 'column',
                 top: 0,
                 transform: this._getTransform(),
                 width: this.props.width,

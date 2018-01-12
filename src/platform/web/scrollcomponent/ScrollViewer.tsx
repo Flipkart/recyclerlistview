@@ -1,5 +1,9 @@
 import * as React from "react";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "../../../core/scrollcomponent/BaseScrollView";
+var debounce_1 = require("lodash-es/debounce");
+ var scrollEndEventSimulator = debounce_1.default(function (executable) {
+          executable(); 
+}, 1200);
 /***
  * A scrollviewer that mimics react native scrollview. Additionally on web it can start listening to window scroll events optionally.
  * Supports both window scroll and scrollable divs inside other divs.
@@ -18,11 +22,14 @@ export default class ScrollViewer extends BaseScrollView {
 
     constructor(args: ScrollViewDefaultProps) {
         super(args);
+        this._isScrolling = false;
         this._onScroll = this._onScroll.bind(this);
         this._windowOnScroll = this._windowOnScroll.bind(this);
         this._getRelevantOffset = this._getRelevantOffset.bind(this);
         this._setRelevantOffset = this._setRelevantOffset.bind(this);
         this._onWindowResize = this._onWindowResize.bind(this);
+        this._isScrollEnd = _this._isScrollEnd.bind(_this);
+        this._trackScrollOccurence = _this._trackScrollOccurence.bind(_this); 
 
         this.scrollEvent = {nativeEvent: {contentOffset: {x: 0, y: 0}}};
     }
@@ -62,25 +69,27 @@ export default class ScrollViewer extends BaseScrollView {
     }
 
     public render(): JSX.Element {
+        var _this = this;
         return !this.props.useWindowScroll
-            ? <div
-                ref={(div) => this._mainDivRef = div as HTMLDivElement | null}
-                style={{
+            ? React.createElement("div", {
+                ref: function (div) {
+                    return _this._mainDivRef = div;
+                },
+                style: __assign({
                     WebkitOverflowScrolling: "touch",
                     height: "100%",
                     overflowX: this.props.horizontal ? "scroll" : "hidden",
                     overflowY: !this.props.horizontal ? "scroll" : "hidden",
-                    width: "100%",
-                    ...this.props.style,
-                }}
-            >
-                <div style={{position: "relative"}}>
-                    {this.props.children}
-                </div>
-            </div>
-            : <div style={{position: "relative"}}>
-                {this.props.children}
-            </div>;
+                    width: "100%"
+                }, this.props.style)
+            },
+            React.createElement("div", {style: {position: "relative",}}, this.props.children))
+            : React.createElement("div", {
+            ref: function (div) {
+                return _this._mainDivRef = div;
+            },
+            style: {position: "relative"}
+        }, this.props.children);
     }
 
     private _getRelevantOffset(): number {
@@ -119,6 +128,19 @@ export default class ScrollViewer extends BaseScrollView {
             }
         }
     }
+
+    private _isScrollEnd = function () { 
+        this._mainDivRef.style.pointerEvents = "auto"; 
+        this._isScrolling = false; 
+    };
+
+    private _trackScrollOccurence = function () {
+        if(!this._isScrolling) {
+            this._mainDivRef.style.pointerEvents = "none";
+            this._isScrolling = true;
+        }
+        scrollEndEventSimulator(this._isScrollEnd); 
+    };
 
     private _doAnimatedScroll(offset: number): void {
         let start = this._getRelevantOffset();
