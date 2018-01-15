@@ -1,5 +1,9 @@
 import * as React from "react";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "../../../core/scrollcomponent/BaseScrollView";
+import debounce from "lodash-es/debounce";
+const scrollEndEventSimulator = debounce((executable: () => void) => {
+    executable();
+}, 1200);
 /***
  * A scrollviewer that mimics react native scrollview. Additionally on web it can start listening to window scroll events optionally.
  * Supports both window scroll and scrollable divs inside other divs.
@@ -15,7 +19,7 @@ export default class ScrollViewer extends BaseScrollView {
 
     private scrollEvent: ScrollEvent;
     private _mainDivRef: HTMLDivElement | null;
-
+    private _isScrolling: boolean = false;
     constructor(args: ScrollViewDefaultProps) {
         super(args);
         this._onScroll = this._onScroll.bind(this);
@@ -23,7 +27,8 @@ export default class ScrollViewer extends BaseScrollView {
         this._getRelevantOffset = this._getRelevantOffset.bind(this);
         this._setRelevantOffset = this._setRelevantOffset.bind(this);
         this._onWindowResize = this._onWindowResize.bind(this);
-
+        this._isScrollEnd = this._isScrollEnd.bind(this);
+        this._trackScrollOccurence = this._trackScrollOccurence.bind(this);
         this.scrollEvent = {nativeEvent: {contentOffset: {x: 0, y: 0}}};
     }
 
@@ -78,7 +83,9 @@ export default class ScrollViewer extends BaseScrollView {
                     {this.props.children}
                 </div>
             </div>
-            : <div style={{position: "relative"}}>
+            : <div
+            ref={(div) => this._mainDivRef = div as HTMLDivElement | null}
+            style={{position: "relative"}}>
                 {this.props.children}
             </div>;
     }
@@ -118,6 +125,23 @@ export default class ScrollViewer extends BaseScrollView {
                 window.scrollTo(0, offset + this.props.distanceFromWindow);
             }
         }
+    }
+
+    private _isScrollEnd(): void {
+        if (this._mainDivRef) {
+            this._mainDivRef.style.pointerEvents = "auto";
+        }
+        this._isScrolling = false;
+    }
+
+    private _trackScrollOccurence(): void {
+        if (!this._isScrolling) {
+            if (this._mainDivRef) {
+                this._mainDivRef.style.pointerEvents = "none";
+            }
+            this._isScrolling = true;
+        }
+        scrollEndEventSimulator(this._isScrollEnd);
     }
 
     private _doAnimatedScroll(offset: number): void {
