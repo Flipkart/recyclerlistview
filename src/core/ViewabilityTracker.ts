@@ -28,7 +28,7 @@ export default class ViewabilityTracker {
     private _windowBound: number;
     private _visibleIndexes: number[];
     private _engagedIndexes: number[];
-    private _layouts: Rect[];
+    private _layouts: Rect[] = [];
 
     constructor(renderAheadOffset: number, initialOffset: number) {
         this._currentOffset = Math.max(0, initialOffset);

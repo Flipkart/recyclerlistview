@@ -130,7 +130,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
     private _cachedLayouts?: Rect[];
-    private _scrollComponent: BaseScrollComponent | null;
+    private _scrollComponent: BaseScrollComponent | null = null;
 
     constructor(props: RecyclerListViewProps) {
         super(props);

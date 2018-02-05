@@ -18,7 +18,7 @@ export default class ScrollViewer extends BaseScrollView {
     };
 
     private scrollEvent: ScrollEvent;
-    private _mainDivRef: HTMLDivElement | null;
+    private _mainDivRef: HTMLDivElement | null = null;
     private _isScrolling: boolean = false;
     constructor(args: ScrollViewDefaultProps) {
         super(args);

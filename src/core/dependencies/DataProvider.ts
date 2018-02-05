@@ -4,7 +4,7 @@
  */
 export default class DataProvider {
 
-    public rowHasChanged: (r1: any, r2: any) => boolean;
+    public rowHasChanged: (r1: any, r2: any) => boolean = this.rowHasChanged;
 
     private _firstIndexToProcess: number = 0;
     private _size: number = 0;
