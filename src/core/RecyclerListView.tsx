@@ -33,12 +33,15 @@ import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent } from "./scrollcomponent/BaseScrollView";
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
+import ItemAnimator from "./ItemAnimator";
 
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { Platform } from "react-native";
-const IS_WEB = Platform.OS === "web";
+import DefaultNativeItemAnimator from "../platform/reactnative/DefaultNativeItemAnimator";
+const IS_WEB = false;
+const defaultItemAnimator = new DefaultNativeItemAnimator();
 //#endif
 
 /***
@@ -48,7 +51,9 @@ const IS_WEB = Platform.OS === "web";
 //#if [WEB]
 //import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
 //import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
+//import DefaultWebItemAnimator from "../platform/web/DefaultWebItemAnimator";
 //const IS_WEB = true;
+//const defaultItemAnimator = new DefaultWebItemAnimator();
 //#endif
 
 const refreshRequestDebouncer = debounce((executable: () => void) => {
@@ -94,6 +99,7 @@ export interface RecyclerListViewProps {
     disableRecycling?: boolean;
     forceNonDeterministicRendering?: boolean;
     extendedState?: object;
+    itemAnimator?: ItemAnimator;
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
@@ -408,6 +414,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                     childRenderer={this.props.rowRenderer}
                     height={itemRect.height}
                     width={itemRect.width}
+                    itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, defaultItemAnimator)}
                     extendedState={this.props.extendedState} />
             );
         }
