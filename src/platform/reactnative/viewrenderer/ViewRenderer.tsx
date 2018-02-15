@@ -1,5 +1,5 @@
 import * as React from "react";
-import { LayoutChangeEvent, View, ViewStatic, ViewProperties } from "react-native";
+import { LayoutChangeEvent, View, ViewProperties } from "react-native";
 import { Dimension } from "../../../core/dependencies/LayoutProvider";
 import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
 
