@@ -38,19 +38,22 @@ export default abstract class BaseViewRenderer<T> extends React.Component<ViewRe
         const shouldUpdate = hasLayoutChanged || hasDataChanged || hasExtendedStateChanged;
 
         if (hasDataChanged) {
-            newProps.itemAnimator.animateUpdate(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef);
+            newProps.itemAnimator.animateWillUpdate(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object);
         } else if (hasLayoutChanged) {
-            newProps.itemAnimator.animateShift(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef);
+            newProps.itemAnimator.animateShift(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object);
         }
         return shouldUpdate;
     }
+    public componentDidMount(): void {
+        this.props.itemAnimator.animateDidMount(this.props.x, this.props.y, this.getRef() as object);
+    }
     public componentWillMount(): void {
-        this.props.itemAnimator.animateMount(this.props.x, this.props.y);
+        this.props.itemAnimator.animateWillMount(this.props.x, this.props.y);
     }
     public componentWillUnmount(): void {
-        this.props.itemAnimator.animateMount(this.props.x, this.props.y, this.getRef);
+        this.props.itemAnimator.animateWillUnmount(this.props.x, this.props.y, this.getRef() as object);
     }
-    protected abstract getRef(): object;
+    protected abstract getRef(): object | null;
     protected renderChild(): JSX.Element | JSX.Element[] | null {
         return this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index, this.props.extendedState);
     }

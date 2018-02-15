@@ -9,21 +9,27 @@ export default class DefaultNativeItemAnimator implements ItemAnimator {
             UIManager.setLayoutAnimationEnabledExperimental(true);
         }
     }
-    public animateMount(atX: number, atY: number, itemRef?: object): void {
+    public animateWillMount(atX: number, atY: number): void {
         //no need
     }
-    public animateUpdate(fromX: number, fromY: number, toX: number, toY: number, itemRef: object): void {
+    public animateDidMount(atX: number, atY: number, itemRef: object): void {
+        //no need
+    }
+
+    public animateWillUpdate(fromX: number, fromY: number, toX: number, toY: number, itemRef: object): void {
         //no need
     }
 
     public animateShift(fromX: number, fromY: number, toX: number, toY: number, itemRef: object): void {
-        if (!this.shouldAnimateOnce || this.shouldAnimateOnce && !this.hasAnimatedOnce) {
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-            this.hasAnimatedOnce = true;
+        if (fromX !== toX || fromY !== toY) {
+            if (!this.shouldAnimateOnce || this.shouldAnimateOnce && !this.hasAnimatedOnce) {
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                this.hasAnimatedOnce = true;
+            }
         }
     }
 
-    public animateUnmount(atX: number, atY: number, itemRef: object): void {
+    public animateWillUnmount(atX: number, atY: number, itemRef: object): void {
         //no need
     }
 }

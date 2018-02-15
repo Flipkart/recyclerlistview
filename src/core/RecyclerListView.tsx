@@ -33,7 +33,7 @@ import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent } from "./scrollcomponent/BaseScrollView";
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
-import ItemAnimator from "./ItemAnimator";
+import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
@@ -555,4 +555,9 @@ RecyclerListView.propTypes = {
     //outside and pass it down via this prop. Changing this object will cause everything to re-render. Make sure you don't change
     //it often to ensure performance. Re-renders are heavy.
     extendedState: PropTypes.object,
+
+    //Can be used to pass an external item animation implementation. Look into BaseItemAnimator/DefaultNativeItemAnimator/DefaultWevItemAnimator
+    //for more info. By default there are few animations, to disable completely simply pass blank new BaseItemAnimator() object. Remember, create
+    //one object and keep it do not create multiple object of type BaseAnimator
+    itemAnimator: PropTypes.instanceOf(BaseItemAnimator),
 };

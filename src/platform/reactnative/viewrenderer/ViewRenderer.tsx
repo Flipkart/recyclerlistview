@@ -1,5 +1,5 @@
 import * as React from "react";
-import { LayoutChangeEvent, View, ViewStatic } from "react-native";
+import { LayoutChangeEvent, View, ViewStatic, ViewProperties } from "react-native";
 import { Dimension } from "../../../core/dependencies/LayoutProvider";
 import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
 
@@ -12,7 +12,7 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _isFirstLayoutDone: boolean = false;
-    private _viewRef: ViewStatic | null = null;
+    private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
 
     constructor(props: ViewRendererProps<any>) {
         super(props);
@@ -33,7 +33,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 {this.renderChild()}
             </View>
         ) : (
-                <View
+                <View ref={this._setRef}
                     style={{
                         left: this.props.x,
                         position: "absolute",
@@ -46,11 +46,11 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             );
     }
 
-    protected getRef(): object {
+    protected getRef(): object | null {
         return this._viewRef;
     }
 
-    private _setRef(view: View | null): void {
+    private _setRef(view: React.Component<ViewProperties, React.ComponentState> | null): void {
         this._viewRef = view;
     }
 

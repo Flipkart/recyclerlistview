@@ -10,12 +10,18 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
  * This is second of the two things recycler works on. Implemented both for web and react native.
  */
 export default class ViewRenderer extends BaseViewRenderer<any> {
-
     private _dim: Dimension = { width: 0, height: 0 };
-    private _isFirstLayoutDone: boolean = false;
     private _mainDiv: HTMLDivElement | null = null;
 
+    constructor(props: ViewRendererProps<any>) {
+        super(props);
+        this._setRef = this._setRef.bind(this);
+    }
+
     public componentDidMount(): void {
+        if (super.componentDidMount) {
+            super.componentDidMount();
+        }
         this._checkSizeChange();
     }
 
@@ -28,7 +34,6 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             ? {
                 WebkitTransform: this._getTransform(),
                 left: 0,
-                opacity: this._isFirstLayoutDone ? 1 : 0,
                 position: "absolute",
                 flexDirection: "column",
                 display: "flex",
@@ -48,12 +53,18 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 width: this.props.width,
             };
         return (
-            <div ref={(div) => this._mainDiv = div as HTMLDivElement | null} style={styleObj}>
+            <div ref={this._setRef} style={styleObj}>
                 {this.renderChild()}
             </div>
         );
     }
 
+    protected getRef(): object | null {
+        return this._mainDiv;
+    }
+    private _setRef(div: HTMLDivElement | null): void {
+        this._mainDiv = div;
+    }
     private _getTransform(): string {
         return "translate(" + this.props.x + "px," + this.props.y + "px)";
     }
@@ -66,12 +77,8 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 this._dim.height = mainDiv.clientHeight;
                 if (this.props.width !== this._dim.width || this.props.height !== this._dim.height) {
                     this.props.onSizeChanged(this._dim, this.props.index);
-                } else if (!this._isFirstLayoutDone) {
-                    this._isFirstLayoutDone = true;
-                    this.forceUpdate();
                 }
             }
         }
-        this._isFirstLayoutDone = true;
     }
 }
