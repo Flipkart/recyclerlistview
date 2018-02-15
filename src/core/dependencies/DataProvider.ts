@@ -3,19 +3,14 @@
  * Allows access to data and size. Clone with rows creates a new data provider and let listview know where to calculate row layout from.
  */
 export default class DataProvider {
-
     public rowHasChanged: (r1: any, r2: any) => boolean;
-
     private _firstIndexToProcess: number = 0;
     private _size: number = 0;
     private _data: any[] = [];
 
     constructor(rowHasChanged: (r1: any, r2: any) => boolean) {
-        if (rowHasChanged) {
             this.rowHasChanged = rowHasChanged;
-        }
     }
-
     public getDataForIndex(index: number): any {
         return this._data[index];
     }

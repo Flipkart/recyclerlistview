@@ -26,8 +26,8 @@ export default class ScrollComponent extends BaseScrollComponent {
     private _height: number;
     private _width: number;
     private _isSizeChangedCalledOnce: boolean;
-    private _dummyOnLayout: (event: LayoutChangeEvent) => void;
-    private _scrollViewRef: ScrollView | null;
+    private _dummyOnLayout: (event: LayoutChangeEvent) => void = TSCast.cast(null);
+    private _scrollViewRef: ScrollView | null = null;
 
     constructor(args: ScrollComponentProps) {
         super(args);

@@ -20,7 +20,7 @@ export default class ScrollComponent extends BaseScrollComponent {
     };
     private _height: number;
     private _width: number;
-    private _scrollViewRef: BaseScrollView | null;
+    private _scrollViewRef: BaseScrollView | null = null;
 
     constructor(args: ScrollComponentProps) {
         super(args);
@@ -40,7 +40,7 @@ export default class ScrollComponent extends BaseScrollComponent {
     public render(): JSX.Element {
         const Scroller = this.props.externalScrollView as any; //TSI
         return (
-            <Scroller ref={(scrollView: BaseScrollView) => this._scrollViewRef as (BaseScrollView | null)}
+            <Scroller ref={(scrollView: BaseScrollView) => this._scrollViewRef = scrollView as (BaseScrollView | null)}
                 {...this.props}
                 horizontal={this.props.isHorizontal}
                 onScroll={this._onScroll}
