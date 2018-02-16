@@ -23,7 +23,7 @@ export default class DefaultWebItemAnimator implements ItemAnimator {
                     element.removeEventListener("transitionend", transitionEndCallback);
                     this.hasAnimatedOnce = true;
                 };
-                element.style.transition = "transform 0.35s cubic-bezier(0.645, 0.045, 0.355, 1)";
+                element.style.transition = "transform 0.15s ease-out";
                 element.addEventListener("transitionend", transitionEndCallback, false);
             }
         }
