@@ -57,7 +57,6 @@ not be as fast.
 ## Demo
 
 Expo snack demos: 
-https://snack.expo.io/rksoUdx-f
 https://snack.expo.io/B1GYad52b
 
 Sample project: https://github.com/naqvitalha/travelMate
