@@ -56,14 +56,15 @@ not be as fast.
 
 ## Demo
 
-Expo snack demos: 
-https://snack.expo.io/B1GYad52b
+Production Flipkart Grocery Demo Video (or try the app): https://youtu.be/6YqEqP3MmoU
+
+Expo snack demo: https://snack.expo.io/B1GYad52b
 
 Sample project: https://github.com/naqvitalha/travelMate
 
 Context Preservation Sample: https://github.com/naqvitalha/recyclerlistview-context-preservation-demo
 
-Watch Demo Video: https://www.youtube.com/watch?v=Tnv4HMmPgMc
+Other Video: https://www.youtube.com/watch?v=Tnv4HMmPgMc
 
 [![Watch Video](https://img.youtube.com/vi/Tnv4HMmPgMc/0.jpg)](https://www.youtube.com/watch?v=Tnv4HMmPgMc)
 
