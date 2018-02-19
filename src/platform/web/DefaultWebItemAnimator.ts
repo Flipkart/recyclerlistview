@@ -3,18 +3,18 @@ import ItemAnimator from "../../core/ItemAnimator";
 export default class DefaultWebItemAnimator implements ItemAnimator {
     public shouldAnimateOnce: boolean = true;
     private hasAnimatedOnce: boolean = false;
-    public animateWillMount(atX: number, atY: number): void {
+    public animateWillMount(atX: number, atY: number, itemIndex: number): void {
         //no need
     }
-    public animateDidMount(atX: number, atY: number, itemRef: object): void {
-        //no need
-    }
-
-    public animateWillUpdate(fromX: number, fromY: number, toX: number, toY: number, itemRef: object): void {
+    public animateDidMount(atX: number, atY: number, itemRef: object, itemIndex: number): void {
         //no need
     }
 
-    public animateShift(fromX: number, fromY: number, toX: number, toY: number, itemRef: object): void {
+    public animateWillUpdate(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): void {
+        //no need
+    }
+
+    public animateShift(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): void {
         if (fromX !== toX || fromY !== toY) {
             const element = itemRef as HTMLDivElement;
             if (!this.shouldAnimateOnce || this.shouldAnimateOnce && !this.hasAnimatedOnce) {
@@ -29,7 +29,7 @@ export default class DefaultWebItemAnimator implements ItemAnimator {
         }
     }
 
-    public animateWillUnmount(atX: number, atY: number, itemRef: object): void {
+    public animateWillUnmount(atX: number, atY: number, itemRef: object, itemIndex: number): void {
         //no need
     }
 }

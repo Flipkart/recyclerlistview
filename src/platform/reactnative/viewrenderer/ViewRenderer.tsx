@@ -11,7 +11,6 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
  */
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
-    private _isFirstLayoutDone: boolean = false;
     private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
 
     constructor(props: ViewRendererProps<any>) {

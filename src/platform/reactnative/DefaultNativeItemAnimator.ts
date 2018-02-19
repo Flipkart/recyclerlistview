@@ -1,5 +1,5 @@
 import ItemAnimator from "../../core/ItemAnimator";
-import { ViewStatic, LayoutAnimation, Platform, UIManager } from "react-native";
+import { LayoutAnimation, Platform, UIManager } from "react-native";
 
 export default class DefaultNativeItemAnimator implements ItemAnimator {
     public shouldAnimateOnce: boolean = true;
@@ -9,18 +9,18 @@ export default class DefaultNativeItemAnimator implements ItemAnimator {
             UIManager.setLayoutAnimationEnabledExperimental(true);
         }
     }
-    public animateWillMount(atX: number, atY: number): void {
+    public animateWillMount(atX: number, atY: number, itemIndex: number): void {
         //no need
     }
-    public animateDidMount(atX: number, atY: number, itemRef: object): void {
-        //no need
-    }
-
-    public animateWillUpdate(fromX: number, fromY: number, toX: number, toY: number, itemRef: object): void {
+    public animateDidMount(atX: number, atY: number, itemRef: object, itemIndex: number): void {
         //no need
     }
 
-    public animateShift(fromX: number, fromY: number, toX: number, toY: number, itemRef: object): void {
+    public animateWillUpdate(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): void {
+        //no need
+    }
+
+    public animateShift(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): void {
         if (fromX !== toX || fromY !== toY) {
             if (!this.shouldAnimateOnce || this.shouldAnimateOnce && !this.hasAnimatedOnce) {
                 LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -29,7 +29,7 @@ export default class DefaultNativeItemAnimator implements ItemAnimator {
         }
     }
 
-    public animateWillUnmount(atX: number, atY: number, itemRef: object): void {
+    public animateWillUnmount(atX: number, atY: number, itemRef: object, itemIndex: number): void {
         //no need
     }
 }

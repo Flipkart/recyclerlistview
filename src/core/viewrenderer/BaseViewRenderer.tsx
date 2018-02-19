@@ -38,20 +38,20 @@ export default abstract class BaseViewRenderer<T> extends React.Component<ViewRe
         const shouldUpdate = hasLayoutChanged || hasDataChanged || hasExtendedStateChanged;
 
         if (hasDataChanged) {
-            newProps.itemAnimator.animateWillUpdate(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object);
+            newProps.itemAnimator.animateWillUpdate(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
         } else if (hasLayoutChanged) {
-            newProps.itemAnimator.animateShift(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object);
+            newProps.itemAnimator.animateShift(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
         }
         return shouldUpdate;
     }
     public componentDidMount(): void {
-        this.props.itemAnimator.animateDidMount(this.props.x, this.props.y, this.getRef() as object);
+        this.props.itemAnimator.animateDidMount(this.props.x, this.props.y, this.getRef() as object, this.props.index);
     }
     public componentWillMount(): void {
-        this.props.itemAnimator.animateWillMount(this.props.x, this.props.y);
+        this.props.itemAnimator.animateWillMount(this.props.x, this.props.y, this.props.index);
     }
     public componentWillUnmount(): void {
-        this.props.itemAnimator.animateWillUnmount(this.props.x, this.props.y, this.getRef() as object);
+        this.props.itemAnimator.animateWillUnmount(this.props.x, this.props.y, this.getRef() as object, this.props.index);
     }
     protected abstract getRef(): object | null;
     protected renderChild(): JSX.Element | JSX.Element[] | null {
