@@ -1,8 +1,10 @@
+import TSCast from "../../utils/TSCast";
 /***
  * You can create a new instance or inherit and override default methods
  * Allows access to data and size. Clone with rows creates a new data provider and let listview know where to calculate row layout from.
  */
 export default class DataProvider {
+    public rowHasChanged: (r1: any, r2: any) => boolean = TSCast.cast(null); //TSI
     private _firstIndexToProcess: number = 0;
     private _size: number = 0;
     private _data: any[] = [];
@@ -12,9 +14,6 @@ export default class DataProvider {
             this.rowHasChanged = rowHasChanged;
         }
     }
-
-    public rowHasChanged: (r1: any, r2: any) => boolean = (r1, r2) => r1 !== r2;
-
     public getDataForIndex(index: number): any {
         return this._data[index];
     }
