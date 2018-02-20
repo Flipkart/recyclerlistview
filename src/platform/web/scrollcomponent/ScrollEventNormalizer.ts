@@ -44,10 +44,10 @@ export class ScrollEventNormalizer {
                 },
                 contentSize: {
                     get height(): number {
-                        return document.body.scrollHeight;
+                        return target.offsetHeight;
                     },
                     get width(): number {
-                        return document.body.scrollWidth;
+                        return target.offsetWidth;
                     },
                 },
                 layoutMeasurement: {
