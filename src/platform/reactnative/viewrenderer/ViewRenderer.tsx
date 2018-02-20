@@ -1,7 +1,17 @@
 import * as React from "react";
-import { LayoutChangeEvent, View } from "react-native";
+import { LayoutChangeEvent, View, Animated, Platform } from "react-native";
 import { Dimension } from "../../../core/dependencies/LayoutProvider";
 import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
+
+const requestDeferrer = requestAnimationFrame ? requestAnimationFrame : (func: () => void) => { setTimeout(func, 20); };
+const customAnimFrame = Platform.OS === "web" ?
+    (func: () => void) => {
+        requestDeferrer(() => {
+            requestDeferrer(() => {
+                requestDeferrer(func);
+            });
+        });
+    } : requestDeferrer;
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
@@ -12,41 +22,76 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _isFirstLayoutDone: boolean = false;
-
+    private _container: View | null = null;
+    private _opacity: number = 0;
     constructor(props: ViewRendererProps<any>) {
         super(props);
         this._onLayout = this._onLayout.bind(this);
+        this._refGrabber = this._refGrabber.bind(this);
     }
 
-    public render(): JSX.Element {
-        if (this.props.forceNonDeterministicRendering) {
-            return (
-                <View onLayout={this._onLayout}
-                    style={{
-                        flexDirection: this.props.isHorizontal ? "column" : "row",
-                        left: this.props.x,
-                        opacity: this._isFirstLayoutDone ? 1 : 0,
-                        position: "absolute",
-                        top: this.props.y,
-                    }}>
-                    {this.renderChild()}
-                </View>
-            );
-        } else {
-            return (
-                <View
-                    style={{
-                        height: this.props.height,
-                        left: 0,
-                        position: "absolute",
-                        top: 0,
-                        transform: [{ translateX: this.props.x }, { translateY: this.props.y }],
-                        width: this.props.width,
-                    }}>
-                    {this.renderChild()}
-                </View>
-            );
+    public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
+        if (newProps.forceNonDeterministicRendering && this._opacity === 0 && this._isFirstLayoutDone) {
+            this._setOpacity(1);
         }
+        if (this.props.extendedState !== newProps.extendedState ||
+            (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data)) ||
+            this.props.layoutProvider !== newProps.layoutProvider) {
+            return true;
+        }
+        if (!newProps.forceNonDeterministicRendering && (this.props.width !== newProps.width ||
+            this.props.height !== newProps.height)) {
+            return true;
+        }
+        //Only if not re-rendering
+        if (this.props.x !== newProps.x || this.props.y !== newProps.y) {
+            if (this._container) {
+                this._container.setNativeProps({
+                    left: newProps.x,
+                    top: newProps.y,
+                });
+            }
+        }
+        return false;
+    }
+    public render(): JSX.Element {
+        return this.props.forceNonDeterministicRendering ?
+            <View ref={this._refGrabber} onLayout={this._onLayout}
+                style={{
+                    flexDirection: this.props.isHorizontal ? "column" : "row",
+                    left: this.props.x,
+                    opacity: this._opacity,
+                    position: "absolute",
+                    top: this.props.y,
+                }}>
+                {this.renderChild()}
+            </View>
+            :
+            <View ref={this._refGrabber}
+                style={{
+                    height: this.props.height,
+                    left: this.props.x,
+                    position: "absolute",
+                    top: this.props.y,
+                    width: this.props.width,
+                }}>
+                {this.renderChild()}
+            </View>;
+    }
+
+    private _setOpacity(opacityVal: number): void {
+        this._opacity = opacityVal;
+        customAnimFrame(() => {
+            if (this._container) {
+                this._container.setNativeProps({
+                    opacity: opacityVal,
+                });
+            }
+        });
+    }
+
+    private _refGrabber(ref: any): void {
+        this._container = ref;
     }
 
     private _onLayout(event: LayoutChangeEvent): void {
@@ -63,7 +108,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             }
         } else if (!this._isFirstLayoutDone) {
             this._isFirstLayoutDone = true;
-            this.forceUpdate();
+            this._setOpacity(1);
         }
         this._isFirstLayoutDone = true;
     }
