@@ -1,4 +1,3 @@
-import TSCast from "../../utils/TSCast";
 /***
  * You can create a new instance or inherit and override default methods
  * Allows access to data and size. Clone with rows creates a new data provider and let listview know where to calculate row layout from.
