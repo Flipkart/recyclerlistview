@@ -1,5 +1,5 @@
 import * as React from "react";
-import { LayoutChangeEvent, View } from "react-native";
+import { LayoutChangeEvent, View, ViewProperties } from "react-native";
 import { Dimension } from "../../../core/dependencies/LayoutProvider";
 import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
 
@@ -11,42 +11,46 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
  */
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
-    private _isFirstLayoutDone: boolean = false;
+    private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
 
     constructor(props: ViewRendererProps<any>) {
         super(props);
         this._onLayout = this._onLayout.bind(this);
+        this._setRef = this._setRef.bind(this);
     }
 
     public render(): JSX.Element {
-        if (this.props.forceNonDeterministicRendering) {
-            return (
-                <View onLayout={this._onLayout}
+        return this.props.forceNonDeterministicRendering ? (
+            <View ref={this._setRef}
+            onLayout={this._onLayout}
+                style={{
+                    flexDirection: this.props.isHorizontal ? "column" : "row",
+                    left: this.props.x,
+                    position: "absolute",
+                    top: this.props.y,
+                }}>
+                {this.renderChild()}
+            </View>
+        ) : (
+                <View ref={this._setRef}
                     style={{
-                        flexDirection: this.props.isHorizontal ? "column" : "row",
                         left: this.props.x,
-                        opacity: this._isFirstLayoutDone ? 1 : 0,
                         position: "absolute",
                         top: this.props.y,
-                    }}>
-                    {this.renderChild()}
-                </View>
-            );
-        } else {
-            return (
-                <View
-                    style={{
                         height: this.props.height,
-                        left: 0,
-                        position: "absolute",
-                        top: 0,
-                        transform: [{ translateX: this.props.x }, { translateY: this.props.y }],
                         width: this.props.width,
                     }}>
                     {this.renderChild()}
                 </View>
             );
-        }
+    }
+
+    protected getRef(): object | null {
+        return this._viewRef;
+    }
+
+    private _setRef(view: React.Component<ViewProperties, React.ComponentState> | null): void {
+        this._viewRef = view;
     }
 
     private _onLayout(event: LayoutChangeEvent): void {
@@ -61,10 +65,6 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             if (this.props.onSizeChanged) {
                 this.props.onSizeChanged(this._dim, this.props.index);
             }
-        } else if (!this._isFirstLayoutDone) {
-            this._isFirstLayoutDone = true;
-            this.forceUpdate();
         }
-        this._isFirstLayoutDone = true;
     }
 }

@@ -1,5 +1,6 @@
 import * as React from "react";
 import LayoutProvider, { Dimension } from "../dependencies/LayoutProvider";
+import ItemAnimator from "../ItemAnimator";
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
@@ -18,23 +19,41 @@ export interface ViewRendererProps<T> {
     onSizeChanged: (dim: Dimension, index: number) => void;
     data: any;
     index: number;
+    itemAnimator: ItemAnimator;
     forceNonDeterministicRendering?: boolean;
     isHorizontal?: boolean;
     extendedState?: object;
     layoutProvider?: LayoutProvider;
 }
-export default class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {
+export default abstract class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
-        return (
-            this.props.x !== newProps.x ||
+        const hasLayoutChanged = this.props.x !== newProps.x ||
             this.props.y !== newProps.y ||
             this.props.width !== newProps.width ||
             this.props.height !== newProps.height ||
-            this.props.layoutProvider !== newProps.layoutProvider ||
-            this.props.extendedState !== newProps.extendedState ||
-            (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data))
-        );
+            this.props.layoutProvider !== newProps.layoutProvider;
+
+        const hasExtendedStateChanged = this.props.extendedState !== newProps.extendedState;
+        const hasDataChanged = (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data));
+        const shouldUpdate = hasLayoutChanged || hasDataChanged || hasExtendedStateChanged;
+
+        if (hasDataChanged) {
+            newProps.itemAnimator.animateWillUpdate(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
+        } else if (hasLayoutChanged) {
+            newProps.itemAnimator.animateShift(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
+        }
+        return shouldUpdate;
     }
+    public componentDidMount(): void {
+        this.props.itemAnimator.animateDidMount(this.props.x, this.props.y, this.getRef() as object, this.props.index);
+    }
+    public componentWillMount(): void {
+        this.props.itemAnimator.animateWillMount(this.props.x, this.props.y, this.props.index);
+    }
+    public componentWillUnmount(): void {
+        this.props.itemAnimator.animateWillUnmount(this.props.x, this.props.y, this.getRef() as object, this.props.index);
+    }
+    protected abstract getRef(): object | null;
     protected renderChild(): JSX.Element | JSX.Element[] | null {
         return this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index, this.props.extendedState);
     }

@@ -9,7 +9,7 @@ export default class DataProvider {
     private _data: any[] = [];
 
     constructor(rowHasChanged: (r1: any, r2: any) => boolean) {
-            this.rowHasChanged = rowHasChanged;
+        this.rowHasChanged = rowHasChanged;
     }
     public getDataForIndex(index: number): any {
         return this._data[index];

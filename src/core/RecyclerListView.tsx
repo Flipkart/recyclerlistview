@@ -33,12 +33,15 @@ import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent } from "./scrollcomponent/BaseScrollView";
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
+import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { Platform } from "react-native";
-const IS_WEB = Platform.OS === "web";
+import DefaultNativeItemAnimator from "../platform/reactnative/DefaultNativeItemAnimator";
+const IS_WEB = false;
+const defaultItemAnimator = new DefaultNativeItemAnimator();
 //#endif
 
 /***
@@ -48,7 +51,9 @@ const IS_WEB = Platform.OS === "web";
 //#if [WEB]
 //import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
 //import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
+//import DefaultWebItemAnimator from "../platform/web/DefaultWebItemAnimator";
 //const IS_WEB = true;
+//const defaultItemAnimator = new DefaultWebItemAnimator();
 //#endif
 
 const refreshRequestDebouncer = debounce((executable: () => void) => {
@@ -94,6 +99,7 @@ export interface RecyclerListViewProps {
     disableRecycling?: boolean;
     forceNonDeterministicRendering?: boolean;
     extendedState?: object;
+    itemAnimator?: ItemAnimator;
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
@@ -408,6 +414,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                     childRenderer={this.props.rowRenderer}
                     height={itemRect.height}
                     width={itemRect.width}
+                    itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, defaultItemAnimator)}
                     extendedState={this.props.extendedState} />
             );
         }
@@ -508,7 +515,8 @@ RecyclerListView.propTypes = {
 
     //Provide your own ScrollView Component. The contract for the scroll event should match the native scroll event contract, i.e.
     // scrollEvent = { nativeEvent: { contentOffset: { x: offset, y: offset } } }
-    externalScrollView: PropTypes.instanceOf(BaseScrollView),
+    //Note: Please extend BaseScrollView to achieve expected behaviour
+    externalScrollView: PropTypes.func,
 
     //Callback given when user scrolls to the end of the list or footer just becomes visible, useful in incremental loading scenarios
     onEndReached: PropTypes.func,
@@ -548,4 +556,12 @@ RecyclerListView.propTypes = {
     //outside and pass it down via this prop. Changing this object will cause everything to re-render. Make sure you don't change
     //it often to ensure performance. Re-renders are heavy.
     extendedState: PropTypes.object,
+
+    //Enables animating RecyclerListView item cells e.g, shift, add, remove etc. This prop can be used to pass an external item animation implementation.
+    //Look into BaseItemAnimator/DefaultNativeItemAnimator/DefaultWebItemAnimator for more info.
+    //By default there are few animations, to disable completely simply pass blank new BaseItemAnimator() object. Remember, create
+    //one object and keep it do not create multiple object of type BaseItemAnimator.
+    //Note: This enables and uses Layout Animation on React Native, if that affects your workflow please disable animation or, write your own
+    //without using Layout Animation. You get access to item reference to write your own animations.
+    itemAnimator: PropTypes.instanceOf(BaseItemAnimator),
 };
