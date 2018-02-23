@@ -41,7 +41,6 @@ import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { Platform } from "react-native";
 import DefaultNativeItemAnimator from "../platform/reactnative/DefaultNativeItemAnimator";
 const IS_WEB = false;
-const defaultItemAnimator = new DefaultNativeItemAnimator();
 //#endif
 
 /***
@@ -53,7 +52,6 @@ const defaultItemAnimator = new DefaultNativeItemAnimator();
 //import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
 //import DefaultWebItemAnimator from "../platform/web/DefaultWebItemAnimator";
 //const IS_WEB = true;
-//const defaultItemAnimator = new DefaultWebItemAnimator();
 //#endif
 
 const refreshRequestDebouncer = debounce((executable: () => void) => {
@@ -137,6 +135,13 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     private _initialOffset = 0;
     private _cachedLayouts?: Rect[];
     private _scrollComponent: BaseScrollComponent | null = null;
+
+    //#if [REACT-NATIVE]
+    private _defaultItemAnimator: ItemAnimator = new DefaultNativeItemAnimator();
+    //#endif
+    //#if [WEB]
+//private _defaultItemAnimator: ItemAnimator = new DefaultWebItemAnimator();
+    //#endif
 
     constructor(props: RecyclerListViewProps) {
         super(props);
@@ -414,7 +419,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                     childRenderer={this.props.rowRenderer}
                     height={itemRect.height}
                     width={itemRect.width}
-                    itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, defaultItemAnimator)}
+                    itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
                     extendedState={this.props.extendedState} />
             );
         }
