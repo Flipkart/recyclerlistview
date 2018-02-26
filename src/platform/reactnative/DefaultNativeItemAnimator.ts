@@ -17,7 +17,7 @@ export default class DefaultNativeItemAnimator implements ItemAnimator {
     }
 
     public animateWillUpdate(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): void {
-        //no need
+        this.hasAnimatedOnce = true;
     }
 
     public animateShift(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): void {
