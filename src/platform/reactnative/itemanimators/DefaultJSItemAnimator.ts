@@ -1,5 +1,9 @@
-import { Animated, Easing, ViewStatic, View } from "react-native";
+import { Animated, Easing, View } from "react-native";
 import ItemAnimator from "../../../core/ItemAnimator";
+
+interface UnmountAwareView extends View {
+    _isUnmountedForRecyclerListView?: boolean;
+}
 
 /**
  * Default implementation of RLV layout animations for react native. These ones are purely JS driven. Also, check out DefaultNativeItemAnimator
@@ -26,9 +30,13 @@ export class DefaultJSItemAnimator implements ItemAnimator {
     public animateShift(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): boolean {
         if (fromX !== toX || fromY !== toY) {
             if (!this.shouldAnimateOnce || this.shouldAnimateOnce && !this._hasAnimatedOnce) {
-                const viewRef = itemRef as View;
+                const viewRef = itemRef as UnmountAwareView;
                 const animXY = new Animated.ValueXY({ x: fromX, y: fromY });
                 animXY.addListener((value) => {
+                    if (viewRef._isUnmountedForRecyclerListView) {
+                        animXY.stopAnimation();
+                        return;
+                    }
                     viewRef.setNativeProps({ left: value.x, top: value.y });
                 });
                 Animated.timing(animXY, {
@@ -54,6 +62,6 @@ export class DefaultJSItemAnimator implements ItemAnimator {
     }
 
     public animateWillUnmount(atX: number, atY: number, itemRef: object, itemIndex: number): void {
-        //no need
+        (itemRef as UnmountAwareView)._isUnmountedForRecyclerListView = true;
     }
 }
