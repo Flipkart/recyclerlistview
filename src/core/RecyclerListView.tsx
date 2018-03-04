@@ -38,8 +38,7 @@ import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
-import { Platform } from "react-native";
-import DefaultNativeItemAnimator from "../platform/reactnative/DefaultNativeItemAnimator";
+import { DefaultJSItemAnimator as DefaultItemAnimator} from "../platform/reactnative/itemanimators/DefaultJSItemAnimator";
 const IS_WEB = false;
 //#endif
 
@@ -50,7 +49,7 @@ const IS_WEB = false;
 //#if [WEB]
 //import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
 //import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
-//import DefaultWebItemAnimator from "../platform/web/DefaultWebItemAnimator";
+//import { DefaultWebItemAnimator as DefaultItemAnimator} from "../platform/web/itemanimators/DefaultWebItemAnimator";
 //const IS_WEB = true;
 //#endif
 
@@ -136,12 +135,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     private _cachedLayouts?: Rect[];
     private _scrollComponent: BaseScrollComponent | null = null;
 
-    //#if [REACT-NATIVE]
-    private _defaultItemAnimator: ItemAnimator = new DefaultNativeItemAnimator();
-    //#endif
-    //#if [WEB]
-//private _defaultItemAnimator: ItemAnimator = new DefaultWebItemAnimator();
-    //#endif
+    private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
 
     constructor(props: RecyclerListViewProps) {
         super(props);

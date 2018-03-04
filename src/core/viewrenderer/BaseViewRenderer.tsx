@@ -27,20 +27,20 @@ export interface ViewRendererProps<T> {
 }
 export default abstract class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
-        const hasLayoutChanged = this.props.x !== newProps.x ||
-            this.props.y !== newProps.y ||
-            this.props.width !== newProps.width ||
-            this.props.height !== newProps.height ||
+        const hasMoved = this.props.x !== newProps.x || this.props.y !== newProps.y;
+
+        const hasSizeChanged = !newProps.forceNonDeterministicRendering &&
+            (this.props.width !== newProps.width || this.props.height !== newProps.height) ||
             this.props.layoutProvider !== newProps.layoutProvider;
 
         const hasExtendedStateChanged = this.props.extendedState !== newProps.extendedState;
         const hasDataChanged = (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data));
-        const shouldUpdate = hasLayoutChanged || hasDataChanged || hasExtendedStateChanged;
+        let shouldUpdate = hasSizeChanged || hasDataChanged || hasExtendedStateChanged;
 
-        if (hasDataChanged) {
+        if (shouldUpdate) {
             newProps.itemAnimator.animateWillUpdate(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
-        } else if (hasLayoutChanged) {
-            newProps.itemAnimator.animateShift(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
+        } else if (hasMoved) {
+            shouldUpdate = !newProps.itemAnimator.animateShift(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
         }
         return shouldUpdate;
     }

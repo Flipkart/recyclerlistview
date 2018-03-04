@@ -1,9 +1,10 @@
-import ItemAnimator from "../../core/ItemAnimator";
 import { LayoutAnimation, Platform, UIManager } from "react-native";
+import ItemAnimator from "../../../core/ItemAnimator";
 
-export default class DefaultNativeItemAnimator implements ItemAnimator {
+export class DefaultNativeItemAnimator implements ItemAnimator {
     public shouldAnimateOnce: boolean = true;
-    private hasAnimatedOnce: boolean = false;
+    private _hasAnimatedOnce: boolean = false;
+    private _isTimerOn: boolean = false;
     constructor() {
         if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
             UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -17,16 +18,26 @@ export default class DefaultNativeItemAnimator implements ItemAnimator {
     }
 
     public animateWillUpdate(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): void {
-        this.hasAnimatedOnce = true;
+        this._hasAnimatedOnce = true;
     }
 
-    public animateShift(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): void {
+    public animateShift(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): boolean {
         if (fromX !== toX || fromY !== toY) {
-            if (!this.shouldAnimateOnce || this.shouldAnimateOnce && !this.hasAnimatedOnce) {
+            if (!this.shouldAnimateOnce || this.shouldAnimateOnce && !this._hasAnimatedOnce) {
                 LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                this.hasAnimatedOnce = true;
+                this._hasAnimatedOnce = true;
+            }
+        } else {
+            if (!this._isTimerOn) {
+                this._isTimerOn = true;
+                if (!this._hasAnimatedOnce) {
+                    setTimeout(() => {
+                        this._hasAnimatedOnce = true;
+                    }, 1000);
+                }
             }
         }
+        return false;
     }
 
     public animateWillUnmount(atX: number, atY: number, itemRef: object, itemIndex: number): void {
