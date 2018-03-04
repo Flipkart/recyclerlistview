@@ -557,10 +557,10 @@ RecyclerListView.propTypes = {
     extendedState: PropTypes.object,
 
     //Enables animating RecyclerListView item cells e.g, shift, add, remove etc. This prop can be used to pass an external item animation implementation.
-    //Look into BaseItemAnimator/DefaultNativeItemAnimator/DefaultWebItemAnimator for more info.
+    //Look into BaseItemAnimator/DefaultJSItemAnimator/DefaultNativeItemAnimator/DefaultWebItemAnimator for more info.
     //By default there are few animations, to disable completely simply pass blank new BaseItemAnimator() object. Remember, create
     //one object and keep it do not create multiple object of type BaseItemAnimator.
-    //Note: This enables and uses Layout Animation on React Native, if that affects your workflow please disable animation or, write your own
-    //without using Layout Animation. You get access to item reference to write your own animations.
+    //Note: You might want to look into DefaultNativeItemAnimator to check an implementation based on LayoutAnimation. By default,
+    //animations are JS driven to avoid workflow interference. Also, please note LayoutAnimation is buggy on Android.
     itemAnimator: PropTypes.instanceOf(BaseItemAnimator),
 };
