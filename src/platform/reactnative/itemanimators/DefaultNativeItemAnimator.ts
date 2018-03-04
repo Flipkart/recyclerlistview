@@ -1,7 +1,7 @@
 import { LayoutAnimation, Platform, UIManager } from "react-native";
-import ItemAnimator from "../../../core/ItemAnimator";
+import { BaseItemAnimator } from "../../../core/ItemAnimator";
 
-export class DefaultNativeItemAnimator implements ItemAnimator {
+export class DefaultNativeItemAnimator implements BaseItemAnimator {
     public shouldAnimateOnce: boolean = true;
     private _hasAnimatedOnce: boolean = false;
     private _isTimerOn: boolean = false;

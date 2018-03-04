@@ -1,5 +1,5 @@
 import { Animated, Easing, View } from "react-native";
-import ItemAnimator from "../../../core/ItemAnimator";
+import { BaseItemAnimator } from "../../../core/ItemAnimator";
 
 interface UnmountAwareView extends View {
     _isUnmountedForRecyclerListView?: boolean;
@@ -12,7 +12,7 @@ interface UnmountAwareView extends View {
  * you need to. Check DefaultNativeItemAnimator for inspiration. LayoutAnimation definitely gives better performance but is
  * hardly customizable.
  */
-export class DefaultJSItemAnimator implements ItemAnimator {
+export class DefaultJSItemAnimator implements BaseItemAnimator {
     public shouldAnimateOnce: boolean = true;
     private _hasAnimatedOnce: boolean = false;
     private _isTimerOn: boolean = false;
@@ -43,6 +43,7 @@ export class DefaultJSItemAnimator implements ItemAnimator {
                     toValue: { x: toX, y: toY },
                     duration: 200,
                     easing: Easing.out(Easing.ease),
+                    useNativeDriver: BaseItemAnimator.USE_NATIVE_DRIVER,
                 }).start(() => {
                     this._hasAnimatedOnce = true;
                 });
