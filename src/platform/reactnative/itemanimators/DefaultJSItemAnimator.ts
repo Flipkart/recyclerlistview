@@ -3,6 +3,7 @@ import { BaseItemAnimator } from "../../../core/ItemAnimator";
 
 interface UnmountAwareView extends View {
     _isUnmountedForRecyclerListView?: boolean;
+    _lastAnimVal?: Animated.ValueXY | null;
 }
 
 /**
@@ -39,12 +40,17 @@ export class DefaultJSItemAnimator implements BaseItemAnimator {
                     }
                     viewRef.setNativeProps({ left: value.x, top: value.y });
                 });
+                if (viewRef._lastAnimVal) {
+                    viewRef._lastAnimVal.stopAnimation();
+                }
+                viewRef._lastAnimVal = animXY;
                 Animated.timing(animXY, {
                     toValue: { x: toX, y: toY },
                     duration: 200,
                     easing: Easing.out(Easing.ease),
                     useNativeDriver: BaseItemAnimator.USE_NATIVE_DRIVER,
                 }).start(() => {
+                    viewRef._lastAnimVal = null;
                     this._hasAnimatedOnce = true;
                 });
                 return true;
