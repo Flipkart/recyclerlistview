@@ -41,6 +41,8 @@ Apart from all performance benefits RecyclerListView comes with great features o
 - Scroll position preservation
 - Window scrolling support for web
 - Non deterministic rendering mode on demand (height cannot be determined before rendering)
+- (New) ItemAnimator interface added, customize to your will how RLV handles layout changes. Allows you to modify animations that move cells. You can do things like smoothly move an item to a new position when height of one of the cells has changed.
+- (WIP) Stable Id support, ability to associate a stable id with an item. Will enable beautiful add/remove animations and optimize re-renders when DataProvider is updated.
 
 ## Why?
 
