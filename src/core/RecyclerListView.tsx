@@ -38,8 +38,7 @@ import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
-import { Platform } from "react-native";
-import DefaultNativeItemAnimator from "../platform/reactnative/DefaultNativeItemAnimator";
+import { DefaultJSItemAnimator as DefaultItemAnimator} from "../platform/reactnative/itemanimators/DefaultJSItemAnimator";
 const IS_WEB = false;
 //#endif
 
@@ -50,7 +49,7 @@ const IS_WEB = false;
 //#if [WEB]
 //import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
 //import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
-//import DefaultWebItemAnimator from "../platform/web/DefaultWebItemAnimator";
+//import { DefaultWebItemAnimator as DefaultItemAnimator} from "../platform/web/itemanimators/DefaultWebItemAnimator";
 //const IS_WEB = true;
 //#endif
 
@@ -136,12 +135,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     private _cachedLayouts?: Rect[];
     private _scrollComponent: BaseScrollComponent | null = null;
 
-    //#if [REACT-NATIVE]
-    private _defaultItemAnimator: ItemAnimator = new DefaultNativeItemAnimator();
-    //#endif
-    //#if [WEB]
-//private _defaultItemAnimator: ItemAnimator = new DefaultWebItemAnimator();
-    //#endif
+    private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
 
     constructor(props: RecyclerListViewProps) {
         super(props);
@@ -563,10 +557,10 @@ RecyclerListView.propTypes = {
     extendedState: PropTypes.object,
 
     //Enables animating RecyclerListView item cells e.g, shift, add, remove etc. This prop can be used to pass an external item animation implementation.
-    //Look into BaseItemAnimator/DefaultNativeItemAnimator/DefaultWebItemAnimator for more info.
+    //Look into BaseItemAnimator/DefaultJSItemAnimator/DefaultNativeItemAnimator/DefaultWebItemAnimator for more info.
     //By default there are few animations, to disable completely simply pass blank new BaseItemAnimator() object. Remember, create
     //one object and keep it do not create multiple object of type BaseItemAnimator.
-    //Note: This enables and uses Layout Animation on React Native, if that affects your workflow please disable animation or, write your own
-    //without using Layout Animation. You get access to item reference to write your own animations.
+    //Note: You might want to look into DefaultNativeItemAnimator to check an implementation based on LayoutAnimation. By default,
+    //animations are JS driven to avoid workflow interference. Also, please note LayoutAnimation is buggy on Android.
     itemAnimator: PropTypes.instanceOf(BaseItemAnimator),
 };
