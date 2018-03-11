@@ -33,7 +33,7 @@ export class DefaultWebItemAnimator implements BaseItemAnimator {
             }
         } else {
             if (!this._isTimerOn) {
-                this._isTimerOn = false;
+                this._isTimerOn = true;
                 if (!this._hasAnimatedOnce) {
                     setTimeout(() => {
                         this._hasAnimatedOnce = true;
