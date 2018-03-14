@@ -72,7 +72,7 @@ Other Video: https://www.youtube.com/watch?v=Tnv4HMmPgMc
 
 ## Props
 For full feature set have a look at prop definitions of [RecyclerListView](https://github.com/Flipkart/recyclerlistview/blob/afd7d80c13bad68ddbb60849ccda47ccef3ecda2/src/core/RecyclerListView.tsx#L488-L566)
-(bottom of the file).
+(bottom of the file). All `ScrollView` features also work out of the box.
 
 ## Sample Code
 Please go through DataProvider, LayoutProvider and rowRenderer in detail. Those are the basic building blocks of this component. For more details dive into
