@@ -71,8 +71,8 @@ Other Video: https://www.youtube.com/watch?v=Tnv4HMmPgMc
 [![Watch Video](https://img.youtube.com/vi/Tnv4HMmPgMc/0.jpg)](https://www.youtube.com/watch?v=Tnv4HMmPgMc)
 
 ## Props
-For full feature set have a look at prop definitions of [RecyclerListView](https://github.com/Flipkart/recyclerlistview/blob/593b7636264a49eb17bf75f88513420b8f0c9b85/src/core/RecyclerListView.tsx#L478-L547)
-(bottom of the file).
+For full feature set have a look at prop definitions of [RecyclerListView](https://github.com/Flipkart/recyclerlistview/blob/afd7d80c13bad68ddbb60849ccda47ccef3ecda2/src/core/RecyclerListView.tsx#L488-L566)
+(bottom of the file). All `ScrollView` features also work out of the box.
 
 ## Sample Code
 Please go through DataProvider, LayoutProvider and rowRenderer in detail. Those are the basic building blocks of this component. For more details dive into
