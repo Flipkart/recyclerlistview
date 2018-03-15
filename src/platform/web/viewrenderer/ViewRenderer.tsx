@@ -30,30 +30,22 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     }
 
     public render(): JSX.Element {
-        const styleObj: CSSProperties = this.props.forceNonDeterministicRendering
+        const style: CSSProperties = this.props.forceNonDeterministicRendering
             ? {
-                WebkitTransform: this._getTransform(),
-                left: 0,
-                position: "absolute",
-                flexDirection: "column",
-                display: "flex",
-                top: 0,
                 transform: this._getTransform(),
+                WebkitTransform: this._getTransform(),
+                ...styles.baseViewStyle,
             }
             : {
-                WebkitTransform: this._getTransform(),
                 height: this.props.height,
-                left: 0,
                 overflow: "hidden",
-                position: "absolute",
-                flexDirection: "column",
-                display: "flex",
-                top: 0,
-                transform: this._getTransform(),
                 width: this.props.width,
+                transform: this._getTransform(),
+                WebkitTransform: this._getTransform(),
+                ...styles.baseViewStyle,
             };
         return (
-            <div ref={this._setRef} style={styleObj}>
+            <div ref={this._setRef} style={style}>
                 {this.renderChild()}
             </div>
         );
@@ -82,3 +74,22 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         }
     }
 }
+
+const styles: { [key: string]: CSSProperties } = {
+    baseViewStyle: {
+        alignItems: "stretch",
+        borderWidth: 0,
+        borderStyle: "solid",
+        boxSizing: "border-box",
+        display: "flex",
+        flexDirection: "column",
+        margin: 0,
+        padding: 0,
+        position: "absolute",
+        zIndex: 0,
+        minHeight: 0,
+        minWidth: 0,
+        left: 0,
+        top: 0,
+    },
+};
