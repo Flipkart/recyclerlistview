@@ -86,7 +86,6 @@ const styles: { [key: string]: CSSProperties } = {
         margin: 0,
         padding: 0,
         position: "absolute",
-        zIndex: 0,
         minHeight: 0,
         minWidth: 0,
         left: 0,
