@@ -12,10 +12,13 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _mainDiv: HTMLDivElement | null = null;
+    private _invertedTransform: string = "";
 
     constructor(props: ViewRendererProps<any>) {
         super(props);
         this._setRef = this._setRef.bind(this);
+
+        this._invertedTransform = this._getInvertedTransform();
     }
 
     public componentDidMount(): void {
@@ -58,7 +61,10 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         this._mainDiv = div;
     }
     private _getTransform(): string {
-        return "translate(" + this.props.x + "px," + this.props.y + "px)";
+        return "translate(" + this.props.x + "px," + this.props.y + "px)" + this._invertedTransform;
+    }
+    private _getInvertedTransform(): string {
+        return this.props.inverted ? this.props.isHorizontal ? "scaleX(-1)" : "scaleY(-1)" : "";
     }
 
     private _checkSizeChange(): void {

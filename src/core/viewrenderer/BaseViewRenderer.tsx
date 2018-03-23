@@ -24,6 +24,7 @@ export interface ViewRendererProps<T> {
     isHorizontal?: boolean;
     extendedState?: object;
     layoutProvider?: LayoutProvider;
+    inverted?: boolean;
 }
 export default abstract class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {

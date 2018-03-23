@@ -38,7 +38,7 @@ import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
-import { DefaultJSItemAnimator as DefaultItemAnimator} from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
+import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
 const IS_WEB = false;
 //#endif
 
@@ -97,6 +97,7 @@ export interface RecyclerListViewProps {
     forceNonDeterministicRendering?: boolean;
     extendedState?: object;
     itemAnimator?: ItemAnimator;
+    inverted?: boolean;
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
@@ -111,6 +112,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         isHorizontal: false,
         onEndReachedThreshold: 0,
         renderAheadOffset: IS_WEB ? 1000 : 250,
+        inverted: false,
     };
 
     public static propTypes = {};
@@ -414,7 +416,8 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                     height={itemRect.height}
                     width={itemRect.width}
                     itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
-                    extendedState={this.props.extendedState} />
+                    extendedState={this.props.extendedState}
+                    inverted={this.props.inverted} />
             );
         }
         return null;
@@ -563,4 +566,7 @@ RecyclerListView.propTypes = {
     //Note: You might want to look into DefaultNativeItemAnimator to check an implementation based on LayoutAnimation. By default,
     //animations are JS driven to avoid workflow interference. Also, please note LayoutAnimation is buggy on Android.
     itemAnimator: PropTypes.instanceOf(BaseItemAnimator),
+
+    //Web only. Invert scrollable view. Default  is false
+    inverted: PropTypes.bool,
 };
