@@ -11,8 +11,6 @@ import TSCast from "../utils/TSCast";
  * Renderer which keeps track of recyclable items and the currently rendered items. Notifies list view to re render if something changes, like scroll offset
  */
 export interface RenderStackItem {
-    key?: number;
-    type?: string | number;
     dataIndex?: number;
 }
 export interface RenderStack { [key: string]: RenderStackItem; }
@@ -30,9 +28,10 @@ export default class VirtualRenderer {
     public onVisibleItemsChanged: TOnItemStatusChanged | null;
 
     private _scrollOnNextUpdate: (point: Point) => void;
-    private _renderStackIndexKeyMap: { [key: number]: number };
+    private _stableIdToRenderKeyMap: { [key: string]: string };
     private _renderStack: RenderStack;
     private _renderStackChanged: (renderStack: RenderStack) => void;
+    private _fetchStableId: (index: number) => string;
     private _isRecyclingEnabled: boolean;
     private _isViewTrackerRunning: boolean;
     private _startKey: number;
@@ -44,12 +43,17 @@ export default class VirtualRenderer {
     private _viewabilityTracker: ViewabilityTracker | null = null;
     private _dimensions: Dimension | null;
 
-    constructor(renderStackChanged: (renderStack: RenderStack) => void, scrollOnNextUpdate: (point: Point) => void, isRecyclingEnabled: boolean) {
+    constructor(renderStackChanged: (renderStack: RenderStack) => void,
+                scrollOnNextUpdate: (point: Point) => void,
+                fetchStableId: (index: number) => string,
+                isRecyclingEnabled: boolean) {
         //Keeps track of items that need to be rendered in the next render cycle
         this._renderStack = {};
 
+        this._fetchStableId = fetchStableId;
+
         //Keeps track of keys of all the currently rendered indexes, can eventually replace renderStack as well if no new use cases come up
-        this._renderStackIndexKeyMap = {};
+        this._stableIdToRenderKeyMap = {};
         this._renderStackChanged = renderStackChanged;
         this._scrollOnNextUpdate = scrollOnNextUpdate;
         this._dimensions = null;
@@ -189,8 +193,8 @@ export default class VirtualRenderer {
         }
     }
 
-    private _getNewKey(): number {
-        return this._startKey++;
+    public findKey(index: number): string {
+        return this._stableIdToRenderKeyMap[this._fetchStableId(index)];
     }
 
     private _prepareViewabilityTracker(): void {
@@ -219,21 +223,17 @@ export default class VirtualRenderer {
 
     private _onEngagedItemsChanged(all: number[], now: number[], notNow: number[]): void {
         const count = notNow.length;
-        let resolvedIndex = 0;
+        let resolvedKey = "";
         let disengagedIndex = 0;
         if (this._isRecyclingEnabled) {
             for (let i = 0; i < count; i++) {
                 disengagedIndex = notNow[i];
-                resolvedIndex = this._renderStackIndexKeyMap[disengagedIndex];
+                resolvedKey = this._stableIdToRenderKeyMap[this._fetchStableId(disengagedIndex)];
 
                 if (this._params && disengagedIndex < this._params.itemCount) {
                     //All the items which are now not visible can go to the recycle pool, the pool only needs to maintain keys since
                     //react can link a view to a key automatically
-                    this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedIndex);
-                } else {
-                    //Type provider may not be available in this case, use most probable
-                    const itemMeta = this._renderStack[resolvedIndex];
-                    this._recyclePool.putRecycledObject(itemMeta.type ? itemMeta.type : 0, resolvedIndex);
+                    this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedKey);
                 }
             }
         }
@@ -248,45 +248,40 @@ export default class VirtualRenderer {
         const count = itemIndexes.length;
         let type = null;
         let availableKey = null;
-        let itemMeta: RenderStackItem | null = null;
+        let itemMeta: RenderStackItem | undefined;
         let index = 0;
         let hasRenderStackChanged = false;
         for (let i = 0; i < count; i++) {
             index = itemIndexes[i];
-            availableKey = this._renderStackIndexKeyMap[index];
-            if (availableKey >= 0) {
+            availableKey = this._stableIdToRenderKeyMap[this._fetchStableId(index)];
+            if (availableKey) {
                 //Use if already rendered and remove from pool
                 this._recyclePool.removeFromPool(availableKey);
                 itemMeta = this._renderStack[availableKey];
-                if (itemMeta.key !== availableKey) {
-                    hasRenderStackChanged = true;
-                    itemMeta.key = availableKey;
-                }
+                // if (itemMeta.key !== availableKey) {
+                //     hasRenderStackChanged = true;
+                //     itemMeta.key = availableKey;
+                // }
             } else {
                 hasRenderStackChanged = true;
                 type = this._layoutProvider.getLayoutTypeForIndex(index);
                 availableKey = this._recyclePool.getRecycledObject(type);
                 if (availableKey) {
                     //If available in pool use that key instead
-                    availableKey = parseInt(availableKey, 10);
                     itemMeta = this._renderStack[availableKey];
                     if (!itemMeta) {
                         itemMeta = {};
                         this._renderStack[availableKey] = itemMeta;
                     }
-                    itemMeta.key = availableKey;
-                    itemMeta.type = type;
 
                     //since this data index is no longer being rendered anywhere
                     if (!ObjectUtil.isNullOrUndefined(itemMeta.dataIndex)) {
-                        delete this._renderStackIndexKeyMap[itemMeta.dataIndex];
+                        delete this._stableIdToRenderKeyMap[this._fetchStableId(itemMeta.dataIndex)];
                     }
                 } else {
                     //Create new if no existing key is available
                     itemMeta = {};
-                    availableKey = this._getNewKey();
-                    itemMeta.key = availableKey;
-                    itemMeta.type = type;
+                    availableKey = this._fetchStableId(index);
                     this._renderStack[availableKey] = itemMeta;
                 }
 
@@ -299,7 +294,7 @@ export default class VirtualRenderer {
                 //     delete this._renderStack[alreadyRenderedAtKey];
                 // }
             }
-            this._renderStackIndexKeyMap[index] = itemMeta.key;
+            this._stableIdToRenderKeyMap[this._fetchStableId(index)] = availableKey;
             itemMeta.dataIndex = index;
         }
         return hasRenderStackChanged;

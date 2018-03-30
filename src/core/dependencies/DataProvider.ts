@@ -1,15 +1,25 @@
+import { ObjectUtil } from "ts-object-utils";
+
 /***
  * You can create a new instance or inherit and override default methods
  * Allows access to data and size. Clone with rows creates a new data provider and let listview know where to calculate row layout from.
  */
 export default class DataProvider {
     public rowHasChanged: (r1: any, r2: any) => boolean;
+
+    // In JS context make sure stable id is a string
+    public getStableId: (index: number) => string;
     private _firstIndexToProcess: number = 0;
     private _size: number = 0;
     private _data: any[] = [];
 
-    constructor(rowHasChanged: (r1: any, r2: any) => boolean) {
+    constructor(rowHasChanged: (r1: any, r2: any) => boolean, getStableId?: (index: number) => string) {
         this.rowHasChanged = rowHasChanged;
+        if (getStableId) {
+            this.getStableId = getStableId;
+        } else {
+            this.getStableId = (index) => index.toString();
+        }
     }
     public getDataForIndex(index: number): any {
         return this._data[index];
@@ -28,17 +38,22 @@ export default class DataProvider {
     }
 
     //No need to override this one
-    public cloneWithRows(newData: any[]): DataProvider {
-        const dp = new DataProvider(this.rowHasChanged);
+    //If you already know the first row where rowHasChanged will be false pass it upfront to avoid loop
+    public cloneWithRows(newData: any[], firstModifiedIndex: number | undefined): DataProvider {
+        const dp = new DataProvider(this.rowHasChanged, this.getStableId);
         const newSize = newData.length;
         const iterCount = Math.min(this._size, newSize);
-        let i = 0;
-        for (i = 0; i < iterCount; i++) {
-            if (this.rowHasChanged(this._data[i], newData[i])) {
-                break;
+        if (ObjectUtil.isNullOrUndefined(firstModifiedIndex)) {
+            let i = 0;
+            for (i = 0; i < iterCount; i++) {
+                if (this.rowHasChanged(this._data[i], newData[i])) {
+                    break;
+                }
             }
+            dp._firstIndexToProcess = i;
+        } else {
+            dp._firstIndexToProcess = Math.max(Math.min(firstModifiedIndex, this._data.length - 1), 0);
         }
-        dp._firstIndexToProcess = i;
         dp._data = newData;
         dp._size = newSize;
         return dp;
