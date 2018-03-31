@@ -12,11 +12,13 @@ export default class DataProvider {
     private _firstIndexToProcess: number = 0;
     private _size: number = 0;
     private _data: any[] = [];
+    private _hasStableIds = false;
 
     constructor(rowHasChanged: (r1: any, r2: any) => boolean, getStableId?: (index: number) => string) {
         this.rowHasChanged = rowHasChanged;
         if (getStableId) {
             this.getStableId = getStableId;
+            this._hasStableIds = true;
         } else {
             this.getStableId = (index) => index.toString();
         }
@@ -31,6 +33,10 @@ export default class DataProvider {
 
     public getSize(): number {
         return this._size;
+    }
+
+    public hasStableIds(): boolean {
+        return this._hasStableIds;
     }
 
     public getFirstIndexToProcessInternal(): number {

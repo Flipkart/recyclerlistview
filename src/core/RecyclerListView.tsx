@@ -267,6 +267,24 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     }
 
     public render(): JSX.Element {
+        //TODO:Talha
+        // const {
+        //     layoutProvider,
+        //     dataProvider,
+        //     contextProvider,
+        //     renderAheadOffset,
+        //     onEndReached,
+        //     onEndReachedThreshold,
+        //     onVisibleIndexesChanged,
+        //     initialOffset,
+        //     initialRenderIndex,
+        //     disableRecycling,
+        //     forceNonDeterministicRendering,
+        //     extendedState,
+        //     itemAnimator,
+        //     rowRenderer,
+        //     ...props,
+        // } = this.props;
         return (
             <ScrollComponent
                 ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
@@ -303,6 +321,9 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                 this._relayoutReqIndex = -1;
                 this._refreshViewability();
             }
+        }
+        if (newProps.dataProvider.hasStableIds() && this.props.dataProvider !== newProps.dataProvider) {
+            this._virtualRenderer.handleDataSetChange();
         }
     }
 
@@ -456,7 +477,6 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         for (const key in this.state.renderStack) {
             if (this.state.renderStack.hasOwnProperty(key)) {
                 renderedItems.push(this._renderRowUsingMeta(this.state.renderStack[key]));
-
             }
         }
         return renderedItems;

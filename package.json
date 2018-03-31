@@ -9,7 +9,8 @@
     "clean": "sh scripts/clean.sh",
     "setup": "sh scripts/setup.sh",
     "release": "sh scripts/publish-latest.sh",
-    "release-beta": "sh scripts/publish-beta.sh"
+    "release-beta": "sh scripts/publish-beta.sh",
+    "publish-local": "sh scripts/publish-local.sh"
   },
   "repository": {
     "type": "git",

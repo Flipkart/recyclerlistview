@@ -48,6 +48,19 @@ export default class ScrollComponent extends BaseScrollComponent {
 
     public render(): JSX.Element {
         const Scroller = TSCast.cast<ScrollView>(this.props.externalScrollView); //TSI
+        //TODO:Talha
+        // const {
+        //     useWindowScroll,
+        //     contentHeight,
+        //     contentWidth,
+        //     externalScrollView,
+        //     canChangeSize,
+        //     distanceFromWindow,
+        //     renderFooter,
+        //     isHorizontal,
+        //     scrollThrottle,
+        //     ...props,
+        // } = this.props;
         return (
             <Scroller ref={(scrollView: any) => this._scrollViewRef = scrollView as (ScrollView | null)}
                       removeClippedSubviews={false}
