@@ -303,6 +303,9 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         this._params.isHorizontal = newProps.isHorizontal;
         this._params.itemCount = newProps.dataProvider.getSize();
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
+        if (newProps.dataProvider.hasStableIds() && this.props.dataProvider !== newProps.dataProvider) {
+            this._virtualRenderer.handleDataSetChange(newProps.dataProvider);
+        }
         if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
             this._virtualRenderer.setLayoutManager(new LayoutManager(newProps.layoutProvider, this._layout, newProps.isHorizontal));
@@ -321,9 +324,6 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                 this._relayoutReqIndex = -1;
                 this._refreshViewability();
             }
-        }
-        if (newProps.dataProvider.hasStableIds() && this.props.dataProvider !== newProps.dataProvider) {
-            this._virtualRenderer.handleDataSetChange();
         }
     }
 

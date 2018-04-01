@@ -6,6 +6,7 @@ import LayoutManager, { Point } from "./layoutmanager/LayoutManager";
 import ViewabilityTracker, { TOnItemStatusChanged } from "./ViewabilityTracker";
 import { ObjectUtil, Default } from "ts-object-utils";
 import TSCast from "../utils/TSCast";
+import DataProvider from "./dependencies/DataProvider";
 
 /***
  * Renderer which keeps track of recyclable items and the currently rendered items. Notifies list view to re render if something changes, like scroll offset
@@ -24,6 +25,8 @@ export interface RenderStackParams {
     renderAheadOffset?: number;
 }
 
+export type StableIdProvider = (index: number) => string;
+
 export default class VirtualRenderer {
 
     public onVisibleItemsChanged: TOnItemStatusChanged | null;
@@ -32,7 +35,7 @@ export default class VirtualRenderer {
     private _stableIdToRenderKeyMap: { [key: string]: string | undefined };
     private _renderStack: RenderStack;
     private _renderStackChanged: (renderStack: RenderStack) => void;
-    private _fetchStableId: (index: number) => string;
+    private _fetchStableId: StableIdProvider;
     private _isRecyclingEnabled: boolean;
     private _isViewTrackerRunning: boolean;
     private _startKey: number;
@@ -46,7 +49,7 @@ export default class VirtualRenderer {
 
     constructor(renderStackChanged: (renderStack: RenderStack) => void,
                 scrollOnNextUpdate: (point: Point) => void,
-                fetchStableId: (index: number) => string,
+                fetchStableId: StableIdProvider,
                 isRecyclingEnabled: boolean) {
         //Keeps track of items that need to be rendered in the next render cycle
         this._renderStack = {};
@@ -194,27 +197,39 @@ export default class VirtualRenderer {
         }
     }
 
-    public findKey(index: number): string {
-        let key = this._stableIdToRenderKeyMap[this._fetchStableId(index)];
+    public findKey(index: number, overrideStableIdProvider?: StableIdProvider): string {
+        const getStableId = overrideStableIdProvider ? overrideStableIdProvider : this._fetchStableId;
+        let key = this._stableIdToRenderKeyMap[getStableId(index)];
         if (ObjectUtil.isNullOrUndefined(key)) {
-            key = this._fetchStableId(index);
-            this._stableIdToRenderKeyMap[this._fetchStableId(index)] = key;
+            key = getStableId(index);
+            this._stableIdToRenderKeyMap[getStableId(index)] = key;
         }
         return key;
     }
 
-    public handleDataSetChange(): void {
+    public handleDataSetChange(newDataProvider: DataProvider): void {
+        const getStableId = newDataProvider.getStableId;
+        const maxIndex = newDataProvider.getSize() - 1;
         const activeStableIds: { [key: string]: number } = {};
+        const stackKeysToDelete: { [key: string]: number } = {};
         const newRenderStack: RenderStack = {};
+
+        //Compute active stable ids and stale active keys
         for (const key in this._renderStack) {
             if (this._renderStack.hasOwnProperty(key)) {
                 const index = this._renderStack[key].dataIndex;
                 if (!ObjectUtil.isNullOrUndefined(index)) {
-                    const stableId = this._fetchStableId(index);
-                    activeStableIds[stableId] = 1;
+                    if (index > maxIndex) {
+                        stackKeysToDelete[key] = 1;
+                    } else {
+                        const stableId = getStableId(index);
+                        activeStableIds[stableId] = 1;
+                    }
                 }
             }
         }
+
+        //Clean stable id to key map
         const oldActiveStableIds = Object.keys(this._stableIdToRenderKeyMap);
         const oldActiveStableIdsCount = oldActiveStableIds.length;
         for (let i = 0; i < oldActiveStableIdsCount; i++) {
@@ -223,16 +238,28 @@ export default class VirtualRenderer {
                 delete this._stableIdToRenderKeyMap[key];
             }
         }
+
+        //Clean up render stack
+        const oldActiveKeys = Object.keys(this._renderStack);
+        const oldActiveKeysCount = oldActiveKeys.length;
+        for (let i = 0; i < oldActiveKeysCount; i++) {
+            const key = oldActiveKeys[i];
+            if (stackKeysToDelete[key]) {
+                delete this._renderStack[key];
+            }
+        }
+
+        //Resync render stack to new key
         for (const key in this._renderStack) {
             if (this._renderStack.hasOwnProperty(key)) {
                 const index = this._renderStack[key].dataIndex;
                 if (!ObjectUtil.isNullOrUndefined(index)) {
-                    const stableId = this._fetchStableId(index);
+                    const stableId = getStableId(index);
                     const currentAssignedKey = this._stableIdToRenderKeyMap[stableId];
                     if (!ObjectUtil.isNullOrUndefined(currentAssignedKey)) {
                         newRenderStack[currentAssignedKey] = { dataIndex: index };
                     } else {
-                        newRenderStack[this.findKey(index)] = { dataIndex: index };
+                        newRenderStack[this.findKey(index, getStableId)] = { dataIndex: index };
                     }
                 }
             }
@@ -271,11 +298,10 @@ export default class VirtualRenderer {
         if (this._isRecyclingEnabled) {
             for (let i = 0; i < count; i++) {
                 disengagedIndex = notNow[i];
-                resolvedKey = this._stableIdToRenderKeyMap[this._fetchStableId(disengagedIndex)];
-
                 if (this._params && disengagedIndex < this._params.itemCount) {
                     //All the items which are now not visible can go to the recycle pool, the pool only needs to maintain keys since
                     //react can link a view to a key automatically
+                    resolvedKey = this._stableIdToRenderKeyMap[this._fetchStableId(disengagedIndex)];
                     if (!ObjectUtil.isNullOrUndefined(resolvedKey)) {
                         this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedKey);
                     }
