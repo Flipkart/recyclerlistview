@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
+TARGET=$"/Users/talha.naqvi/Documents/Work/rn-rnw-setup-live-reload/node_modules/recyclerlistview/dist" #target-path
+
 npm run build
 
 echo "copying build..."
-rm -rf /Users/talha.naqvi/Documents/Work/rn-rnw-setup-live-reload/node_modules/recyclerlistview/dist
-cp -r dist /Users/talha.naqvi/Documents/Work/rn-rnw-setup-live-reload/node_modules/recyclerlistview/dist
-# rm -rf /Users/talha.naqvi/Documents/GitHub/fk-react-native/node_modules/recyclerlistview/dist
-# cp -r dist /Users/talha.naqvi/Documents/GitHub/fk-react-native/node_modules/recyclerlistview/dist
+rm -rf "$TARGET"
+cp -r dist "$TARGET"
 
 echo "copy complete."
