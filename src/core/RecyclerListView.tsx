@@ -10,9 +10,9 @@
  * DONE: Add full render logic in cases like change of dimensions
  * DONE: Fix all proptypes
  * DONE: Add Initial render Index support
+ * DONE: Add animated scroll to web scrollviewer
+ * DONE: Animate list view transition, including add/remove
  * TODO: Destroy less frequently used items in recycle pool, this will help in case of too many types.
- * TODO: Add animated scroll to web scrollviewer
- * TODO: Animate list view transition, including add/remove
  * TODO: Implement sticky headers
  * TODO: Make viewability callbacks configurable
  * TODO: Observe size changes on web to optimize for reflowability
@@ -39,7 +39,8 @@ import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
-const IS_WEB = false;
+import { Platform } from "react-native";
+const IS_WEB = Platform.OS === "web";
 //#endif
 
 /***
