@@ -13,7 +13,6 @@ import DataProvider from "./dependencies/DataProvider";
  */
 export interface RenderStackItem {
     dataIndex?: number;
-    stableId?: string;
 }
 export interface RenderStack { [key: string]: RenderStackItem; }
 
