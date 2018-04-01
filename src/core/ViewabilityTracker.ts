@@ -1,6 +1,6 @@
 import BinarySearch from "../utils/BinarySearch";
 import { Dimension } from "./dependencies/LayoutProvider";
-import { Rect } from "./layoutmanager/LayoutManager";
+import { Layout } from "./layoutmanager/LayoutManager";
 /***
  * Given an offset this utility can compute visible items. Also tracks previously visible items to compute items which get hidden or visible
  * Virtual renderer uses callbacks from this utility to main recycle pool and the render stack.
@@ -28,7 +28,7 @@ export default class ViewabilityTracker {
     private _windowBound: number;
     private _visibleIndexes: number[];
     private _engagedIndexes: number[];
-    private _layouts: Rect[] = [];
+    private _layouts: Layout[] = [];
 
     constructor(renderAheadOffset: number, initialOffset: number) {
         this._currentOffset = Math.max(0, initialOffset);
@@ -55,7 +55,7 @@ export default class ViewabilityTracker {
         this._doInitialFit(this._currentOffset);
     }
 
-    public setLayouts(layouts: Rect[], maxOffset: number): void {
+    public setLayouts(layouts: Layout[], maxOffset: number): void {
         this._layouts = layouts;
         this._maxOffset = maxOffset;
     }
@@ -229,7 +229,7 @@ export default class ViewabilityTracker {
         return isFound;
     }
 
-    private _setRelevantBounds(itemRect: Rect, relevantDim: Range): void {
+    private _setRelevantBounds(itemRect: Layout, relevantDim: Range): void {
         if (this._isHorizontal) {
             relevantDim.end = itemRect.x + itemRect.width;
             relevantDim.start = itemRect.x;

@@ -27,7 +27,7 @@ import DataProvider from "./dependencies/DataProvider";
 import LayoutProvider, { Dimension } from "./dependencies/LayoutProvider";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
-import LayoutManager, { Point, Rect } from "./layoutmanager/LayoutManager";
+import LayoutManager, { Point, Layout } from "./layoutmanager/LayoutManager";
 import Messages from "./messages/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent } from "./scrollcomponent/BaseScrollView";
@@ -132,7 +132,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     private _pendingScrollToOffset: Point | null = null;
     private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
-    private _cachedLayouts?: Rect[];
+    private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
 
     private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
@@ -239,6 +239,11 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                 break;
             }
         }
+    }
+
+    public getLayout(index: number): Layout | undefined {
+        const layoutManager = this._virtualRenderer.getLayoutManager();
+        return layoutManager ? layoutManager.getLayouts()[index] : undefined;
     }
 
     public scrollToTop(animate?: boolean): void {
