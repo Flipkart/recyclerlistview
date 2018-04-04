@@ -33,12 +33,13 @@ import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent } from "./scrollcomponent/BaseScrollView";
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
+import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
-import { Platform } from "react-native";
-const IS_WEB = Platform.OS === "web";
+import { DefaultJSItemAnimator as DefaultItemAnimator} from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
+const IS_WEB = false;
 //#endif
 
 /***
@@ -48,6 +49,7 @@ const IS_WEB = Platform.OS === "web";
 //#if [WEB]
 //import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
 //import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
+//import { DefaultWebItemAnimator as DefaultItemAnimator} from "../platform/web/itemanimators/DefaultWebItemAnimator";
 //const IS_WEB = true;
 //#endif
 
@@ -94,6 +96,7 @@ export interface RecyclerListViewProps {
     disableRecycling?: boolean;
     forceNonDeterministicRendering?: boolean;
     extendedState?: object;
+    itemAnimator?: ItemAnimator;
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
@@ -130,7 +133,9 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
     private _cachedLayouts?: Rect[];
-    private _scrollComponent: BaseScrollComponent | null;
+    private _scrollComponent: BaseScrollComponent | null = null;
+
+    private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
 
     constructor(props: RecyclerListViewProps) {
         super(props);
@@ -408,6 +413,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                     childRenderer={this.props.rowRenderer}
                     height={itemRect.height}
                     width={itemRect.width}
+                    itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
                     extendedState={this.props.extendedState} />
             );
         }
@@ -508,7 +514,8 @@ RecyclerListView.propTypes = {
 
     //Provide your own ScrollView Component. The contract for the scroll event should match the native scroll event contract, i.e.
     // scrollEvent = { nativeEvent: { contentOffset: { x: offset, y: offset } } }
-    externalScrollView: PropTypes.instanceOf(BaseScrollView),
+    //Note: Please extend BaseScrollView to achieve expected behaviour
+    externalScrollView: PropTypes.func,
 
     //Callback given when user scrolls to the end of the list or footer just becomes visible, useful in incremental loading scenarios
     onEndReached: PropTypes.func,
@@ -548,4 +555,12 @@ RecyclerListView.propTypes = {
     //outside and pass it down via this prop. Changing this object will cause everything to re-render. Make sure you don't change
     //it often to ensure performance. Re-renders are heavy.
     extendedState: PropTypes.object,
+
+    //Enables animating RecyclerListView item cells e.g, shift, add, remove etc. This prop can be used to pass an external item animation implementation.
+    //Look into BaseItemAnimator/DefaultJSItemAnimator/DefaultNativeItemAnimator/DefaultWebItemAnimator for more info.
+    //By default there are few animations, to disable completely simply pass blank new BaseItemAnimator() object. Remember, create
+    //one object and keep it do not create multiple object of type BaseItemAnimator.
+    //Note: You might want to look into DefaultNativeItemAnimator to check an implementation based on LayoutAnimation. By default,
+    //animations are JS driven to avoid workflow interference. Also, please note LayoutAnimation is buggy on Android.
+    itemAnimator: PropTypes.instanceOf(BaseItemAnimator),
 };

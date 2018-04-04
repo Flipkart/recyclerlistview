@@ -41,6 +41,8 @@ Apart from all performance benefits RecyclerListView comes with great features o
 - Scroll position preservation
 - Window scrolling support for web
 - Non deterministic rendering mode on demand (height cannot be determined before rendering)
+- (New) ItemAnimator interface added, customize to your will how RLV handles layout changes. Allows you to modify animations that move cells. You can do things like smoothly move an item to a new position when height of one of the cells has changed.
+- (WIP) Stable Id support, ability to associate a stable id with an item. Will enable beautiful add/remove animations and optimize re-renders when DataProvider is updated.
 
 ## Why?
 
@@ -56,21 +58,21 @@ not be as fast.
 
 ## Demo
 
-Expo snack demos: 
-https://snack.expo.io/rksoUdx-f
-https://snack.expo.io/B1GYad52b
+Production Flipkart Grocery Demo Video (or try the app): https://youtu.be/6YqEqP3MmoU
+
+Expo snack demo: https://snack.expo.io/B1GYad52b
 
 Sample project: https://github.com/naqvitalha/travelMate
 
 Context Preservation Sample: https://github.com/naqvitalha/recyclerlistview-context-preservation-demo
 
-Watch Demo Video: https://www.youtube.com/watch?v=Tnv4HMmPgMc
+Other Video: https://www.youtube.com/watch?v=Tnv4HMmPgMc
 
 [![Watch Video](https://img.youtube.com/vi/Tnv4HMmPgMc/0.jpg)](https://www.youtube.com/watch?v=Tnv4HMmPgMc)
 
 ## Props
-For full feature set have a look at prop definitions of [RecyclerListView](https://github.com/Flipkart/recyclerlistview/blob/593b7636264a49eb17bf75f88513420b8f0c9b85/src/core/RecyclerListView.tsx#L478-L547)
-(bottom of the file).
+For full feature set have a look at prop definitions of [RecyclerListView](https://github.com/Flipkart/recyclerlistview/blob/afd7d80c13bad68ddbb60849ccda47ccef3ecda2/src/core/RecyclerListView.tsx#L488-L566)
+(bottom of the file). All `ScrollView` features also work out of the box.
 
 ## Sample Code
 Please go through DataProvider, LayoutProvider and rowRenderer in detail. Those are the basic building blocks of this component. For more details dive into
@@ -224,8 +226,9 @@ const styles = {
 };
 ```
 You can find similar web sample [here](samples/web/Sample1.js).
-Note: Works with React Native Web out of the box, to use with ReactJS start importing from `recyclerlistview/web` e.g., `import { RecyclerListView } from "recyclerlistview/web"`. Use aliases if you
-want to preserve import path. Only platform specific code is part of the build so, no unnecessary code will ship with your app.
+
+Note: Works with React Native Web out of the box. For use with ReactJS start importing from `recyclerlistview/web` e.g., `import { RecyclerListView } from "recyclerlistview/web"`. Use aliases if you want to preserve import path. 
+Only platform specific code is part of the build so, no unnecessary code will ship with your app.
 
 ## License
 [Apache v2.0](https://github.com/Flipkart/recyclerlistview/blob/master/LICENSE.md)

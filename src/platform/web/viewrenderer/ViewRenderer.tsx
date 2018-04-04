@@ -10,12 +10,18 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
  * This is second of the two things recycler works on. Implemented both for web and react native.
  */
 export default class ViewRenderer extends BaseViewRenderer<any> {
-
     private _dim: Dimension = { width: 0, height: 0 };
-    private _isFirstLayoutDone: boolean = false;
-    private _mainDiv: HTMLDivElement | null;
+    private _mainDiv: HTMLDivElement | null = null;
+
+    constructor(props: ViewRendererProps<any>) {
+        super(props);
+        this._setRef = this._setRef.bind(this);
+    }
 
     public componentDidMount(): void {
+        if (super.componentDidMount) {
+            super.componentDidMount();
+        }
         this._checkSizeChange();
     }
 
@@ -24,32 +30,33 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     }
 
     public render(): JSX.Element {
-        const styleObj: CSSProperties = this.props.forceNonDeterministicRendering
+        const style: CSSProperties = this.props.forceNonDeterministicRendering
             ? {
-                WebkitTransform: this._getTransform(),
-                left: 0,
-                opacity: this._isFirstLayoutDone ? 1 : 0,
-                position: "absolute",
-                top: 0,
                 transform: this._getTransform(),
+                WebkitTransform: this._getTransform(),
+                ...styles.baseViewStyle,
             }
             : {
-                WebkitTransform: this._getTransform(),
                 height: this.props.height,
-                left: 0,
                 overflow: "hidden",
-                position: "absolute",
-                top: 0,
-                transform: this._getTransform(),
                 width: this.props.width,
+                transform: this._getTransform(),
+                WebkitTransform: this._getTransform(),
+                ...styles.baseViewStyle,
             };
         return (
-            <div ref={(div) => this._mainDiv = div as HTMLDivElement | null} style={styleObj}>
+            <div ref={this._setRef} style={style}>
                 {this.renderChild()}
             </div>
         );
     }
 
+    protected getRef(): object | null {
+        return this._mainDiv;
+    }
+    private _setRef(div: HTMLDivElement | null): void {
+        this._mainDiv = div;
+    }
     private _getTransform(): string {
         return "translate(" + this.props.x + "px," + this.props.y + "px)";
     }
@@ -62,12 +69,26 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 this._dim.height = mainDiv.clientHeight;
                 if (this.props.width !== this._dim.width || this.props.height !== this._dim.height) {
                     this.props.onSizeChanged(this._dim, this.props.index);
-                } else if (!this._isFirstLayoutDone) {
-                    this._isFirstLayoutDone = true;
-                    this.forceUpdate();
                 }
             }
         }
-        this._isFirstLayoutDone = true;
     }
 }
+
+const styles: { [key: string]: CSSProperties } = {
+    baseViewStyle: {
+        alignItems: "stretch",
+        borderWidth: 0,
+        borderStyle: "solid",
+        boxSizing: "border-box",
+        display: "flex",
+        flexDirection: "column",
+        margin: 0,
+        padding: 0,
+        position: "absolute",
+        minHeight: 0,
+        minWidth: 0,
+        left: 0,
+        top: 0,
+    },
+};

@@ -5,6 +5,7 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 import LayoutManager, { Point } from "./layoutmanager/LayoutManager";
 import ViewabilityTracker, { TOnItemStatusChanged } from "./ViewabilityTracker";
 import { ObjectUtil, Default } from "ts-object-utils";
+import TSCast from "../utils/TSCast";
 
 /***
  * Renderer which keeps track of recyclable items and the currently rendered items. Notifies list view to re render if something changes, like scroll offset
@@ -35,12 +36,12 @@ export default class VirtualRenderer {
     private _isRecyclingEnabled: boolean;
     private _isViewTrackerRunning: boolean;
     private _startKey: number;
-    private _layoutProvider: LayoutProvider;
-    private _recyclePool: RecycleItemPool;
+    private _layoutProvider: LayoutProvider = TSCast.cast<LayoutProvider>(null); //TSI
+    private _recyclePool: RecycleItemPool = TSCast.cast<RecycleItemPool>(null); //TSI
 
     private _params: RenderStackParams | null;
-    private _layoutManager: LayoutManager | null;
-    private _viewabilityTracker: ViewabilityTracker | null;
+    private _layoutManager: LayoutManager | null = null;
+    private _viewabilityTracker: ViewabilityTracker | null = null;
     private _dimensions: Dimension | null;
 
     constructor(renderStackChanged: (renderStack: RenderStack) => void, scrollOnNextUpdate: (point: Point) => void, isRecyclingEnabled: boolean) {
