@@ -1,6 +1,6 @@
 export default interface ItemAnimator {
     //Web uses tranforms for moving items while react native uses left, top
-    //In case of native itemRef will be a View and in web div element so, override accordingly
+    //IMPORTANT: In case of native itemRef will be a View and in web/RNW div element so, override accordingly.
 
     //Just an external trigger, no itemRef available
     animateWillMount: (atX: number, atY: number, itemIndex: number) => void;

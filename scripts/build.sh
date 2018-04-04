@@ -25,9 +25,9 @@ echo "TSC: Building ES5 react-native package..."
 cd ..
 tsc --outDir dist/reactnative
 
-echo "Removing unnecessary files..."
-rm -rf dist/reactnative/platform/web
-rm -rf dist/web/platform/reactnative
+# echo "Removing unnecessary files..."
+# rm -rf dist/reactnative/platform/web
+# rm -rf dist/web/platform/reactnative
 
 echo "Resetting code state..."
 cd src
