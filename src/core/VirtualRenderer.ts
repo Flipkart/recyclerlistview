@@ -14,6 +14,10 @@ import DataProvider from "./dependencies/DataProvider";
 export interface RenderStackItem {
     dataIndex?: number;
 }
+export interface StableIdMapItem {
+    key: string;
+    type: string | number;
+}
 export interface RenderStack { [key: string]: RenderStackItem; }
 
 export interface RenderStackParams {
@@ -31,12 +35,14 @@ export default class VirtualRenderer {
     public onVisibleItemsChanged: TOnItemStatusChanged | null;
 
     private _scrollOnNextUpdate: (point: Point) => void;
-    private _stableIdToRenderKeyMap: { [key: string]: string | undefined };
+    private _stableIdToRenderKeyMap: { [key: string]: StableIdMapItem | undefined };
+    private _engagedIndexes: { [key: number]: number | undefined };
     private _renderStack: RenderStack;
     private _renderStackChanged: (renderStack: RenderStack) => void;
     private _fetchStableId: StableIdProvider;
     private _isRecyclingEnabled: boolean;
     private _isViewTrackerRunning: boolean;
+    private _markDirty: boolean;
     private _startKey: number;
     private _layoutProvider: LayoutProvider = TSCast.cast<LayoutProvider>(null); //TSI
     private _recyclePool: RecycleItemPool = TSCast.cast<RecycleItemPool>(null); //TSI
@@ -57,6 +63,7 @@ export default class VirtualRenderer {
 
         //Keeps track of keys of all the currently rendered indexes, can eventually replace renderStack as well if no new use cases come up
         this._stableIdToRenderKeyMap = {};
+        this._engagedIndexes = {};
         this._renderStackChanged = renderStackChanged;
         this._scrollOnNextUpdate = scrollOnNextUpdate;
         this._dimensions = null;
@@ -64,6 +71,7 @@ export default class VirtualRenderer {
         this._isRecyclingEnabled = isRecyclingEnabled;
 
         this._isViewTrackerRunning = false;
+        this._markDirty = false;
 
         //Would be surprised if someone exceeds this
         this._startKey = 0;
@@ -196,31 +204,61 @@ export default class VirtualRenderer {
         }
     }
 
-    public findKey(index: number, overrideStableIdProvider?: StableIdProvider): string {
+    public syncAndGetKey(index: number, overrideStableIdProvider?: StableIdProvider, newRenderStack?: RenderStack): string {
         const getStableId = overrideStableIdProvider ? overrideStableIdProvider : this._fetchStableId;
-        let key = this._stableIdToRenderKeyMap[getStableId(index)];
+        const renderStack = newRenderStack ? newRenderStack : this._renderStack;
+        const stableIdItem = this._stableIdToRenderKeyMap[getStableId(index)];
+        let key = stableIdItem ? stableIdItem.key : undefined;
+
         if (ObjectUtil.isNullOrUndefined(key)) {
-            key = getStableId(index);
-            this._stableIdToRenderKeyMap[getStableId(index)] = key;
+            const type = this._layoutProvider.getLayoutTypeForIndex(index);
+            key = this._recyclePool.getRecycledObject(type);
+            if (!ObjectUtil.isNullOrUndefined(key)) {
+                const itemMeta = renderStack[key];
+                if (itemMeta) {
+                    const oldIndex = itemMeta.dataIndex;
+                    itemMeta.dataIndex = index;
+                    if (!ObjectUtil.isNullOrUndefined(oldIndex) && oldIndex !== index) {
+                        delete this._stableIdToRenderKeyMap[getStableId(oldIndex)];
+                    }
+                } else {
+                    renderStack[key] = { dataIndex: index };
+                }
+            } else {
+                key = getStableId(index);
+                if (renderStack[key]) {
+                    //Probable collision, warn and avoid
+                    console.warn("Possible stableId collision @", index); //tslint:disable-line
+                    key = this._getCollisionAvoidingKey();
+                }
+                renderStack[key] = { dataIndex: index };
+            }
+            this._markDirty = true;
+            this._stableIdToRenderKeyMap[getStableId(index)] = { key, type };
+        }
+        if (!ObjectUtil.isNullOrUndefined(this._engagedIndexes[index])) {
+            this._recyclePool.removeFromPool(key);
+        }
+        const stackItem = renderStack[key];
+        if (stackItem && stackItem.dataIndex !== index) {
+            //Probable collision, warn
+            console.warn("Possible stableId collision @", index); //tslint:disable-line
         }
         return key;
     }
 
-    public handleDataSetChange(newDataProvider: DataProvider): void {
+    public handleDataSetChange(newDataProvider: DataProvider, shouldOptimizeForAnimations?: boolean): void {
         const getStableId = newDataProvider.getStableId;
         const maxIndex = newDataProvider.getSize() - 1;
         const activeStableIds: { [key: string]: number } = {};
-        const stackKeysToDelete: { [key: string]: number } = {};
         const newRenderStack: RenderStack = {};
 
-        //Compute active stable ids and stale active keys
+        //Compute active stable ids and stale active keys and resync render stack
         for (const key in this._renderStack) {
             if (this._renderStack.hasOwnProperty(key)) {
                 const index = this._renderStack[key].dataIndex;
                 if (!ObjectUtil.isNullOrUndefined(index)) {
-                    if (index > maxIndex) {
-                        stackKeysToDelete[key] = 1;
-                    } else {
+                    if (index <= maxIndex) {
                         const stableId = getStableId(index);
                         activeStableIds[stableId] = 1;
                     }
@@ -234,36 +272,42 @@ export default class VirtualRenderer {
         for (let i = 0; i < oldActiveStableIdsCount; i++) {
             const key = oldActiveStableIds[i];
             if (!activeStableIds[key]) {
+                if (!shouldOptimizeForAnimations && this._isRecyclingEnabled) {
+                    const stableIdItem = this._stableIdToRenderKeyMap[key];
+                    if (stableIdItem) {
+                        this._recyclePool.putRecycledObject(stableIdItem.type, stableIdItem.key);
+                    }
+                }
                 delete this._stableIdToRenderKeyMap[key];
             }
         }
 
-        //Clean up render stack
-        const oldActiveKeys = Object.keys(this._renderStack);
-        const oldActiveKeysCount = oldActiveKeys.length;
-        for (let i = 0; i < oldActiveKeysCount; i++) {
-            const key = oldActiveKeys[i];
-            if (stackKeysToDelete[key]) {
-                delete this._renderStack[key];
-            }
-        }
-
-        //Resync render stack to new key
         for (const key in this._renderStack) {
             if (this._renderStack.hasOwnProperty(key)) {
                 const index = this._renderStack[key].dataIndex;
                 if (!ObjectUtil.isNullOrUndefined(index)) {
-                    const stableId = getStableId(index);
-                    const currentAssignedKey = this._stableIdToRenderKeyMap[stableId];
-                    if (!ObjectUtil.isNullOrUndefined(currentAssignedKey)) {
-                        newRenderStack[currentAssignedKey] = { dataIndex: index };
-                    } else {
-                        newRenderStack[this.findKey(index, getStableId)] = { dataIndex: index };
+                    if (index <= maxIndex) {
+                        const newKey = this.syncAndGetKey(index, getStableId, newRenderStack);
+                        const newStackItem = newRenderStack[newKey];
+                        if (!newStackItem) {
+                            newRenderStack[newKey] = { dataIndex: index };
+                        } else if (newStackItem.dataIndex !== index) {
+                            const cllKey = this._getCollisionAvoidingKey();
+                            newRenderStack[cllKey] = { dataIndex: index };
+                            this._stableIdToRenderKeyMap[getStableId(index)] = {
+                                key: cllKey, type: this._layoutProvider.getLayoutTypeForIndex(index),
+                            };
+                        }
                     }
                 }
+                delete this._renderStack[key];
             }
         }
-        this._renderStack = newRenderStack;
+        Object.assign(this._renderStack, newRenderStack);
+    }
+
+    private _getCollisionAvoidingKey(): string {
+        return "#" + this._startKey++ + "_rlv_c";
     }
 
     private _prepareViewabilityTracker(): void {
@@ -297,12 +341,13 @@ export default class VirtualRenderer {
         if (this._isRecyclingEnabled) {
             for (let i = 0; i < count; i++) {
                 disengagedIndex = notNow[i];
+                delete this._engagedIndexes[disengagedIndex];
                 if (this._params && disengagedIndex < this._params.itemCount) {
                     //All the items which are now not visible can go to the recycle pool, the pool only needs to maintain keys since
                     //react can link a view to a key automatically
                     resolvedKey = this._stableIdToRenderKeyMap[this._fetchStableId(disengagedIndex)];
                     if (!ObjectUtil.isNullOrUndefined(resolvedKey)) {
-                        this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedKey);
+                        this._recyclePool.putRecycledObject(this._layoutProvider.getLayoutTypeForIndex(disengagedIndex), resolvedKey.key);
                     }
                 }
             }
@@ -315,58 +360,17 @@ export default class VirtualRenderer {
 
     //Updates render stack and reports whether anything has changed
     private _updateRenderStack(itemIndexes: number[]): boolean {
+        this._markDirty = false;
         const count = itemIndexes.length;
-        let type = null;
-        let availableKey = null;
-        let itemMeta: RenderStackItem | undefined;
         let index = 0;
         let hasRenderStackChanged = false;
         for (let i = 0; i < count; i++) {
             index = itemIndexes[i];
-            availableKey = this._stableIdToRenderKeyMap[this._fetchStableId(index)];
-            if (availableKey) {
-                //Use if already rendered and remove from pool
-                this._recyclePool.removeFromPool(availableKey);
-                itemMeta = this._renderStack[availableKey];
-                // if (itemMeta.key !== availableKey) {
-                //     hasRenderStackChanged = true;
-                //     itemMeta.key = availableKey;
-                // }
-            } else {
-                hasRenderStackChanged = true;
-                type = this._layoutProvider.getLayoutTypeForIndex(index);
-                availableKey = this._recyclePool.getRecycledObject(type);
-                if (availableKey) {
-                    //If available in pool use that key instead
-                    itemMeta = this._renderStack[availableKey];
-                    if (!itemMeta) {
-                        itemMeta = {};
-                        this._renderStack[availableKey] = itemMeta;
-                    }
-
-                    //since this data index is no longer being rendered anywhere
-                    if (!ObjectUtil.isNullOrUndefined(itemMeta.dataIndex)) {
-                        delete this._stableIdToRenderKeyMap[this._fetchStableId(itemMeta.dataIndex)];
-                    }
-                } else {
-                    //Create new if no existing key is available
-                    itemMeta = {};
-                    availableKey = this._fetchStableId(index);
-                    this._renderStack[availableKey] = itemMeta;
-                }
-
-                //TODO:Talha validate if this causes an issue
-                //In case of mismatch in pool types we need to make sure only unique data indexes exist in render stack
-                //keys are always integers for all practical purposes
-                // alreadyRenderedAtKey = this._renderStackIndexKeyMap[index];
-                // if (alreadyRenderedAtKey >= 0) {
-                //     this._recyclePool.removeFromPool(alreadyRenderedAtKey);
-                //     delete this._renderStack[alreadyRenderedAtKey];
-                // }
-            }
-            this._stableIdToRenderKeyMap[this._fetchStableId(index)] = availableKey;
-            itemMeta.dataIndex = index;
+            this._engagedIndexes[index] = 1;
+            this.syncAndGetKey(index);
+            hasRenderStackChanged = this._markDirty;
         }
+        this._markDirty = false;
         return hasRenderStackChanged;
     }
 }

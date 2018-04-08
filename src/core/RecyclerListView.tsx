@@ -98,6 +98,7 @@ export interface RecyclerListViewProps {
     forceNonDeterministicRendering?: boolean;
     extendedState?: object;
     itemAnimator?: ItemAnimator;
+    optimizeForInsertDeleteAnimations?: boolean;
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
@@ -309,8 +310,9 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         this._params.isHorizontal = newProps.isHorizontal;
         this._params.itemCount = newProps.dataProvider.getSize();
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
+        this._virtualRenderer.setLayoutProvider(newProps.layoutProvider);
         if (newProps.dataProvider.hasStableIds() && this.props.dataProvider !== newProps.dataProvider) {
-            this._virtualRenderer.handleDataSetChange(newProps.dataProvider);
+            this._virtualRenderer.handleDataSetChange(newProps.dataProvider, this.props.optimizeForInsertDeleteAnimations);
         }
         if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
@@ -424,7 +426,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             const itemRect = (this._virtualRenderer.getLayoutManager() as LayoutManager).getLayouts()[dataIndex];
             const data = this.props.dataProvider.getDataForIndex(dataIndex);
             const type = this.props.layoutProvider.getLayoutTypeForIndex(dataIndex);
-            const key = this._virtualRenderer.findKey(dataIndex);
+            const key = this._virtualRenderer.syncAndGetKey(dataIndex);
             this._assertType(type);
             if (!this.props.forceNonDeterministicRendering) {
                 this._checkExpectedDimensionDiscrepancy(itemRect, type, dataIndex);
@@ -592,4 +594,8 @@ RecyclerListView.propTypes = {
     //Note: You might want to look into DefaultNativeItemAnimator to check an implementation based on LayoutAnimation. By default,
     //animations are JS driven to avoid workflow interference. Also, please note LayoutAnimation is buggy on Android.
     itemAnimator: PropTypes.instanceOf(BaseItemAnimator),
+
+    //Enables you to utilize layout animations better by unmounting removed items. Please note, this might increase unmounts
+    //on large data changes.
+    optimizeForInsertDeleteAnimations: PropTypes.bool,
 };

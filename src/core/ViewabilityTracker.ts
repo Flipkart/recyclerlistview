@@ -93,6 +93,10 @@ export default class ViewabilityTracker {
         return this._currentOffset;
     }
 
+    public getEngagedIndexes(): number[] {
+        return this._engagedIndexes;
+    }
+
     public findFirstLogicallyVisibleIndex(): number {
         const relevantIndex = this._findFirstVisibleIndexUsingBS(0.001);
         let result = relevantIndex;
