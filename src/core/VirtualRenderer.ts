@@ -304,6 +304,16 @@ export default class VirtualRenderer {
             }
         }
         Object.assign(this._renderStack, newRenderStack);
+
+        for (const key in this._renderStack) {
+            if (this._renderStack.hasOwnProperty(key)) {
+                const index = this._renderStack[key].dataIndex;
+                if (!ObjectUtil.isNullOrUndefined(index) && ObjectUtil.isNullOrUndefined(this._engagedIndexes[index])) {
+                    const type = this._layoutProvider.getLayoutTypeForIndex(index);
+                    this._recyclePool.putRecycledObject(type, key);
+                }
+            }
+        }
     }
 
     private _getCollisionAvoidingKey(): string {

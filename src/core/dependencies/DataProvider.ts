@@ -13,6 +13,7 @@ export default class DataProvider {
     private _size: number = 0;
     private _data: any[] = [];
     private _hasStableIds = false;
+    private _requiresDataChangeHandling = false;
 
     constructor(rowHasChanged: (r1: any, r2: any) => boolean, getStableId?: (index: number) => string) {
         this.rowHasChanged = rowHasChanged;
@@ -39,6 +40,10 @@ export default class DataProvider {
         return this._hasStableIds;
     }
 
+    public requiresDataChangeHandling(): boolean {
+        return this._requiresDataChangeHandling;
+    }
+
     public getFirstIndexToProcessInternal(): number {
         return this._firstIndexToProcess;
     }
@@ -58,7 +63,10 @@ export default class DataProvider {
             }
             dp._firstIndexToProcess = i;
         } else {
-            dp._firstIndexToProcess = Math.max(Math.min(firstModifiedIndex, this._data.length - 1), 0);
+            dp._firstIndexToProcess = Math.max(Math.min(firstModifiedIndex, this._data.length), 0);
+        }
+        if (dp._firstIndexToProcess !== this._data.length) {
+            dp._requiresDataChangeHandling = true;
         }
         dp._data = newData;
         dp._size = newSize;
