@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Dimension } from "../dependencies/LayoutProvider";
 import BaseScrollView, { ScrollEvent } from "./BaseScrollView";
+import { ScrollViewDefaultProps } from "../../../dist/reactnative/core/scrollcomponent/BaseScrollView";
 
 export interface ScrollComponentProps {
     onSizeChanged: (dimensions: Dimension) => void;
@@ -8,7 +9,7 @@ export interface ScrollComponentProps {
     contentHeight: number;
     contentWidth: number;
     canChangeSize?: boolean;
-    externalScrollView?: BaseScrollView;
+    externalScrollView?: { new(props?: ScrollViewDefaultProps): BaseScrollView };
     isHorizontal?: boolean;
     renderFooter?: () => JSX.Element | JSX.Element[] | null;
     scrollThrottle?: number;

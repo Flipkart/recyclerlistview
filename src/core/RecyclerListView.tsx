@@ -38,7 +38,8 @@ import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
-import { DefaultJSItemAnimator as DefaultItemAnimator} from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
+import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
+import { ScrollViewDefaultProps } from "../../dist/reactnative/core/scrollcomponent/BaseScrollView";
 const IS_WEB = false;
 //#endif
 
@@ -86,7 +87,7 @@ export interface RecyclerListViewProps {
     onEndReachedThreshold?: number;
     onVisibleIndexesChanged?: TOnItemStatusChanged;
     renderFooter?: () => JSX.Element | JSX.Element[] | null;
-    externalScrollView?: BaseScrollView;
+    externalScrollView?: { new(props?: ScrollViewDefaultProps): BaseScrollView };
     initialOffset?: number;
     initialRenderIndex?: number;
     scrollThrottle?: number;
