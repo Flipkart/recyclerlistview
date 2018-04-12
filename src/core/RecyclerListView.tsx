@@ -30,7 +30,7 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 import LayoutManager, { Point, Rect } from "./layoutmanager/LayoutManager";
 import Messages from "./messages/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
-import BaseScrollView, { ScrollEvent } from "./scrollcomponent/BaseScrollView";
+import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
@@ -39,7 +39,6 @@ import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
-import { ScrollViewDefaultProps } from "../../dist/reactnative/core/scrollcomponent/BaseScrollView";
 const IS_WEB = false;
 //#endif
 

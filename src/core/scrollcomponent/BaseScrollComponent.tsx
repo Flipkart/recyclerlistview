@@ -1,7 +1,6 @@
 import * as React from "react";
 import { Dimension } from "../dependencies/LayoutProvider";
-import BaseScrollView, { ScrollEvent } from "./BaseScrollView";
-import { ScrollViewDefaultProps } from "../../../dist/reactnative/core/scrollcomponent/BaseScrollView";
+import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./BaseScrollView";
 
 export interface ScrollComponentProps {
     onSizeChanged: (dimensions: Dimension) => void;
