@@ -86,7 +86,7 @@ export interface RecyclerListViewProps {
     onEndReachedThreshold?: number;
     onVisibleIndexesChanged?: TOnItemStatusChanged;
     renderFooter?: () => JSX.Element | JSX.Element[] | null;
-    externalScrollView?: { new(props?: ScrollViewDefaultProps): BaseScrollView };
+    externalScrollView?: { new(props: ScrollViewDefaultProps): BaseScrollView };
     initialOffset?: number;
     initialRenderIndex?: number;
     scrollThrottle?: number;
