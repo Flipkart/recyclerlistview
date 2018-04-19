@@ -568,4 +568,9 @@ RecyclerListView.propTypes = {
     //Note: You might want to look into DefaultNativeItemAnimator to check an implementation based on LayoutAnimation. By default,
     //animations are JS driven to avoid workflow interference. Also, please note LayoutAnimation is buggy on Android.
     itemAnimator: PropTypes.instanceOf(BaseItemAnimator),
+
+    //For TS use case, not necessary with JS use.
+    //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
+    //and passed down.
+    scrollViewProps: PropTypes.object,
 };
