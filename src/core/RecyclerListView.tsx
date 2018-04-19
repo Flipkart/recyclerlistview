@@ -30,7 +30,7 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 import LayoutManager, { Point, Rect } from "./layoutmanager/LayoutManager";
 import Messages from "./messages/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
-import BaseScrollView, { ScrollEvent } from "./scrollcomponent/BaseScrollView";
+import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
@@ -38,7 +38,7 @@ import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
-import { DefaultJSItemAnimator as DefaultItemAnimator} from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
+import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
 const IS_WEB = false;
 //#endif
 
@@ -86,7 +86,7 @@ export interface RecyclerListViewProps {
     onEndReachedThreshold?: number;
     onVisibleIndexesChanged?: TOnItemStatusChanged;
     renderFooter?: () => JSX.Element | JSX.Element[] | null;
-    externalScrollView?: BaseScrollView;
+    externalScrollView?: { new(props: ScrollViewDefaultProps): BaseScrollView };
     initialOffset?: number;
     initialRenderIndex?: number;
     scrollThrottle?: number;
