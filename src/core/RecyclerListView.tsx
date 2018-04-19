@@ -97,6 +97,10 @@ export interface RecyclerListViewProps {
     forceNonDeterministicRendering?: boolean;
     extendedState?: object;
     itemAnimator?: ItemAnimator;
+
+    //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
+    //and passed down. For better typescript support.
+    scrollViewProps?: object;
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
@@ -269,6 +273,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             <ScrollComponent
                 ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
                 {...this.props}
+                {...this.props.scrollViewProps}
                 onScroll={this._onScroll}
                 onSizeChanged={this._onSizeChanged}
                 contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
@@ -563,4 +568,9 @@ RecyclerListView.propTypes = {
     //Note: You might want to look into DefaultNativeItemAnimator to check an implementation based on LayoutAnimation. By default,
     //animations are JS driven to avoid workflow interference. Also, please note LayoutAnimation is buggy on Android.
     itemAnimator: PropTypes.instanceOf(BaseItemAnimator),
+
+    //For TS use case, not necessary with JS use.
+    //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
+    //and passed down.
+    scrollViewProps: PropTypes.object,
 };
