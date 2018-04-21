@@ -39,6 +39,17 @@ export default class ScrollComponent extends BaseScrollComponent {
 
     public render(): JSX.Element {
         const Scroller = this.props.externalScrollView as any; //TSI
+        const invertedStyles = this.props.inverted
+            ? { transform: this.props.isHorizontal ? "scaleX(-1)" : "scaleY(-1)" }
+            : null;
+        const horizontalStyle = this.props.isHorizontal
+            ? {
+                left: this.props.contentWidth,
+                position: "absolute",
+                top: 0,
+            }
+            : null;
+        const style = { ...horizontalStyle, ...invertedStyles };
         return (
             <Scroller ref={(scrollView: BaseScrollView) => this._scrollViewRef = scrollView as (BaseScrollView | null)}
                 {...this.props}
@@ -52,11 +63,7 @@ export default class ScrollComponent extends BaseScrollComponent {
                 }}>
                     {this.props.children}
                 </div>
-                {this.props.renderFooter ? <div style={this.props.isHorizontal ? {
-                    left: this.props.contentWidth,
-                    position: "absolute",
-                    top: 0,
-                } : undefined}>
+                {this.props.renderFooter ? <div style={style}>
                     {this.props.renderFooter()}
                 </div> : null}
             </Scroller>

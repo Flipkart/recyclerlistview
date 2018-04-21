@@ -97,7 +97,7 @@ export interface RecyclerListViewProps {
     forceNonDeterministicRendering?: boolean;
     extendedState?: object;
     itemAnimator?: ItemAnimator;
-
+    inverted?: boolean;
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
@@ -115,6 +115,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         isHorizontal: false,
         onEndReachedThreshold: 0,
         renderAheadOffset: IS_WEB ? 1000 : 250,
+        inverted: false,
     };
 
     public static propTypes = {};
@@ -419,7 +420,8 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                     height={itemRect.height}
                     width={itemRect.width}
                     itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
-                    extendedState={this.props.extendedState} />
+                    extendedState={this.props.extendedState}
+                    inverted={this.props.inverted} />
             );
         }
         return null;
@@ -569,6 +571,9 @@ RecyclerListView.propTypes = {
     //animations are JS driven to avoid workflow interference. Also, please note LayoutAnimation is buggy on Android.
     itemAnimator: PropTypes.instanceOf(BaseItemAnimator),
 
+    //Web only. Invert scrollable view. Default  is false
+    inverted: PropTypes.bool,
+  
     //For TS use case, not necessary with JS use.
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down.

@@ -32,6 +32,7 @@ export default class ScrollViewer extends BaseScrollView {
         this._isScrollEnd = this._isScrollEnd.bind(this);
         this._trackScrollOccurence = this._trackScrollOccurence.bind(this);
         this._setDivRef = this._setDivRef.bind(this);
+        this._onWheel = this._onWheel.bind(this);
     }
 
     public componentDidMount(): void {
@@ -86,6 +87,7 @@ export default class ScrollViewer extends BaseScrollView {
                     overflowX: this.props.horizontal ? "scroll" : "hidden",
                     overflowY: !this.props.horizontal ? "scroll" : "hidden",
                     width: "100%",
+                    transform: this.props.inverted ? !this.props.horizontal ? "scaleY(-1)" : "scaleX(-1)" : null,
                     ...this.props.style,
                 }}
             >
@@ -187,6 +189,9 @@ export default class ScrollViewer extends BaseScrollView {
     private _startListeningToDivEvents(): void {
         if (this._mainDivRef) {
             this._mainDivRef.addEventListener("scroll", this._onScroll);
+            if (this.props.inverted) {
+                this._mainDivRef.addEventListener("wheel", this._onWheel);
+            }
         }
     }
 
@@ -215,6 +220,17 @@ export default class ScrollViewer extends BaseScrollView {
         if (this.props.onScroll) {
             if (this._scrollEventNormalizer) {
                 this.props.onScroll(this._scrollEventNormalizer.divEvent);
+            }
+        }
+    }
+
+    private _onWheel(evt: WheelEvent): void {
+        evt.preventDefault();
+        if (this._mainDivRef) {
+            if (this.props.horizontal) {
+                this._mainDivRef.scrollLeft -= evt.deltaX;
+            } else {
+                this._mainDivRef.scrollTop -= evt.deltaY;
             }
         }
     }
