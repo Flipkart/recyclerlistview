@@ -30,7 +30,7 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 import LayoutManager, { Point, Rect } from "./layoutmanager/LayoutManager";
 import Messages from "./messages/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
-import BaseScrollView, { ScrollEvent } from "./scrollcomponent/BaseScrollView";
+import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
@@ -86,7 +86,7 @@ export interface RecyclerListViewProps {
     onEndReachedThreshold?: number;
     onVisibleIndexesChanged?: TOnItemStatusChanged;
     renderFooter?: () => JSX.Element | JSX.Element[] | null;
-    externalScrollView?: BaseScrollView;
+    externalScrollView?: { new(props: ScrollViewDefaultProps): BaseScrollView };
     initialOffset?: number;
     initialRenderIndex?: number;
     scrollThrottle?: number;
@@ -98,6 +98,9 @@ export interface RecyclerListViewProps {
     extendedState?: object;
     itemAnimator?: ItemAnimator;
     inverted?: boolean;
+    //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
+    //and passed down. For better typescript support.
+    scrollViewProps?: object;
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
@@ -271,6 +274,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             <ScrollComponent
                 ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
                 {...this.props}
+                {...this.props.scrollViewProps}
                 onScroll={this._onScroll}
                 onSizeChanged={this._onSizeChanged}
                 contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
@@ -569,4 +573,9 @@ RecyclerListView.propTypes = {
 
     //Web only. Invert scrollable view. Default  is false
     inverted: PropTypes.bool,
+  
+    //For TS use case, not necessary with JS use.
+    //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
+    //and passed down.
+    scrollViewProps: PropTypes.object,
 };
