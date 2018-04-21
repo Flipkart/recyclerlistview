@@ -100,6 +100,10 @@ export interface RecyclerListViewProps {
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object;
+
+    //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
+    //and passed down. For better typescript support.
+    scrollViewProps?: object;
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
@@ -297,6 +301,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             <ScrollComponent
                 ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
                 {...this.props}
+                {...this.props.scrollViewProps}
                 onScroll={this._onScroll}
                 onSizeChanged={this._onSizeChanged}
                 contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
@@ -599,4 +604,12 @@ RecyclerListView.propTypes = {
     //Enables you to utilize layout animations better by unmounting removed items. Please note, this might increase unmounts
     //on large data changes.
     optimizeForInsertDeleteAnimations: PropTypes.bool,
+  
+    //To pass down style to inner ScrollView
+    style: PropTypes.object,
+  
+    //For TS use case, not necessary with JS use.
+    //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
+    //and passed down.
+    scrollViewProps: PropTypes.object,
 };
