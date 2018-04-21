@@ -14,7 +14,8 @@ const RecyclerListViewExceptions: {[key: string]: Exception} = {
         type: "ItemTypeNullException",
     },
     layoutException: {
-        message: "RecyclerListView needs to have a bounded size. Currently height or, width is 0",
+        message: "RecyclerListView needs to have a bounded size. Currently height or, width is 0." +
+                    "Consider adding style={{flex:1}} or, fixed dimensions",
         type: "LayoutException",
     },
     platformNotDetectedException: {

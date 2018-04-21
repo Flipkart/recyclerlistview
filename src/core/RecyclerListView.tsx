@@ -99,6 +99,7 @@ export interface RecyclerListViewProps {
     extendedState?: object;
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
+    style?: object;
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;

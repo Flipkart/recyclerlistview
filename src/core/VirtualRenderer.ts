@@ -247,6 +247,7 @@ export default class VirtualRenderer {
         return key;
     }
 
+    //Further optimize in later revision, pretty fast for now considering this is a low frequency event
     public handleDataSetChange(newDataProvider: DataProvider, shouldOptimizeForAnimations?: boolean): void {
         const getStableId = newDataProvider.getStableId;
         const maxIndex = newDataProvider.getSize() - 1;
