@@ -604,10 +604,10 @@ RecyclerListView.propTypes = {
     //Enables you to utilize layout animations better by unmounting removed items. Please note, this might increase unmounts
     //on large data changes.
     optimizeForInsertDeleteAnimations: PropTypes.bool,
-  
+
     //To pass down style to inner ScrollView
     style: PropTypes.object,
-  
+
     //For TS use case, not necessary with JS use.
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down.
