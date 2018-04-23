@@ -62,6 +62,10 @@ Production Flipkart Grocery Demo Video (or try the app): https://youtu.be/6YqEqP
 
 Expo snack demo: https://snack.expo.io/B1GYad52b
 
+Other (third party) snack demos
+[Mini calendar Expo snack](https://snack.expo.io/S1OeHVAQM) by [SudoPlz](https://github.com/SudoPlz)
+
+
 Sample project: https://github.com/naqvitalha/travelMate
 
 Context Preservation Sample: https://github.com/naqvitalha/recyclerlistview-context-preservation-demo
@@ -77,6 +81,7 @@ For full feature set have a look at prop definitions of [RecyclerListView](https
 ## Sample Code
 Please go through DataProvider, LayoutProvider and rowRenderer in detail. Those are the basic building blocks of this component. For more details dive into
 the source code, lot of relevant comments have been added to help you out. 
+
 
 ```js
 /***
