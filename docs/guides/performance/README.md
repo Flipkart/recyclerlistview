@@ -3,7 +3,7 @@ To ensure optimal performance there are a few thing that you need to watch out f
 
 **Common issue:** Lof of people start testing performance with dev mode turned on. Please make sure `dev=false` and `minify=true` before you start your benchmarking.
 
-### `rowHasChanged` method
+### 1) `rowHasChanged` method
 This is what you pass to the `DataProvider` when you create it. Reference code:
 
 ```js
@@ -20,7 +20,7 @@ Since RLV is a component it has to do renders to manipulate rows. In these cycle
 
 Getting this method correct is, undoubtedly, the most important performance aspect.
 
-### Estimated heights
+### 2) Estimated heights
 If you're using `forceNonDeterministicRendering` the layout manager expects heigts and widths provided by you as close estimates. By default in first pass RLV will compute layout based on estimates and position the items post that, RLV uses `ItemAnimator` to gracefully move items to actual positions based on actual layouts computed after views mount.
 
 Any mismatch in actual and estimated layouts leads to a relayout cycles which are not a concern if they're close otherwise it becomes a performance bottleneck. Incorrect values may lead to lot of visual glitches and increased blank areas.
@@ -29,7 +29,7 @@ Lower estimates may also lead to extra mounts which are not required while higer
 
 Make sure you try to bring estimates close to actual values. Non deterministic mode improves dev experience dramatically and with some effort you can match the performance of `deterministic` mode where there is zero layout thrashing.
 
-### Ensure `shouldComponentUpdate` is present
+### 3) Ensure `shouldComponentUpdate` is present
 In few cases `rowHasChanged` may not work. One example would be when RLV needs to actually reposition items using regular render cycle, let's say if the first row shifts by `1px` all of them need to be moved. In this case RLV will re-render the cell to change position but, inadvertently, your component will also become part of this cycle. 
 
 Look at this code:
@@ -42,7 +42,7 @@ rowRenderer(type, data) => {
 
 In the above case `MyComponent` should have a valid `shouldComponentUpdate` defined in its implementation. Depending on the use case this might significantly reduce load on JS thread. Make sure you put it there.
 
-### `extendedState` usage
+### 4) `extendedState` usage
 Extendate state defines values that rows/columns depend on but reside outside of the row data. Imagine a wishlist kind of scenario where each row needs to check a separate `set` to detect if it's part of it. Changing `extendedState` re-renders all the rows.
 
 ```js
@@ -61,12 +61,12 @@ this.state = {
 
 The second approach will change the object on every render that you might do in your application. This might cause unnecessary RLV renders. Thus make sure `extendedState` object only changes when you intend things to re-render.
 
-### Use Stable Ids
+### 5) Use Stable Ids
 In case you have frequent full page refreshes where entire data changes e.g, cache then network load strategy. In these cases having a stable id to identify data with helps RLV in using the most optimal views to render new data. By default, indexes are used as ids which might not be very optimal in aforementioned case. Stable Ids also help in add/remove animations if they fit your use case.
 
 Note: `stableId` feature is only available in versions above `1.4.0`
 
-### `renderAheadOffset` usage
+### 6) `renderAheadOffset` usage
 `renderAheadOffset` specifies how much ahead of current scroll postion does RLV renders items to prevent visible blank spaces. This buffer is maintained both on the top and bottom of the list. You may choose a to play with this but only after you've taken care of other points.
 
 Please note that lower value is better. A lower values ensures that less number of views are created and that they're quickly available for recycling. You should be choosing the smallest value that gives you zero blank spaces while scrolling.
