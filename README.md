@@ -15,7 +15,6 @@ and UICollectionView on iOS.
 * **[Why?](#why)**
 * **[Demo](#demo)**
 * **[Props](#props)**
-* **[Sample Code](#sample-code)**
 * **[Guides](#guides)**
 * **[License](#license)**
 * **[Contact us](#contact-us)**
