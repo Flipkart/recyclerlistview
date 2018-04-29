@@ -15,13 +15,17 @@ this.state = {
 }
 ```
 The purpose of this method is to equip RLV with a method to detect if data has changed. We chose not to depend just on the reference since lot of data has ids which will work better than reference.
+
 Since RLV is also a component it has do renders to manipulate rows but in these cycles lot of rows which have not changed might get impacted. So, lets say 1 out 10 rows has changes RLV will still re-render. In such cases this method allows RLV to completely skip unchanged rows and maintain optimal performance. An issue here can significantly increase load on JS thread which can lead to lot of blank spaces while scrolling.
+
 Getting this method correct is, undoubtedly, the most important aspect.
 
 ## Estimated heights
 If you're using `forceNonDeterministicRendering` the layout manager expects heigts and widths provides by you as close estimates. By default in first pass RLV will compute layout based on estimates and place the items there post that, RLV uses `ItemAnimator` to gracefully move items to actual positions based on actual layouts computed after views mount.
+
 Any mismatch in actual and estimated layout leads to a relayout cycle which is not a concern if they're not extremely far off.
 Incorrect values may lead to lot of visual glitches and increased blank areas.
+
 Make sure you try to bring estimates close to actual values. This mode improves dev experience dramatically and with some effort you can match the performance of `deterministic` mode where there is zero layout thrashing.
 
 ## Ensure `shouldComponentUpdate` is present
@@ -58,5 +62,5 @@ The second approach will change the object on every render that you might do in 
 
 ## Use Stable Ids
 In case you have frequent full page refreshes where entire data changes e.g, cache first then network loads. In these cases having a stable id to identify data with helps RLV in using the most optimal views to render new data. By default, indexes are used as ids which might not be very optimal in aforementioned case. Stable Ids also help in add/remove animations if they fit your use case.
- 
-Note: stableIds are only available in version `1.4.0+`
+
+Note: `stableId` feature is only available in versions above `1.4.0`
