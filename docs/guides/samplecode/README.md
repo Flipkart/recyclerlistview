@@ -1,6 +1,8 @@
 # Sample Code
 Please go through DataProvider, LayoutProvider and rowRenderer in detail. Those are the basic building blocks of this component. For more details dive into the source code, lot of relevant comments have been added to help you out. 
 
+You can also refer to expo: https://snack.expo.io/@naqvitalha/rlv-demo
+
 ```js
 /***
  Use this component inside your React Native Application.
