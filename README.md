@@ -76,7 +76,7 @@ Other Video: https://www.youtube.com/watch?v=Tnv4HMmPgMc
 
 ## Props
 For full feature set have a look at prop definitions of [RecyclerListView](https://github.com/Flipkart/recyclerlistview/blob/afd7d80c13bad68ddbb60849ccda47ccef3ecda2/src/core/RecyclerListView.tsx#L488-L566)
-(bottom of the file). All `ScrollView` features also work out of the box.
+(bottom of the file). All `ScrollView` features like `RefreshControl` also work out of the box.
 
 ## Guides
 * **[Sample Code](docs/guides/samplecode)**
