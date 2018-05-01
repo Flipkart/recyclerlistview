@@ -79,7 +79,7 @@ For full feature set have a look at prop definitions of [RecyclerListView](https
 * **Web Support:** Works with React Native Web out of the box. For use with ReactJS start importing from `recyclerlistview/web` e.g., `import { RecyclerListView } from "recyclerlistview/web"`. Use aliases if you want to preserve import path. Only platform specific code is part of the build so, no unnecessary code will ship with your app.
 
 ## License
-**[Apache v2.0]**(https://github.com/Flipkart/recyclerlistview/blob/master/LICENSE.md)
+**[Apache v2.0](https://github.com/Flipkart/recyclerlistview/blob/master/LICENSE.md)**
 
 ## Contact Us
 Please open issues for any bugs that you encounter. You can reach out to me on twitter [@naqvitalha](https://www.twitter.com/naqvitalha) or, write to cross-platform@flipkart.com for any questions that
