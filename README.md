@@ -79,8 +79,8 @@ For full feature set have a look at prop definitions of [RecyclerListView](https
 (bottom of the file). All `ScrollView` features like `RefreshControl` also work out of the box.
 
 ## Guides
-* **[Sample Code](docs/guides/samplecode)**
-* **[Performance](docs/guides/performance)**
+* **[Sample Code](https://github.com/Flipkart/recyclerlistview/tree/master/docs/guides/samplecode)**
+* **[Performance](https://github.com/Flipkart/recyclerlistview/tree/master/docs/guides/performance)**
 * **Web Support:** Works with React Native Web out of the box. For use with ReactJS start importing from `recyclerlistview/web` e.g., `import { RecyclerListView } from "recyclerlistview/web"`. Use aliases if you want to preserve import path. Only platform specific code is part of the build so, no unnecessary code will ship with your app.
 
 ## License

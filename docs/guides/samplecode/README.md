@@ -150,7 +150,7 @@ const styles = {
     }
 };
 ```
-You can find similar web sample [here](web/Sample1.js).
+You can find similar web sample [here](https://github.com/Flipkart/recyclerlistview/tree/master/docs/guides/samplecode/web/Sample1.js).
 
 Note: Works with React Native Web out of the box. For use with ReactJS start importing from `recyclerlistview/web` e.g., `import { RecyclerListView } from "recyclerlistview/web"`. Use aliases if you want to preserve import path. 
 Only platform specific code is part of the build so, no unnecessary code will ship with your app.
