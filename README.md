@@ -11,6 +11,9 @@ and UICollectionView on iOS.
 
 `npm install --save recyclerlistview`
 
+For latest beta:
+`npm install --save recyclerlistview@beta`
+
 * **[Overview and features](#overview-and-features)**
 * **[Why?](#why)**
 * **[Demo](#demo)**
