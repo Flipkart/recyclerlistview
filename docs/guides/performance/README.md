@@ -21,9 +21,9 @@ Since RLV is a component it has to do renders to manipulate rows. In these cycle
 Getting this method correct is, undoubtedly, the most important performance aspect.
 
 ### 2) Estimated heights
-If you're using `forceNonDeterministicRendering` the layout manager expects heigts and widths provided by you as close estimates. By default in first pass RLV will compute layout based on estimates and position the items post that, RLV uses `ItemAnimator` to gracefully move items to actual positions based on actual layouts computed after views mount.
+If you're using `forceNonDeterministicRendering` the layout manager expects heigts and widths provided by you as close estimates. By default in first pass RLV will compute layout based on estimates and position items. Post that RLV uses `ItemAnimator` to gracefully move items to actual positions based on actual layouts computed after views mount.
 
-Any mismatch in actual and estimated layouts leads to a relayout cycles which are not a concern if they're close otherwise it becomes a performance bottleneck. Incorrect values may lead to lot of visual glitches and increased blank areas.
+Any mismatch in actual and estimated layouts leads to relayout cycles which are not a concern if estimates are close otherwise it becomes a performance bottleneck. Incorrect values may lead to lot of visual glitches and increased blank areas.
 
 Lower estimates may also lead to extra mounts which are not required while higer estimates cause mounts to happen unexpectedly when RLV realises there aren't enough views to fill the screen.
 
@@ -67,7 +67,7 @@ In case you have frequent full page refreshes where entire data changes e.g, cac
 Note: `stableId` feature is only available in versions above `1.4.0`
 
 ### 6) `renderAheadOffset` usage
-`renderAheadOffset` specifies how much ahead of current scroll postion does RLV renders items to prevent visible blank spaces. This buffer is maintained both on the top and bottom of the list. You may choose a to play with this but only after you've taken care of other points.
+`renderAheadOffset` specifies how much ahead of current scroll postion does RLV renders items to prevent visible blank spaces. This buffer is maintained both on the top and bottom of the list. You may choose a to play with this but only after you've taken care of all other points.
 
 Please note that lower value is better. A lower values ensures that less number of views are created and that they're quickly available for recycling. You should be choosing the smallest value that gives you zero blank spaces while scrolling.
 Larger values mount extra views and increases the offset after which views are available for recycling but it might help with faster scrolling depending on the use case.
