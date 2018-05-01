@@ -11,6 +11,9 @@ and UICollectionView on iOS.
 
 `npm install --save recyclerlistview`
 
+For latest beta:  
+`npm install --save recyclerlistview@beta`
+
 * **[Overview and features](#overview-and-features)**
 * **[Why?](#why)**
 * **[Demo](#demo)**
@@ -58,19 +61,14 @@ not be as fast.
 
 ## Demo
 
-Production Flipkart Grocery Demo Video (or try the app): https://youtu.be/6YqEqP3MmoU
+**Production Flipkart Grocery Demo Video (or try the app):** https://youtu.be/6YqEqP3MmoU  
+**Infinite Loading/View Change (Expo):** https://snack.expo.io/@naqvitalha/rlv-demo  
+**Mixed ViewTypes:** https://snack.expo.io/B1GYad52b  
+**Sample project:** https://github.com/naqvitalha/travelMate  
+**Web Sample (Using RNW):** https://codesandbox.io/s/k54j2zx977, https://jolly-engelbart-8ff0d0.netlify.com/  
+**Context Preservation Sample:** https://github.com/naqvitalha/recyclerlistview-context-preservation-demo
 
-Expo snack demo 1: https://snack.expo.io/@naqvitalha/rlv-demo
-
-Expo snack demo 2: https://snack.expo.io/B1GYad52b
-
-Sample project: https://github.com/naqvitalha/travelMate
-
-Web Sample (Using RNW): https://codesandbox.io/s/k54j2zx977, https://jolly-engelbart-8ff0d0.netlify.com/
-
-Context Preservation Sample: https://github.com/naqvitalha/recyclerlistview-context-preservation-demo
-
-Other Video: https://www.youtube.com/watch?v=Tnv4HMmPgMc
+**Other Video:** https://www.youtube.com/watch?v=Tnv4HMmPgMc
 
 [![Watch Video](https://img.youtube.com/vi/Tnv4HMmPgMc/0.jpg)](https://www.youtube.com/watch?v=Tnv4HMmPgMc)
 
@@ -79,12 +77,12 @@ For full feature set have a look at prop definitions of [RecyclerListView](https
 (bottom of the file). All `ScrollView` features like `RefreshControl` also work out of the box.
 
 ## Guides
-* **[Sample Code](docs/guides/samplecode)**
-* **[Performance](docs/guides/performance)**
+* **[Sample Code](https://github.com/Flipkart/recyclerlistview/tree/master/docs/guides/samplecode)**
+* **[Performance](https://github.com/Flipkart/recyclerlistview/tree/master/docs/guides/performance)**
 * **Web Support:** Works with React Native Web out of the box. For use with ReactJS start importing from `recyclerlistview/web` e.g., `import { RecyclerListView } from "recyclerlistview/web"`. Use aliases if you want to preserve import path. Only platform specific code is part of the build so, no unnecessary code will ship with your app.
 
 ## License
-[Apache v2.0](https://github.com/Flipkart/recyclerlistview/blob/master/LICENSE.md)
+**[Apache v2.0](https://github.com/Flipkart/recyclerlistview/blob/master/LICENSE.md)**
 
 ## Contact Us
 Please open issues for any bugs that you encounter. You can reach out to me on twitter [@naqvitalha](https://www.twitter.com/naqvitalha) or, write to cross-platform@flipkart.com for any questions that
