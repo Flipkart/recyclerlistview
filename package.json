@@ -11,6 +11,18 @@
     "release": "sh scripts/publish-latest.sh",
     "release-beta": "sh scripts/publish-beta.sh"
   },
+  "keywords": [
+    "react-native",
+    "recyclerview",
+    "listview",
+    "flatlist-alternative",
+    "flatlist",
+    "60fps",
+    "cross-platform",
+    "web",
+    "react-native-web",
+    "performance"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/Flipkart/recyclerlistview"
