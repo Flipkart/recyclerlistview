@@ -58,12 +58,12 @@ not be as fast.
 
 ## Demo
 
-Production Flipkart Grocery Demo Video (or try the app): https://youtu.be/6YqEqP3MmoU\
-Expo snack demo 1: https://snack.expo.io/@naqvitalha/rlv-demo\
-Expo snack demo 2: https://snack.expo.io/B1GYad52b\
-Sample project: https://github.com/naqvitalha/travelMate\
-Web Sample (Using RNW): https://codesandbox.io/s/k54j2zx977, https://jolly-engelbart-8ff0d0.netlify.com/\
-Context Preservation Sample: https://github.com/naqvitalha/recyclerlistview-context-preservation-demo\
+Production Flipkart Grocery Demo Video (or try the app): https://youtu.be/6YqEqP3MmoU  
+Expo snack demo 1: https://snack.expo.io/@naqvitalha/rlv-demo  
+Expo snack demo 2: https://snack.expo.io/B1GYad52b  
+Sample project: https://github.com/naqvitalha/travelMate  
+Web Sample (Using RNW): https://codesandbox.io/s/k54j2zx977, https://jolly-engelbart-8ff0d0.netlify.com/  
+Context Preservation Sample: https://github.com/naqvitalha/recyclerlistview-context-preservation-demo
 
 Other Video: https://www.youtube.com/watch?v=Tnv4HMmPgMc
 
