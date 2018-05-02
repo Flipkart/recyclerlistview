@@ -73,3 +73,6 @@ Please note that lower value is better. A lower values ensures that less number 
 Larger values mount extra views and increases the offset after which views are available for recycling but it might help with faster scrolling depending on the use case.
 
 In most cases, defaults work the best.
+
+### 7) `key` prop is not needed!
+Please **don't** add `key` prop to the output of `rowRenderer`. It is intentional to not have it. Adding it will stop recycling and cause random mounts/unmounts. It will totally ruin performance.
