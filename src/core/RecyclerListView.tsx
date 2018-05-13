@@ -83,6 +83,7 @@ export interface RecyclerListViewProps {
     renderAheadOffset?: number;
     isHorizontal?: boolean;
     onScroll?: (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => void;
+    onRecreate?: (rawEvent: ScrollEvent | null, offsetX: number | null, offsetY: number | null) => void;
     onEndReached?: () => void;
     onEndReachedThreshold?: number;
     onVisibleIndexesChanged?: TOnItemStatusChanged;
@@ -212,6 +213,9 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                 const offset = this.props.contextProvider.get(uniqueKey);
                 if (typeof offset === "number" && offset > 0) {
                     this._initialOffset = offset;
+                    if (this.props.onRecreate) {
+                        this.props.onRecreate(null, null, this._initialOffset);
+                    }
                 }
                 if (this.props.forceNonDeterministicRendering) {
                     const cachedLayouts = this.props.contextProvider.get(uniqueKey + "_layouts") as string;
@@ -517,6 +521,9 @@ RecyclerListView.propTypes = {
 
     //On scroll callback onScroll(rawEvent, offsetX, offsetY), note you get offsets no need to read scrollTop/scrollLeft
     onScroll: PropTypes.func,
+    //callback onRecreate(rawEvent, offsetX, offsetY), when recreating recycler view from context provider. Gives you the initial offset in the first
+    //frame itself to allow you to render content accordingly
+    onRecreate: PropTypes.func,
 
     //Provide your own ScrollView Component. The contract for the scroll event should match the native scroll event contract, i.e.
     // scrollEvent = { nativeEvent: { contentOffset: { x: offset, y: offset } } }
