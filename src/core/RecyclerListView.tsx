@@ -214,7 +214,11 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                 if (typeof offset === "number" && offset > 0) {
                     this._initialOffset = offset;
                     if (this.props.onRecreate) {
-                        this.props.onRecreate(null, null, this._initialOffset);
+                        if (this.props.isHorizontal) {
+                            this.props.onRecreate(null, this._initialOffset, this._initialOffset);
+                        } else {
+                            this.props.onRecreate(null, null, this._initialOffset);
+                        }
                     }
                 }
                 if (this.props.forceNonDeterministicRendering) {
