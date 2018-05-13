@@ -5,9 +5,10 @@
  * views just the way they want. Current implementation is a StaggeredList
  */
 import LayoutProvider, { Dimension } from "../dependencies/LayoutProvider";
+import { LayoutManagerInterface, Point, Rect } from "../dependencies/LayoutManagerInterface";
 import CustomError from "../exceptions/CustomError";
 
-export default class LayoutManager {
+export default class MasonaryLayoutManager implements LayoutManagerInterface {
   private _layoutProvider: LayoutProvider;
   private _window: Dimension;
   private _totalHeight: number;
@@ -132,12 +133,4 @@ export default class LayoutManager {
   private _checkBounds(itemX: number, itemY: number, itemDim: Dimension, isHorizontal: boolean): boolean {
     return isHorizontal ? itemY + itemDim.height <= this._window.height : itemX + itemDim.width <= this._window.width;
   }
-}
-
-export interface Rect extends Dimension, Point {
-  isOverridden?: boolean;
-}
-export interface Point {
-  x: number;
-  y: number;
 }
