@@ -521,6 +521,7 @@ RecyclerListView.propTypes = {
 
     //On scroll callback onScroll(rawEvent, offsetX, offsetY), note you get offsets no need to read scrollTop/scrollLeft
     onScroll: PropTypes.func,
+
     //callback onRecreate(rawEvent, offsetX, offsetY), when recreating recycler view from context provider. Gives you the initial offset in the first
     //frame itself to allow you to render content accordingly
     onRecreate: PropTypes.func,
