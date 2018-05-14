@@ -21,7 +21,7 @@ export default class LayoutManager {
     layoutProvider: LayoutProvider,
     dimensions: Dimension,
     isHorizontal: boolean = false,
-    cachedLayouts?: Rect[]
+    cachedLayouts?: Rect[],
   ) {
     this._columnCount = columnCount;
     this._layoutProvider = layoutProvider;
@@ -46,7 +46,7 @@ export default class LayoutManager {
     } else {
       throw new CustomError({
         message: "No layout available for index: " + index,
-        type: "LayoutUnavailableException"
+        type: "LayoutUnavailableException",
       });
     }
   }
@@ -78,15 +78,15 @@ export default class LayoutManager {
 
     const itemDim = { height: 0, width: 0 };
 
-    let newLayouts = [];
-    let columnLenghts: number[] = [];
+    const newLayouts = [];
+    const columnLenghts: number[] = [];
     for (let idx = 0; idx < this._columnCount; idx++) {
       columnLenghts[idx] = 0;
     }
-    let minColumnIdxFn = () => columnLenghts.reduce((acc, val, idx, arr) => (arr[acc] < val ? acc : idx), 0);
+    const minColumnIdxFn = () => columnLenghts.reduce((acc, val, idx, arr) => (arr[acc] < val ? acc : idx), 0);
     const colLenght = (this._isHorizontal ? this._window.height : this._window.width) / this._columnCount;
     for (let i = startIndex; i < itemCount; i++) {
-      let oldLayout = this._layouts[i];
+      const oldLayout = this._layouts[i];
       if (oldLayout && oldLayout.isOverridden) {
         itemDim.height = oldLayout.height;
         itemDim.width = oldLayout.width;
@@ -97,7 +97,7 @@ export default class LayoutManager {
 
       newLayouts.push({ x: startX, y: startY, height: itemDim.height, width: itemDim.width });
 
-      let minColumnIdx = minColumnIdxFn();
+      const minColumnIdx = minColumnIdxFn();
       if (this._isHorizontal) {
         columnLenghts[minColumnIdx] += itemDim.width;
         if (startY + colLenght <= this._window.height) {
@@ -118,7 +118,7 @@ export default class LayoutManager {
     }
     this._layouts = newLayouts;
 
-    let maxColumnIdxFn = () => columnLenghts.reduce((acc, val, idx, arr) => (arr[acc] > val ? acc : idx), 0);
+    const maxColumnIdxFn = () => columnLenghts.reduce((acc, val, idx, arr) => (arr[acc] > val ? acc : idx), 0);
 
     if (this._isHorizontal) {
       this._totalHeight = this._window.height;
