@@ -1,6 +1,8 @@
+import round from "lodash-es/round";
 import BinarySearch from "../utils/BinarySearch";
 import { Dimension } from "./dependencies/LayoutProvider";
 import { Rect } from "./layoutmanager/LayoutManager";
+
 /***
  * Given an offset this utility can compute visible items. Also tracks previously visible items to compute items which get hidden or visible
  * Virtual renderer uses callbacks from this utility to main recycle pool and the render stack.
@@ -231,11 +233,11 @@ export default class ViewabilityTracker {
 
     private _setRelevantBounds(itemRect: Rect, relevantDim: Range): void {
         if (this._isHorizontal) {
-            relevantDim.end = itemRect.x + itemRect.width;
-            relevantDim.start = itemRect.x;
+            relevantDim.end = round(itemRect.x + itemRect.width);
+            relevantDim.start = round(itemRect.x);
         } else {
-            relevantDim.end = itemRect.y + itemRect.height;
-            relevantDim.start = itemRect.y;
+            relevantDim.end = round(itemRect.y + itemRect.height);
+            relevantDim.start = round(itemRect.y);
         }
     }
 
@@ -265,8 +267,8 @@ export default class ViewabilityTracker {
         this._engagedWindow.start = Math.max(0, newOffset - this._renderAheadOffset);
         this._engagedWindow.end = newOffset + this._windowBound + this._renderAheadOffset;
 
-        this._visibleWindow.start = newOffset;
-        this._visibleWindow.end = newOffset + this._windowBound;
+        this._visibleWindow.start = round(newOffset);
+        this._visibleWindow.end = round(newOffset + this._windowBound);
     }
 
     //TODO:Talha optimize this
