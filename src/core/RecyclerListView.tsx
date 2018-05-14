@@ -118,7 +118,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     initialRenderIndex: 0,
     isHorizontal: false,
     onEndReachedThreshold: 0,
-    renderAheadOffset: IS_WEB ? 1000 : 250
+    renderAheadOffset: IS_WEB ? 1000 : 250,
   };
 
   public static propTypes = {};
@@ -134,7 +134,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     initialRenderIndex: 0,
     isHorizontal: false,
     itemCount: 0,
-    renderAheadOffset: 250
+    renderAheadOffset: 250,
   };
   private _layout: Dimension = { height: 0, width: 0 };
   private _pendingScrollToOffset: Point | null = null;
@@ -159,11 +159,11 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
       offset => {
         this._pendingScrollToOffset = offset;
       },
-      !props.disableRecycling
+      !props.disableRecycling,
     );
 
     this.state = {
-      renderStack: {}
+      renderStack: {},
     };
   }
 
@@ -303,7 +303,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     ) {
       //TODO:Talha use old layout manager
       this._virtualRenderer.setLayoutManager(
-        new MasonaryLayoutManager(2, newProps.layoutProvider, this._layout, newProps.isHorizontal)
+        new MasonaryLayoutManager(2, newProps.layoutProvider, this._layout, newProps.isHorizontal),
       );
       this._virtualRenderer.refreshWithAnchor();
       this._refreshViewability();
@@ -312,7 +312,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
       if (layoutManager) {
         layoutManager.reLayoutFromIndex(
           newProps.dataProvider.getFirstIndexToProcessInternal(),
-          newProps.dataProvider.getSize()
+          newProps.dataProvider.getSize(),
         );
         this._virtualRenderer.refresh();
       }
@@ -380,7 +380,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
       initialRenderIndex: this.props.initialRenderIndex,
       isHorizontal: this.props.isHorizontal,
       itemCount: this.props.dataProvider.getSize(),
-      renderAheadOffset: this.props.renderAheadOffset
+      renderAheadOffset: this.props.renderAheadOffset,
     };
     this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
     this._virtualRenderer.setLayoutManager(
@@ -389,8 +389,8 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         this.props.layoutProvider,
         this._layout,
         this.props.isHorizontal,
-        this._cachedLayouts
-      )
+        this._cachedLayouts,
+      ),
     );
     this._virtualRenderer.setLayoutProvider(this.props.layoutProvider);
     this._virtualRenderer.init();
@@ -601,5 +601,5 @@ RecyclerListView.propTypes = {
   //For TS use case, not necessary with JS use.
   //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
   //and passed down.
-  scrollViewProps: PropTypes.object
+  scrollViewProps: PropTypes.object,
 };

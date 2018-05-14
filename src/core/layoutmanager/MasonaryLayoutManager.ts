@@ -84,7 +84,7 @@ export default class MasonaryLayoutManager implements LayoutManagerInterface {
     for (let idx = 0; idx < this._columnCount; idx++) {
       columnLenghts[idx] = 0;
     }
-    const minColumnIdxFn = () => columnLenghts.reduce((acc, val, idx, arr) => (arr[acc] < val ? acc : idx), 0);
+    const minColumnIdxFn = (cols: number[]) => cols.reduce((acc, val, idx, arr) => (val < arr[acc] ? idx : acc), 0);
     const colLenght = (this._isHorizontal ? this._window.height : this._window.width) / this._columnCount;
     for (let i = startIndex; i < itemCount; i++) {
       const oldLayout = this._layouts[i];
@@ -96,9 +96,12 @@ export default class MasonaryLayoutManager implements LayoutManagerInterface {
       }
       this.setMaxBounds(itemDim);
 
+      const minColumnIdx = minColumnIdxFn(columnLenghts);
+      startY = columnLenghts[minColumnIdx];
+      startX = colLenght * minColumnIdx;
+
       newLayouts.push({ x: startX, y: startY, height: itemDim.height, width: itemDim.width });
 
-      const minColumnIdx = minColumnIdxFn();
       if (this._isHorizontal) {
         columnLenghts[minColumnIdx] += itemDim.width;
         if (startY + colLenght <= this._window.height) {
@@ -106,15 +109,9 @@ export default class MasonaryLayoutManager implements LayoutManagerInterface {
         } else {
           startY = 0;
         }
-        startX = columnLenghts[minColumnIdxFn()];
+        startX = columnLenghts[minColumnIdxFn(columnLenghts)];
       } else {
         columnLenghts[minColumnIdx] += itemDim.height;
-        if (startX + colLenght <= this._window.width) {
-          startX = startX + colLenght;
-        } else {
-          startX = 0;
-        }
-        startY = columnLenghts[minColumnIdxFn()];
       }
     }
     this._layouts = newLayouts;

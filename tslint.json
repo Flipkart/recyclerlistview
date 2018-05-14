@@ -1,25 +1,18 @@
 {
-    "extends": [
-        "tslint:recommended"
-    ],
-    "rules": {
-        "max-line-length": {
-            "options": [
-                160
-            ]
-        },
-        "typedef": [
-            true,
-            "call-signature",
-            "property-declaration"
-        ],
-        "typeof-compare": true,
-        "interface-name": false,
-        "variable-name": false,
-        "comment-format": false,
-        "no-bitwise": false,
-        "member-access": true,
-        "ordered-imports": false,
-        "object-literal-sort-keys": false
-    }
+  "extends": ["tslint:recommended"],
+  "rules": {
+    "max-line-length": {
+      "options": [160]
+    },
+    "typedef": [true, "call-signature", "property-declaration"],
+    "typeof-compare": true,
+    "interface-name": false,
+    "variable-name": false,
+    "comment-format": false,
+    "no-bitwise": false,
+    "member-access": true,
+    "ordered-imports": false,
+    "object-literal-sort-keys": false,
+    "arrow-parens": false
+  }
 }

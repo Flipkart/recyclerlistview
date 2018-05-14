@@ -49,7 +49,7 @@ export default class VirtualRenderer {
   constructor(
     renderStackChanged: (renderStack: RenderStack) => void,
     scrollOnNextUpdate: (point: Point) => void,
-    isRecyclingEnabled: boolean
+    isRecyclingEnabled: boolean,
   ) {
     //Keeps track of items that need to be rendered in the next render cycle
     this._renderStack = {};
@@ -181,7 +181,7 @@ export default class VirtualRenderer {
     if (this._params) {
       this._viewabilityTracker = new ViewabilityTracker(
         Default.value<number>(this._params.renderAheadOffset, 0),
-        Default.value<number>(this._params.initialOffset, 0)
+        Default.value<number>(this._params.initialOffset, 0),
       );
     } else {
       this._viewabilityTracker = new ViewabilityTracker(0, 0);
@@ -210,14 +210,14 @@ export default class VirtualRenderer {
         this._layoutManager.getLayouts(),
         this._params.isHorizontal
           ? this._layoutManager.getLayoutDimension().width
-          : this._layoutManager.getLayoutDimension().height
+          : this._layoutManager.getLayoutDimension().height,
       );
       this._viewabilityTracker.setDimensions(
         {
           height: this._dimensions.height,
-          width: this._dimensions.width
+          width: this._dimensions.width,
         },
-        Default.value<boolean>(this._params.isHorizontal, false)
+        Default.value<boolean>(this._params.isHorizontal, false),
       );
     } else {
       throw new CustomError(RecyclerListViewExceptions.initializationException);
@@ -244,7 +244,7 @@ export default class VirtualRenderer {
           //react can link a view to a key automatically
           this._recyclePool.putRecycledObject(
             this._layoutProvider.getLayoutTypeForIndex(disengagedIndex),
-            resolvedIndex
+            resolvedIndex,
           );
         } else {
           //Type provider may not be available in this case, use most probable
