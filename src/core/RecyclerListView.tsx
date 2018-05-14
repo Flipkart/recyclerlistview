@@ -10,9 +10,9 @@
  * DONE: Add full render logic in cases like change of dimensions
  * DONE: Fix all proptypes
  * DONE: Add Initial render Index support
+ * DONE: Add animated scroll to web scrollviewer
+ * DONE: Animate list view transition, including add/remove
  * TODO: Destroy less frequently used items in recycle pool, this will help in case of too many types.
- * TODO: Add animated scroll to web scrollviewer
- * TODO: Animate list view transition, including add/remove
  * TODO: Implement sticky headers
  * TODO: Make viewability callbacks configurable
  * TODO: Observe size changes on web to optimize for reflowability
@@ -27,7 +27,7 @@ import DataProvider from "./dependencies/DataProvider";
 import LayoutProvider, { Dimension } from "./dependencies/LayoutProvider";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
-import LayoutManager, { Point, Rect } from "./layoutmanager/LayoutManager";
+import LayoutManager, { Point, Layout } from "./layoutmanager/LayoutManager";
 import Messages from "./messages/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
@@ -98,6 +98,8 @@ export interface RecyclerListViewProps {
     forceNonDeterministicRendering?: boolean;
     extendedState?: object;
     itemAnimator?: ItemAnimator;
+    optimizeForInsertDeleteAnimations?: boolean;
+    style?: object;
 
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
@@ -137,7 +139,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     private _pendingScrollToOffset: Point | null = null;
     private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
-    private _cachedLayouts?: Rect[];
+    private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
 
     private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
@@ -153,6 +155,8 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
         this._virtualRenderer = new VirtualRenderer(this._renderStackWhenReady, (offset) => {
             this._pendingScrollToOffset = offset;
+        }, (index) => {
+            return this.props.dataProvider.getStableId(index);
         }, !props.disableRecycling);
 
         this.state = {
@@ -244,6 +248,11 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         }
     }
 
+    public getLayout(index: number): Layout | undefined {
+        const layoutManager = this._virtualRenderer.getLayoutManager();
+        return layoutManager ? layoutManager.getLayouts()[index] : undefined;
+    }
+
     public scrollToTop(animate?: boolean): void {
         this.scrollToOffset(0, 0, animate);
     }
@@ -270,6 +279,24 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     }
 
     public render(): JSX.Element {
+        //TODO:Talha
+        // const {
+        //     layoutProvider,
+        //     dataProvider,
+        //     contextProvider,
+        //     renderAheadOffset,
+        //     onEndReached,
+        //     onEndReachedThreshold,
+        //     onVisibleIndexesChanged,
+        //     initialOffset,
+        //     initialRenderIndex,
+        //     disableRecycling,
+        //     forceNonDeterministicRendering,
+        //     extendedState,
+        //     itemAnimator,
+        //     rowRenderer,
+        //     ...props,
+        // } = this.props;
         return (
             <ScrollComponent
                 ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
@@ -289,6 +316,10 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         this._params.isHorizontal = newProps.isHorizontal;
         this._params.itemCount = newProps.dataProvider.getSize();
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
+        this._virtualRenderer.setLayoutProvider(newProps.layoutProvider);
+        if (newProps.dataProvider.hasStableIds() && this.props.dataProvider !== newProps.dataProvider && newProps.dataProvider.requiresDataChangeHandling()) {
+            this._virtualRenderer.handleDataSetChange(newProps.dataProvider, this.props.optimizeForInsertDeleteAnimations);
+        }
         if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
             this._virtualRenderer.setLayoutManager(new LayoutManager(newProps.layoutProvider, this._layout, newProps.isHorizontal));
@@ -401,12 +432,13 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             const itemRect = (this._virtualRenderer.getLayoutManager() as LayoutManager).getLayouts()[dataIndex];
             const data = this.props.dataProvider.getDataForIndex(dataIndex);
             const type = this.props.layoutProvider.getLayoutTypeForIndex(dataIndex);
+            const key = this._virtualRenderer.syncAndGetKey(dataIndex);
             this._assertType(type);
             if (!this.props.forceNonDeterministicRendering) {
                 this._checkExpectedDimensionDiscrepancy(itemRect, type, dataIndex);
             }
             return (
-                <ViewRenderer key={itemMeta.key} data={data}
+                <ViewRenderer key={key} data={data}
                     dataHasChanged={this._dataHasChanged}
                     x={itemRect.x}
                     y={itemRect.y}
@@ -459,7 +491,6 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         for (const key in this.state.renderStack) {
             if (this.state.renderStack.hasOwnProperty(key)) {
                 renderedItems.push(this._renderRowUsingMeta(this.state.renderStack[key]));
-
             }
         }
         return renderedItems;
@@ -569,6 +600,13 @@ RecyclerListView.propTypes = {
     //Note: You might want to look into DefaultNativeItemAnimator to check an implementation based on LayoutAnimation. By default,
     //animations are JS driven to avoid workflow interference. Also, please note LayoutAnimation is buggy on Android.
     itemAnimator: PropTypes.instanceOf(BaseItemAnimator),
+
+    //Enables you to utilize layout animations better by unmounting removed items. Please note, this might increase unmounts
+    //on large data changes.
+    optimizeForInsertDeleteAnimations: PropTypes.bool,
+
+    //To pass down style to inner ScrollView
+    style: PropTypes.object,
 
     //For TS use case, not necessary with JS use.
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread

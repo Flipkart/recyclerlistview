@@ -4,6 +4,7 @@ import LayoutProvider from "./core/dependencies/LayoutProvider";
 import RecyclerListView from "./core/RecyclerListView";
 import BaseScrollView from "./core/scrollcomponent/BaseScrollView";
 import { BaseItemAnimator } from "./core/ItemAnimator";
+import { AutoScroll } from "./utils/AutoScroll";
 
 export {
     ContextProvider,
@@ -12,4 +13,5 @@ export {
     RecyclerListView,
     BaseItemAnimator,
     BaseScrollView,
+    AutoScroll,
 };

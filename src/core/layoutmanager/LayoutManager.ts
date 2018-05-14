@@ -12,10 +12,10 @@ export default class LayoutManager {
     private _window: Dimension;
     private _totalHeight: number;
     private _totalWidth: number;
-    private _layouts: Rect[];
+    private _layouts: Layout[];
     private _isHorizontal: boolean;
 
-    constructor(layoutProvider: LayoutProvider, dimensions: Dimension, isHorizontal: boolean = false, cachedLayouts?: Rect[]) {
+    constructor(layoutProvider: LayoutProvider, dimensions: Dimension, isHorizontal: boolean = false, cachedLayouts?: Layout[]) {
         this._layoutProvider = layoutProvider;
         this._window = dimensions;
         this._totalHeight = 0;
@@ -28,7 +28,7 @@ export default class LayoutManager {
         return { height: this._totalHeight, width: this._totalWidth };
     }
 
-    public getLayouts(): Rect[] {
+    public getLayouts(): Layout[] {
         return this._layouts;
     }
 
@@ -129,7 +129,7 @@ export default class LayoutManager {
         this._setFinalDimensions(maxBound);
     }
 
-    private _pointDimensionsToRect(itemRect: Rect): void {
+    private _pointDimensionsToRect(itemRect: Layout): void {
         if (this._isHorizontal) {
             this._totalWidth = itemRect.x;
         } else {
@@ -169,7 +169,7 @@ export default class LayoutManager {
     }
 }
 
-export interface Rect extends Dimension, Point {
+export interface Layout extends Dimension, Point {
     isOverridden?: boolean;
 }
 export interface Point {
