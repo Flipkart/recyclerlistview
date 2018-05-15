@@ -28,7 +28,8 @@ import LayoutProvider, { Dimension } from "./dependencies/LayoutProvider";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
 import LayoutManager, { Point, Layout } from "./layoutmanager/LayoutManager";
-import Messages from "./messages/Messages";
+import { Constants } from "./constants/Constants";
+import { Messages } from "./constants/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
@@ -40,7 +41,7 @@ import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollCompo
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
 import { Platform } from "react-native";
-const IS_WEB = Platform.OS === "web";
+const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
 
 /***
@@ -74,7 +75,9 @@ const refreshRequestDebouncer = debounce((executable: () => void) => {
  * NOTE: Also works on web (experimental)
  * NOTE: For reflowability set canChangeSize to true (experimental)
  */
-
+export interface OnRecreateParams {
+    lastOffset?: number;
+}
 export interface RecyclerListViewProps {
     layoutProvider: LayoutProvider;
     dataProvider: DataProvider;
@@ -83,6 +86,7 @@ export interface RecyclerListViewProps {
     renderAheadOffset?: number;
     isHorizontal?: boolean;
     onScroll?: (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => void;
+    onRecreate?: (params: OnRecreateParams) => void;
     onEndReached?: () => void;
     onEndReachedThreshold?: number;
     onVisibleIndexesChanged?: TOnItemStatusChanged;
@@ -195,13 +199,14 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         if (this.props.contextProvider) {
             const uniqueKey = this.props.contextProvider.getUniqueKey();
             if (uniqueKey) {
-                this.props.contextProvider.save(uniqueKey, this.getCurrentScrollOffset());
+                this.props.contextProvider.save(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX, this.getCurrentScrollOffset());
                 if (this.props.forceNonDeterministicRendering) {
                     if (this._virtualRenderer) {
                         const layoutManager = this._virtualRenderer.getLayoutManager();
                         if (layoutManager) {
                             const layoutsToCache = layoutManager.getLayouts();
-                            this.props.contextProvider.save(uniqueKey + "_layouts", JSON.stringify({ layoutArray: layoutsToCache }));
+                            this.props.contextProvider.save(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX,
+                                                            JSON.stringify({ layoutArray: layoutsToCache }));
                         }
                     }
                 }
@@ -213,17 +218,21 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         if (this.props.contextProvider) {
             const uniqueKey = this.props.contextProvider.getUniqueKey();
             if (uniqueKey) {
-                const offset = this.props.contextProvider.get(uniqueKey);
+                const offset = this.props.contextProvider.get(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX);
                 if (typeof offset === "number" && offset > 0) {
                     this._initialOffset = offset;
+                    if (this.props.onRecreate) {
+                        this.props.onRecreate({lastOffset: this._initialOffset});
+                    }
+                    this.props.contextProvider.remove(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX);
                 }
                 if (this.props.forceNonDeterministicRendering) {
-                    const cachedLayouts = this.props.contextProvider.get(uniqueKey + "_layouts") as string;
+                    const cachedLayouts = this.props.contextProvider.get(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX) as string;
                     if (cachedLayouts && typeof cachedLayouts === "string") {
                         this._cachedLayouts = JSON.parse(cachedLayouts).layoutArray;
+                        this.props.contextProvider.remove(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX);
                     }
                 }
-                this.props.contextProvider.remove(uniqueKey);
             }
         }
     }
@@ -548,6 +557,10 @@ RecyclerListView.propTypes = {
 
     //On scroll callback onScroll(rawEvent, offsetX, offsetY), note you get offsets no need to read scrollTop/scrollLeft
     onScroll: PropTypes.func,
+
+    //callback onRecreate(params), when recreating recycler view from context provider. Gives you the initial params in the first
+    //frame itself to allow you to render content accordingly
+    onRecreate: PropTypes.func,
 
     //Provide your own ScrollView Component. The contract for the scroll event should match the native scroll event contract, i.e.
     // scrollEvent = { nativeEvent: { contentOffset: { x: offset, y: offset } } }
