@@ -40,7 +40,7 @@ import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollCompo
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
 import { Platform } from "react-native";
-const IS_WEB = Platform.OS === "web";
+const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
 
 /***
@@ -74,7 +74,9 @@ const refreshRequestDebouncer = debounce((executable: () => void) => {
  * NOTE: Also works on web (experimental)
  * NOTE: For reflowability set canChangeSize to true (experimental)
  */
-
+export interface OnRecreateParams {
+    lastOffset?: number;
+}
 export interface RecyclerListViewProps {
     layoutProvider: LayoutProvider;
     dataProvider: DataProvider;
@@ -83,7 +85,7 @@ export interface RecyclerListViewProps {
     renderAheadOffset?: number;
     isHorizontal?: boolean;
     onScroll?: (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => void;
-    onRecreate?: (rawEvent: ScrollEvent | null, offsetX: number | null, offsetY: number | null) => void;
+    onRecreate?: (params: OnRecreateParams) => void;
     onEndReached?: () => void;
     onEndReachedThreshold?: number;
     onVisibleIndexesChanged?: TOnItemStatusChanged;
@@ -214,11 +216,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                 if (typeof offset === "number" && offset > 0) {
                     this._initialOffset = offset;
                     if (this.props.onRecreate) {
-                        if (this.props.isHorizontal) {
-                            this.props.onRecreate(null, this._initialOffset, this._initialOffset);
-                        } else {
-                            this.props.onRecreate(null, null, this._initialOffset);
-                        }
+                        this.props.onRecreate({lastOffset: this._initialOffset});
                     }
                 }
                 if (this.props.forceNonDeterministicRendering) {
@@ -526,7 +524,7 @@ RecyclerListView.propTypes = {
     //On scroll callback onScroll(rawEvent, offsetX, offsetY), note you get offsets no need to read scrollTop/scrollLeft
     onScroll: PropTypes.func,
 
-    //callback onRecreate(rawEvent, offsetX, offsetY), when recreating recycler view from context provider. Gives you the initial offset in the first
+    //callback onRecreate(params), when recreating recycler view from context provider. Gives you the initial params in the first
     //frame itself to allow you to render content accordingly
     onRecreate: PropTypes.func,
 
