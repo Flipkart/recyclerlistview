@@ -28,7 +28,8 @@ import LayoutProvider, { Dimension } from "./dependencies/LayoutProvider";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
 import LayoutManager, { Point, Rect } from "./layoutmanager/LayoutManager";
-import Messages from "./messages/Messages";
+import { Constants } from "./constants/Constants";
+import { Messages } from "./constants/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
@@ -194,13 +195,14 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         if (this.props.contextProvider) {
             const uniqueKey = this.props.contextProvider.getUniqueKey();
             if (uniqueKey) {
-                this.props.contextProvider.save(uniqueKey, this.getCurrentScrollOffset());
+                this.props.contextProvider.save(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX, this.getCurrentScrollOffset());
                 if (this.props.forceNonDeterministicRendering) {
                     if (this._virtualRenderer) {
                         const layoutManager = this._virtualRenderer.getLayoutManager();
                         if (layoutManager) {
                             const layoutsToCache = layoutManager.getLayouts();
-                            this.props.contextProvider.save(uniqueKey + "_layouts", JSON.stringify({ layoutArray: layoutsToCache }));
+                            this.props.contextProvider.save(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX,
+                                                            JSON.stringify({ layoutArray: layoutsToCache }));
                         }
                     }
                 }
@@ -212,20 +214,21 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         if (this.props.contextProvider) {
             const uniqueKey = this.props.contextProvider.getUniqueKey();
             if (uniqueKey) {
-                const offset = this.props.contextProvider.get(uniqueKey);
+                const offset = this.props.contextProvider.get(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX);
                 if (typeof offset === "number" && offset > 0) {
                     this._initialOffset = offset;
                     if (this.props.onRecreate) {
                         this.props.onRecreate({lastOffset: this._initialOffset});
                     }
+                    this.props.contextProvider.remove(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX);
                 }
                 if (this.props.forceNonDeterministicRendering) {
-                    const cachedLayouts = this.props.contextProvider.get(uniqueKey + "_layouts") as string;
+                    const cachedLayouts = this.props.contextProvider.get(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX) as string;
                     if (cachedLayouts && typeof cachedLayouts === "string") {
                         this._cachedLayouts = JSON.parse(cachedLayouts).layoutArray;
+                        this.props.contextProvider.remove(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX);
                     }
                 }
-                this.props.contextProvider.remove(uniqueKey);
             }
         }
     }
