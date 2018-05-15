@@ -8,6 +8,7 @@ npm run clean
 npm run build
 
 echo "Pushing out BETA build..."
+npm config set registry http://10.85.59.116/artifactory/v1.0/artifacts/npm/
 npm publish --tag beta
 
 echo "PUSH SUCCESS"
