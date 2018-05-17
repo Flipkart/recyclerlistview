@@ -28,7 +28,7 @@ export interface ViewRendererProps<T> {
     layoutProvider?: BaseLayoutProvider;
 }
 export default abstract class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {
-    protected initialStyleOverrides: object | undefined;
+    protected animatorStyleOverrides: object | undefined;
 
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
         const hasMoved = this.props.x !== newProps.x || this.props.y !== newProps.y;
@@ -49,11 +49,11 @@ export default abstract class BaseViewRenderer<T> extends React.Component<ViewRe
         return shouldUpdate;
     }
     public componentDidMount(): void {
-        this.initialStyleOverrides = undefined;
+        this.animatorStyleOverrides = undefined;
         this.props.itemAnimator.animateDidMount(this.props.x, this.props.y, this.getRef() as object, this.props.index);
     }
     public componentWillMount(): void {
-        this.initialStyleOverrides = this.props.itemAnimator.animateWillMount(this.props.x, this.props.y, this.props.index);
+        this.animatorStyleOverrides = this.props.itemAnimator.animateWillMount(this.props.x, this.props.y, this.props.index);
     }
     public componentWillUnmount(): void {
         this.props.itemAnimator.animateWillUnmount(this.props.x, this.props.y, this.getRef() as object, this.props.index);

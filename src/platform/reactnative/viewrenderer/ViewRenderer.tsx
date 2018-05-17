@@ -29,7 +29,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                     position: "absolute",
                     top: this.props.y,
                     ...this.props.styleOverrides,
-                    ...this.initialStyleOverrides,
+                    ...this.animatorStyleOverrides,
                 }}>
                 {this.renderChild()}
             </View>
@@ -42,7 +42,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                         height: this.props.height,
                         width: this.props.width,
                         ...this.props.styleOverrides,
-                        ...this.initialStyleOverrides,
+                        ...this.animatorStyleOverrides,
                     }}>
                     {this.renderChild()}
                 </View>

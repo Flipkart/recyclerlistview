@@ -36,7 +36,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 WebkitTransform: this._getTransform(),
                 ...styles.baseViewStyle,
                 ...this.props.styleOverrides,
-                ...this.initialStyleOverrides,
+                ...this.animatorStyleOverrides,
             }
             : {
                 height: this.props.height,
@@ -46,7 +46,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 WebkitTransform: this._getTransform(),
                 ...styles.baseViewStyle,
                 ...this.props.styleOverrides,
-                ...this.initialStyleOverrides,
+                ...this.animatorStyleOverrides,
             };
         return (
             <div ref={this._setRef} style={style}>
