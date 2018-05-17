@@ -206,7 +206,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                         if (layoutManager) {
                             const layoutsToCache = layoutManager.getLayouts();
                             this.props.contextProvider.save(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX,
-                                                            JSON.stringify({ layoutArray: layoutsToCache }));
+                                JSON.stringify({ layoutArray: layoutsToCache }));
                         }
                     }
                 }
@@ -222,7 +222,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                 if (typeof offset === "number" && offset > 0) {
                     this._initialOffset = offset;
                     if (this.props.onRecreate) {
-                        this.props.onRecreate({lastOffset: this._initialOffset});
+                        this.props.onRecreate({ lastOffset: this._initialOffset });
                     }
                     this.props.contextProvider.remove(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX);
                 }
@@ -273,6 +273,11 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
     public scrollToOffset(x: number, y: number, animate: boolean = false): void {
         if (this._scrollComponent) {
+            if (this.props.isHorizontal) {
+                y = 0;
+            } else {
+                x = 0;
+            }
             this._scrollComponent.scrollTo(x, y, animate);
         }
     }
