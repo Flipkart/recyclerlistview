@@ -1,11 +1,11 @@
 import ContextProvider from "./core/dependencies/ContextProvider";
 import DataProvider from "./core/dependencies/DataProvider";
-import { LayoutProvider, BaseLayoutProvider } from "./core/dependencies/LayoutProvider";
+import { LayoutProvider, BaseLayoutProvider, Dimension } from "./core/dependencies/LayoutProvider";
 import RecyclerListView from "./core/RecyclerListView";
 import BaseScrollView from "./core/scrollcomponent/BaseScrollView";
 import { BaseItemAnimator } from "./core/ItemAnimator";
 import { AutoScroll } from "./utils/AutoScroll";
-import { LayoutManager, WrapGridLayoutManager } from "./core/layoutmanager/LayoutManager";
+import { LayoutManager, WrapGridLayoutManager, Point, Layout } from "./core/layoutmanager/LayoutManager";
 
 export {
     ContextProvider,
@@ -18,4 +18,7 @@ export {
     BaseItemAnimator,
     BaseScrollView,
     AutoScroll,
+    Dimension,
+    Point,
+    Layout,
 };

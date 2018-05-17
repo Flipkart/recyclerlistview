@@ -24,7 +24,7 @@ import * as React from "react";
 import { ObjectUtil, Default } from "ts-object-utils";
 import ContextProvider from "./dependencies/ContextProvider";
 import DataProvider from "./dependencies/DataProvider";
-import { Dimension, LayoutProvider } from "./dependencies/LayoutProvider";
+import { Dimension, BaseLayoutProvider } from "./dependencies/LayoutProvider";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
 import { Point, Layout, LayoutManager } from "./layoutmanager/LayoutManager";
@@ -79,7 +79,7 @@ export interface OnRecreateParams {
     lastOffset?: number;
 }
 export interface RecyclerListViewProps {
-    layoutProvider: LayoutProvider;
+    layoutProvider: BaseLayoutProvider;
     dataProvider: DataProvider;
     rowRenderer: (type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null;
     contextProvider?: ContextProvider;
@@ -331,7 +331,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         }
         if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
-            this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(newProps.layoutProvider, this._layout, newProps.isHorizontal));
+            this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout, newProps.isHorizontal));
             this._virtualRenderer.refreshWithAnchor();
             this._refreshViewability();
         } else if (this.props.dataProvider !== newProps.dataProvider) {
@@ -406,7 +406,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             renderAheadOffset: this.props.renderAheadOffset,
         };
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
-        const layoutManager = this.props.layoutProvider.newLayoutManager(this.props.layoutProvider, this._layout, this.props.isHorizontal, this._cachedLayouts);
+        const layoutManager = this.props.layoutProvider.newLayoutManager(this._layout, this.props.isHorizontal, this._cachedLayouts);
         this._virtualRenderer.setLayoutManager(layoutManager);
         this._virtualRenderer.setLayoutProvider(this.props.layoutProvider);
         this._virtualRenderer.init();
@@ -487,7 +487,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         //Cannot be null here
         const layoutManager = this._virtualRenderer.getLayoutManager() as LayoutManager;
         layoutManager.setMaxBounds(this._tempDim);
-        this.props.layoutProvider.setLayoutForType(type, this._tempDim, index);
+        this.props.layoutProvider.setComputedLayout(type, this._tempDim, index);
 
         //TODO:Talha calling private method, find an alternative and remove this
         layoutManager.setMaxBounds(this._tempDim);
@@ -539,7 +539,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 RecyclerListView.propTypes = {
 
     //Refer the sample
-    layoutProvider: PropTypes.instanceOf(LayoutProvider).isRequired,
+    layoutProvider: PropTypes.instanceOf(BaseLayoutProvider).isRequired,
 
     //Refer the sample
     dataProvider: PropTypes.instanceOf(DataProvider).isRequired,

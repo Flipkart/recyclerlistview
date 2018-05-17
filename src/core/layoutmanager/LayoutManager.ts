@@ -4,7 +4,7 @@
  * Note: In future, this will also become an external dependency which means you can write your own layout manager. That will enable everyone to layout their
  * views just the way they want. Current implementation is a StaggeredList
  */
-import { Dimension, BaseLayoutProvider } from "../dependencies/LayoutProvider";
+import { Dimension, LayoutProvider } from "../dependencies/LayoutProvider";
 import CustomError from "../exceptions/CustomError";
 
 export abstract class LayoutManager {
@@ -31,13 +31,13 @@ export abstract class LayoutManager {
 }
 
 export class WrapGridLayoutManager extends LayoutManager {
-    private _layoutProvider: BaseLayoutProvider;
+    private _layoutProvider: LayoutProvider;
     private _window: Dimension;
     private _totalHeight: number;
     private _totalWidth: number;
     private _isHorizontal: boolean;
 
-    constructor(layoutProvider: BaseLayoutProvider, dimensions: Dimension, isHorizontal: boolean = false, cachedLayouts?: Layout[]) {
+    constructor(layoutProvider: LayoutProvider, dimensions: Dimension, isHorizontal: boolean = false, cachedLayouts?: Layout[]) {
         super(cachedLayouts);
         this._layoutProvider = layoutProvider;
         this._window = dimensions;
@@ -114,7 +114,7 @@ export class WrapGridLayoutManager extends LayoutManager {
                 itemDim.height = oldLayout.height;
                 itemDim.width = oldLayout.width;
             } else {
-                this._layoutProvider.setLayoutForType(this._layoutProvider.getLayoutTypeForIndex(i), itemDim, i);
+                this._layoutProvider.setComputedLayout(this._layoutProvider.getLayoutTypeForIndex(i), itemDim, i);
             }
             this.setMaxBounds(itemDim);
             while (!this._checkBounds(startX, startY, itemDim, this._isHorizontal)) {

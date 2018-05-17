@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Dimension, LayoutProvider } from "../dependencies/LayoutProvider";
+import { Dimension, BaseLayoutProvider } from "../dependencies/LayoutProvider";
 import ItemAnimator from "../ItemAnimator";
 import { LayoutManager } from "../layoutmanager/LayoutManager";
 
@@ -25,7 +25,7 @@ export interface ViewRendererProps<T> {
     forceNonDeterministicRendering?: boolean;
     isHorizontal?: boolean;
     extendedState?: object;
-    layoutProvider?: LayoutProvider;
+    layoutProvider?: BaseLayoutProvider;
 }
 export default abstract class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {
     protected initialStyleOverrides: object | undefined;

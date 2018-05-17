@@ -15,10 +15,14 @@ import { Layout, WrapGridLayoutManager, LayoutManager } from "../layoutmanager/L
  */
 
 export abstract class BaseLayoutProvider {
-    public abstract newLayoutManager(layoutProvider: BaseLayoutProvider, dimensions: Dimension,
-                                     isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager;
+    //Return your layout manager
+    public abstract newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager;
+
+    //Given an index a provider is expected to return a view type which used to recycling choices
     public abstract getLayoutTypeForIndex(index: number): string | number;
-    public abstract setLayoutForType(type: string | number, dimension: Dimension, index: number): void;
+
+    //Set the computed layout for an item, if there is a mismatch with actual your layout manager will be notified.
+    public abstract setComputedLayout(type: string | number, dimension: Dimension, index: number): void;
 }
 
 export class LayoutProvider extends BaseLayoutProvider {
@@ -33,8 +37,8 @@ export class LayoutProvider extends BaseLayoutProvider {
         this._setLayoutForType = setLayoutForType;
     }
 
-    public newLayoutManager(layoutProvider: BaseLayoutProvider, dimensions: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager {
-        return new WrapGridLayoutManager(layoutProvider, dimensions, isHorizontal, cachedLayouts);
+    public newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager {
+        return new WrapGridLayoutManager(this, renderWindowSize, isHorizontal, cachedLayouts);
     }
 
     //Provide a type for index, something which identifies the template of view about to load
@@ -44,7 +48,7 @@ export class LayoutProvider extends BaseLayoutProvider {
 
     //Given a type and dimension set the dimension values on given dimension object
     //You can also get index here if you add an extra argument but we don't recommend using it.
-    public setLayoutForType(type: string | number, dimension: Dimension, index: number): void {
+    public setComputedLayout(type: string | number, dimension: Dimension, index: number): void {
         return this._setLayoutForType(type, dimension, index);
     }
 }
