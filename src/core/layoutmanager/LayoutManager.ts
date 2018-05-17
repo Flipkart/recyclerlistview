@@ -26,7 +26,6 @@ export abstract class LayoutManager {
     public abstract getLayouts(): Layout[];
     public abstract overrideLayout(index: number, dim: Dimension): void;
     public abstract reLayoutFromIndex(startIndex: number, itemCount: number): void;
-    public abstract setMaxBounds(itemDim: Dimension): void;
     public abstract getStyleOverrides(): object | undefined;
 }
 
