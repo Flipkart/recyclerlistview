@@ -1,3 +1,5 @@
+import { Layout, WrapGridLayoutManager, LayoutManager } from "../layoutmanager/LayoutManager";
+
 /**
  * Created by talha.naqvi on 05/04/17.
  * You can create a new instance or inherit and override default methods
@@ -12,15 +14,27 @@
  * NOTE: You can also implement features such as ListView/GridView switch by simple changing your layout provider.
  */
 
-export default class LayoutProvider {
+export abstract class BaseLayoutProvider {
+    public abstract newLayoutManager(layoutProvider: BaseLayoutProvider, dimensions: Dimension,
+                                     isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager;
+    public abstract getLayoutTypeForIndex(index: number): string | number;
+    public abstract setLayoutForType(type: string | number, dimension: Dimension, index: number): void;
+}
+
+export class LayoutProvider extends BaseLayoutProvider {
 
     private _getLayoutTypeForIndex: (index: number) => string | number;
     private _setLayoutForType: (type: string | number, dim: Dimension, index: number) => void;
 
     constructor(getLayoutTypeForIndex: (index: number) => string | number,
                 setLayoutForType: (type: string | number, dim: Dimension, index: number) => void) {
+        super();
         this._getLayoutTypeForIndex = getLayoutTypeForIndex;
         this._setLayoutForType = setLayoutForType;
+    }
+
+    public newLayoutManager(layoutProvider: BaseLayoutProvider, dimensions: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager {
+        return new WrapGridLayoutManager(layoutProvider, dimensions, isHorizontal, cachedLayouts);
     }
 
     //Provide a type for index, something which identifies the template of view about to load

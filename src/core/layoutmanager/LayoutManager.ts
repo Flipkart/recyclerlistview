@@ -4,27 +4,49 @@
  * Note: In future, this will also become an external dependency which means you can write your own layout manager. That will enable everyone to layout their
  * views just the way they want. Current implementation is a StaggeredList
  */
-import LayoutProvider, { Dimension } from "../dependencies/LayoutProvider";
+import { Dimension, BaseLayoutProvider } from "../dependencies/LayoutProvider";
 import CustomError from "../exceptions/CustomError";
 
-export default class LayoutManager {
-    private _layoutProvider: LayoutProvider;
+export abstract class LayoutManager {
+    protected _layouts: Layout[];
+    constructor(cachedLayouts?: Layout[]) {
+        this._layouts = cachedLayouts ? cachedLayouts : [];
+    }
+    public getOffsetForIndex(index: number): Point {
+        if (this._layouts.length > index) {
+            return { x: this._layouts[index].x, y: this._layouts[index].y };
+        } else {
+            throw new CustomError({
+                message: "No layout available for index: " + index,
+                type: "LayoutUnavailableException",
+            });
+        }
+    }
+    public abstract getContentDimension(): Dimension;
+    public abstract getLayouts(): Layout[];
+    public abstract overrideLayout(index: number, dim: Dimension): void;
+    public abstract reLayoutFromIndex(startIndex: number, itemCount: number): void;
+    public abstract setMaxBounds(itemDim: Dimension): void;
+    public abstract getStyleOverrides(): object | undefined;
+}
+
+export class WrapGridLayoutManager extends LayoutManager {
+    private _layoutProvider: BaseLayoutProvider;
     private _window: Dimension;
     private _totalHeight: number;
     private _totalWidth: number;
-    private _layouts: Layout[];
     private _isHorizontal: boolean;
 
-    constructor(layoutProvider: LayoutProvider, dimensions: Dimension, isHorizontal: boolean = false, cachedLayouts?: Layout[]) {
+    constructor(layoutProvider: BaseLayoutProvider, dimensions: Dimension, isHorizontal: boolean = false, cachedLayouts?: Layout[]) {
+        super(cachedLayouts);
         this._layoutProvider = layoutProvider;
         this._window = dimensions;
         this._totalHeight = 0;
         this._totalWidth = 0;
-        this._layouts = cachedLayouts ? cachedLayouts : [];
-        this._isHorizontal = isHorizontal;
+        this._isHorizontal = !!isHorizontal;
     }
 
-    public getLayoutDimension(): Dimension {
+    public getContentDimension(): Dimension {
         return { height: this._totalHeight, width: this._totalWidth };
     }
 
@@ -50,6 +72,10 @@ export default class LayoutManager {
             layout.width = dim.width;
             layout.height = dim.height;
         }
+    }
+
+    public  getStyleOverrides(): object | undefined {
+        return undefined;
     }
 
     public setMaxBounds(itemDim: Dimension): void {

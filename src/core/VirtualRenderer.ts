@@ -1,8 +1,8 @@
 import RecycleItemPool from "../utils/RecycleItemPool";
-import { default as LayoutProvider, Dimension } from "./dependencies/LayoutProvider";
+import { LayoutProvider, Dimension } from "./dependencies/LayoutProvider";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
-import LayoutManager, { Point } from "./layoutmanager/LayoutManager";
+import { Point, LayoutManager } from "./layoutmanager/LayoutManager";
 import ViewabilityTracker, { TOnItemStatusChanged } from "./ViewabilityTracker";
 import { ObjectUtil, Default } from "ts-object-utils";
 import TSCast from "../utils/TSCast";
@@ -83,7 +83,7 @@ export default class VirtualRenderer {
 
     public getLayoutDimension(): Dimension {
         if (this._layoutManager) {
-            return this._layoutManager.getLayoutDimension();
+            return this._layoutManager.getContentDimension();
         }
         return { height: 0, width: 0 };
     }
@@ -328,8 +328,8 @@ export default class VirtualRenderer {
                 this._viewabilityTracker.onVisibleRowsChanged = this._onVisibleItemsChanged;
             }
             this._viewabilityTracker.setLayouts(this._layoutManager.getLayouts(), this._params.isHorizontal ?
-                this._layoutManager.getLayoutDimension().width :
-                this._layoutManager.getLayoutDimension().height);
+                this._layoutManager.getContentDimension().width :
+                this._layoutManager.getContentDimension().height);
             this._viewabilityTracker.setDimensions({
                 height: this._dimensions.height,
                 width: this._dimensions.width,

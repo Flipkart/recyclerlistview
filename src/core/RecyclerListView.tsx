@@ -24,10 +24,10 @@ import * as React from "react";
 import { ObjectUtil, Default } from "ts-object-utils";
 import ContextProvider from "./dependencies/ContextProvider";
 import DataProvider from "./dependencies/DataProvider";
-import LayoutProvider, { Dimension } from "./dependencies/LayoutProvider";
+import { Dimension, LayoutProvider } from "./dependencies/LayoutProvider";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
-import LayoutManager, { Point, Layout } from "./layoutmanager/LayoutManager";
+import { Point, Layout, LayoutManager } from "./layoutmanager/LayoutManager";
 import { Constants } from "./constants/Constants";
 import { Messages } from "./constants/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
@@ -331,7 +331,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         }
         if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
-            this._virtualRenderer.setLayoutManager(new LayoutManager(newProps.layoutProvider, this._layout, newProps.isHorizontal));
+            this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(newProps.layoutProvider, this._layout, newProps.isHorizontal));
             this._virtualRenderer.refreshWithAnchor();
             this._refreshViewability();
         } else if (this.props.dataProvider !== newProps.dataProvider) {
@@ -406,11 +406,14 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             renderAheadOffset: this.props.renderAheadOffset,
         };
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
-        this._virtualRenderer.setLayoutManager(new LayoutManager(this.props.layoutProvider, this._layout, this.props.isHorizontal, this._cachedLayouts));
+        const layoutManager = this.props.layoutProvider.newLayoutManager(this.props.layoutProvider, this._layout, this.props.isHorizontal, this._cachedLayouts);
+        this._virtualRenderer.setLayoutManager(layoutManager);
         this._virtualRenderer.setLayoutProvider(this.props.layoutProvider);
         this._virtualRenderer.init();
         const offset = this._virtualRenderer.getInitialOffset();
-        if (offset.y > 0 || offset.x > 0) {
+        const contentDimension = layoutManager.getContentDimension();
+        if ((offset.y > 0 && contentDimension.height > this._layout.height) ||
+            (offset.x > 0 && contentDimension.width > this._layout.width)) {
             this._pendingScrollToOffset = offset;
             this.setState({});
         } else {
@@ -442,6 +445,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             const data = this.props.dataProvider.getDataForIndex(dataIndex);
             const type = this.props.layoutProvider.getLayoutTypeForIndex(dataIndex);
             const key = this._virtualRenderer.syncAndGetKey(dataIndex);
+            const styleOverrides = (this._virtualRenderer.getLayoutManager() as LayoutManager).getStyleOverrides();
             this._assertType(type);
             if (!this.props.forceNonDeterministicRendering) {
                 this._checkExpectedDimensionDiscrepancy(itemRect, type, dataIndex);
@@ -453,6 +457,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                     y={itemRect.y}
                     layoutType={type}
                     index={dataIndex}
+                    styleOverrides={styleOverrides}
                     layoutProvider={this.props.layoutProvider}
                     forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
                     isHorizontal={this.props.isHorizontal}
