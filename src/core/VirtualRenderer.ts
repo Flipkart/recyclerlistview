@@ -125,7 +125,7 @@ export default class VirtualRenderer {
     public setLayoutManager(layoutManager: LayoutManager): void {
         this._layoutManager = layoutManager;
         if (this._params) {
-            this._layoutManager.reLayoutFromIndex(0, this._params.itemCount);
+            this._layoutManager.relayoutFromIndex(0, this._params.itemCount);
         }
     }
 

@@ -1,8 +1,6 @@
 /***
  * Computes the positions and dimensions of items that will be rendered by the list. The output from this is utilized by viewability tracker to compute the
  * lists of visible/hidden item.
- * Note: In future, this will also become an external dependency which means you can write your own layout manager. That will enable everyone to layout their
- * views just the way they want. Current implementation is a StaggeredList
  */
 import { Dimension, LayoutProvider } from "../dependencies/LayoutProvider";
 import CustomError from "../exceptions/CustomError";
@@ -22,13 +20,25 @@ export abstract class LayoutManager {
             });
         }
     }
+
+    //You can ovveride this incase you want to override style in some cases e.g, say you want to enfore width but not height
     public getStyleOverridesForIndex(index: number): object | undefined {
         return undefined;
     }
+
+    //Return the dimension of entire content inside the list
     public abstract getContentDimension(): Dimension;
+
+    //Return all computer layouts as an array
     public abstract getLayouts(): Layout[];
+
+    //RLV will call this method in case of mismatch with actual rendered dimensions in case of non deterministic rendering
+    //You are expected to cache this value and prefer it over estimates provided
+    //No need to relayout which RLV will trigger. You should only relayout when relayoutFromIndex is called.
     public abstract overrideLayout(index: number, dim: Dimension): void;
-    public abstract reLayoutFromIndex(startIndex: number, itemCount: number): void;
+
+    //Recompute layouts from given index
+    public abstract relayoutFromIndex(startIndex: number, itemCount: number): void;
 }
 
 export class WrapGridLayoutManager extends LayoutManager {
@@ -84,7 +94,7 @@ export class WrapGridLayoutManager extends LayoutManager {
     }
 
     //TODO:Talha laziliy calculate in future revisions
-    public reLayoutFromIndex(startIndex: number, itemCount: number): void {
+    public relayoutFromIndex(startIndex: number, itemCount: number): void {
         startIndex = this._locateFirstNeighbourIndex(startIndex);
         let startX = 0;
         let startY = 0;
