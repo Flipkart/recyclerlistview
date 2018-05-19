@@ -450,7 +450,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             const data = this.props.dataProvider.getDataForIndex(dataIndex);
             const type = this.props.layoutProvider.getLayoutTypeForIndex(dataIndex);
             const key = this._virtualRenderer.syncAndGetKey(dataIndex);
-            const styleOverrides = (this._virtualRenderer.getLayoutManager() as LayoutManager).getStyleOverrides();
+            const styleOverrides = (this._virtualRenderer.getLayoutManager() as LayoutManager).getStyleOverridesForIndex(dataIndex);
             this._assertType(type);
             if (!this.props.forceNonDeterministicRendering) {
                 this._checkExpectedDimensionDiscrepancy(itemRect, type, dataIndex);

@@ -22,11 +22,13 @@ export abstract class LayoutManager {
             });
         }
     }
+    public getStyleOverridesForIndex(index: number): object | undefined {
+        return undefined;
+    }
     public abstract getContentDimension(): Dimension;
     public abstract getLayouts(): Layout[];
     public abstract overrideLayout(index: number, dim: Dimension): void;
     public abstract reLayoutFromIndex(startIndex: number, itemCount: number): void;
-    public abstract getStyleOverrides(): object | undefined;
 }
 
 export class WrapGridLayoutManager extends LayoutManager {
@@ -71,10 +73,6 @@ export class WrapGridLayoutManager extends LayoutManager {
             layout.width = dim.width;
             layout.height = dim.height;
         }
-    }
-
-    public  getStyleOverrides(): object | undefined {
-        return undefined;
     }
 
     public setMaxBounds(itemDim: Dimension): void {
