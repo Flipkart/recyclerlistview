@@ -6,13 +6,10 @@ import { Dimension, LayoutProvider } from "../dependencies/LayoutProvider";
 import CustomError from "../exceptions/CustomError";
 
 export abstract class LayoutManager {
-    protected _layouts: Layout[];
-    constructor(cachedLayouts?: Layout[]) {
-        this._layouts = cachedLayouts ? cachedLayouts : [];
-    }
     public getOffsetForIndex(index: number): Point {
-        if (this._layouts.length > index) {
-            return { x: this._layouts[index].x, y: this._layouts[index].y };
+        const layouts = this.getLayouts();
+        if (layouts.length > index) {
+            return { x: layouts[index].x, y: layouts[index].y };
         } else {
             throw new CustomError({
                 message: "No layout available for index: " + index,
@@ -29,7 +26,7 @@ export abstract class LayoutManager {
     //Return the dimension of entire content inside the list
     public abstract getContentDimension(): Dimension;
 
-    //Return all computer layouts as an array
+    //Return all computed layouts as an array, frequently called, you are expected to return a cached array. Don't compute here.
     public abstract getLayouts(): Layout[];
 
     //RLV will call this method in case of mismatch with actual rendered dimensions in case of non deterministic rendering
@@ -37,7 +34,7 @@ export abstract class LayoutManager {
     //No need to relayout which RLV will trigger. You should only relayout when relayoutFromIndex is called.
     public abstract overrideLayout(index: number, dim: Dimension): void;
 
-    //Recompute layouts from given index
+    //Recompute layouts from given index, compute heavy stuff should be here
     public abstract relayoutFromIndex(startIndex: number, itemCount: number): void;
 }
 
@@ -47,14 +44,16 @@ export class WrapGridLayoutManager extends LayoutManager {
     private _totalHeight: number;
     private _totalWidth: number;
     private _isHorizontal: boolean;
+    private _layouts: Layout[];
 
-    constructor(layoutProvider: LayoutProvider, dimensions: Dimension, isHorizontal: boolean = false, cachedLayouts?: Layout[]) {
-        super(cachedLayouts);
+    constructor(layoutProvider: LayoutProvider, renderWindowSize: Dimension, isHorizontal: boolean = false, cachedLayouts?: Layout[]) {
+        super();
         this._layoutProvider = layoutProvider;
-        this._window = dimensions;
+        this._window = renderWindowSize;
         this._totalHeight = 0;
         this._totalWidth = 0;
         this._isHorizontal = !!isHorizontal;
+        this._layouts = cachedLayouts ? cachedLayouts : [];
     }
 
     public getContentDimension(): Dimension {

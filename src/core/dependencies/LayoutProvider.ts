@@ -15,7 +15,8 @@ import { Layout, WrapGridLayoutManager, LayoutManager } from "../layoutmanager/L
  */
 
 export abstract class BaseLayoutProvider {
-    //Return your layout manager
+    //Return your layout manager, you get all required dependencies here. Also, make sure to use cachedLayouts. RLV might cache layouts and give back to
+    //in cases of conxtext preservation. Make sure you use them if provided.
     public abstract newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager;
 
     //Given an index a provider is expected to return a view type which used to recycling choices
