@@ -18,7 +18,7 @@
  * TODO: Observe size changes on web to optimize for reflowability
  * TODO: Solve //TSI
  */
-import debounce from "lodash-es/debounce";
+import debounce = require("lodash.debounce");
 import * as PropTypes from "prop-types";
 import * as React from "react";
 import { ObjectUtil, Default } from "ts-object-utils";
