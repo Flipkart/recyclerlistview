@@ -193,6 +193,9 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         }
         this._processOnEndReached();
         this._checkAndChangeLayouts(this.props);
+        if (this.props.dataProvider.getSize() === 0) {
+            console.warn(Messages.WARN_NO_DATA); //tslint:disable-line
+        }
     }
 
     public componentWillUnmount(): void {
