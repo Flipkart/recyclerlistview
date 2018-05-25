@@ -10,8 +10,8 @@ export class DefaultNativeItemAnimator implements BaseItemAnimator {
             UIManager.setLayoutAnimationEnabledExperimental(true);
         }
     }
-    public animateWillMount(atX: number, atY: number, itemIndex: number): void {
-        //no need
+    public animateWillMount(atX: number, atY: number, itemIndex: number): object | undefined {
+        return undefined;
     }
     public animateDidMount(atX: number, atY: number, itemRef: object, itemIndex: number): void {
         //no need

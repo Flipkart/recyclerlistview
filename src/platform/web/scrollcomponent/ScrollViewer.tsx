@@ -1,6 +1,6 @@
 import * as React from "react";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "../../../core/scrollcomponent/BaseScrollView";
-import debounce from "lodash-es/debounce";
+import debounce = require("lodash.debounce");
 import { ScrollEventNormalizer } from "./ScrollEventNormalizer";
 const scrollEndEventSimulator = debounce((executable: () => void) => {
     executable();

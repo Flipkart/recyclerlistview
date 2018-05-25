@@ -2,8 +2,9 @@ export default interface ItemAnimator {
     //Web uses tranforms for moving items while react native uses left, top
     //IMPORTANT: In case of native itemRef will be a View and in web/RNW div element so, override accordingly.
 
-    //Just an external trigger, no itemRef available
-    animateWillMount: (atX: number, atY: number, itemIndex: number) => void;
+    //Just an external trigger, no itemRef available, you can return initial style overrides here i.e, let's say if you want to
+    //set initial opacity to 0 you can do: return { opacity: 0 };
+    animateWillMount: (atX: number, atY: number, itemIndex: number) => object | undefined;
 
     //Called after mount, item may already be visible when this is called. Handle accordingly
     animateDidMount: (atX: number, atY: number, itemRef: object, itemIndex: number) => void;
@@ -23,8 +24,8 @@ export default interface ItemAnimator {
 
 export class BaseItemAnimator implements ItemAnimator {
     public static USE_NATIVE_DRIVER = true;
-    public animateWillMount(atX: number, atY: number, itemIndex: number): void {
-        //no need
+    public animateWillMount(atX: number, atY: number, itemIndex: number): object | undefined {
+        return undefined;
     }
     public animateDidMount(atX: number, atY: number, itemRef: object, itemIndex: number): void {
         //no need

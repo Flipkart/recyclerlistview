@@ -18,16 +18,16 @@
  * TODO: Observe size changes on web to optimize for reflowability
  * TODO: Solve //TSI
  */
-import debounce from "lodash-es/debounce";
+import debounce = require("lodash.debounce");
 import * as PropTypes from "prop-types";
 import * as React from "react";
 import { ObjectUtil, Default } from "ts-object-utils";
 import ContextProvider from "./dependencies/ContextProvider";
 import DataProvider from "./dependencies/DataProvider";
-import LayoutProvider, { Dimension } from "./dependencies/LayoutProvider";
+import { Dimension, BaseLayoutProvider } from "./dependencies/LayoutProvider";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
-import LayoutManager, { Point, Layout } from "./layoutmanager/LayoutManager";
+import { Point, Layout, LayoutManager } from "./layoutmanager/LayoutManager";
 import { Constants } from "./constants/Constants";
 import { Messages } from "./constants/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
@@ -79,7 +79,7 @@ export interface OnRecreateParams {
     lastOffset?: number;
 }
 export interface RecyclerListViewProps {
-    layoutProvider: LayoutProvider;
+    layoutProvider: BaseLayoutProvider;
     dataProvider: DataProvider;
     rowRenderer: (type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null;
     contextProvider?: ContextProvider;
@@ -193,6 +193,9 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         }
         this._processOnEndReached();
         this._checkAndChangeLayouts(this.props);
+        if (this.props.dataProvider.getSize() === 0) {
+            console.warn(Messages.WARN_NO_DATA); //tslint:disable-line
+        }
     }
 
     public componentWillUnmount(): void {
@@ -206,7 +209,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                         if (layoutManager) {
                             const layoutsToCache = layoutManager.getLayouts();
                             this.props.contextProvider.save(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX,
-                                                            JSON.stringify({ layoutArray: layoutsToCache }));
+                                JSON.stringify({ layoutArray: layoutsToCache }));
                         }
                     }
                 }
@@ -222,7 +225,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                 if (typeof offset === "number" && offset > 0) {
                     this._initialOffset = offset;
                     if (this.props.onRecreate) {
-                        this.props.onRecreate({lastOffset: this._initialOffset});
+                        this.props.onRecreate({ lastOffset: this._initialOffset });
                     }
                     this.props.contextProvider.remove(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX);
                 }
@@ -273,6 +276,11 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
     public scrollToOffset(x: number, y: number, animate: boolean = false): void {
         if (this._scrollComponent) {
+            if (this.props.isHorizontal) {
+                y = 0;
+            } else {
+                x = 0;
+            }
             this._scrollComponent.scrollTo(x, y, animate);
         }
     }
@@ -331,19 +339,19 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         }
         if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
-            this._virtualRenderer.setLayoutManager(new LayoutManager(newProps.layoutProvider, this._layout, newProps.isHorizontal));
+            this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout, newProps.isHorizontal));
             this._virtualRenderer.refreshWithAnchor();
             this._refreshViewability();
         } else if (this.props.dataProvider !== newProps.dataProvider) {
             const layoutManager = this._virtualRenderer.getLayoutManager();
             if (layoutManager) {
-                layoutManager.reLayoutFromIndex(newProps.dataProvider.getFirstIndexToProcessInternal(), newProps.dataProvider.getSize());
+                layoutManager.relayoutFromIndex(newProps.dataProvider.getFirstIndexToProcessInternal(), newProps.dataProvider.getSize());
                 this._virtualRenderer.refresh();
             }
         } else if (this._relayoutReqIndex >= 0) {
             const layoutManager = this._virtualRenderer.getLayoutManager();
             if (layoutManager) {
-                layoutManager.reLayoutFromIndex(this._relayoutReqIndex, newProps.dataProvider.getSize());
+                layoutManager.relayoutFromIndex(this._relayoutReqIndex, newProps.dataProvider.getSize());
                 this._relayoutReqIndex = -1;
                 this._refreshViewability();
             }
@@ -406,11 +414,14 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             renderAheadOffset: this.props.renderAheadOffset,
         };
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
-        this._virtualRenderer.setLayoutManager(new LayoutManager(this.props.layoutProvider, this._layout, this.props.isHorizontal, this._cachedLayouts));
+        const layoutManager = this.props.layoutProvider.newLayoutManager(this._layout, this.props.isHorizontal, this._cachedLayouts);
+        this._virtualRenderer.setLayoutManager(layoutManager);
         this._virtualRenderer.setLayoutProvider(this.props.layoutProvider);
         this._virtualRenderer.init();
         const offset = this._virtualRenderer.getInitialOffset();
-        if (offset.y > 0 || offset.x > 0) {
+        const contentDimension = layoutManager.getContentDimension();
+        if ((offset.y > 0 && contentDimension.height > this._layout.height) ||
+            (offset.x > 0 && contentDimension.width > this._layout.width)) {
             this._pendingScrollToOffset = offset;
             this.setState({});
         } else {
@@ -442,6 +453,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             const data = this.props.dataProvider.getDataForIndex(dataIndex);
             const type = this.props.layoutProvider.getLayoutTypeForIndex(dataIndex);
             const key = this._virtualRenderer.syncAndGetKey(dataIndex);
+            const styleOverrides = (this._virtualRenderer.getLayoutManager() as LayoutManager).getStyleOverridesForIndex(dataIndex);
             this._assertType(type);
             if (!this.props.forceNonDeterministicRendering) {
                 this._checkExpectedDimensionDiscrepancy(itemRect, type, dataIndex);
@@ -453,6 +465,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                     y={itemRect.y}
                     layoutType={type}
                     index={dataIndex}
+                    styleOverrides={styleOverrides}
                     layoutProvider={this.props.layoutProvider}
                     forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
                     isHorizontal={this.props.isHorizontal}
@@ -479,14 +492,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     }
 
     private _checkExpectedDimensionDiscrepancy(itemRect: Dimension, type: string | number, index: number): void {
-        //Cannot be null here
-        const layoutManager = this._virtualRenderer.getLayoutManager() as LayoutManager;
-        layoutManager.setMaxBounds(this._tempDim);
-        this.props.layoutProvider.setLayoutForType(type, this._tempDim, index);
-
-        //TODO:Talha calling private method, find an alternative and remove this
-        layoutManager.setMaxBounds(this._tempDim);
-        if (itemRect.height !== this._tempDim.height || itemRect.width !== this._tempDim.width) {
+        if (this.props.layoutProvider.checkDimensionDiscrepancy(itemRect, type, index)) {
             if (this._relayoutReqIndex === -1) {
                 this._relayoutReqIndex = index;
             } else {
@@ -534,7 +540,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 RecyclerListView.propTypes = {
 
     //Refer the sample
-    layoutProvider: PropTypes.instanceOf(LayoutProvider).isRequired,
+    layoutProvider: PropTypes.instanceOf(BaseLayoutProvider).isRequired,
 
     //Refer the sample
     dataProvider: PropTypes.instanceOf(DataProvider).isRequired,
