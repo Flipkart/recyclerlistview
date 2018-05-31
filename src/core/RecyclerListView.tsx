@@ -98,6 +98,7 @@ export interface RecyclerListViewProps {
     canChangeSize?: boolean;
     distanceFromWindow?: number;
     useWindowScroll?: boolean;
+    maxWidth?: number;
     disableRecycling?: boolean;
     forceNonDeterministicRendering?: boolean;
     extendedState?: object;
@@ -596,6 +597,9 @@ RecyclerListView.propTypes = {
 
     //Web only. Specify how far away the first list item is from window top. This is an adjustment for better optimization.
     distanceFromWindow: PropTypes.number,
+
+    //Specify  the max maxWidth of the list.
+    maxWidth: PropTypes.number,
 
     //Web only. Layout elements in window instead of a scrollable div.
     useWindowScroll: PropTypes.bool,

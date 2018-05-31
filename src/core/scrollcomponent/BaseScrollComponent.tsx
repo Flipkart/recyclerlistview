@@ -14,6 +14,7 @@ export interface ScrollComponentProps {
     scrollThrottle?: number;
     distanceFromWindow?: number;
     useWindowScroll?: boolean;
+    maxWidth?: number;
 }
 export default abstract class BaseScrollComponent extends React.Component<ScrollComponentProps, {}> {
     public abstract scrollTo(x: number, y: number, animate: boolean): void;

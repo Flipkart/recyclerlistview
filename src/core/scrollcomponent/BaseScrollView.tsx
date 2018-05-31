@@ -10,6 +10,7 @@ export interface ScrollViewDefaultProps {
     style?: CSSProperties | null;
     distanceFromWindow: number;
     useWindowScroll: boolean;
+    maxWidth?: number;
 }
 export interface ScrollEvent {
     nativeEvent: {
