@@ -36,18 +36,12 @@ export default class ScrollViewer extends BaseScrollView {
 
     public componentDidMount(): void {
         if (this.props.onSizeChanged) {
-            if (!this.props.useWindowScroll && this._mainDivRef) {
-                this._startListeningToDivEvents();
-                this.props.onSizeChanged({ height: this._mainDivRef.clientHeight, width: this._mainDivRef.clientWidth });
-            }
-        }
-    }
-
-    public componentWillMount(): void {
-        if (this.props.onSizeChanged) {
             if (this.props.useWindowScroll) {
                 this._startListeningToWindowEvents();
                 this.props.onSizeChanged({ height: window.innerHeight, width: window.innerWidth });
+            } else if (this._mainDivRef) {
+                this._startListeningToDivEvents();
+                this.props.onSizeChanged({ height: this._mainDivRef.clientHeight, width: this._mainDivRef.clientWidth });
             }
         }
     }
