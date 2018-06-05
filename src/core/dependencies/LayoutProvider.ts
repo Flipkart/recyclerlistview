@@ -21,6 +21,8 @@ export abstract class BaseLayoutProvider {
 
     //Given an index a provider is expected to return a view type which used to recycling choices
     public abstract getLayoutTypeForIndex(index: number): string | number;
+    public abstract setLayoutForType(type: string | number, dim: Dimension, index: number): void;
+
 
     //Check if given dimension contradicts with your layout provider, return true for mismatches. Returning true will
     //cause a relayout to fix the discrepancy
@@ -49,13 +51,17 @@ export class LayoutProvider extends BaseLayoutProvider {
 
     //Provide a type for index, something which identifies the template of view about to load
     public getLayoutTypeForIndex(index: number): string | number {
-        return this._getLayoutTypeForIndex(index);
+        return this.getLayoutTypeForIndex(index);
     }
 
     //Given a type and dimension set the dimension values on given dimension object
     //You can also get index here if you add an extra argument but we don't recommend using it.
     public setComputedLayout(type: string | number, dimension: Dimension, index: number): void {
-        return this._setLayoutForType(type, dimension, index);
+        return this.setLayoutForType(type, dimension, index);
+    }
+
+    public setLayoutForType(type: string | number, dim: Dimension, index: number): void {
+        return this.setLayoutForType(type, dim, index);
     }
 
     public checkDimensionDiscrepancy(dimension: Dimension, type: string | number, index: number): boolean {
