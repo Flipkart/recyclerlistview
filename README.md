@@ -73,7 +73,7 @@ not be as fast.
 [![Watch Video](https://img.youtube.com/vi/Tnv4HMmPgMc/0.jpg)](https://www.youtube.com/watch?v=Tnv4HMmPgMc)
 
 ## Props
-For full feature set have a look at prop definitions of [RecyclerListView](https://github.com/Flipkart/recyclerlistview/blob/afd7d80c13bad68ddbb60849ccda47ccef3ecda2/src/core/RecyclerListView.tsx#L488-L566)
+For full feature set have a look at prop definitions of [RecyclerListView](https://github.com/Flipkart/recyclerlistview/blob/21049cc89ad606ec9fe8ea045dc73732ff29eac9/src/core/RecyclerListView.tsx#L540-L634)
 (bottom of the file). All `ScrollView` features like `RefreshControl` also work out of the box.
 
 ## Guides
