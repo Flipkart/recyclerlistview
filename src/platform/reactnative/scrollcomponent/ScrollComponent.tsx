@@ -26,7 +26,6 @@ export default class ScrollComponent extends BaseScrollComponent {
     private _height: number;
     private _width: number;
     private _isSizeChangedCalledOnce: boolean;
-    private _dummyOnLayout: (event: LayoutChangeEvent) => void = TSCast.cast(null);
     private _scrollViewRef: ScrollView | null = null;
 
     constructor(args: ScrollComponentProps) {
@@ -42,7 +41,7 @@ export default class ScrollComponent extends BaseScrollComponent {
 
     public scrollTo(x: number, y: number, isAnimated: boolean): void {
         if (this._scrollViewRef) {
-            this._scrollViewRef.scrollTo({x, y, animated: isAnimated});
+            this._scrollViewRef.scrollTo({ x, y, animated: isAnimated });
         }
     }
 
@@ -63,13 +62,13 @@ export default class ScrollComponent extends BaseScrollComponent {
         // } = this.props;
         return (
             <Scroller ref={(scrollView: any) => this._scrollViewRef = scrollView as (ScrollView | null)}
-                      removeClippedSubviews={false}
-                      scrollEventThrottle={this.props.scrollThrottle}
-                      {...this.props}
-                      horizontal={this.props.isHorizontal}
-                      onScroll={this._onScroll}
-                      onLayout={(!this._isSizeChangedCalledOnce || this.props.canChangeSize) ? this._onLayout : this._dummyOnLayout}>
-                <View style={{flexDirection: this.props.isHorizontal ? "row" : "column"}}>
+                removeClippedSubviews={false}
+                scrollEventThrottle={this.props.scrollThrottle}
+                {...this.props}
+                horizontal={this.props.isHorizontal}
+                onScroll={this._onScroll}
+                onLayout={(!this._isSizeChangedCalledOnce || this.props.canChangeSize) ? this._onLayout : this.props.onLayout}>
+                <View style={{ flexDirection: this.props.isHorizontal ? "row" : "column" }}>
                     <View style={{
                         height: this.props.contentHeight,
                         width: this.props.contentWidth,
@@ -96,6 +95,9 @@ export default class ScrollComponent extends BaseScrollComponent {
                 this._isSizeChangedCalledOnce = true;
                 this.props.onSizeChanged(event.nativeEvent.layout);
             }
+        }
+        if (this.props.onLayout) {
+            this.props.onLayout(event);
         }
     }
 }
