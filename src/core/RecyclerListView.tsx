@@ -40,9 +40,16 @@ import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
-import { Platform, ScrollViewProperties, Insets } from "react-native";
+import { Platform } from "react-native";
 const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
+
+export interface EdgeInsets {
+    top: number;
+    left: number;
+    right: number;
+    bottom: number;
+}
 
 /***
  * To use on web, start importing from recyclerlistview/web. To make it even easier specify an alias in you builder of choice.
@@ -107,7 +114,13 @@ export interface RecyclerListViewProps {
 
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
-    scrollViewProps?: ScrollViewProperties;
+    scrollViewProps?: object;
+
+    /**
+     * Use this prop to provide padding around list content instead of
+     * using padding/margin in contentContainerStyle prop of scroll view.
+     */
+    contentInsets?: EdgeInsets;
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
@@ -148,7 +161,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
     private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
 
-    private _derivedContentInsets: Insets = { top: 0, left: 0, right: 0, bottom: 0 };
+    private _contentInsets: EdgeInsets = { top: 0, left: 0, bottom: 0, right: 0 };
 
     constructor(props: RecyclerListViewProps) {
         super(props);
@@ -171,6 +184,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     }
 
     public componentWillReceiveProps(newProps: RecyclerListViewProps): void {
+        this._contentInsets = this.props.contentInsets ? this.props.contentInsets : { top: 0, left: 0, right: 0, bottom: 0 };
         this._assertDependencyPresence(newProps);
         this._checkAndChangeLayouts(newProps);
         if (!this.props.onVisibleIndexesChanged) {
@@ -316,31 +330,19 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         //     rowRenderer,
         //     ...props,
         // } = this.props;
-
-        if (!this._derivedContentInsets && this.props.scrollViewProps) {
-            this._derivedContentInsets = this.props.scrollViewProps.contentInset ? this.props.scrollViewProps.contentInset : { top: 0, left: 0, right: 0, bottom: 0 };
-
-            if (this.props.scrollViewProps.contentContainerStyle) {
-                const padding = this.props.scrollViewProps.contentContainerStyle.padding;
-                const paddingTop = this.props.scrollViewProps.contentContainerStyle.paddingTop;
-                const paddingBottom = this.props.scrollViewProps.contentContainerStyle.paddingBottom;
-                const paddingLeft = this.props.scrollViewProps.contentContainerStyle.paddingLeft;
-                const paddingRight = this.props.scrollViewProps.contentContainerStyle.paddingRight;
-                const paddingVertical = this.props.scrollViewProps.contentContainerStyle.paddingVertical;
-                const paddingHorizontal = this.props.scrollViewProps.contentContainerStyle.paddingHorizontal;
-
-                this._derivedContentInsets.top += padding ? padding : (paddingVertical ? paddingVertical : (paddingTop ? paddingTop : 0));
-                this._derivedContentInsets.bottom += padding ? padding : (paddingVertical ? paddingVertical : (paddingBottom ? paddingBottom : 0));
-                this._derivedContentInsets.left += padding ? padding : (paddingHorizontal ? paddingHorizontal : (paddingLeft ? paddingLeft : 0));
-                this._derivedContentInsets.right += padding ? padding : (paddingHorizontal ? paddingHorizontal : (paddingRight ? paddingRight : 0));
-            }
-        }
-
         return (
             <ScrollComponent
                 ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
                 {...this.props}
                 {...this.props.scrollViewProps}
+                {...{
+                    contentContainerStyle: {
+                        paddingTop: this._contentInsets.top,
+                        paddingLeft: this._contentInsets.top,
+                        paddingBottom: this._contentInsets.top,
+                        paddingRight: this._contentInsets.top,
+                    },
+                }}
                 onScroll={this._onScroll}
                 onSizeChanged={this._onSizeChanged}
                 contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
@@ -534,10 +536,11 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     }
 
     private _onScroll(offsetX: number, offsetY: number, rawEvent: ScrollEvent): void {
-        const forwardOffsetX = offsetX - this._derivedContentInsets.left;
-        const forwardOffsetY = offsetX - this._derivedContentInsets.top;
-        
+        const forwardOffsetX = offsetX - this._contentInsets.left;
+        const forwardOffsetY = offsetX - this._contentInsets.top;
+
         this._virtualRenderer.updateOffset(forwardOffsetX, forwardOffsetY);
+
         if (this.props.onScroll) {
             this.props.onScroll(rawEvent, offsetX, offsetY);
         }
