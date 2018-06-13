@@ -1,4 +1,4 @@
-import { Layout, WrapGridLayoutManager, LayoutManager } from "../layoutmanager/LayoutManager";
+import { Layout, GridLayoutManager } from "../layoutmanager/LayoutManager";
 
 /**
  * Created by talha.naqvi on 05/04/17.
@@ -17,7 +17,7 @@ import { Layout, WrapGridLayoutManager, LayoutManager } from "../layoutmanager/L
 export abstract class BaseLayoutProvider {
     //Return your layout manager, you get all required dependencies here. Also, make sure to use cachedLayouts. RLV might cache layouts and give back to
     //in cases of conxtext preservation. Make sure you use them if provided.
-    public abstract newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager;
+    public abstract newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[], columnSpan?: number): GridLayoutManager;
 
     //Given an index a provider is expected to return a view type which used to recycling choices
     public abstract getLayoutTypeForIndex(index: number): string | number;
@@ -27,13 +27,12 @@ export abstract class BaseLayoutProvider {
     public abstract checkDimensionDiscrepancy(dimension: Dimension, type: string | number, index: number): boolean;
 }
 
-export class LayoutProvider extends BaseLayoutProvider {
+export class GridLayoutProvider extends BaseLayoutProvider {
 
     private _getLayoutTypeForIndex: (index: number) => string | number;
     private _setLayoutForType: (type: string | number, dim: Dimension, index: number) => void;
     private _tempDim: Dimension;
-    private _lastLayoutManager: WrapGridLayoutManager | undefined;
-
+    private _lastLayoutManager: GridLayoutManager | undefined;
     constructor(getLayoutTypeForIndex: (index: number) => string | number,
                 setLayoutForType: (type: string | number, dim: Dimension, index: number) => void) {
         super();
@@ -42,8 +41,9 @@ export class LayoutProvider extends BaseLayoutProvider {
         this._tempDim = { height: 0, width: 0 };
     }
 
-    public newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager {
-        this._lastLayoutManager = new WrapGridLayoutManager(this, renderWindowSize, isHorizontal, cachedLayouts);
+    // tslint:disable-next-line:max-line-length
+    public newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean | undefined, cachedLayouts?: Layout[] | undefined, columnSpan?: number): GridLayoutManager {
+        this._lastLayoutManager = new GridLayoutManager(this, renderWindowSize, isHorizontal, cachedLayouts, columnSpan);
         return this._lastLayoutManager;
     }
 
@@ -57,7 +57,6 @@ export class LayoutProvider extends BaseLayoutProvider {
     public setComputedLayout(type: string | number, dimension: Dimension, index: number): void {
         return this._setLayoutForType(type, dimension, index);
     }
-
     public checkDimensionDiscrepancy(dimension: Dimension, type: string | number, index: number): boolean {
         const dimension1 = dimension;
         this.setComputedLayout(type, this._tempDim, index);

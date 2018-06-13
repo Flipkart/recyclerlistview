@@ -2,7 +2,7 @@
  * Computes the positions and dimensions of items that will be rendered by the list. The output from this is utilized by viewability tracker to compute the
  * lists of visible/hidden item.
  */
-import { Dimension, LayoutProvider } from "../dependencies/LayoutProvider";
+import { Dimension, GridLayoutProvider } from "../dependencies/LayoutProvider";
 import CustomError from "../exceptions/CustomError";
 
 export abstract class LayoutManager {
@@ -37,21 +37,22 @@ export abstract class LayoutManager {
     //Recompute layouts from given index, compute heavy stuff should be here
     public abstract relayoutFromIndex(startIndex: number, itemCount: number): void;
 }
-
-export class WrapGridLayoutManager extends LayoutManager {
-    private _layoutProvider: LayoutProvider;
+export class GridLayoutManager extends LayoutManager {
+    private _layoutProvider: GridLayoutProvider;
     private _window: Dimension;
     private _totalHeight: number;
     private _totalWidth: number;
     private _isHorizontal: boolean;
     private _layouts: Layout[];
+    private _columnSpan: number;
 
-    constructor(layoutProvider: LayoutProvider, renderWindowSize: Dimension, isHorizontal: boolean = false, cachedLayouts?: Layout[]) {
+    constructor(layoutProvider: GridLayoutProvider, renderWindowSize: Dimension, isHorizontal: boolean = false, cachedLayouts?: Layout[], columnSpan?: number) {
         super();
         this._layoutProvider = layoutProvider;
         this._window = renderWindowSize;
         this._totalHeight = 0;
         this._totalWidth = 0;
+        this._columnSpan = 0;
         this._isHorizontal = !!isHorizontal;
         this._layouts = cachedLayouts ? cachedLayouts : [];
     }
@@ -88,8 +89,21 @@ export class WrapGridLayoutManager extends LayoutManager {
         if (this._isHorizontal) {
             itemDim.height = Math.min(this._window.height, itemDim.height);
         } else {
-            itemDim.width = Math.min(this._window.width, itemDim.width);
+            if (this._columnSpan > 0) {
+                itemDim.width = Math.min(this._window.width / this._columnSpan, itemDim.width);
+            } else {
+                itemDim.width = Math.min(this._window.width, itemDim.width);
+            }
         }
+    }
+
+    public getStyleOverridesForIndex(index: number): object | undefined {
+        if (this._columnSpan > 0) {
+            return {
+                width: this._totalWidth / this._columnSpan,
+            };
+        }
+        return undefined;
     }
 
     //TODO:Talha laziliy calculate in future revisions

@@ -81,6 +81,7 @@ export interface OnRecreateParams {
 export interface RecyclerListViewProps {
     layoutProvider: BaseLayoutProvider;
     dataProvider: DataProvider;
+    columnSpan?: number;
     rowRenderer: (type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null;
     contextProvider?: ContextProvider;
     renderAheadOffset?: number;
@@ -414,7 +415,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             renderAheadOffset: this.props.renderAheadOffset,
         };
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
-        const layoutManager = this.props.layoutProvider.newLayoutManager(this._layout, this.props.isHorizontal, this._cachedLayouts);
+        const layoutManager = this.props.layoutProvider.newLayoutManager(this._layout, this.props.isHorizontal, this._cachedLayouts, this.props.columnSpan);
         this._virtualRenderer.setLayoutManager(layoutManager);
         this._virtualRenderer.setLayoutProvider(this.props.layoutProvider);
         this._virtualRenderer.init();
@@ -541,6 +542,9 @@ RecyclerListView.propTypes = {
 
     //Refer the sample
     layoutProvider: PropTypes.instanceOf(BaseLayoutProvider).isRequired,
+
+    //Column span in case of Grid Layout Manager
+    columnSpan: PropTypes.number,
 
     //Refer the sample
     dataProvider: PropTypes.instanceOf(DataProvider).isRequired,
