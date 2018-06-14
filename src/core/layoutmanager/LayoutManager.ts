@@ -214,7 +214,7 @@ export class GridLayoutManager extends LayoutManager {
         this._layoutProvider = layoutProvider;
         this._window = renderWindowSize;
         this._totalHeight = 0;
-        this._columnSpan = 0;
+        this._columnSpan = columnSpan ? columnSpan : 0;
         this._totalWidth = 0;
         this._layouts = cachedLayouts ? cachedLayouts : [];
     }
