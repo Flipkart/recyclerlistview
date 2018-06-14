@@ -71,7 +71,6 @@ export class LayoutProvider extends BaseLayoutProvider {
 }
 
 export class GridLayoutProvider extends LayoutProvider {
-    private _layoutManager: GridLayoutManager | undefined;
     private _setHeightForIndex: (height: number, index: number) => number;
     private _getColumnSpanForIndex: (index: number) => number;
     constructor(getLayoutTypeForIndex: (index: number) => string | number,
@@ -90,8 +89,7 @@ export class GridLayoutProvider extends LayoutProvider {
                 type: "NotSupportedException",
             });
         } else {
-            this._layoutManager = new GridLayoutManager(this, renderWindowSize, cachedLayouts);
-            return this._layoutManager;
+            return new GridLayoutManager(this, renderWindowSize, cachedLayouts);
         }
     }
 
