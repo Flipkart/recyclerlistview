@@ -39,10 +39,10 @@ export abstract class LayoutManager {
 }
 
 export class WrapGridLayoutManager extends LayoutManager {
-    public _totalWidth: number;
     private _layoutProvider: LayoutProvider;
     private _window: Dimension;
     private _totalHeight: number;
+    private _totalWidth: number;
     private _isHorizontal: boolean;
     private _layouts: Layout[];
 
