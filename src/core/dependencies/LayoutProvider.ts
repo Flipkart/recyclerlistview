@@ -29,9 +29,8 @@ export abstract class BaseLayoutProvider {
 }
 
 export class LayoutProvider extends BaseLayoutProvider {
-
+    public _setLayoutForType: (type: string | number, dim: Dimension, index: number) => void;
     private _getLayoutTypeForIndex: (index: number) => string | number;
-    private _setLayoutForType: (type: string | number, dim: Dimension, index: number) => void;
     private _tempDim: Dimension;
     private _lastLayoutManager: WrapGridLayoutManager | undefined;
 
@@ -74,12 +73,15 @@ export class GridLayoutProvider extends LayoutProvider {
     private _setHeightForIndex: (height: number, index: number) => number;
     private _getColumnSpanForIndex: (index: number) => number;
     constructor(getLayoutTypeForIndex: (index: number) => string | number,
-                setLayoutForType: (type: string | number, dim: Dimension, index: number) => void,
                 setHeightForIndex: (height: number, index: number) => number,
                 getColumnSpanForIndex: (index: number) => number) {
-        super(getLayoutTypeForIndex, setLayoutForType);
+        super(getLayoutTypeForIndex, () => this.setLayoutForType);
         this._setHeightForIndex = setHeightForIndex;
         this._getColumnSpanForIndex =  getColumnSpanForIndex;
+    }
+
+    public setLayoutForType(type: string | number, dim: Dimension, index: number): void {
+        return this._setLayoutForType(type, dim, index);
     }
 
     public newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager {
