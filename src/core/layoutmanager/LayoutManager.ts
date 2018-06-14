@@ -202,7 +202,7 @@ export class WrapGridLayoutManager extends LayoutManager {
 }
 
 export class GridLayoutManager extends LayoutManager {
-    public _totalWidth: number;
+    private _totalWidth: number;
     private _layoutProvider: GridLayoutProvider;
     private _window: Dimension;
     private _totalHeight: number;
