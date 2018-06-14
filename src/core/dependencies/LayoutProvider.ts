@@ -85,8 +85,8 @@ export class GridLayoutProvider extends BaseLayoutProvider {
         this._tempDim = { height: 0, width: 0 };
     }
 
-    // tslint:disable-next-line:max-line-length
-    public newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean | undefined, cachedLayouts?: Layout[] | undefined, columnSpan?: number): GridLayoutManager {
+    public newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean | undefined,
+                            cachedLayouts?: Layout[] | undefined, columnSpan?: number): GridLayoutManager {
         this._lastLayoutManager = new GridLayoutManager(this, renderWindowSize, cachedLayouts, columnSpan);
         return this._lastLayoutManager;
     }
