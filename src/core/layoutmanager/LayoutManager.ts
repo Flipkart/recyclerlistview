@@ -2,7 +2,7 @@
  * Computes the positions and dimensions of items that will be rendered by the list. The output from this is utilized by viewability tracker to compute the
  * lists of visible/hidden item.
  */
-import { Dimension, LayoutProvider } from "../dependencies/LayoutProvider";
+import { Dimension, LayoutProvider, GridLayoutProvider } from "../dependencies/LayoutProvider";
 import CustomError from "../exceptions/CustomError";
 
 export abstract class LayoutManager {
@@ -39,10 +39,10 @@ export abstract class LayoutManager {
 }
 
 export class WrapGridLayoutManager extends LayoutManager {
+    public _totalWidth: number;
     private _layoutProvider: LayoutProvider;
     private _window: Dimension;
     private _totalHeight: number;
-    private _totalWidth: number;
     private _isHorizontal: boolean;
     private _layouts: Layout[];
 
@@ -198,6 +198,145 @@ export class WrapGridLayoutManager extends LayoutManager {
 
     private _checkBounds(itemX: number, itemY: number, itemDim: Dimension, isHorizontal: boolean): boolean {
         return isHorizontal ? (itemY + itemDim.height <= this._window.height) : (itemX + itemDim.width <= this._window.width);
+    }
+}
+
+export class GridLayoutManager extends LayoutManager {
+    public _totalWidth: number;
+    private _layoutProvider: GridLayoutProvider;
+    private _window: Dimension;
+    private _totalHeight: number;
+    private _layouts: Layout[];
+    private _columnSpan: number;
+
+    constructor(layoutProvider: GridLayoutProvider, renderWindowSize: Dimension, cachedLayouts?: Layout[], columnSpan?: number) {
+        super();
+        this._layoutProvider = layoutProvider;
+        this._window = renderWindowSize;
+        this._totalHeight = 0;
+        this._columnSpan = 0;
+        this._totalWidth = 0;
+        this._layouts = cachedLayouts ? cachedLayouts : [];
+    }
+
+    public getContentDimension(): Dimension {
+        return { height: this._totalHeight, width: this._totalWidth };
+    }
+
+    public getLayouts(): Layout[] {
+        return this._layouts;
+    }
+
+    public getOffsetForIndex(index: number): Point {
+        if (this._layouts.length > index) {
+            return { x: this._layouts[index].x, y: this._layouts[index].y };
+        } else {
+            throw new CustomError({
+                message: "No layout available for index: " + index,
+                type: "LayoutUnavailableException",
+            });
+        }
+    }
+
+    public overrideLayout(index: number, dim: Dimension): void {
+        const layout = this._layouts[index];
+        if (layout) {
+            layout.isOverridden = true;
+            layout.width = dim.width;
+            layout.height = dim.height;
+        }
+    }
+
+    public setMaxBounds(itemDim: Dimension): void {
+        if (this._columnSpan && this._columnSpan > 0) {
+            itemDim.width = Math.min(this._window.width, itemDim.width / this._columnSpan);
+        } else {
+            itemDim.width = Math.min(this._window.width, itemDim.width);
+        }
+    }
+
+    //TODO:Talha laziliy calculate in future revisions
+    public relayoutFromIndex(startIndex: number, itemCount: number): void {
+        startIndex = this._locateFirstNeighbourIndex(startIndex);
+        let startX = 0;
+        let startY = 0;
+        let maxBound = 0;
+
+        const startVal = this._layouts[startIndex];
+
+        if (startVal) {
+            startX = startVal.x;
+            startY = startVal.y;
+            this._pointDimensionsToRect(startVal);
+        }
+
+        const oldItemCount = this._layouts.length;
+
+        const itemDim = { height: 0, width: 0 };
+        let itemRect = null;
+
+        let oldLayout = null;
+
+        for (let i = startIndex; i < itemCount; i++) {
+            oldLayout = this._layouts[i];
+            if (oldLayout && oldLayout.isOverridden) {
+                itemDim.height = oldLayout.height;
+                itemDim.width = oldLayout.width;
+            } else {
+                this._layoutProvider.setComputedLayout(itemDim.height, i);
+            }
+            this.setMaxBounds(itemDim);
+            while (!this._checkBounds(startX, startY, itemDim)) {
+                startX = 0;
+                startY += maxBound;
+                this._totalHeight += maxBound;
+                maxBound = 0;
+            }
+
+            maxBound = Math.max(maxBound, itemDim.height);
+
+            //TODO: Talha creating array upfront will speed this up
+            if (i > oldItemCount - 1) {
+                this._layouts.push({ x: startX, y: startY, height: itemDim.height, width: itemDim.width });
+            } else {
+                itemRect = this._layouts[i];
+                itemRect.x = startX;
+                itemRect.y = startY;
+                itemRect.width = itemDim.width;
+                itemRect.height = itemDim.height;
+            }
+            startX += itemDim.width;
+        }
+        if (oldItemCount > itemCount) {
+            this._layouts.splice(itemCount, oldItemCount - itemCount);
+        }
+        this._setFinalDimensions(maxBound);
+    }
+
+    private _pointDimensionsToRect(itemRect: Layout): void {
+        this._totalHeight = itemRect.y;
+    }
+
+    private _setFinalDimensions(maxBound: number): void {
+        this._totalWidth = this._window.width;
+        this._totalHeight += maxBound;
+    }
+
+    private _locateFirstNeighbourIndex(startIndex: number): number {
+        if (startIndex === 0) {
+            return 0;
+        }
+        let i = startIndex - 1;
+        for (; i >= 0; i--) {
+            if (this._layouts[i].x === 0) {
+                break;
+            }
+        }
+        return i;
+    }
+
+    private _checkBounds(itemX: number, itemY: number, itemDim: Dimension): boolean {
+        return (itemX + itemDim.width <= this._window.width);
     }
 }
 

@@ -1,4 +1,4 @@
-import { Layout, WrapGridLayoutManager, LayoutManager } from "../layoutmanager/LayoutManager";
+import { Layout, WrapGridLayoutManager, LayoutManager, GridLayoutManager } from "../layoutmanager/LayoutManager";
 
 /**
  * Created by talha.naqvi on 05/04/17.
@@ -61,6 +61,50 @@ export class LayoutProvider extends BaseLayoutProvider {
     public checkDimensionDiscrepancy(dimension: Dimension, type: string | number, index: number): boolean {
         const dimension1 = dimension;
         this.setComputedLayout(type, this._tempDim, index);
+        const dimension2 = this._tempDim;
+        if (this._lastLayoutManager) {
+            this._lastLayoutManager.setMaxBounds(dimension2);
+        }
+        return dimension1.height !== dimension2.height || dimension1.width !== dimension2.width;
+    }
+}
+
+export class GridLayoutProvider extends BaseLayoutProvider {
+    private _getLayoutTypeForIndex: (index: number) => string | number;
+    private _setHeightForIndex: (height: number, index: number) => void;
+    private _getColumnSpanForIndex: (index: number) => number;
+    private _tempDim: Dimension;
+    private _lastLayoutManager: GridLayoutManager | undefined;
+    constructor(getLayoutTypeForIndex: (index: number) => string | number,
+                setHeightForIndex: (height: number, index: number) => void,
+                getColumnSpanForIndex: (index: number) => number) {
+        super();
+        this._getLayoutTypeForIndex = getLayoutTypeForIndex;
+        this._setHeightForIndex = setHeightForIndex;
+        this._getColumnSpanForIndex = getColumnSpanForIndex;
+        this._tempDim = { height: 0, width: 0 };
+    }
+
+    // tslint:disable-next-line:max-line-length
+    public newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean | undefined, cachedLayouts?: Layout[] | undefined, columnSpan?: number): GridLayoutManager {
+        this._lastLayoutManager = new GridLayoutManager(this, renderWindowSize, cachedLayouts, columnSpan);
+        return this._lastLayoutManager;
+    }
+    public getLayoutTypeForIndex(index: number): string | number {
+        return this._getLayoutTypeForIndex(index);
+    }
+
+    public getColumnSpanForIndex(index: number): number {
+        return this._getColumnSpanForIndex(index);
+    }
+
+    public setComputedLayout(height: number, index: number): void {
+        return this._setHeightForIndex(height, index);
+    }
+
+    public checkDimensionDiscrepancy(dimension: Dimension, type: string | number, index: number): boolean {
+        const dimension1 = dimension;
+        this.setComputedLayout(this._tempDim.height, index);
         const dimension2 = this._tempDim;
         if (this._lastLayoutManager) {
             this._lastLayoutManager.setMaxBounds(dimension2);
