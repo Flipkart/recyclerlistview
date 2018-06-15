@@ -601,10 +601,10 @@ RecyclerListView.propTypes = {
     //Specify if size can change, listview will automatically relayout items. For web, works only with useWindowScroll = true
     canChangeSize: PropTypes.bool,
 
-    //Specify how far away the first list item is from top of the RecyclerListView. e.g, if you have content padding on top or left.
+    //Specify how far away the first list item is from start of the RecyclerListView. e.g, if you have content padding on top or left.
     //This is an adjustment for optimization and to make sure onVisibileIndexesChanged callback is correct.
-    //Ideally try to avoid setting large padding values on RLV content. If you do please do correct handling in a ScrollView and
-    //pass it to RLV.
+    //Ideally try to avoid setting large padding values on RLV content. If you have to please correct offsets reported, handle
+    //them in a custom ScrollView and pass it as an externalScrollView.
     distanceFromWindow: PropTypes.number,
 
     //Web only. Layout elements in window instead of a scrollable div.
