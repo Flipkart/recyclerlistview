@@ -44,13 +44,6 @@ import { Platform } from "react-native";
 const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
 
-export interface EdgeInsets {
-    top: number;
-    left: number;
-    right: number;
-    bottom: number;
-}
-
 /***
  * To use on web, start importing from recyclerlistview/web. To make it even easier specify an alias in you builder of choice.
  */
@@ -115,12 +108,6 @@ export interface RecyclerListViewProps {
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
-
-    /**
-     * Use this prop to provide padding around list content instead of
-     * using padding/margin in contentContainerStyle prop of scroll view.
-     */
-    contentInsets?: EdgeInsets;
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
@@ -134,6 +121,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         initialRenderIndex: 0,
         isHorizontal: false,
         onEndReachedThreshold: 0,
+        distanceFromWindow: 0,
         renderAheadOffset: IS_WEB ? 1000 : 250,
     };
 
@@ -161,8 +149,6 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
     private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
 
-    private _contentInsets: EdgeInsets = { top: 0, left: 0, bottom: 0, right: 0 };
-
     constructor(props: RecyclerListViewProps) {
         super(props);
         this._onScroll = this._onScroll.bind(this);
@@ -184,7 +170,6 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     }
 
     public componentWillReceiveProps(newProps: RecyclerListViewProps): void {
-        this._contentInsets = this.props.contentInsets ? this.props.contentInsets : { top: 0, left: 0, right: 0, bottom: 0 };
         this._assertDependencyPresence(newProps);
         this._checkAndChangeLayouts(newProps);
         if (!this.props.onVisibleIndexesChanged) {
@@ -335,14 +320,6 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                 ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
                 {...this.props}
                 {...this.props.scrollViewProps}
-                {...{
-                    contentContainerStyle: {
-                        paddingTop: this._contentInsets.top,
-                        paddingLeft: this._contentInsets.top,
-                        paddingBottom: this._contentInsets.top,
-                        paddingRight: this._contentInsets.top,
-                    },
-                }}
                 onScroll={this._onScroll}
                 onSizeChanged={this._onSizeChanged}
                 contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
@@ -536,10 +513,8 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     }
 
     private _onScroll(offsetX: number, offsetY: number, rawEvent: ScrollEvent): void {
-        const forwardOffsetX = offsetX - this._contentInsets.left;
-        const forwardOffsetY = offsetX - this._contentInsets.top;
-
-        this._virtualRenderer.updateOffset(forwardOffsetX, forwardOffsetY);
+        //Adjusting offsets using distanceFromWindow
+        this._virtualRenderer.updateOffset(offsetX - this.props.distanceFromWindow!, offsetY - this.props.distanceFromWindow!);
 
         if (this.props.onScroll) {
             this.props.onScroll(rawEvent, offsetX, offsetY);
@@ -622,7 +597,10 @@ RecyclerListView.propTypes = {
     //Specify if size can change, listview will automatically relayout items. For web, works only with useWindowScroll = true
     canChangeSize: PropTypes.bool,
 
-    //Web only. Specify how far away the first list item is from window top. This is an adjustment for better optimization.
+    //Specify how far away the first list item is from top of the RecyclerListView. e.g, if you have content padding on top or left.
+    //This is an adjustment for optimization and to make sure onVisibileIndexesChanged callback is correct.
+    //Ideally try to avoid setting large padding values on RLV content. If you do please do correct handling in a ScrollView and
+    //pass it to RLV.
     distanceFromWindow: PropTypes.number,
 
     //Web only. Layout elements in window instead of a scrollable div.
