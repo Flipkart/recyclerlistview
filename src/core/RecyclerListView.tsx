@@ -277,6 +277,10 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
     public scrollToOffset(x: number, y: number, animate: boolean = false): void {
         if (this._scrollComponent) {
+            if (IS_WEB && this.props.useWindowScroll) {
+                x += this.props.distanceFromWindow!;
+                y += this.props.distanceFromWindow!;
+            }
             if (this.props.isHorizontal) {
                 y = 0;
             } else {
