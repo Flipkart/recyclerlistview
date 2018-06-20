@@ -108,6 +108,7 @@ export interface RecyclerListViewProps {
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object;
     debugHandlers?: DebugHandlers;
+    getViewHolderForType?: (type: string | number) => JSX.Element;
 
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
@@ -486,21 +487,22 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             }
             return (
                 <ViewRenderer key={key} data={data}
-                              dataHasChanged={this._dataHasChanged}
-                              x={itemRect.x}
-                              y={itemRect.y}
-                              layoutType={type}
-                              index={dataIndex}
-                              styleOverrides={styleOverrides}
-                              layoutProvider={this.props.layoutProvider}
-                              forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
-                              isHorizontal={this.props.isHorizontal}
-                              onSizeChanged={this._onViewContainerSizeChange}
-                              childRenderer={this.props.rowRenderer}
-                              height={itemRect.height}
-                              width={itemRect.width}
-                              itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
-                              extendedState={this.props.extendedState}/>
+                    dataHasChanged={this._dataHasChanged}
+                    x={itemRect.x}
+                    y={itemRect.y}
+                    layoutType={type}
+                    index={dataIndex}
+                    styleOverrides={styleOverrides}
+                    layoutProvider={this.props.layoutProvider}
+                    forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
+                    isHorizontal={this.props.isHorizontal}
+                    onSizeChanged={this._onViewContainerSizeChange}
+                    childRenderer={this.props.rowRenderer}
+                    height={itemRect.height}
+                    width={itemRect.width}
+                    itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
+                    extendedState={this.props.extendedState}
+                    getViewHolderForType={this.props.getViewHolderForType} />
             );
         }
         return null;
@@ -672,4 +674,8 @@ RecyclerListView.propTypes = {
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down.
     scrollViewProps: PropTypes.object,
+    
+    //Function to receive the row type and returns a component to wrap the row children in.
+    //Useful for implementing row reordering with drag and drop.
+    getViewHolderForType: PropTypes.func,
 };

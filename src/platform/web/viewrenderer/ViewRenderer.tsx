@@ -24,6 +24,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     }
 
     public render(): JSX.Element {
+        const ViewHolder: any = this.props.getViewHolderForType ? this.props.getViewHolderForType(this.props.layoutType) : "div";
         const style: CSSProperties = this.props.forceNonDeterministicRendering
             ? {
                 transform: this._getTransform(),
@@ -43,9 +44,9 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 ...this.animatorStyleOverrides,
             };
         return (
-            <div ref={this._setRef} style={style}>
+            <ViewHolder ref={this._setRef} style={style}>
                 {this.renderChild()}
-            </div>
+            </ViewHolder>
         );
     }
 
