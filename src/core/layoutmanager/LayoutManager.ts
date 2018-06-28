@@ -202,19 +202,28 @@ export class WrapGridLayoutManager extends LayoutManager {
 }
 
 export class GridLayoutManager extends WrapGridLayoutManager {
-    private _columnSpan: number;
-    constructor(layoutProvider: GridLayoutProvider, renderWindowSize: Dimension, cachedLayouts?: Layout[], columnSpan?: number) {
+    private _maxColumnSpan: number;
+    private _getColumnSpanForIndex: (index: number) => number;
+    constructor(layoutProvider: GridLayoutProvider, renderWindowSize: Dimension, getColumnSpanForIndex: (index: number) => number,
+                maxColumnSpan?: number, cachedLayouts?: Layout[]) {
         super(layoutProvider, renderWindowSize, false, cachedLayouts);
-        this._columnSpan = columnSpan ? columnSpan : 0;
+        this._getColumnSpanForIndex = getColumnSpanForIndex;
+        if (maxColumnSpan === 0 || maxColumnSpan === undefined) {
+            throw new CustomError({
+                message: "Max Column Span cannot be 0 or undefined",
+                type: "NotSupportedException",
+            });
+        } else {
+            this._maxColumnSpan = maxColumnSpan;
+        }
     }
 
     public getStyleOverridesForIndex(index: number): object | undefined {
-        if (this._columnSpan && this._columnSpan > 0) {
-            return {
-                width: this._totalWidth / this._columnSpan,
-            };
-        }
-        return undefined;
+        const columnSpanForIndex = this._getColumnSpanForIndex(index);
+        const singleUnitDim = this._totalWidth / this._maxColumnSpan;
+        return {
+            width: singleUnitDim * columnSpanForIndex,
+        };
     }
 }
 

@@ -29,7 +29,7 @@ export abstract class BaseLayoutProvider {
 }
 
 export class LayoutProvider extends BaseLayoutProvider {
-    public _setLayoutForType: (type: string | number, dim: Dimension, index: number) => void;
+    private _setLayoutForType: (type: string | number, dim: Dimension, index: number) => void;
     private _getLayoutTypeForIndex: (index: number) => string | number;
     private _tempDim: Dimension;
     private _lastLayoutManager: WrapGridLayoutManager | undefined;
@@ -72,27 +72,32 @@ export class LayoutProvider extends BaseLayoutProvider {
 export class GridLayoutProvider extends LayoutProvider {
     private _setHeightForIndex: (height: number, index: number) => number;
     private _getColumnSpanForIndex: (index: number) => number;
+    private _setMaxColumnSpan: () => number;
     constructor(getLayoutTypeForIndex: (index: number) => string | number,
                 setHeightForIndex: (height: number, index: number) => number,
-                getColumnSpanForIndex: (index: number) => number) {
-        super(getLayoutTypeForIndex, () => this.setLayoutForType);
+                getColumnSpanForIndex: (index: number) => number,
+                setMaxColumnSpan: () => number) {
+        super(getLayoutTypeForIndex, (type: string | number, dim: Dimension, index: number) => this.setComputedLayout(type, dim, index));
         this._setHeightForIndex = setHeightForIndex;
         this._getColumnSpanForIndex =  getColumnSpanForIndex;
-    }
-
-    public setLayoutForType(type: string | number, dim: Dimension, index: number): void {
-        return this._setLayoutForType(type, dim, index);
+        this._setMaxColumnSpan = setMaxColumnSpan;
     }
 
     public newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager {
+        //TODO:Muskein Start supporting Horizontal and rename columnspan to just spans
         if (isHorizontal) {
             throw new CustomError({
                 message: "Horizontal support not available for Grid Layouts",
                 type: "NotSupportedException",
             });
         } else {
-            return new GridLayoutManager(this, renderWindowSize, cachedLayouts);
+            return new GridLayoutManager(this, renderWindowSize, this._getColumnSpanForIndex,
+                this._setMaxColumnSpan(), cachedLayouts);
         }
+    }
+
+    public setMaxColumnSpan(): number {
+        return this._setMaxColumnSpan();
     }
 
     public getColumnSpanForIndex(index: number): number {
