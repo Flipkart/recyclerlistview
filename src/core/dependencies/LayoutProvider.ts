@@ -1,4 +1,4 @@
-import { Layout, WrapGridLayoutManager, LayoutManager, GridLayoutManager } from "../layoutmanager/LayoutManager";
+import { Layout, WrapGridLayoutManager, LayoutManager } from "../layoutmanager/LayoutManager";
 import CustomError from "../exceptions/CustomError";
 
 /**
@@ -70,41 +70,55 @@ export class LayoutProvider extends BaseLayoutProvider {
 }
 
 export class GridLayoutProvider extends LayoutProvider {
-    private _setHeightForIndex: (height: number, index: number) => number;
+    private _setDimensionForIndex: (index: number) => number;
     private _getSpanForIndex: (index: number) => number;
     private _setMaxSpan: () => number;
+    private _renderWindowSize: Dimension | undefined;
+    private _isHorizontal: boolean | undefined;
     constructor(getLayoutTypeForIndex: (index: number) => string | number,
-                setHeightForIndex: (height: number, index: number) => number,
+                setDimensionForIndex: (index: number) => number,
                 getSpanForIndex: (index: number) => number,
                 setMaxSpan: () => number) {
-        super(getLayoutTypeForIndex, (type: string | number, dim: Dimension, index: number) => this.setComputedLayout(type, dim, index));
-        this._setHeightForIndex = setHeightForIndex;
+        super(getLayoutTypeForIndex, (type: string | number, dimension: Dimension, index: number) => {this.setLayoutForTypeGrid(type, dimension, index); });
+        this._setDimensionForIndex = setDimensionForIndex;
         this._getSpanForIndex =  getSpanForIndex;
         this._setMaxSpan = setMaxSpan;
     }
 
-    public newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager {
-        if (isHorizontal) {
-            throw new CustomError({
-                message: "Horizontal support not available for Grid Layouts",
-                type: "NotSupportedException",
-            });
+    public setLayoutForTypeGrid(type: string | number, dimension: Dimension, index: number): void {
+        const maxSpan: number = this.setMaxSpan();
+        const itemSpan: number = this.getSpanForIndex(index);
+        if (this._isHorizontal) {
+            dimension.width = this.setDimensionForIndex(index);
+            if (this._renderWindowSize) {
+                dimension.height = (this._renderWindowSize.height / maxSpan) * itemSpan;
+            }
         } else {
-            return new GridLayoutManager(this, renderWindowSize, this._getSpanForIndex,
-                this._setMaxSpan(), cachedLayouts);
+            dimension.height = this.setDimensionForIndex(index);
+            if (this._renderWindowSize) {
+                dimension.width = (this._renderWindowSize.width / maxSpan) * itemSpan;
+            }
         }
     }
 
-    public setMaxColumnSpan(): number {
+    public newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager {
+        this._isHorizontal = isHorizontal;
+        this._renderWindowSize = renderWindowSize;
+        // return new GridLayoutManager(this, renderWindowSize, this.getSpanForIndex,
+        //     this.setMaxSpan, cachedLayouts);
+        return new WrapGridLayoutManager(this, renderWindowSize, isHorizontal, cachedLayouts);
+    }
+
+    public setMaxSpan(): number {
         return this._setMaxSpan();
     }
 
-    public getColumnSpanForIndex(index: number): number {
+    public getSpanForIndex(index: number): number {
         return this._getSpanForIndex(index);
     }
 
-    public setHeightForIndex(height: number, index: number): number {
-        return this._setHeightForIndex(height, index);
+    public setDimensionForIndex(index: number): number {
+        return this._setDimensionForIndex(index);
     }
 }
 

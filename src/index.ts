@@ -5,17 +5,18 @@ import RecyclerListView from "./core/RecyclerListView";
 import BaseScrollView from "./core/scrollcomponent/BaseScrollView";
 import { BaseItemAnimator } from "./core/ItemAnimator";
 import { AutoScroll } from "./utils/AutoScroll";
-import { LayoutManager, WrapGridLayoutManager, GridLayoutManager, Point, Layout } from "./core/layoutmanager/LayoutManager";
+import { LayoutManager, WrapGridLayoutManager, Point, Layout } from "./core/layoutmanager/LayoutManager";
 
 export {
     ContextProvider,
     DataProvider,
     LayoutProvider,
     GridLayoutProvider,
+    // GridLayoutProviderHorizontal,
     BaseLayoutProvider,
     LayoutManager,
     WrapGridLayoutManager,
-    GridLayoutManager,
+    // GridLayoutManager,
     RecyclerListView,
     BaseItemAnimator,
     BaseScrollView,
