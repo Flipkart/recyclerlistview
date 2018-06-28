@@ -71,37 +71,36 @@ export class LayoutProvider extends BaseLayoutProvider {
 
 export class GridLayoutProvider extends LayoutProvider {
     private _setHeightForIndex: (height: number, index: number) => number;
-    private _getColumnSpanForIndex: (index: number) => number;
-    private _setMaxColumnSpan: () => number;
+    private _getSpanForIndex: (index: number) => number;
+    private _setMaxSpan: () => number;
     constructor(getLayoutTypeForIndex: (index: number) => string | number,
                 setHeightForIndex: (height: number, index: number) => number,
-                getColumnSpanForIndex: (index: number) => number,
-                setMaxColumnSpan: () => number) {
+                getSpanForIndex: (index: number) => number,
+                setMaxSpan: () => number) {
         super(getLayoutTypeForIndex, (type: string | number, dim: Dimension, index: number) => this.setComputedLayout(type, dim, index));
         this._setHeightForIndex = setHeightForIndex;
-        this._getColumnSpanForIndex =  getColumnSpanForIndex;
-        this._setMaxColumnSpan = setMaxColumnSpan;
+        this._getSpanForIndex =  getSpanForIndex;
+        this._setMaxSpan = setMaxSpan;
     }
 
     public newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager {
-        //TODO:Muskein Start supporting Horizontal and rename columnspan to just spans
         if (isHorizontal) {
             throw new CustomError({
                 message: "Horizontal support not available for Grid Layouts",
                 type: "NotSupportedException",
             });
         } else {
-            return new GridLayoutManager(this, renderWindowSize, this._getColumnSpanForIndex,
-                this._setMaxColumnSpan(), cachedLayouts);
+            return new GridLayoutManager(this, renderWindowSize, this._getSpanForIndex,
+                this._setMaxSpan(), cachedLayouts);
         }
     }
 
     public setMaxColumnSpan(): number {
-        return this._setMaxColumnSpan();
+        return this._setMaxSpan();
     }
 
     public getColumnSpanForIndex(index: number): number {
-        return this._getColumnSpanForIndex(index);
+        return this._getSpanForIndex(index);
     }
 
     public setHeightForIndex(height: number, index: number): number {

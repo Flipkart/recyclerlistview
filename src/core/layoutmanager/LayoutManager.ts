@@ -202,25 +202,25 @@ export class WrapGridLayoutManager extends LayoutManager {
 }
 
 export class GridLayoutManager extends WrapGridLayoutManager {
-    private _maxColumnSpan: number;
-    private _getColumnSpanForIndex: (index: number) => number;
-    constructor(layoutProvider: GridLayoutProvider, renderWindowSize: Dimension, getColumnSpanForIndex: (index: number) => number,
-                maxColumnSpan?: number, cachedLayouts?: Layout[]) {
+    private _maxSpan: number;
+    private _getSpanForIndex: (index: number) => number;
+    constructor(layoutProvider: GridLayoutProvider, renderWindowSize: Dimension, getSpanForIndex: (index: number) => number,
+                maxSpan?: number, cachedLayouts?: Layout[]) {
         super(layoutProvider, renderWindowSize, false, cachedLayouts);
-        this._getColumnSpanForIndex = getColumnSpanForIndex;
-        if (maxColumnSpan === 0 || maxColumnSpan === undefined) {
+        this._getSpanForIndex = getSpanForIndex;
+        if (maxSpan === 0 || maxSpan === undefined) {
             throw new CustomError({
                 message: "Max Column Span cannot be 0 or undefined",
                 type: "NotSupportedException",
             });
         } else {
-            this._maxColumnSpan = maxColumnSpan;
+            this._maxSpan = maxSpan;
         }
     }
 
     public getStyleOverridesForIndex(index: number): object | undefined {
-        const columnSpanForIndex = this._getColumnSpanForIndex(index);
-        const singleUnitDim = this._totalWidth / this._maxColumnSpan;
+        const columnSpanForIndex = this._getSpanForIndex(index);
+        const singleUnitDim = this._totalWidth / this._maxSpan;
         return {
             width: singleUnitDim * columnSpanForIndex,
         };
