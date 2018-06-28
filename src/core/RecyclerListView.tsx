@@ -121,6 +121,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         initialRenderIndex: 0,
         isHorizontal: false,
         onEndReachedThreshold: 0,
+        distanceFromWindow: 0,
         renderAheadOffset: IS_WEB ? 1000 : 250,
     };
 
@@ -276,6 +277,10 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
     public scrollToOffset(x: number, y: number, animate: boolean = false): void {
         if (this._scrollComponent) {
+            if (IS_WEB && this.props.useWindowScroll) {
+                x += this.props.distanceFromWindow!;
+                y += this.props.distanceFromWindow!;
+            }
             if (this.props.isHorizontal) {
                 y = 0;
             } else {
@@ -512,7 +517,9 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     }
 
     private _onScroll(offsetX: number, offsetY: number, rawEvent: ScrollEvent): void {
-        this._virtualRenderer.updateOffset(offsetX, offsetY);
+        //Adjusting offsets using distanceFromWindow
+        this._virtualRenderer.updateOffset(offsetX - this.props.distanceFromWindow!, offsetY - this.props.distanceFromWindow!);
+
         if (this.props.onScroll) {
             this.props.onScroll(rawEvent, offsetX, offsetY);
         }
@@ -594,7 +601,10 @@ RecyclerListView.propTypes = {
     //Specify if size can change, listview will automatically relayout items. For web, works only with useWindowScroll = true
     canChangeSize: PropTypes.bool,
 
-    //Web only. Specify how far away the first list item is from window top. This is an adjustment for better optimization.
+    //Specify how far away the first list item is from start of the RecyclerListView. e.g, if you have content padding on top or left.
+    //This is an adjustment for optimization and to make sure onVisibileIndexesChanged callback is correct.
+    //Ideally try to avoid setting large padding values on RLV content. If you have to please correct offsets reported, handle
+    //them in a custom ScrollView and pass it as an externalScrollView.
     distanceFromWindow: PropTypes.number,
 
     //Web only. Layout elements in window instead of a scrollable div.
