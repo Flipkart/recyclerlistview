@@ -1,6 +1,6 @@
 {
   "name": "recyclerlistview-gridlayoutmanager",
-  "version": "0.0.1-alpha.11",
+  "version": "0.0.1-alpha.17",
   "description": "The listview that you need and deserve. It was built for performance, uses cell recycling to achieve smooth scrolling.",
   "main": "dist/reactnative/index.js",
   "types": "dist/reactnative/index.d.ts",
