@@ -113,14 +113,14 @@ export class LayoutProvider extends BaseLayoutProvider {
 }
 
 export class GridLayoutProvider extends LayoutProvider {
-  private _setDimensionForIndex: (index: number) => number;
+  private _getDimensionForIndex: (index: number) => number;
   private _getSpanForIndex: (index: number) => number;
   private _setMaxSpan: () => number;
   private _renderWindowSize: Dimension | undefined;
   private _isHorizontal: boolean | undefined;
   constructor(
     getLayoutTypeForIndex: (index: number) => string | number,
-    setDimensionForIndex: (index: number) => number,
+    getDimensionForIndex: (index: number) => number,
     getSpanForIndex: (index: number) => number,
     setMaxSpan: () => number,
   ) {
@@ -130,7 +130,7 @@ export class GridLayoutProvider extends LayoutProvider {
         this.setLayoutForTypeGrid(dimension, index);
       },
     );
-    this._setDimensionForIndex = setDimensionForIndex;
+    this._getDimensionForIndex = getDimensionForIndex;
     this._getSpanForIndex = getSpanForIndex;
     this._setMaxSpan = setMaxSpan;
   }
@@ -145,12 +145,12 @@ export class GridLayoutProvider extends LayoutProvider {
       });
     }
     if (this._isHorizontal) {
-      dimension.width = this.setDimensionForIndex(index);
+      dimension.width = this.getDimensionForIndex(index);
       if (this._renderWindowSize) {
         dimension.height = (this._renderWindowSize.height / maxSpan) * itemSpan;
       }
     } else {
-      dimension.height = this.setDimensionForIndex(index);
+      dimension.height = this.getDimensionForIndex(index);
       if (this._renderWindowSize) {
         dimension.width = (this._renderWindowSize.width / maxSpan) * itemSpan;
       }
@@ -182,8 +182,8 @@ export class GridLayoutProvider extends LayoutProvider {
     return this._getSpanForIndex(index);
   }
 
-  public setDimensionForIndex(index: number): number {
-    return this._setDimensionForIndex(index);
+  public getDimensionForIndex(index: number): number {
+    return this._getDimensionForIndex(index);
   }
 }
 
