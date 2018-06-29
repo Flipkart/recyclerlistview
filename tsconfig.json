@@ -10,6 +10,7 @@
     "declaration": true, // generate TypeScript definitions
     "rootDir": "src",
     "strict": true,
+    "skipLibCheck": true,
     "noImplicitReturns": true,
     "removeComments": false,
     "jsx": "react",

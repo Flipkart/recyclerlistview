@@ -76,6 +76,6 @@ export class DefaultJSItemAnimator implements BaseItemAnimator {
 
     private _getNativePropObject(x: number, y: number): object {
         const point = { left: x, top: y };
-        return !IS_WEB ? point : { style: point };
+        return { style: point };
     }
 }
