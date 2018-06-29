@@ -13,7 +13,6 @@ const scrollEndEventSimulator = debounce((executable: () => void) => {
 export default class ScrollViewer extends BaseScrollView {
     public static defaultProps = {
         canChangeSize: false,
-        distanceFromWindow: 0,
         horizontal: false,
         style: null,
         useWindowScroll: false,
@@ -42,14 +41,6 @@ export default class ScrollViewer extends BaseScrollView {
             } else if (this._mainDivRef) {
                 this._startListeningToDivEvents();
                 this.props.onSizeChanged({ height: this._mainDivRef.clientHeight, width: this._mainDivRef.clientWidth });
-            }
-        }
-    }
-
-    public componentWillReceiveProps(nextProps: ScrollViewDefaultProps): void {
-        if (this.props.distanceFromWindow !== nextProps.distanceFromWindow) {
-            if (this._mainDivRef) {
-                this._scrollEventNormalizer = new ScrollEventNormalizer(this._mainDivRef, nextProps.distanceFromWindow);
             }
         }
     }
@@ -97,7 +88,7 @@ export default class ScrollViewer extends BaseScrollView {
     private _setDivRef(div: HTMLDivElement | null): void {
         this._mainDivRef = div;
         if (div) {
-            this._scrollEventNormalizer = new ScrollEventNormalizer(div, this.props.distanceFromWindow);
+            this._scrollEventNormalizer = new ScrollEventNormalizer(div);
         } else {
             this._scrollEventNormalizer = null;
         }
@@ -133,9 +124,9 @@ export default class ScrollViewer extends BaseScrollView {
             }
         } else {
             if (this.props.horizontal) {
-                window.scrollTo(offset + this.props.distanceFromWindow, 0);
+                window.scrollTo(offset, 0);
             } else {
-                window.scrollTo(0, offset + this.props.distanceFromWindow);
+                window.scrollTo(0, offset);
             }
         }
     }

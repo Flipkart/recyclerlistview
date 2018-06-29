@@ -54,7 +54,6 @@ export default class ScrollComponent extends BaseScrollComponent {
         //     contentWidth,
         //     externalScrollView,
         //     canChangeSize,
-        //     distanceFromWindow,
         //     renderFooter,
         //     isHorizontal,
         //     scrollThrottle,
