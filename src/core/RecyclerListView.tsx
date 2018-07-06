@@ -111,6 +111,8 @@ export interface RecyclerListViewProps {
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
+    renderStackCompleted: number;
+    totalItemsToRender: number;
 }
 
 export default class RecyclerListView extends React.Component<RecyclerListViewProps, RecyclerListViewState> {
@@ -149,6 +151,8 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
     private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
 
+    private _requestAnimationFrameHandler: number|undefined;
+
     constructor(props: RecyclerListViewProps) {
         super(props);
         this._onScroll = this._onScroll.bind(this);
@@ -166,6 +170,8 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
         this.state = {
             renderStack: {},
+            renderStackCompleted: 0,
+            totalItemsToRender: 0
         };
     }
 
@@ -191,6 +197,13 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             setTimeout(() => {
                 this.scrollToOffset(offset.x, offset.y, false);
             }, 0);
+        }
+        if (this.state.totalItemsToRender && this.state.renderStackCompleted !== this.state.totalItemsToRender) {
+            this._requestAnimationFrameHandler = window.requestAnimationFrame(() => {
+                this._cancelProgressiveUpdate();
+                this.setState({renderStackCompleted: this.state.renderStackCompleted+1});
+            })
+
         }
         this._processOnEndReached();
         this._checkAndChangeLayouts(this.props);
@@ -401,9 +414,23 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     }
 
     private _renderStackWhenReady(stack: RenderStack): void {
+        let totalItemsToRender = 0;
+        for (const key in stack) {
+            if (stack.hasOwnProperty(key)) {
+                totalItemsToRender++;
+            }
+        }
+        this._cancelProgressiveUpdate();
         this.setState(() => {
-            return { renderStack: stack };
+            return { renderStack: stack, renderStackCompleted: 0, totalItemsToRender};
         });
+    }
+
+    private _cancelProgressiveUpdate() {
+        if (this._requestAnimationFrameHandler) {
+            window.cancelAnimationFrame(this._requestAnimationFrameHandler);
+            this._requestAnimationFrameHandler = undefined;
+        }
     }
 
     private _initTrackers(): void {
@@ -508,9 +535,14 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
     private _generateRenderStack(): Array<JSX.Element | null> {
         const renderedItems = [];
+        let renderedIndex:number = 0;
         for (const key in this.state.renderStack) {
             if (this.state.renderStack.hasOwnProperty(key)) {
                 renderedItems.push(this._renderRowUsingMeta(this.state.renderStack[key]));
+                renderedIndex++;
+                if (renderedIndex === this.state.renderStackCompleted+1) {
+                    break;
+                }
             }
         }
         return renderedItems;
