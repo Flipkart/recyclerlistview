@@ -104,6 +104,7 @@ export interface RecyclerListViewProps {
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object;
+    renderDataCountInOneFrame:number;
 
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
@@ -125,6 +126,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         onEndReachedThreshold: 0,
         distanceFromWindow: 0,
         renderAheadOffset: IS_WEB ? 1000 : 250,
+        renderDataCountInOneFrame:1
     };
 
     public static propTypes = {};
@@ -198,10 +200,10 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                 this.scrollToOffset(offset.x, offset.y, false);
             }, 0);
         }
-        if (this.state.totalItemsToRender && this.state.renderStackCompleted !== this.state.totalItemsToRender) {
+        if (this.state.totalItemsToRender && this.state.renderStackCompleted < this.state.totalItemsToRender) {
             this._requestAnimationFrameHandler = window.requestAnimationFrame(() => {
                 this._cancelProgressiveUpdate();
-                this.setState({renderStackCompleted: this.state.renderStackCompleted+1});
+                this.setState({renderStackCompleted: this.state.renderStackCompleted + this.props.renderDataCountInOneFrame});
             })
 
         }
@@ -540,7 +542,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             if (this.state.renderStack.hasOwnProperty(key)) {
                 renderedItems.push(this._renderRowUsingMeta(this.state.renderStack[key]));
                 renderedIndex++;
-                if (renderedIndex === this.state.renderStackCompleted+1) {
+                if (renderedIndex === (this.state.renderStackCompleted + this.props.renderDataCountInOneFrame)) {
                     break;
                 }
             }
