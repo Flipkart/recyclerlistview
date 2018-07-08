@@ -78,6 +78,7 @@ const refreshRequestDebouncer = debounce((executable: () => void) => {
 export interface OnRecreateParams {
     lastOffset?: number;
 }
+
 export interface RecyclerListViewProps {
     layoutProvider: BaseLayoutProvider;
     dataProvider: DataProvider;
@@ -104,16 +105,18 @@ export interface RecyclerListViewProps {
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object;
-    renderDataCountInOneFrame:number;
-
+    renderDataCountInOneFrame?: number;
+    enableProgressiveRendering?: boolean;
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
 }
+
 export interface RecyclerListViewState {
     renderStack: RenderStack;
     renderStackCompleted: number;
     totalItemsToRender: number;
+    doProgressiveRendering: boolean; // Irrespective of Progressive rendering is enabled or not, do the first data set Progressive rendering.
 }
 
 export default class RecyclerListView extends React.Component<RecyclerListViewProps, RecyclerListViewState> {
@@ -126,7 +129,8 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         onEndReachedThreshold: 0,
         distanceFromWindow: 0,
         renderAheadOffset: IS_WEB ? 1000 : 250,
-        renderDataCountInOneFrame:1
+        renderDataCountInOneFrame: 2,
+        enableProgressiveRendering: false
     };
 
     public static propTypes = {};
@@ -173,7 +177,8 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         this.state = {
             renderStack: {},
             renderStackCompleted: 0,
-            totalItemsToRender: 0
+            totalItemsToRender: 0,
+            doProgressiveRendering: true
         };
     }
 
@@ -200,10 +205,10 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
                 this.scrollToOffset(offset.x, offset.y, false);
             }, 0);
         }
-        if (this.state.totalItemsToRender && this.state.renderStackCompleted < this.state.totalItemsToRender) {
+        if (this._isMoreItemsToRender()) {
             this._requestAnimationFrameHandler = window.requestAnimationFrame(() => {
                 this._cancelProgressiveUpdate();
-                this.setState({renderStackCompleted: this.state.renderStackCompleted + this.props.renderDataCountInOneFrame});
+                this.setState({renderStackCompleted: this.state.renderStackCompleted + this.props.renderDataCountInOneFrame!});
             })
 
         }
@@ -349,6 +354,10 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         );
     }
 
+    private _isMoreItemsToRender(): boolean {
+        return !!this.state.totalItemsToRender && this.state.renderStackCompleted < this.state.totalItemsToRender;
+    }
+
     private _checkAndChangeLayouts(newProps: RecyclerListViewProps, forceFullRender?: boolean): void {
         this._params.isHorizontal = newProps.isHorizontal;
         this._params.itemCount = newProps.dataProvider.getSize();
@@ -423,8 +432,14 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             }
         }
         this._cancelProgressiveUpdate();
+        const renderStackCompleted = (this.props.enableProgressiveRendering || this.state.doProgressiveRendering) ? 0 : totalItemsToRender;
         this.setState(() => {
-            return { renderStack: stack, renderStackCompleted: 0, totalItemsToRender};
+            return {
+                renderStack: stack,
+                renderStackCompleted,
+                totalItemsToRender,
+                doProgressiveRendering: this.props.enableProgressiveRendering!
+            };
         });
     }
 
@@ -537,13 +552,15 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
     private _generateRenderStack(): Array<JSX.Element | null> {
         const renderedItems = [];
-        let renderedIndex:number = 0;
+        let itemCount: number = 0;
         for (const key in this.state.renderStack) {
             if (this.state.renderStack.hasOwnProperty(key)) {
                 renderedItems.push(this._renderRowUsingMeta(this.state.renderStack[key]));
-                renderedIndex++;
-                if (renderedIndex === (this.state.renderStackCompleted + this.props.renderDataCountInOneFrame)) {
-                    break;
+                if (this._isMoreItemsToRender()) {
+                    itemCount++;
+                    if (itemCount === (this.state.renderStackCompleted + this.props.renderDataCountInOneFrame!)) {
+                        break;
+                    }
                 }
             }
         }
