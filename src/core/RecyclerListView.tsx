@@ -206,7 +206,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             }, 0);
         }
         if (this._isMoreItemsToRender()) {
-            this._requestAnimationFrameHandler = window.requestAnimationFrame(() => {
+            this._requestAnimationFrameHandler = requestAnimationFrame(() => {
                 this._cancelProgressiveUpdate();
                 this.setState({renderStackCompleted: this.state.renderStackCompleted + this.props.renderDataCountInOneFrame!});
             })
@@ -445,7 +445,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
     private _cancelProgressiveUpdate() {
         if (this._requestAnimationFrameHandler) {
-            window.cancelAnimationFrame(this._requestAnimationFrameHandler);
+            cancelAnimationFrame(this._requestAnimationFrameHandler);
             this._requestAnimationFrameHandler = undefined;
         }
     }
@@ -687,6 +687,12 @@ RecyclerListView.propTypes = {
 
     //To pass down style to inner ScrollView
     style: PropTypes.object,
+
+    // Number of data render in one frame.
+    renderDataCountInOneFrame: PropTypes.number,
+    // Enable progressive rendering. Default is false to optimise recycling.
+    // Make it true when we know there is no Recycling of view.
+    enableProgressiveRendering: PropTypes.bool,
 
     //For TS use case, not necessary with JS use.
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
