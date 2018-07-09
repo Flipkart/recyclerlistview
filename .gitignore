@@ -37,7 +37,7 @@ captures/
 .idea/
 
 # Distribution
-dist/
+# dist/
 
 # Keystore files
 *.jks
