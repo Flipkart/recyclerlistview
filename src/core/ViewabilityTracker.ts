@@ -118,6 +118,11 @@ export default class ViewabilityTracker {
         return result;
     }
 
+    public updateRenderAheadOffset(renderAheadOffset: number): void {
+        this._renderAheadOffset = Math.max(0, renderAheadOffset);
+        this.forceRefreshWithOffset(this._currentOffset);
+    }
+
     private _findFirstVisibleIndexOptimally(): number {
         let firstVisibleIndex = 0;
 
