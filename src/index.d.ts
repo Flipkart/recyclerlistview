@@ -7,20 +7,4 @@ import { BaseItemAnimator } from "./core/ItemAnimator";
 import { AutoScroll } from "./utils/AutoScroll";
 import { LayoutManager, WrapGridLayoutManager, Point, Layout } from "./core/layoutmanager/LayoutManager";
 import DynamicRenderAheadRecyclerListView from "./core/DynamicRenderAheadRecyclerListView";
-
-export {
-    ContextProvider,
-    DataProvider,
-    LayoutProvider,
-    BaseLayoutProvider,
-    LayoutManager,
-    WrapGridLayoutManager,
-    RecyclerListView,
-    DynamicRenderAheadRecyclerListView,
-    BaseItemAnimator,
-    BaseScrollView,
-    AutoScroll,
-    Dimension,
-    Point,
-    Layout,
-};
+export { ContextProvider, DataProvider, LayoutProvider, BaseLayoutProvider, LayoutManager, WrapGridLayoutManager, RecyclerListView, DynamicRenderAheadRecyclerListView, BaseItemAnimator, BaseScrollView, AutoScroll, Dimension, Point, Layout };

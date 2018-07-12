@@ -43,7 +43,7 @@ export class DefaultJSItemAnimator implements BaseItemAnimator {
                     viewRef.setNativeProps(this._getNativePropObject(value.x, value.y));
                 });
                 if (viewRef._lastAnimVal) {
-                    viewRef._lastAnimVal.stopAnimation();
+                    viewRef._lastAnimVal!.stopAnimation();
                 }
                 viewRef._lastAnimVal = animXY;
                 Animated.timing(animXY, {

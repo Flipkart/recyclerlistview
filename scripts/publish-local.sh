@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-TARGET=$"/Users/talha.naqvi/Documents/GitHub/ts-rex/node_modules/recyclerlistview/dist" #target-path
+TARGET=$"/Users/manish.patwari/Workspace/FKReactNative/ts-rex/node_modules/recyclerlistview/dist" #target-path
 
 npm run build
 
