@@ -292,7 +292,9 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
     // You can use requestAnimationFrame callback to change renderAhead in multiple frames to enable advanced progressive
     // rendering when view types are very complex. This method returns a boolean saying if the update was committed. Retry in
-    // the next frame if you get a failure. Value should be greater than or equal to 0;
+    // the next frame if you get a failure (if mount wasn't complete). Value should be greater than or equal to 0;
+    // Very useful when you have a page where you need a large renderAheadOffset. Setting it at once will slow down the load and
+    // this will help mitigate that.
     public updateRenderAheadOffset(renderAheadOffset: number): boolean {
         const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
         if (viewabilityTracker) {
