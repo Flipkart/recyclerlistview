@@ -34,7 +34,7 @@ export class DefaultJSItemAnimator implements BaseItemAnimator {
                 const viewRef = itemRef as UnmountAwareView;
                 const animXY = new Animated.ValueXY({ x: fromX, y: fromY });
                 animXY.addListener((value) => {
-                    if (viewRef._isUnmountedForRecyclerListView || this._hasAnimatedOnce) {
+                    if (viewRef._isUnmountedForRecyclerListView || (this.shouldAnimateOnce && this._hasAnimatedOnce)) {
                         animXY.stopAnimation();
                         return;
                     }
