@@ -37,11 +37,11 @@ import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 
 //#if [REACT-NATIVE]
-import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
-import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
-import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
-import { Platform } from "react-native";
-const IS_WEB = !Platform || Platform.OS === "web";
+//import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
+//import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
+//import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
+//import { Platform } from "react-native";
+//const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
 
 /***
@@ -49,10 +49,10 @@ const IS_WEB = !Platform || Platform.OS === "web";
  */
 
 //#if [WEB]
-//import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
-//import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
-//import { DefaultWebItemAnimator as DefaultItemAnimator} from "../platform/web/itemanimators/DefaultWebItemAnimator";
-//const IS_WEB = true;
+import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
+import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
+import { DefaultWebItemAnimator as DefaultItemAnimator} from "../platform/web/itemanimators/DefaultWebItemAnimator";
+const IS_WEB = true;
 //#endif
 
 const refreshRequestDebouncer = debounce((executable: () => void) => {
@@ -113,7 +113,7 @@ export interface RecyclerListViewState {
     renderStack: RenderStack;
 }
 
-export default class RecyclerListView<P extends RecyclerListViewProps,S extends RecyclerListViewState> extends React.Component<P, S> {
+export default class RecyclerListView<P extends RecyclerListViewProps, S extends RecyclerListViewState> extends React.Component<P, S> {
     public static defaultProps = {
         canChangeSize: false,
         disableRecycling: false,
@@ -126,11 +126,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps,S extends 
     };
 
     public static propTypes = {};
-
-    private _onEndReachedCalled = false;
-
     protected _virtualRenderer: VirtualRenderer;
-
+    private _onEndReachedCalled = false;
     private _initComplete = false;
     private _relayoutReqIndex: number = -1;
     private _params: RenderStackParams = {
@@ -166,7 +163,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps,S extends 
 
         this.state = {
             renderStack: {},
-        };
+        } as S;
     }
 
     public componentWillReceiveProps(newProps: RecyclerListViewProps): void {
