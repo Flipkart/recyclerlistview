@@ -1,11 +1,11 @@
 import RecyclerListView, { RecyclerListViewProps, RecyclerListViewState } from "./RecyclerListView";
 
-export interface DynamicRenderAheadRecyclerListViewProps extends RecyclerListViewProps {
+export interface ProgressiveListViewProps extends RecyclerListViewProps {
     maxRenderAhead?: number;
     renderAheadStep?: number;
 }
 
-export default class DynamicRenderAheadRecyclerListView extends RecyclerListView<DynamicRenderAheadRecyclerListViewProps, RecyclerListViewState> {
+export default class ProgressiveListView extends RecyclerListView<ProgressiveListViewProps, RecyclerListViewState> {
     public static defaultProps = {
         ...RecyclerListView.defaultProps,
         maxRenderAhead: Number.MAX_VALUE,
@@ -17,7 +17,7 @@ export default class DynamicRenderAheadRecyclerListView extends RecyclerListView
         if (super.componentDidMount) {
             super.componentDidMount();
         }
-        this._updateOffset(this.getRenderAheadOffset());
+        this._updateOffset(this.getCurrentRenderAheadOffset());
     }
 
     private _updateOffset(newVal: number): void {
@@ -34,7 +34,7 @@ export default class DynamicRenderAheadRecyclerListView extends RecyclerListView
     private incrementRenderAhead(): void {
         if (this.props.maxRenderAhead && this.props.renderAheadStep) {
             const layoutManager = this._virtualRenderer.getLayoutManager();
-            const currentRenderAheadOffset = this.getRenderAheadOffset();
+            const currentRenderAheadOffset = this.getCurrentRenderAheadOffset();
             if (layoutManager && currentRenderAheadOffset !== -1) {
                 const contentDimension = layoutManager.getContentDimension();
                 const maxContentSize = this.props.isHorizontal ? contentDimension.width : contentDimension.height;

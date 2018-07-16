@@ -6,7 +6,7 @@ import BaseScrollView from "./core/scrollcomponent/BaseScrollView";
 import { BaseItemAnimator } from "./core/ItemAnimator";
 import { AutoScroll } from "./utils/AutoScroll";
 import { LayoutManager, WrapGridLayoutManager, Point, Layout } from "./core/layoutmanager/LayoutManager";
-import DynamicRenderAheadRecyclerListView from "./core/DynamicRenderAheadRecyclerListView";
+import ProgressiveListView from "./core/ProgressiveListView";
 
 export {
     ContextProvider,
@@ -16,7 +16,7 @@ export {
     LayoutManager,
     WrapGridLayoutManager,
     RecyclerListView,
-    DynamicRenderAheadRecyclerListView,
+    ProgressiveListView,
     BaseItemAnimator,
     BaseScrollView,
     AutoScroll,

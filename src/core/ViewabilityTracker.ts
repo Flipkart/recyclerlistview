@@ -123,7 +123,7 @@ export default class ViewabilityTracker {
         this.forceRefreshWithOffset(this._currentOffset);
     }
 
-    public getRenderAheadOffset(): number {
+    public getCurrentRenderAheadOffset(): number {
         return this._renderAheadOffset;
     }
 

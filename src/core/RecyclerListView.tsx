@@ -301,10 +301,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         return false;
     }
 
-    public getRenderAheadOffset(): number {
+    public getCurrentRenderAheadOffset(): number {
         const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
         if (viewabilityTracker) {
-            return viewabilityTracker.getRenderAheadOffset();
+            return viewabilityTracker.getCurrentRenderAheadOffset();
         }
         return -1;
     }
