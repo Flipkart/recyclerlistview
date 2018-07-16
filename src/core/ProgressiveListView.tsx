@@ -1,5 +1,5 @@
 import RecyclerListView, { RecyclerListViewProps, RecyclerListViewState } from "./RecyclerListView";
-
+import { pRequestAnimationFrame, pCancelAnimationFrame } from "../utils/JavascriptPolyfill";
 export interface ProgressiveListViewProps extends RecyclerListViewProps {
     maxRenderAhead?: number;
     renderAheadStep?: number;
@@ -11,7 +11,8 @@ export default class ProgressiveListView extends RecyclerListView<ProgressiveLis
     public static defaultProps = {
         ...RecyclerListView.defaultProps,
         maxRenderAhead: Number.MAX_VALUE,
-        renderAheadStep: 100,
+        renderAheadStep: 300,
+        renderAheadOffset: 0,
     };
     private renderAheadUdpateCallbackId?: number;
 
@@ -19,14 +20,14 @@ export default class ProgressiveListView extends RecyclerListView<ProgressiveLis
         if (super.componentDidMount) {
             super.componentDidMount();
         }
-        this._updateOffset(this.getCurrentRenderAheadOffset());
+        this.updateRenderAheadProgessively(this.getCurrentRenderAheadOffset());
     }
 
-    private _updateOffset(newVal: number): void {
+    private updateRenderAheadProgessively(newVal: number): void {
         this.cancelRenderAheadUpdate(); // Cancel any pending callback.
-        this.renderAheadUdpateCallbackId = requestAnimationFrame(() => {
+        this.renderAheadUdpateCallbackId = pRequestAnimationFrame(() => {
             if (!this.updateRenderAheadOffset(newVal)) {
-                this._updateOffset(newVal);
+                this.updateRenderAheadProgessively(newVal);
             } else {
                 this.incrementRenderAhead();
             }
@@ -35,14 +36,14 @@ export default class ProgressiveListView extends RecyclerListView<ProgressiveLis
 
     private incrementRenderAhead(): void {
         if (this.props.maxRenderAhead && this.props.renderAheadStep) {
-            const layoutManager = this._virtualRenderer.getLayoutManager();
+            const layoutManager = this.getVirtualRenderer().getLayoutManager();
             const currentRenderAheadOffset = this.getCurrentRenderAheadOffset();
-            if (layoutManager && currentRenderAheadOffset !== -1) {
+            if (layoutManager) {
                 const contentDimension = layoutManager.getContentDimension();
                 const maxContentSize = this.props.isHorizontal ? contentDimension.width : contentDimension.height;
-                if (currentRenderAheadOffset < maxContentSize && currentRenderAheadOffset < this.props.maxRenderAhead ) {
+                if (currentRenderAheadOffset < maxContentSize && currentRenderAheadOffset < this.props.maxRenderAhead) {
                     const newRenderAheadOffset = currentRenderAheadOffset + this.props.renderAheadStep;
-                    this._updateOffset(newRenderAheadOffset);
+                    this.updateRenderAheadProgessively(newRenderAheadOffset);
                 }
             }
         }
@@ -50,7 +51,7 @@ export default class ProgressiveListView extends RecyclerListView<ProgressiveLis
 
     private cancelRenderAheadUpdate(): void {
         if (this.renderAheadUdpateCallbackId) {
-            cancelAnimationFrame(this.renderAheadUdpateCallbackId);
+            pCancelAnimationFrame(this.renderAheadUdpateCallbackId);
         }
     }
 }

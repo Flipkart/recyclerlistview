@@ -126,7 +126,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     };
 
     public static propTypes = {};
-    protected _virtualRenderer: VirtualRenderer;
+    private _virtualRenderer: VirtualRenderer;
     private _onEndReachedCalled = false;
     private _initComplete = false;
     private _relayoutReqIndex: number = -1;
@@ -306,7 +306,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (viewabilityTracker) {
             return viewabilityTracker.getCurrentRenderAheadOffset();
         }
-        return -1;
+        return this.props.renderAheadOffset!;
     }
 
     public getCurrentScrollOffset(): number {
@@ -351,6 +351,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             </ScrollComponent>
 
         );
+    }
+
+    protected getVirtualRenderer(): VirtualRenderer {
+        return this._virtualRenderer;
     }
 
     private _checkAndChangeLayouts(newProps: RecyclerListViewProps, forceFullRender?: boolean): void {
