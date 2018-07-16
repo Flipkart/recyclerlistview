@@ -11,8 +11,27 @@ export default class DynamicRenderAheadRecyclerListView extends RecyclerListView
         maxRenderAhead: Number.MAX_VALUE,
         renderAheadStep: 100,
     };
-    protected renderAheadUdpateCallbackId?: number;
-    public componentDidUpdate(): void {
+    private renderAheadUdpateCallbackId?: number;
+
+    public componentDidMount(): void {
+        if (super.componentDidMount) {
+            super.componentDidMount();
+        }
+        this._updateOffset(this.getRenderAheadOffset());
+    }
+
+    private _updateOffset(newVal: number): void {
+        this.cancelRenderAheadUpdate(); // Cancel any pending callback.
+        this.renderAheadUdpateCallbackId = requestAnimationFrame(() => {
+            if (!this.updateRenderAheadOffset(newVal)) {
+                this._updateOffset(newVal);
+            } else {
+                this.incrementRenderAhead();
+            }
+        });
+    }
+
+    private incrementRenderAhead(): void {
         if (this.props.maxRenderAhead && this.props.renderAheadStep) {
             const layoutManager = this._virtualRenderer.getLayoutManager();
             const currentRenderAheadOffset = this.getRenderAheadOffset();
@@ -27,16 +46,7 @@ export default class DynamicRenderAheadRecyclerListView extends RecyclerListView
         }
     }
 
-    protected _updateOffset(newVal: number): void {
-        this.cancelRenderAheadUpdate(); // Cancel any pending callback.
-        this.renderAheadUdpateCallbackId = requestAnimationFrame(() => {
-            if (!this.updateRenderAheadOffset(newVal)) {
-                this._updateOffset(newVal);
-            }
-        });
-    }
-
-    protected cancelRenderAheadUpdate(): void {
+    private cancelRenderAheadUpdate(): void {
         if (this.renderAheadUdpateCallbackId) {
             cancelAnimationFrame(this.renderAheadUdpateCallbackId);
         }

@@ -172,7 +172,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (!this.props.onVisibleIndexesChanged) {
             this._virtualRenderer.removeVisibleItemsListener();
         } else {
-            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged);
+            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged!);
         }
     }
 
@@ -428,7 +428,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _initTrackers(): void {
         this._assertDependencyPresence(this.props);
         if (this.props.onVisibleIndexesChanged) {
-            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged);
+            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged!);
         }
         this._params = {
             initialOffset: this.props.initialOffset ? this.props.initialOffset : this._initialOffset,
