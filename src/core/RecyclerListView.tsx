@@ -49,10 +49,10 @@ const IS_WEB = !Platform || Platform.OS === "web";
  */
 
 //#if [WEB]
-//import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
-//import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
-//import { DefaultWebItemAnimator as DefaultItemAnimator} from "../platform/web/itemanimators/DefaultWebItemAnimator";
-//const IS_WEB = true;
+// import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
+// import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
+// import { DefaultWebItemAnimator as DefaultItemAnimator} from "../platform/web/itemanimators/DefaultWebItemAnimator";
+// const IS_WEB = true;
 //#endif
 
 const refreshRequestDebouncer = debounce((executable: () => void) => {
@@ -113,7 +113,7 @@ export interface RecyclerListViewState {
     renderStack: RenderStack;
 }
 
-export default class RecyclerListView extends React.Component<RecyclerListViewProps, RecyclerListViewState> {
+export default class RecyclerListView<P extends RecyclerListViewProps, S extends RecyclerListViewState> extends React.Component<P, S> {
     public static defaultProps = {
         canChangeSize: false,
         disableRecycling: false,
@@ -126,11 +126,8 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     };
 
     public static propTypes = {};
-
-    private _onEndReachedCalled = false;
-
     private _virtualRenderer: VirtualRenderer;
-
+    private _onEndReachedCalled = false;
     private _initComplete = false;
     private _relayoutReqIndex: number = -1;
     private _params: RenderStackParams = {
@@ -149,7 +146,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
     private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
 
-    constructor(props: RecyclerListViewProps) {
+    constructor(props: P) {
         super(props);
         this._onScroll = this._onScroll.bind(this);
         this._onSizeChanged = this._onSizeChanged.bind(this);
@@ -166,7 +163,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
 
         this.state = {
             renderStack: {},
-        };
+        } as S;
     }
 
     public componentWillReceiveProps(newProps: RecyclerListViewProps): void {
@@ -175,7 +172,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         if (!this.props.onVisibleIndexesChanged) {
             this._virtualRenderer.removeVisibleItemsListener();
         } else {
-            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged);
+            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged!);
         }
     }
 
@@ -290,6 +287,28 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
         }
     }
 
+    // You can use requestAnimationFrame callback to change renderAhead in multiple frames to enable advanced progressive
+    // rendering when view types are very complex. This method returns a boolean saying if the update was committed. Retry in
+    // the next frame if you get a failure (if mount wasn't complete). Value should be greater than or equal to 0;
+    // Very useful when you have a page where you need a large renderAheadOffset. Setting it at once will slow down the load and
+    // this will help mitigate that.
+    public updateRenderAheadOffset(renderAheadOffset: number): boolean {
+        const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
+        if (viewabilityTracker) {
+            viewabilityTracker.updateRenderAheadOffset(renderAheadOffset);
+            return true;
+        }
+        return false;
+    }
+
+    public getCurrentRenderAheadOffset(): number {
+        const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
+        if (viewabilityTracker) {
+            return viewabilityTracker.getCurrentRenderAheadOffset();
+        }
+        return this.props.renderAheadOffset!;
+    }
+
     public getCurrentScrollOffset(): number {
         const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
         return viewabilityTracker ? viewabilityTracker.getLastOffset() : 0;
@@ -332,6 +351,10 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
             </ScrollComponent>
 
         );
+    }
+
+    protected getVirtualRenderer(): VirtualRenderer {
+        return this._virtualRenderer;
     }
 
     private _checkAndChangeLayouts(newProps: RecyclerListViewProps, forceFullRender?: boolean): void {
@@ -409,7 +432,7 @@ export default class RecyclerListView extends React.Component<RecyclerListViewPr
     private _initTrackers(): void {
         this._assertDependencyPresence(this.props);
         if (this.props.onVisibleIndexesChanged) {
-            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged);
+            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged!);
         }
         this._params = {
             initialOffset: this.props.initialOffset ? this.props.initialOffset : this._initialOffset,
