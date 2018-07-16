@@ -4,7 +4,9 @@ export interface ProgressiveListViewProps extends RecyclerListViewProps {
     maxRenderAhead?: number;
     renderAheadStep?: number;
 }
-
+/**
+ * This will incremently update renderAhread distance and render the page progressively.
+ */
 export default class ProgressiveListView extends RecyclerListView<ProgressiveListViewProps, RecyclerListViewState> {
     public static defaultProps = {
         ...RecyclerListView.defaultProps,
