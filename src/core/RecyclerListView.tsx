@@ -368,7 +368,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
             this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout, newProps.isHorizontal));
-            this._virtualRenderer.refreshWithAnchor();
+            if (newProps.layoutProvider.shouldRefreshWithAnchoring) {
+                this._virtualRenderer.refreshWithAnchor();
+            } else {
+                this._virtualRenderer.refresh();
+            }
             this._refreshViewability();
         } else if (this.props.dataProvider !== newProps.dataProvider) {
             const layoutManager = this._virtualRenderer.getLayoutManager();
