@@ -80,6 +80,7 @@ For full feature set have a look at prop definitions of [RecyclerListView](https
 * **[Sample Code](https://github.com/Flipkart/recyclerlistview/tree/master/docs/guides/samplecode)**
 * **[Performance](https://github.com/Flipkart/recyclerlistview/tree/master/docs/guides/performance)**
 * **Web Support:** Works with React Native Web out of the box. For use with ReactJS start importing from `recyclerlistview/web` e.g., `import { RecyclerListView } from "recyclerlistview/web"`. Use aliases if you want to preserve import path. Only platform specific code is part of the build so, no unnecessary code will ship with your app.
+* **Polyfills Needed:** `requestAnimationFrame`
 
 ## License
 **[Apache v2.0](https://github.com/Flipkart/recyclerlistview/blob/master/LICENSE.md)**

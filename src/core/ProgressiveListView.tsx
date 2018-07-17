@@ -1,5 +1,4 @@
 import RecyclerListView, { RecyclerListViewProps, RecyclerListViewState } from "./RecyclerListView";
-import { pRequestAnimationFrame, pCancelAnimationFrame } from "../utils/JavascriptPolyfill";
 export interface ProgressiveListViewProps extends RecyclerListViewProps {
     maxRenderAhead?: number;
     renderAheadStep?: number;
@@ -25,7 +24,7 @@ export default class ProgressiveListView extends RecyclerListView<ProgressiveLis
 
     private updateRenderAheadProgessively(newVal: number): void {
         this.cancelRenderAheadUpdate(); // Cancel any pending callback.
-        this.renderAheadUdpateCallbackId = pRequestAnimationFrame(() => {
+        this.renderAheadUdpateCallbackId = requestAnimationFrame(() => {
             if (!this.updateRenderAheadOffset(newVal)) {
                 this.updateRenderAheadProgessively(newVal);
             } else {
@@ -51,7 +50,7 @@ export default class ProgressiveListView extends RecyclerListView<ProgressiveLis
 
     private cancelRenderAheadUpdate(): void {
         if (this.renderAheadUdpateCallbackId) {
-            pCancelAnimationFrame(this.renderAheadUdpateCallbackId);
+            cancelAnimationFrame(this.renderAheadUdpateCallbackId);
         }
     }
 }
