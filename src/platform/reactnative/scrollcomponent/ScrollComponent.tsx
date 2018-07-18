@@ -30,12 +30,8 @@ export default class ScrollComponent extends BaseScrollComponent {
 
     constructor(args: ScrollComponentProps) {
         super(args);
-        this._onScroll = this._onScroll.bind(this);
-        this._onLayout = this._onLayout.bind(this);
-
         this._height = 0;
         this._width = 0;
-
         this._isSizeChangedCalledOnce = false;
     }
 
@@ -80,13 +76,13 @@ export default class ScrollComponent extends BaseScrollComponent {
         );
     }
 
-    private _onScroll(event?: NativeSyntheticEvent<NativeScrollEvent>): void {
+    private _onScroll = (event?: NativeSyntheticEvent<NativeScrollEvent>): void => {
         if (event) {
             this.props.onScroll(event.nativeEvent.contentOffset.x, event.nativeEvent.contentOffset.y, event);
         }
     }
 
-    private _onLayout(event: LayoutChangeEvent): void {
+    private _onLayout = (event: LayoutChangeEvent): void => {
         if (this._height !== event.nativeEvent.layout.height || this._width !== event.nativeEvent.layout.width) {
             this._height = event.nativeEvent.layout.height;
             this._width = event.nativeEvent.layout.width;

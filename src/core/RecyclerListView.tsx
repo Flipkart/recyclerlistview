@@ -148,13 +148,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     constructor(props: P) {
         super(props);
-        this._onScroll = this._onScroll.bind(this);
-        this._onSizeChanged = this._onSizeChanged.bind(this);
-        this._dataHasChanged = this._dataHasChanged.bind(this);
-        this.scrollToOffset = this.scrollToOffset.bind(this);
-        this._renderStackWhenReady = this._renderStackWhenReady.bind(this);
-        this._onViewContainerSizeChange = this._onViewContainerSizeChange.bind(this);
-
         this._virtualRenderer = new VirtualRenderer(this._renderStackWhenReady, (offset) => {
             this._pendingScrollToOffset = offset;
         }, (index) => {
@@ -272,9 +265,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this.scrollToIndex(lastIndex, animate);
     }
 
-    public scrollToOffset(x: number, y: number, animate: boolean = false): void {
+    public scrollToOffset = (x: number, y: number, animate: boolean = false): void => {
         if (this._scrollComponent) {
-            if (IS_WEB && this.props.useWindowScroll) {
+            if (this.props.useWindowScroll) {
                 x += this.props.distanceFromWindow!;
                 y += this.props.distanceFromWindow!;
             }
@@ -400,7 +393,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         });
     }
 
-    private _onSizeChanged(layout: Dimension): void {
+    private _onSizeChanged = (layout: Dimension): void => {
         const hasHeightChanged = this._layout.height !== layout.height;
         const hasWidthChanged = this._layout.width !== layout.width;
         this._layout.height = layout.height;
@@ -423,7 +416,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
     }
 
-    private _renderStackWhenReady(stack: RenderStack): void {
+    private _renderStackWhenReady = (stack: RenderStack): void => {
         this.setState(() => {
             return { renderStack: stack };
         });
@@ -469,7 +462,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
     }
 
-    private _dataHasChanged(row1: any, row2: any): boolean {
+    private _dataHasChanged = (row1: any, row2: any): boolean => {
         return this.props.dataProvider.rowHasChanged(row1, row2);
     }
 
@@ -508,7 +501,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         return null;
     }
 
-    private _onViewContainerSizeChange(dim: Dimension, index: number): void {
+    private _onViewContainerSizeChange = (dim: Dimension, index: number): void => {
         //Cannot be null here
         (this._virtualRenderer.getLayoutManager() as LayoutManager).overrideLayout(index, dim);
         if (this._relayoutReqIndex === -1) {
@@ -539,7 +532,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         return renderedItems;
     }
 
-    private _onScroll(offsetX: number, offsetY: number, rawEvent: ScrollEvent): void {
+    private _onScroll = (offsetX: number, offsetY: number, rawEvent: ScrollEvent): void => {
         //Adjusting offsets using distanceFromWindow
         this._virtualRenderer.updateOffset(offsetX - this.props.distanceFromWindow!, offsetY - this.props.distanceFromWindow!);
 
