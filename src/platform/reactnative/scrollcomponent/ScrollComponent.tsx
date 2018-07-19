@@ -56,7 +56,7 @@ export default class ScrollComponent extends BaseScrollComponent {
         //     ...props,
         // } = this.props;
         return (
-            <Scroller ref={this.getScrollViewRef}
+            <Scroller ref={this._getScrollViewRef}
                 removeClippedSubviews={false}
                 scrollEventThrottle={this.props.scrollThrottle}
                 {...this.props}
@@ -76,7 +76,7 @@ export default class ScrollComponent extends BaseScrollComponent {
         );
     }
 
-    private getScrollViewRef = (scrollView: any) => { this._scrollViewRef = scrollView as (ScrollView | null); };
+    private _getScrollViewRef = (scrollView: any) => { this._scrollViewRef = scrollView as (ScrollView | null); };
 
     private _onScroll = (event?: NativeSyntheticEvent<NativeScrollEvent>): void => {
         if (event) {
