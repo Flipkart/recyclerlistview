@@ -146,8 +146,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
 
-    constructor(props: P) {
-        super(props);
+    constructor(props: P,context?: any) {
+        super(props, context);
         this._virtualRenderer = new VirtualRenderer(this._renderStackWhenReady, (offset) => {
             this._pendingScrollToOffset = offset;
         }, (index) => {
