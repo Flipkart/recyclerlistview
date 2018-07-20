@@ -15,6 +15,9 @@ import { Layout, WrapGridLayoutManager, LayoutManager } from "../layoutmanager/L
  */
 
 export abstract class BaseLayoutProvider {
+    //Unset if your new layout provider doesn't require firstVisibleIndex preservation on application
+    public shouldRefreshWithAnchoring: boolean = true;
+
     //Return your layout manager, you get all required dependencies here. Also, make sure to use cachedLayouts. RLV might cache layouts and give back to
     //in cases of conxtext preservation. Make sure you use them if provided.
     public abstract newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager;
@@ -34,8 +37,7 @@ export class LayoutProvider extends BaseLayoutProvider {
     private _tempDim: Dimension;
     private _lastLayoutManager: WrapGridLayoutManager | undefined;
 
-    constructor(getLayoutTypeForIndex: (index: number) => string | number,
-                setLayoutForType: (type: string | number, dim: Dimension, index: number) => void) {
+    constructor(getLayoutTypeForIndex: (index: number) => string | number, setLayoutForType: (type: string | number, dim: Dimension, index: number) => void) {
         super();
         this._getLayoutTypeForIndex = getLayoutTypeForIndex;
         this._setLayoutForType = setLayoutForType;
