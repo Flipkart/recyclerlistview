@@ -47,8 +47,6 @@ export default class ViewabilityTracker {
         this.onEngagedRowsChanged = null;
 
         this._relevantDim = { start: 0, end: 0 };
-
-        this._valueExtractorForBinarySearch = this._valueExtractorForBinarySearch.bind(this);
     }
 
     public init(): void {
@@ -175,7 +173,7 @@ export default class ViewabilityTracker {
         return BinarySearch.findClosestHigherValueIndex(count, this._visibleWindow.start + bias, this._valueExtractorForBinarySearch);
     }
 
-    private _valueExtractorForBinarySearch(index: number): number {
+    private _valueExtractorForBinarySearch = (index: number): number => {
         const itemRect = this._layouts[index];
         this._setRelevantBounds(itemRect, this._relevantDim);
         return this._relevantDim.end;

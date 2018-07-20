@@ -12,12 +12,6 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _mainDiv: HTMLDivElement | null = null;
-
-    constructor(props: ViewRendererProps<any>) {
-        super(props);
-        this._setRef = this._setRef.bind(this);
-    }
-
     public componentDidMount(): void {
         if (super.componentDidMount) {
             super.componentDidMount();
@@ -58,7 +52,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     protected getRef(): object | null {
         return this._mainDiv;
     }
-    private _setRef(div: HTMLDivElement | null): void {
+    private _setRef = (div: HTMLDivElement | null): void => {
         this._mainDiv = div;
     }
     private _getTransform(): string {

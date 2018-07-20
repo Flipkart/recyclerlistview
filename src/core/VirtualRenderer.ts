@@ -77,8 +77,6 @@ export default class VirtualRenderer {
         this._startKey = 0;
 
         this.onVisibleItemsChanged = null;
-        this._onEngagedItemsChanged = this._onEngagedItemsChanged.bind(this);
-        this._onVisibleItemsChanged = this._onVisibleItemsChanged.bind(this);
     }
 
     public getLayoutDimension(): Dimension {
@@ -339,13 +337,13 @@ export default class VirtualRenderer {
         }
     }
 
-    private _onVisibleItemsChanged(all: number[], now: number[], notNow: number[]): void {
+    private _onVisibleItemsChanged = (all: number[], now: number[], notNow: number[]): void => {
         if (this.onVisibleItemsChanged) {
             this.onVisibleItemsChanged(all, now, notNow);
         }
     }
 
-    private _onEngagedItemsChanged(all: number[], now: number[], notNow: number[]): void {
+    private _onEngagedItemsChanged = (all: number[], now: number[], notNow: number[]): void => {
         const count = notNow.length;
         let resolvedKey;
         let disengagedIndex = 0;
