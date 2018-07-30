@@ -267,10 +267,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     public scrollToOffset = (x: number, y: number, animate: boolean = false): void => {
         if (this._scrollComponent) {
-            if (this.props.useWindowScroll) {
-                x += this.props.distanceFromWindow!;
-                y += this.props.distanceFromWindow!;
-            }
             if (this.props.isHorizontal) {
                 y = 0;
             } else {
@@ -304,7 +300,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     public getCurrentScrollOffset(): number {
         const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
-        return viewabilityTracker ? viewabilityTracker.getLastOffset() : 0;
+        let currentOffset = (viewabilityTracker ? viewabilityTracker.getLastOffset() : 0);
+        if (currentOffset > this.props.distanceFromWindow!) {
+            currentOffset += this.props.distanceFromWindow!;
+        }
+        return currentOffset;
     }
 
     public findApproxFirstVisibleIndex(): number {
@@ -432,7 +432,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged!);
         }
         this._params = {
-            initialOffset: this.props.initialOffset ? this.props.initialOffset : this._initialOffset,
+            initialOffset: this._initialOffset ? this._initialOffset : this.props.initialOffset,
             initialRenderIndex: this.props.initialRenderIndex,
             isHorizontal: this.props.isHorizontal,
             itemCount: this.props.dataProvider.getSize(),

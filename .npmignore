@@ -5,3 +5,4 @@ scripts/
 .babelrc
 .travis.yml
 package-lock.json
+.npmrc
