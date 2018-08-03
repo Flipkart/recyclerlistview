@@ -19,6 +19,7 @@ export default class ViewabilityTracker {
     public onEngagedRowsChanged: TOnItemStatusChanged | null;
 
     private _currentOffset: number;
+    private _actualOffset: number;
     private _maxOffset: number;
     private _renderAheadOffset: number;
     private _visibleWindow: Range;
@@ -32,6 +33,7 @@ export default class ViewabilityTracker {
 
     constructor(renderAheadOffset: number, initialOffset: number) {
         this._currentOffset = Math.max(0, initialOffset);
+        this._actualOffset = this._currentOffset;
         this._maxOffset = 0;
         this._renderAheadOffset = renderAheadOffset;
         this._visibleWindow = { start: 0, end: 0 };
@@ -75,6 +77,7 @@ export default class ViewabilityTracker {
     }
 
     public updateOffset(offset: number): void {
+        this._actualOffset = offset;
         offset = Math.min(this._maxOffset, Math.max(0, offset));
         if (this._currentOffset !== offset) {
             this._currentOffset = offset;
@@ -89,6 +92,10 @@ export default class ViewabilityTracker {
 
     public getLastOffset(): number {
         return this._currentOffset;
+    }
+
+    public getLastActualOffset(): number {
+        return this._actualOffset;
     }
 
     public getEngagedIndexes(): number[] {
