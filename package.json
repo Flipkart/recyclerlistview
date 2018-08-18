@@ -46,6 +46,7 @@
   "devDependencies": {
     "@types/lodash.debounce": "4.0.3",
     "@types/prop-types": "15.5.2",
-    "@types/react-native": "0.49.5"
+    "@types/react-native": "0.49.5",
+    "@types/react": "16.4.7"
   }
 }
