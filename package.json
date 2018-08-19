@@ -1,6 +1,6 @@
 {
   "name": "recyclerlistview",
-  "version": "1.4.0-beta.13",
+  "version": "1.4.0-beta.14",
   "description": "The listview that you need and deserve. It was built for performance, uses cell recycling to achieve smooth scrolling.",
   "main": "dist/reactnative/index.js",
   "types": "dist/reactnative/index.d.ts",
@@ -46,6 +46,7 @@
   "devDependencies": {
     "@types/lodash.debounce": "4.0.3",
     "@types/prop-types": "15.5.2",
-    "@types/react-native": "0.49.5"
+    "@types/react-native": "0.49.5",
+    "@types/react": "16.4.7"
   }
 }
