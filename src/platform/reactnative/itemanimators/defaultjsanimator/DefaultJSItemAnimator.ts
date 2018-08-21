@@ -1,12 +1,10 @@
-import { Animated, Easing, View, Platform } from "react-native";
+import { Animated, Easing, View } from "react-native";
 import { BaseItemAnimator } from "../../../../core/ItemAnimator";
 
 interface UnmountAwareView extends View {
     _isUnmountedForRecyclerListView?: boolean;
     _lastAnimVal?: Animated.ValueXY | null;
 }
-
-const IS_WEB = Platform.OS === "web";
 
 /**
  * Default implementation of RLV layout animations for react native. These ones are purely JS driven. Also, check out DefaultNativeItemAnimator
@@ -19,8 +17,8 @@ export class DefaultJSItemAnimator implements BaseItemAnimator {
     public shouldAnimateOnce: boolean = true;
     private _hasAnimatedOnce: boolean = false;
     private _isTimerOn: boolean = false;
-    public animateWillMount(atX: number, atY: number, itemIndex: number): void {
-        //no need
+    public animateWillMount(atX: number, atY: number, itemIndex: number): object | undefined {
+        return undefined;
     }
     public animateDidMount(atX: number, atY: number, itemRef: object, itemIndex: number): void {
         //no need
@@ -36,7 +34,7 @@ export class DefaultJSItemAnimator implements BaseItemAnimator {
                 const viewRef = itemRef as UnmountAwareView;
                 const animXY = new Animated.ValueXY({ x: fromX, y: fromY });
                 animXY.addListener((value) => {
-                    if (viewRef._isUnmountedForRecyclerListView) {
+                    if (viewRef._isUnmountedForRecyclerListView || (this.shouldAnimateOnce && this._hasAnimatedOnce)) {
                         animXY.stopAnimation();
                         return;
                     }
@@ -75,7 +73,6 @@ export class DefaultJSItemAnimator implements BaseItemAnimator {
     }
 
     private _getNativePropObject(x: number, y: number): object {
-        const point = { left: x, top: y };
-        return !IS_WEB ? point : { style: point };
+        return { style: { left: x, top: y } };
     }
 }

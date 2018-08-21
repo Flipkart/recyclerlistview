@@ -1,6 +1,6 @@
 {
   "name": "recyclerlistview",
-  "version": "1.3.1",
+  "version": "1.4.0-beta.14",
   "description": "The listview that you need and deserve. It was built for performance, uses cell recycling to achieve smooth scrolling.",
   "main": "dist/reactnative/index.js",
   "types": "dist/reactnative/index.d.ts",
@@ -9,8 +9,21 @@
     "clean": "sh scripts/clean.sh",
     "setup": "sh scripts/setup.sh",
     "release": "sh scripts/publish-latest.sh",
-    "release-beta": "sh scripts/publish-beta.sh"
+    "release-beta": "sh scripts/publish-beta.sh",
+    "release-local": "sh scripts/publish-local.sh"
   },
+  "keywords": [
+    "react-native",
+    "recyclerview",
+    "listview",
+    "flatlist-alternative",
+    "flatlist",
+    "60fps",
+    "cross-platform",
+    "web",
+    "react-native-web",
+    "performance"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/Flipkart/recyclerlistview"
@@ -22,7 +35,7 @@
   },
   "homepage": "https://github.com/Flipkart/recyclerlistview",
   "dependencies": {
-    "lodash-es": "4.17.4",
+    "lodash.debounce": "4.0.8",
     "prop-types": "15.5.8",
     "ts-object-utils": "0.0.5"
   },
@@ -31,8 +44,9 @@
     "react-native": ">= 0.30.0"
   },
   "devDependencies": {
-    "@types/lodash-es": "4.17.0",
+    "@types/lodash.debounce": "4.0.3",
     "@types/prop-types": "15.5.2",
-    "@types/react-native": "0.49.5"
+    "@types/react-native": "0.49.5",
+    "@types/react": "16.4.7"
   }
 }

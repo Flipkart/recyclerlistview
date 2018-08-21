@@ -1,34 +1,66 @@
 /***
  * Computes the positions and dimensions of items that will be rendered by the list. The output from this is utilized by viewability tracker to compute the
  * lists of visible/hidden item.
- * Note: In future, this will also become an external dependency which means you can write your own layout manager. That will enable everyone to layout their
- * views just the way they want. Current implementation is a StaggeredList
  */
-import LayoutProvider, { Dimension } from "../dependencies/LayoutProvider";
+import { Dimension, LayoutProvider } from "../dependencies/LayoutProvider";
 import CustomError from "../exceptions/CustomError";
 
-export default class LayoutManager {
+export abstract class LayoutManager {
+    public getOffsetForIndex(index: number): Point {
+        const layouts = this.getLayouts();
+        if (layouts.length > index) {
+            return { x: layouts[index].x, y: layouts[index].y };
+        } else {
+            throw new CustomError({
+                message: "No layout available for index: " + index,
+                type: "LayoutUnavailableException",
+            });
+        }
+    }
+
+    //You can ovveride this incase you want to override style in some cases e.g, say you want to enfore width but not height
+    public getStyleOverridesForIndex(index: number): object | undefined {
+        return undefined;
+    }
+
+    //Return the dimension of entire content inside the list
+    public abstract getContentDimension(): Dimension;
+
+    //Return all computed layouts as an array, frequently called, you are expected to return a cached array. Don't compute here.
+    public abstract getLayouts(): Layout[];
+
+    //RLV will call this method in case of mismatch with actual rendered dimensions in case of non deterministic rendering
+    //You are expected to cache this value and prefer it over estimates provided
+    //No need to relayout which RLV will trigger. You should only relayout when relayoutFromIndex is called.
+    public abstract overrideLayout(index: number, dim: Dimension): void;
+
+    //Recompute layouts from given index, compute heavy stuff should be here
+    public abstract relayoutFromIndex(startIndex: number, itemCount: number): void;
+}
+
+export class WrapGridLayoutManager extends LayoutManager {
     private _layoutProvider: LayoutProvider;
     private _window: Dimension;
     private _totalHeight: number;
     private _totalWidth: number;
-    private _layouts: Rect[];
     private _isHorizontal: boolean;
+    private _layouts: Layout[];
 
-    constructor(layoutProvider: LayoutProvider, dimensions: Dimension, isHorizontal: boolean = false, cachedLayouts?: Rect[]) {
+    constructor(layoutProvider: LayoutProvider, renderWindowSize: Dimension, isHorizontal: boolean = false, cachedLayouts?: Layout[]) {
+        super();
         this._layoutProvider = layoutProvider;
-        this._window = dimensions;
+        this._window = renderWindowSize;
         this._totalHeight = 0;
         this._totalWidth = 0;
+        this._isHorizontal = !!isHorizontal;
         this._layouts = cachedLayouts ? cachedLayouts : [];
-        this._isHorizontal = isHorizontal;
     }
 
-    public getLayoutDimension(): Dimension {
+    public getContentDimension(): Dimension {
         return { height: this._totalHeight, width: this._totalWidth };
     }
 
-    public getLayouts(): Rect[] {
+    public getLayouts(): Layout[] {
         return this._layouts;
     }
 
@@ -61,7 +93,7 @@ export default class LayoutManager {
     }
 
     //TODO:Talha laziliy calculate in future revisions
-    public reLayoutFromIndex(startIndex: number, itemCount: number): void {
+    public relayoutFromIndex(startIndex: number, itemCount: number): void {
         startIndex = this._locateFirstNeighbourIndex(startIndex);
         let startX = 0;
         let startY = 0;
@@ -88,7 +120,7 @@ export default class LayoutManager {
                 itemDim.height = oldLayout.height;
                 itemDim.width = oldLayout.width;
             } else {
-                this._layoutProvider.setLayoutForType(this._layoutProvider.getLayoutTypeForIndex(i), itemDim, i);
+                this._layoutProvider.setComputedLayout(this._layoutProvider.getLayoutTypeForIndex(i), itemDim, i);
             }
             this.setMaxBounds(itemDim);
             while (!this._checkBounds(startX, startY, itemDim, this._isHorizontal)) {
@@ -129,7 +161,7 @@ export default class LayoutManager {
         this._setFinalDimensions(maxBound);
     }
 
-    private _pointDimensionsToRect(itemRect: Rect): void {
+    private _pointDimensionsToRect(itemRect: Layout): void {
         if (this._isHorizontal) {
             this._totalWidth = itemRect.x;
         } else {
@@ -169,7 +201,7 @@ export default class LayoutManager {
     }
 }
 
-export interface Rect extends Dimension, Point {
+export interface Layout extends Dimension, Point {
     isOverridden?: boolean;
 }
 export interface Point {

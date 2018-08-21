@@ -1,6 +1,7 @@
 import * as React from "react";
-import LayoutProvider, { Dimension } from "../dependencies/LayoutProvider";
+import { Dimension, BaseLayoutProvider } from "../dependencies/LayoutProvider";
 import ItemAnimator from "../ItemAnimator";
+import { LayoutManager } from "../layoutmanager/LayoutManager";
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
@@ -20,12 +21,15 @@ export interface ViewRendererProps<T> {
     data: any;
     index: number;
     itemAnimator: ItemAnimator;
+    styleOverrides?: object;
     forceNonDeterministicRendering?: boolean;
     isHorizontal?: boolean;
     extendedState?: object;
-    layoutProvider?: LayoutProvider;
+    layoutProvider?: BaseLayoutProvider;
 }
 export default abstract class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {
+    protected animatorStyleOverrides: object | undefined;
+
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
         const hasMoved = this.props.x !== newProps.x || this.props.y !== newProps.y;
 
@@ -45,10 +49,11 @@ export default abstract class BaseViewRenderer<T> extends React.Component<ViewRe
         return shouldUpdate;
     }
     public componentDidMount(): void {
+        this.animatorStyleOverrides = undefined;
         this.props.itemAnimator.animateDidMount(this.props.x, this.props.y, this.getRef() as object, this.props.index);
     }
     public componentWillMount(): void {
-        this.props.itemAnimator.animateWillMount(this.props.x, this.props.y, this.props.index);
+        this.animatorStyleOverrides = this.props.itemAnimator.animateWillMount(this.props.x, this.props.y, this.props.index);
     }
     public componentWillUnmount(): void {
         this.props.itemAnimator.animateWillUnmount(this.props.x, this.props.y, this.getRef() as object, this.props.index);
