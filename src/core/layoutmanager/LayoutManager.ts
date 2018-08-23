@@ -145,6 +145,7 @@ export class WrapGridLayoutManager extends LayoutManager {
                 itemRect = this._layouts[i];
                 itemRect.x = startX;
                 itemRect.y = startY;
+                itemRect.type = layoutType;
                 itemRect.width = itemDim.width;
                 itemRect.height = itemDim.height;
             }
@@ -203,7 +204,7 @@ export class WrapGridLayoutManager extends LayoutManager {
 
 export interface Layout extends Dimension, Point {
     isOverridden?: boolean;
-    type?: string | number;
+    type: string | number;
 }
 export interface Point {
     x: number;
