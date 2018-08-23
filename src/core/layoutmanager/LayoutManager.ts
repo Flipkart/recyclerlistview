@@ -116,9 +116,7 @@ export class WrapGridLayoutManager extends LayoutManager {
         for (let i = startIndex; i < itemCount; i++) {
             oldLayout = this._layouts[i];
             const layoutType = this._layoutProvider.getLayoutTypeForIndex(i);
-            const oldLayoutType = oldLayout && oldLayout.type;
-            const isLayoutTypeSame = oldLayoutType === layoutType;
-            if (oldLayout && oldLayout.isOverridden && isLayoutTypeSame) {
+            if (oldLayout && oldLayout.isOverridden && oldLayout.type === layoutType) {
                 itemDim.height = oldLayout.height;
                 itemDim.width = oldLayout.width;
             } else {
