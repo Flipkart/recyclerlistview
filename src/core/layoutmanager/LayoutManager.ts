@@ -116,7 +116,7 @@ export class WrapGridLayoutManager extends LayoutManager {
         for (let i = startIndex; i < itemCount; i++) {
             oldLayout = this._layouts[i];
             const layoutType = this._layoutProvider.getLayoutTypeForIndex(i);
-            const oldLayoutType = oldLayout && oldLayout.layoutType;
+            const oldLayoutType = oldLayout && oldLayout.type;
             const isLayoutTypeSame = oldLayoutType === layoutType;
             if (oldLayout && oldLayout.isOverridden && isLayoutTypeSame) {
                 itemDim.height = oldLayout.height;
@@ -142,7 +142,7 @@ export class WrapGridLayoutManager extends LayoutManager {
 
             //TODO: Talha creating array upfront will speed this up
             if (i > oldItemCount - 1) {
-                this._layouts.push({ x: startX, y: startY, height: itemDim.height, width: itemDim.width, layoutType });
+                this._layouts.push({ x: startX, y: startY, height: itemDim.height, width: itemDim.width, type: layoutType });
             } else {
                 itemRect = this._layouts[i];
                 itemRect.x = startX;
@@ -205,7 +205,7 @@ export class WrapGridLayoutManager extends LayoutManager {
 
 export interface Layout extends Dimension, Point {
     isOverridden?: boolean;
-    layoutType?: string | number;
+    type?: string | number;
 }
 export interface Point {
     x: number;
