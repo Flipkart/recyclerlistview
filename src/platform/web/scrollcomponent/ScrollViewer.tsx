@@ -68,7 +68,7 @@ export default class ScrollViewer extends BaseScrollView {
             </div>
             : <div
                 ref={this._setDivRef}
-                style={{ position: "relative" }}>
+                style={{ position: "relative", ...this.props.style }}>
                 {this.props.children}
             </div>;
     }
