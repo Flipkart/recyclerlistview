@@ -108,7 +108,6 @@ export class WrapGridLayoutManager extends LayoutManager {
         }
 
         const oldItemCount = this._layouts.length;
-
         const itemDim = { height: 0, width: 0 };
         let itemRect = null;
 
@@ -116,11 +115,12 @@ export class WrapGridLayoutManager extends LayoutManager {
 
         for (let i = startIndex; i < itemCount; i++) {
             oldLayout = this._layouts[i];
-            if (oldLayout && oldLayout.isOverridden) {
+            const layoutType = this._layoutProvider.getLayoutTypeForIndex(i);
+            if (oldLayout && oldLayout.isOverridden && oldLayout.type === layoutType) {
                 itemDim.height = oldLayout.height;
                 itemDim.width = oldLayout.width;
             } else {
-                this._layoutProvider.setComputedLayout(this._layoutProvider.getLayoutTypeForIndex(i), itemDim, i);
+                this._layoutProvider.setComputedLayout(layoutType, itemDim, i);
             }
             this.setMaxBounds(itemDim);
             while (!this._checkBounds(startX, startY, itemDim, this._isHorizontal)) {
@@ -140,11 +140,12 @@ export class WrapGridLayoutManager extends LayoutManager {
 
             //TODO: Talha creating array upfront will speed this up
             if (i > oldItemCount - 1) {
-                this._layouts.push({ x: startX, y: startY, height: itemDim.height, width: itemDim.width });
+                this._layouts.push({ x: startX, y: startY, height: itemDim.height, width: itemDim.width, type: layoutType });
             } else {
                 itemRect = this._layouts[i];
                 itemRect.x = startX;
                 itemRect.y = startY;
+                itemRect.type = layoutType;
                 itemRect.width = itemDim.width;
                 itemRect.height = itemDim.height;
             }
@@ -203,6 +204,7 @@ export class WrapGridLayoutManager extends LayoutManager {
 
 export interface Layout extends Dimension, Point {
     isOverridden?: boolean;
+    type: string | number;
 }
 export interface Point {
     x: number;
