@@ -3,7 +3,7 @@
  */
 
 import * as React from "react";
-import {View} from "react-native";
+import {ToastAndroid, View} from "react-native";
 import RecyclerListView, {RecyclerListViewState, RecyclerListViewProps} from "./RecyclerListView";
 
 export interface StickyContainerProps {
@@ -15,26 +15,24 @@ export interface StickyContainerState {
     visible: boolean;
 }
 export default class StickyContainer<P extends StickyContainerProps, S extends StickyContainerState> extends React.Component<P, S> {
+
     constructor(props: P, context?: any) {
         super(props, context);
+        this.onVisibleIndexesChanged = this.onVisibleIndexesChanged.bind(this);
 
         this.state = {
             visible: false,
         } as S;
-
-        const a: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> = this.props.children as RecyclerListView<RecyclerListViewProps, RecyclerListViewState>;
-        a._virtualRenderer.attachVisibleItemsListener(this.onVisibleIndexesChanged);
-
-        setTimeout(() => {
-            this.show();
-        }, 1000);
     }
 
     public render(): JSX.Element {
         const value: boolean = this.state.visible;
         return (
             <View style={{flex: 1}}>
-                {this.props.children}
+                <RecyclerListView
+                    {...this.props.children.props}
+                    onVisibleIndexesChanged={this.onVisibleIndexesChanged}
+                />
                 {value ? <View style={{height: 200, width: 300, backgroundColor: "blue", position: "absolute", top: 0}}/> : null}
             </View>
         );
@@ -53,6 +51,10 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     }
 
     private onVisibleIndexesChanged(all: number[], now: number[], notNow: number[]): void {
-        console.log("hello");
+        if (notNow[0] === 1) {
+            this.show();
+        } else if (now[0] === 1) {
+            this.hide();
+        }
     }
 }
