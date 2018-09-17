@@ -35,12 +35,13 @@ import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcom
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
+import { Platform, View, Text } from "react-native";
+import StickyContainer from "./StickyContainer";
 
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
-import { Platform } from "react-native";
 const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
 
@@ -126,7 +127,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     };
 
     public static propTypes = {};
-    private _virtualRenderer: VirtualRenderer;
+    public _virtualRenderer: VirtualRenderer;
     private _onEndReachedCalled = false;
     private _initComplete = false;
     private _relayoutReqIndex: number = -1;
@@ -327,6 +328,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         //     rowRenderer,
         //     ...props,
         // } = this.props;
+
         return (
             <ScrollComponent
                 ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
@@ -338,7 +340,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}>
                 {this._generateRenderStack()}
             </ScrollComponent>
-
         );
     }
 
