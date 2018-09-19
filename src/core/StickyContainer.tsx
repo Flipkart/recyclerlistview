@@ -8,7 +8,8 @@ import RecyclerListView, {RecyclerListViewState, RecyclerListViewProps} from "./
 
 export interface StickyContainerProps {
     children: RecyclerListView<RecyclerListViewProps, RecyclerListViewState>;
-    stickyIndices: number;
+    topStickyIndices: number;
+    bottomStickyIndices: number;
     stickyView?: JSX.Element;
 }
 export interface StickyContainerState {
@@ -38,7 +39,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
                 />
                 {value ?
                     <View style={{position: "absolute", top: 0}}>
-                        {this.rowRenderer(0, this.props.stickyIndices, 0)}
+                        {this.rowRenderer(0, this.props.topStickyIndices, 0)}
                     </View> : null}
                 {/*{value ? <View style={{height: 200, width: 300, backgroundColor: "blue", position: "absolute", top: 0}}/> : null}*/}
             </View>
@@ -58,10 +59,10 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     }
 
     private onVisibleIndexesChanged(all: number[], now: number[], notNow: number[]): void {
-        if (this.props.stickyIndices) {
-            if (notNow[0] === this.props.stickyIndices - 1) {
+        if (this.props.topStickyIndices) {
+            if (all.indexOf(this.props.topStickyIndices) >= 0 && all.indexOf(this.props.topStickyIndices - 1) === -1) {
                 this.show();
-            } else if (now[0] === this.props.stickyIndices - 1) {
+            } else if (all.indexOf(this.props.topStickyIndices) >= 0 && all.indexOf(this.props.topStickyIndices - 1) >= 0) {
                 this.hide();
             }
         }
