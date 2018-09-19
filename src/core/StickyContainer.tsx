@@ -5,11 +5,13 @@
 import * as React from "react";
 import {ToastAndroid, View, Animated} from "react-native";
 import RecyclerListView, {RecyclerListViewState, RecyclerListViewProps} from "./RecyclerListView";
+import { ScrollEvent } from "./scrollcomponent/BaseScrollView";
+import {Layout, LayoutManager} from "./layoutmanager/LayoutManager";
 
 export interface StickyContainerProps {
-    children: RecyclerListView<RecyclerListViewProps, RecyclerListViewState>;
-    topStickyIndices: number;
-    bottomStickyIndices: number;
+    children: any;
+    stickyHeaderIndices: number[];
+    stickyFooterIndices: number[];
     stickyView?: JSX.Element;
 }
 export interface StickyContainerState {
@@ -17,36 +19,43 @@ export interface StickyContainerState {
     bottomVisible: boolean;
 }
 export default class StickyContainer<P extends StickyContainerProps, S extends StickyContainerState> extends React.Component<P, S> {
-    private rowRenderer: (type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null;
+    private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null;
+    private _rowRenderer: ((type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null) | null = null;
+    private _topStickyViewOffset: Animated.Value = new Animated.Value(0);
+    private _currentStickyHeaderIndice: number = 0;
+    private _currentStickyFooterIndice: number = 0;
 
     constructor(props: P, context?: any) {
         super(props, context);
-        this.onVisibleIndexesChanged = this.onVisibleIndexesChanged.bind(this);
-        const recycler: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> = this.props.children;
-        this.rowRenderer = recycler.props.rowRenderer;
+        this._onVisibleIndexesChanged = this._onVisibleIndexesChanged.bind(this);
+        this._onScroll = this._onScroll.bind(this);
 
         this.state = {
             topVisible: false,
-            bottomVisible: !!this.props.bottomStickyIndices,
+            bottomVisible: !!this.props.stickyFooterIndices,
         } as S;
     }
 
     public render(): JSX.Element {
+        const recycler = React.cloneElement(this.props.children, {
+            ref: this._getRecyclerRef,
+            onVisibleIndexesChanged: this._onVisibleIndexesChanged,
+            onScroll: this._onScroll,
+        });
+        if (this._recyclerRef) {
+            this._rowRenderer = this._recyclerRef.props.rowRenderer;
+        }
         return (
             <View style={{flex: 1}}>
-                <RecyclerListView
-                    {...this.props.children.props}
-                    onVisibleIndexesChanged={this.onVisibleIndexesChanged}
-                />
+                {recycler}
                 {this.state.topVisible ?
-                    <View style={{position: "absolute", top: 0}}>
-                        {this.rowRenderer(this.props.topStickyIndices, null, 0)}
-                    </View> : null}
+                    <Animated.View style={{position: "absolute", top: 0, transform: [{translateY: this._topStickyViewOffset}]}}>
+                        {this._rowRenderer ? this._rowRenderer(this.props.stickyHeaderIndices[this._currentStickyHeaderIndice], null, 0) : null}
+                    </Animated.View> : null}
                 {this.state.bottomVisible ?
                     <View style={{position: "absolute", bottom: 0}}>
-                        {this.rowRenderer(this.props.bottomStickyIndices, null, 0)}
+                        {this._rowRenderer ? this._rowRenderer(this.props.stickyFooterIndices[this._currentStickyFooterIndice], null, 0) : null}
                     </View> : null}
-                {/*{value ? <View style={{height: 200, width: 300, backgroundColor: "blue", position: "absolute", top: 0}}/> : null}*/}
             </View>
         );
     }
@@ -63,19 +72,40 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         });
     }
 
-    private onVisibleIndexesChanged(all: number[], now: number[], notNow: number[]): void {
-        if (this.props.topStickyIndices) {
-            if (all.indexOf(this.props.topStickyIndices) >= 0 && all.indexOf(this.props.topStickyIndices - 1) === -1) {
+    private _getRecyclerRef = (recycler: any) => { this._recyclerRef = recycler as (RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null); };
+
+    private _onVisibleIndexesChanged(all: number[], now: number[], notNow: number[]): void {
+        if (this.props.stickyHeaderIndices) {
+            const stickyHeaderIndice: number = this.props.stickyHeaderIndices[this._currentStickyHeaderIndice];
+            if (all.indexOf(stickyHeaderIndice) >= 0 && all.indexOf(stickyHeaderIndice - 1) === -1) {
                 this.topStickyViewVisible(true);
-            } else if (all.indexOf(this.props.topStickyIndices) >= 0 && all.indexOf(this.props.topStickyIndices - 1) >= 0) {
+            } else if (all.indexOf(stickyHeaderIndice) >= 0 && all.indexOf(stickyHeaderIndice - 1) >= 0) {
                 this.topStickyViewVisible(false);
             }
         }
-        if (this.props.bottomStickyIndices) {
-            if (all.indexOf(this.props.bottomStickyIndices) >= 0 && all.indexOf(this.props.bottomStickyIndices + 1) === -1) {
+        if (this.props.stickyFooterIndices) {
+            const stickyFooterIndice: number = this.props.stickyFooterIndices[this._currentStickyFooterIndice];
+            if (all.indexOf(stickyFooterIndice) >= 0 && all.indexOf(stickyFooterIndice + 1) === -1) {
                 this.bottomStickyViewVisible(true);
-            } else if (all.indexOf(this.props.bottomStickyIndices) >= 0 && all.indexOf(this.props.bottomStickyIndices + 1) >= 0) {
+            } else if (all.indexOf(stickyFooterIndice) >= 0 && all.indexOf(stickyFooterIndice + 1) >= 0) {
                 this.bottomStickyViewVisible(false);
+            }
+        }
+    }
+
+    private _onScroll(rawEvent: ScrollEvent, offsetX: number, offsetY: number): void {
+        if (this._recyclerRef) {
+            const currentStickyHeaderIndice = this.props.stickyHeaderIndices[this._currentStickyHeaderIndice];
+            const nextStickyHeaderIndice = this.props.stickyHeaderIndices[this._currentStickyHeaderIndice + 1];
+            if (nextStickyHeaderIndice) {
+                const nextLayout: Layout | undefined = this._recyclerRef.getLayout(nextStickyHeaderIndice);
+                const nextY: number | null = nextLayout ? nextLayout.y : null;
+                const currentLayout: Layout | undefined = this._recyclerRef.getLayout(currentStickyHeaderIndice);
+                const currentHeight: number | null = currentLayout ? currentLayout.height : null;
+                if (nextY && currentHeight && offsetY > nextY - currentHeight) {
+                    const y = offsetY + currentHeight - nextY;
+                    this._topStickyViewOffset.setValue(-1 * y);
+                }
             }
         }
     }
