@@ -3,7 +3,7 @@
  */
 
 import * as React from "react";
-import {ToastAndroid, View} from "react-native";
+import {ToastAndroid, View, Animated} from "react-native";
 import RecyclerListView, {RecyclerListViewState, RecyclerListViewProps} from "./RecyclerListView";
 
 export interface StickyContainerProps {
@@ -13,7 +13,8 @@ export interface StickyContainerProps {
     stickyView?: JSX.Element;
 }
 export interface StickyContainerState {
-    visible: boolean;
+    topVisible: boolean;
+    bottomVisible: boolean;
 }
 export default class StickyContainer<P extends StickyContainerProps, S extends StickyContainerState> extends React.Component<P, S> {
     private rowRenderer: (type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null;
@@ -25,45 +26,56 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         this.rowRenderer = recycler.props.rowRenderer;
 
         this.state = {
-            visible: false,
+            topVisible: false,
+            bottomVisible: !!this.props.bottomStickyIndices,
         } as S;
     }
 
     public render(): JSX.Element {
-        const value: boolean = this.state.visible;
         return (
             <View style={{flex: 1}}>
                 <RecyclerListView
                     {...this.props.children.props}
                     onVisibleIndexesChanged={this.onVisibleIndexesChanged}
                 />
-                {value ?
+                {this.state.topVisible ?
                     <View style={{position: "absolute", top: 0}}>
-                        {this.rowRenderer(0, this.props.topStickyIndices, 0)}
+                        {this.rowRenderer(this.props.topStickyIndices, null, 0)}
+                    </View> : null}
+                {this.state.bottomVisible ?
+                    <View style={{position: "absolute", bottom: 0}}>
+                        {this.rowRenderer(this.props.bottomStickyIndices, null, 0)}
                     </View> : null}
                 {/*{value ? <View style={{height: 200, width: 300, backgroundColor: "blue", position: "absolute", top: 0}}/> : null}*/}
             </View>
         );
     }
 
-    public hide(): void {
+    public bottomStickyViewVisible(visible: boolean): void {
         this.setState({
-            visible: false,
+            bottomVisible: visible,
         });
     }
 
-    public show(): void {
+    public topStickyViewVisible(visible: boolean): void {
         this.setState({
-            visible: true,
+            topVisible: visible,
         });
     }
 
     private onVisibleIndexesChanged(all: number[], now: number[], notNow: number[]): void {
         if (this.props.topStickyIndices) {
             if (all.indexOf(this.props.topStickyIndices) >= 0 && all.indexOf(this.props.topStickyIndices - 1) === -1) {
-                this.show();
+                this.topStickyViewVisible(true);
             } else if (all.indexOf(this.props.topStickyIndices) >= 0 && all.indexOf(this.props.topStickyIndices - 1) >= 0) {
-                this.hide();
+                this.topStickyViewVisible(false);
+            }
+        }
+        if (this.props.bottomStickyIndices) {
+            if (all.indexOf(this.props.bottomStickyIndices) >= 0 && all.indexOf(this.props.bottomStickyIndices + 1) === -1) {
+                this.bottomStickyViewVisible(true);
+            } else if (all.indexOf(this.props.bottomStickyIndices) >= 0 && all.indexOf(this.props.bottomStickyIndices + 1) >= 0) {
+                this.bottomStickyViewVisible(false);
             }
         }
     }
