@@ -17,6 +17,7 @@ export interface StickyContainerProps {
 export interface StickyContainerState {
     topVisible: boolean;
     bottomVisible: boolean;
+    headerTentativeSliding: boolean;
 }
 export default class StickyContainer<P extends StickyContainerProps, S extends StickyContainerState> extends React.Component<P, S> {
     private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null;
@@ -33,6 +34,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         this.state = {
             topVisible: false,
             bottomVisible: !!this.props.stickyFooterIndices,
+            headerTentativeSliding: false,
         } as S;
     }
 
@@ -66,9 +68,10 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         });
     }
 
-    public topStickyViewVisible(visible: boolean): void {
+    public topStickyViewVisible(visible: boolean, tentativeSliding?: boolean): void {
         this.setState({
             topVisible: visible,
+            headerTentativeSliding: tentativeSliding ? tentativeSliding : false,
         });
     }
 
@@ -96,15 +99,37 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     private _onScroll(rawEvent: ScrollEvent, offsetX: number, offsetY: number): void {
         if (this._recyclerRef) {
             const currentStickyHeaderIndice = this.props.stickyHeaderIndices[this._currentStickyHeaderIndice];
+            const previousStickyHeaderIndice = this.props.stickyHeaderIndices[this._currentStickyHeaderIndice - 1];
             const nextStickyHeaderIndice = this.props.stickyHeaderIndices[this._currentStickyHeaderIndice + 1];
+            if (previousStickyHeaderIndice || this.state.headerTentativeSliding) {
+                const previousLayout: Layout | undefined = this._recyclerRef.getLayout(previousStickyHeaderIndice);
+                const previousHeight: number | null = previousLayout ? previousLayout.height : null;
+                const currentLayout: Layout | undefined = this._recyclerRef.getLayout(currentStickyHeaderIndice);
+                const currentY: number | null = currentLayout ? currentLayout.y : null;
+                if (currentY && previousHeight && offsetY < currentY) {
+                    if (offsetY > currentY - previousHeight) {
+                        this._currentStickyHeaderIndice -= 1;
+                        const y = offsetY + previousHeight - currentY;
+                        this._topStickyViewOffset.setValue(-1 * y);
+                        this.topStickyViewVisible(true, true);
+                    }
+                }
+            }
             if (nextStickyHeaderIndice) {
                 const nextLayout: Layout | undefined = this._recyclerRef.getLayout(nextStickyHeaderIndice);
                 const nextY: number | null = nextLayout ? nextLayout.y : null;
                 const currentLayout: Layout | undefined = this._recyclerRef.getLayout(currentStickyHeaderIndice);
                 const currentHeight: number | null = currentLayout ? currentLayout.height : null;
                 if (nextY && currentHeight && offsetY > nextY - currentHeight) {
-                    const y = offsetY + currentHeight - nextY;
-                    this._topStickyViewOffset.setValue(-1 * y);
+                    if (offsetY <= nextY) {
+                        const y = offsetY + currentHeight - nextY;
+                        this._topStickyViewOffset.setValue(-1 * y);
+                    }
+                    if (offsetY > nextY) {
+                        this._currentStickyHeaderIndice += 1;
+                        this._topStickyViewOffset.setValue(0);
+                        this.topStickyViewVisible(true);
+                    }
                 }
             }
         }
