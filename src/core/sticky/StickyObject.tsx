@@ -22,14 +22,15 @@ export interface StickyObjectState {
 }
 export default class StickyObject<P extends StickyObjectProps, S extends StickyObjectState> extends React.Component<P, S> {
     private _topStickyViewOffset: Animated.Value = new Animated.Value(0);
-    private _currentHeaderIndice: number = 0;
+    private _currentIndice: number = 0;
     private _stickyType: StickyType = StickyType.HEADER;
     private _stickyTypeMultiplier: number = 1;
 
     constructor(props: P, context?: any) {
         super(props, context);
+        this._setStickyType(context as StickyType);
         this.state = {
-            visible: false,
+            visible: this._stickyType === StickyType.FOOTER,
             tentativeSliding: false,
         } as S;
     }
@@ -40,7 +41,7 @@ export default class StickyObject<P extends StickyObjectProps, S extends StickyO
                 {position: "absolute", transform: [{translateY: this._topStickyViewOffset}]},
                 this._stickyType === StickyType.HEADER ? {top: 0} : {bottom: 0}]}>
                 {this.state.visible ?
-                    this.props.rowRenderer ? this.props.rowRenderer(this.props.stickyIndices[this._currentHeaderIndice], null, 0) : null
+                    this.props.rowRenderer ? this.props.rowRenderer(this.props.stickyIndices[this._currentIndice], null, 0) : null
                     : null}
             </Animated.View>
         );
@@ -49,10 +50,10 @@ export default class StickyObject<P extends StickyObjectProps, S extends StickyO
     public onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
         //TODO Ananya: Use hashmaps
         if (this.props.stickyIndices) {
-            const stickyHeaderIndice: number = this.props.stickyIndices[this._currentHeaderIndice];
-            if (all.indexOf(stickyHeaderIndice) >= 0 && all.indexOf(stickyHeaderIndice - 1) === -1) {
+            const stickyHeaderIndice: number = this.props.stickyIndices[this._currentIndice];
+            if (all.indexOf(stickyHeaderIndice) >= 0 && all.indexOf(stickyHeaderIndice - this._stickyTypeMultiplier) === -1) {
                 this.stickyViewVisible(true);
-            } else if (all.indexOf(stickyHeaderIndice) >= 0 && all.indexOf(stickyHeaderIndice - 1) >= 0) {
+            } else if (all.indexOf(stickyHeaderIndice) >= 0 && all.indexOf(stickyHeaderIndice - this._stickyTypeMultiplier) >= 0) {
                 this.stickyViewVisible(false);
             }
         }
@@ -60,9 +61,9 @@ export default class StickyObject<P extends StickyObjectProps, S extends StickyO
 
     public onScroll(offsetY: number): void {
         if (this.props.recyclerRef) {
-            const currentStickyHeaderIndice = this.props.stickyIndices[this._currentHeaderIndice];
-            const previousStickyHeaderIndice = this.props.stickyIndices[this._currentHeaderIndice - 1];
-            const nextStickyHeaderIndice = this.props.stickyIndices[this._currentHeaderIndice + 1];
+            const currentStickyHeaderIndice = this.props.stickyIndices[this._currentIndice];
+            const previousStickyHeaderIndice = this.props.stickyIndices[this._currentIndice - 1];
+            const nextStickyHeaderIndice = this.props.stickyIndices[this._currentIndice + 1];
             if (previousStickyHeaderIndice || this.state.tentativeSliding) {
                 const previousLayout: Layout | undefined = this.props.recyclerRef.getLayout(previousStickyHeaderIndice);
                 const previousHeight: number | null = previousLayout ? previousLayout.height : null;
@@ -70,7 +71,7 @@ export default class StickyObject<P extends StickyObjectProps, S extends StickyO
                 const currentY: number | null = currentLayout ? currentLayout.y : null;
                 if (currentY && previousHeight && offsetY < currentY) {
                     if (offsetY > currentY - previousHeight) {
-                        this._currentHeaderIndice -= 1;
+                        this._currentIndice -= 1;
                         const y = offsetY + previousHeight - currentY;
                         this._topStickyViewOffset.setValue(-1 * y);
                         this.stickyViewVisible(true, true);
@@ -88,7 +89,7 @@ export default class StickyObject<P extends StickyObjectProps, S extends StickyO
                         this._topStickyViewOffset.setValue(-1 * y);
                     }
                     if (offsetY > nextY) {
-                        this._currentHeaderIndice += 1;
+                        this._currentIndice += 1;
                         this._topStickyViewOffset.setValue(0);
                         this.stickyViewVisible(true);
                     }
@@ -97,7 +98,7 @@ export default class StickyObject<P extends StickyObjectProps, S extends StickyO
         }
     }
 
-    protected setStickyType(stickyType: StickyType): void {
+    protected _setStickyType(stickyType: StickyType): void {
         this._stickyType = stickyType;
         switch (stickyType) {
             case StickyType.HEADER:

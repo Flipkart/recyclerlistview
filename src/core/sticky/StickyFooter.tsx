@@ -6,7 +6,6 @@ import StickyObject, {StickyObjectProps, StickyObjectState, StickyType} from "./
 
 export default class StickyFooter<P extends StickyObjectProps, S extends StickyObjectState> extends StickyObject<P, S> {
     constructor(props: P, context?: any) {
-        super(props, context);
-        this.setStickyType(StickyType.FOOTER);
+        super(props, StickyType.FOOTER);
     }
 }
