@@ -2,22 +2,11 @@
  * Created by ananya.chandra on 20/09/18.
  */
 
-import * as React from "react";
-import {Animated, View} from "react-native";
+import StickyObject, {StickyObjectProps, StickyObjectState, StickyType} from "./StickyObject";
 
-export interface StickyHeaderProps {
-    _rowRenderer: ((type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null) | null;
-}
-export interface StickyHeaderState {
-    a: number;
-}
-export default class StickyHeader<P extends StickyHeaderProps, S extends StickyHeaderState> extends React.Component {
+export default class StickyHeader<P extends StickyObjectProps, S extends StickyObjectState> extends StickyObject<P, S> {
     constructor(props: P, context?: any) {
         super(props, context);
-    }
-    public render(): JSX.Element {
-        return (
-            <View/>
-        );
+        this.setStickyType(StickyType.HEADER);
     }
 }

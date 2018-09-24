@@ -25,6 +25,7 @@ export interface StickyObjectState {
 export default class StickyObject<P extends StickyObjectProps, S extends StickyObjectState> extends React.Component<P, S> {
     private _topStickyViewOffset: Animated.Value = new Animated.Value(0);
     private _currentHeaderIndice: number = 0;
+    private _stickyTypeMultiplier = 1;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -91,6 +92,17 @@ export default class StickyObject<P extends StickyObjectProps, S extends StickyO
                     }
                 }
             }
+        }
+    }
+
+    protected setStickyType(stickyType: StickyType): void {
+        switch (stickyType) {
+            case StickyType.HEADER:
+                this._stickyTypeMultiplier = 1;
+                break;
+            case StickyType.FOOTER:
+                this._stickyTypeMultiplier = -1;
+                break;
         }
     }
 

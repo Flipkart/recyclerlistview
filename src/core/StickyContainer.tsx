@@ -8,6 +8,7 @@ import RecyclerListView, {RecyclerListViewState, RecyclerListViewProps} from "./
 import { ScrollEvent } from "./scrollcomponent/BaseScrollView";
 import {Layout, LayoutManager} from "./layoutmanager/LayoutManager";
 import StickyObject, {StickyObjectProps, StickyObjectState, StickyType} from "./sticky/StickyObject";
+import StickyHeader from "./sticky/StickyHeader";
 
 export interface StickyContainerProps {
     children: any;
@@ -52,7 +53,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         return (
             <View style={{flex: 1}}>
                 {recycler}
-                <StickyObject ref={(stickyHeaderRef: any) => {
+                <StickyHeader ref={(stickyHeaderRef: any) => {
                     this._stickyHeaderRef = stickyHeaderRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
                 }}
                               type={StickyType.HEADER}
