@@ -3,12 +3,12 @@
  */
 
 import * as React from "react";
-import {ToastAndroid, View, Animated} from "react-native";
+import {View} from "react-native";
 import RecyclerListView, {RecyclerListViewState, RecyclerListViewProps} from "./RecyclerListView";
 import { ScrollEvent } from "./scrollcomponent/BaseScrollView";
-import {Layout, LayoutManager} from "./layoutmanager/LayoutManager";
-import StickyObject, {StickyObjectProps, StickyObjectState, StickyType} from "./sticky/StickyObject";
+import StickyObject, {StickyObjectProps, StickyObjectState} from "./sticky/StickyObject";
 import StickyHeader from "./sticky/StickyHeader";
+import StickyFooter from "./sticky/StickyFooter";
 
 export interface StickyContainerProps {
     children: any;
@@ -24,10 +24,8 @@ export interface StickyContainerState {
 export default class StickyContainer<P extends StickyContainerProps, S extends StickyContainerState> extends React.Component<P, S> {
     private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null;
     private _stickyHeaderRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
+    private _stickyFooterRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
     private _rowRenderer: ((type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null) | null = null;
-    private _topStickyViewOffset: Animated.Value = new Animated.Value(0);
-    private _currentStickyHeaderIndice: number = 0;
-    private _currentStickyFooterIndice: number = 0;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -53,18 +51,22 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         return (
             <View style={{flex: 1}}>
                 {recycler}
-                <StickyHeader ref={(stickyHeaderRef: any) => {
+                {this.props.stickyHeaderIndices ? (
+                    <StickyHeader ref={(stickyHeaderRef: any) => {
                     this._stickyHeaderRef = stickyHeaderRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
                 }}
-                              type={StickyType.HEADER}
                               rowRenderer={this._rowRenderer}
-                              stickyHeaderIndices={this.props.stickyHeaderIndices}
-                              stickyFooterIndices={this.props.stickyFooterIndices}
+                              stickyIndices={this.props.stickyHeaderIndices}
                               recyclerRef={this._recyclerRef}/>
-                {this.state.bottomVisible ?
-                    <View style={{position: "absolute", bottom: 0}}>
-                        {this._rowRenderer ? this._rowRenderer(this.props.stickyFooterIndices[this._currentStickyFooterIndice], null, 0) : null}
-                    </View> : null}
+                ) : null}
+                {this.props.stickyFooterIndices ? (
+                    <StickyFooter ref={(stickyFooterRef: any) => {
+                    this._stickyFooterRef = stickyFooterRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
+                }}
+                              rowRenderer={this._rowRenderer}
+                              stickyIndices={this.props.stickyFooterIndices}
+                              recyclerRef={this._recyclerRef}/>
+                ) : null}
             </View>
         );
     }
@@ -85,9 +87,11 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     private _getRecyclerRef = (recycler: any) => { this._recyclerRef = recycler as (RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null); };
 
     private _onVisibleIndexesChanged(all: number[], now: number[], notNow: number[]): void {
-        //TODO Ananya: Use hashmaps
         if (this._stickyHeaderRef) {
-            this._stickyHeaderRef.onVisibleIndicesChanged(all);
+            this._stickyHeaderRef.onVisibleIndicesChanged(all, now, notNow);
+        }
+        if (this._stickyFooterRef) {
+            this._stickyFooterRef.onVisibleIndicesChanged(all, now, notNow);
         }
 
         //TODO Ananya: Hack to rerender to get recyclerRef. To be solved.
@@ -97,6 +101,9 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     private _onScroll(rawEvent: ScrollEvent, offsetX: number, offsetY: number): void {
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onScroll(offsetY);
+        }
+        if (this._stickyFooterRef) {
+            this._stickyFooterRef.onScroll(offsetY);
         }
     }
 }
