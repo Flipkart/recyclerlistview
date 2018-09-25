@@ -143,7 +143,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
     private _cachedLayouts?: Layout[];
-    private _scrollComponent: BaseScrollComponent | null = null;
+    private _scrollComponent: ScrollComponent | null = null;
 
     private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
 
@@ -309,6 +309,13 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         return viewabilityTracker ? viewabilityTracker.findFirstLogicallyVisibleIndex() : 0;
     }
 
+    public getScrollableHeight(): number | null {
+        if (this._scrollComponent) {
+            return this._scrollComponent.getHeight();
+        }
+        return null;
+    }
+
     public render(): JSX.Element {
         //TODO:Talha
         // const {
@@ -331,7 +338,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
         return (
             <ScrollComponent
-                ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
+                ref={(scrollComponent) => this._scrollComponent = scrollComponent as ScrollComponent | null}
                 {...this.props}
                 {...this.props.scrollViewProps}
                 onScroll={this._onScroll}

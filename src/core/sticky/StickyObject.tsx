@@ -15,6 +15,7 @@ export interface StickyObjectProps {
     rowRenderer: ((type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null) | null;
     stickyIndices: number[];
     recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null;
+
 }
 export interface StickyObjectState {
     visible: boolean;
@@ -106,9 +107,9 @@ export default class StickyObject<P extends StickyObjectProps, S extends StickyO
 
                     if (currentY && currentHeight) {
                         const currentYd = -1 * (currentY + currentHeight);
-                        const screenHeight: number = Dimensions.get("window").height;
-                        const scrollY = -1 * (offsetY + screenHeight);
-                        if (previousHeight && scrollY < currentYd) {
+                        const screenHeight: number | null = this.props.recyclerRef.getScrollableHeight();
+                        const scrollY: number | null = screenHeight ? -1 * (offsetY + screenHeight) : null;
+                        if (previousHeight && scrollY && scrollY < currentYd) {
                             if (scrollY > currentYd - previousHeight) {
                                 this._currentIndice += 1;
                                 const translate = scrollY - currentYd + previousHeight;
@@ -128,9 +129,9 @@ export default class StickyObject<P extends StickyObjectProps, S extends StickyO
 
                     if (nextY && nextHeight) {
                         const nextYd = -1 * (nextY + nextHeight);
-                        const screenHeight: number = Dimensions.get("window").height; //TODO Ananya use recycler height here
-                        const scrollY = -1 * (offsetY + screenHeight);
-                        if (currentHeight && nextYd && scrollY + currentHeight > nextYd) {
+                        const screenHeight: number | null = this.props.recyclerRef.getScrollableHeight();
+                        const scrollY: number | null = screenHeight ? -1 * (offsetY + screenHeight) : null;
+                        if (currentHeight && nextYd && scrollY && scrollY + currentHeight > nextYd) {
                             if (scrollY <= nextYd) {
                                 const translate = scrollY - nextYd + currentHeight;
                                 this._stickyViewOffset.setValue(translate);
