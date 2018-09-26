@@ -21,15 +21,15 @@ export interface StickyObjectState {
     visible: boolean;
     tentativeSliding: boolean;
 }
-export default class StickyObject<P extends StickyObjectProps, S extends StickyObjectState> extends React.Component<P, S> {
+export default abstract class StickyObject<P extends StickyObjectProps, S extends StickyObjectState> extends React.Component<P, S> {
+    protected _stickyType: StickyType = StickyType.HEADER;
+    protected _stickyTypeMultiplier: number = 1;
     private _stickyViewOffset: Animated.Value = new Animated.Value(0);
     private _currentIndice: number = 0;
-    private _stickyType: StickyType = StickyType.HEADER;
-    private _stickyTypeMultiplier: number = 1;
 
     constructor(props: P, context?: any) {
         super(props, context);
-        this._setStickyType(context as StickyType);
+        this._setStickyType();
         this.state = {
             visible: this._stickyType === StickyType.FOOTER,
             tentativeSliding: false,
@@ -128,17 +128,7 @@ export default class StickyObject<P extends StickyObjectProps, S extends StickyO
         }
     }
 
-    protected _setStickyType(stickyType: StickyType): void {
-        this._stickyType = stickyType;
-        switch (stickyType) {
-            case StickyType.HEADER:
-                this._stickyTypeMultiplier = 1;
-                break;
-            case StickyType.FOOTER:
-                this._stickyTypeMultiplier = -1;
-                break;
-        }
-    }
+    protected abstract _setStickyType(): void;
 
     private stickyViewVisible(_visible: boolean, _tentativeSliding?: boolean): void {
         this.setState({

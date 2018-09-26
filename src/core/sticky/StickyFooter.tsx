@@ -6,6 +6,11 @@ import StickyObject, {StickyObjectProps, StickyObjectState, StickyType} from "./
 
 export default class StickyFooter<P extends StickyObjectProps, S extends StickyObjectState> extends StickyObject<P, S> {
     constructor(props: P, context?: any) {
-        super(props, StickyType.FOOTER);
+        super(props, context);
+    }
+
+    protected _setStickyType(): void {
+        this._stickyType = StickyType.FOOTER;
+        this._stickyTypeMultiplier = -1;
     }
 }
