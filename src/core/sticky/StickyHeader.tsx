@@ -9,8 +9,9 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
         super(props, context);
     }
 
-    protected _setStickyType(): void {
-        this._stickyType = StickyType.HEADER;
-        this._stickyTypeMultiplier = 1;
+    protected setStickyType(): void {
+        this.stickyType = StickyType.HEADER;
+        this.stickyTypeMultiplier = 1;
+        this.initialVisibility = false;
     }
 }

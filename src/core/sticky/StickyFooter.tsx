@@ -9,8 +9,9 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
         super(props, context);
     }
 
-    protected _setStickyType(): void {
-        this._stickyType = StickyType.FOOTER;
-        this._stickyTypeMultiplier = -1;
+    protected setStickyType(): void {
+        this.stickyType = StickyType.FOOTER;
+        this.stickyTypeMultiplier = -1;
+        this.initialVisibility = true;
     }
 }
