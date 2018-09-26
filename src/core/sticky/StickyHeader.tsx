@@ -13,5 +13,6 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
         this.stickyType = StickyType.HEADER;
         this.stickyTypeMultiplier = 1;
         this.initialVisibility = false;
+        this.containerPosition = {top: 0};
     }
 }

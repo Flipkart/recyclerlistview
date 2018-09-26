@@ -3,7 +3,7 @@
  */
 
 import * as React from "react";
-import {Animated, Dimensions, View} from "react-native";
+import {Animated, StyleProp, ViewStyle} from "react-native";
 import {Layout} from "../layoutmanager/LayoutManager";
 import RecyclerListView, {RecyclerListViewProps, RecyclerListViewState} from "../RecyclerListView";
 
@@ -25,6 +25,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     protected stickyType: StickyType = StickyType.HEADER;
     protected stickyTypeMultiplier: number = 1;
     protected initialVisibility: boolean = false;
+    protected containerPosition: StyleProp<ViewStyle>;
     private _stickyViewOffset: Animated.Value = new Animated.Value(0);
     private _currentIndice: number = 0;
 
@@ -40,8 +41,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     public render(): JSX.Element | null {
         return (
             <Animated.View style={[
-                {position: "absolute", transform: [{translateY: this._stickyViewOffset}]},
-                this.stickyType === StickyType.HEADER ? {top: 0} : {bottom: 0}]}>
+                {position: "absolute", transform: [{translateY: this._stickyViewOffset}]}, this.containerPosition]}>
                 {this.state.visible ?
                     this.props.rowRenderer ? this.props.rowRenderer(this.props.stickyIndices[this._currentIndice], null, 0) : null
                     : null}
