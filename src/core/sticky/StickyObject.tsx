@@ -87,54 +87,40 @@ export default class StickyObject<P extends StickyObjectProps, S extends StickyO
                     if (previousHeight && scrollY && scrollY < currentYd) {
                         if (scrollY > currentYd - previousHeight) {
                             this._currentIndice -= this._stickyTypeMultiplier;
-                            const translate = (scrollY + previousHeight - currentYd) * (-1 * this._stickyTypeMultiplier);
+                            const translate = (scrollY - currentYd + previousHeight) * (-1 * this._stickyTypeMultiplier);
                             this._stickyViewOffset.setValue(translate);
                             this.stickyViewVisible(true, true);
                         }
                     }
                 }
             }
-            if (this._stickyType === StickyType.HEADER) {
-                if (nextStickyIndice) {
-                    const nextLayout: Layout | undefined = this.props.recyclerRef.getLayout(nextStickyIndice);
-                    const nextY: number | null = nextLayout ? nextLayout.y : null;
-                    const currentLayout: Layout | undefined = this.props.recyclerRef.getLayout(currentStickyIndice);
-                    const currentHeight: number | null = currentLayout ? currentLayout.height : null;
-                    const scrollY = offsetY;
-                    if (nextY && currentHeight && scrollY + currentHeight > nextY) {
-                        if (scrollY <= nextY) {
-                            const y = offsetY + currentHeight - nextY;
-                            this._stickyViewOffset.setValue(-1 * y);
-                        }
-                        if (scrollY > nextY) {
-                            this._currentIndice += 1;
+            if (nextStickyIndice) {
+                const nextLayout: Layout | undefined = this.props.recyclerRef.getLayout(nextStickyIndice);
+                const nextY: number | null = nextLayout ? nextLayout.y : null;
+                const nextHeight: number | null = nextLayout ? nextLayout.height : null;
+                const currentLayout: Layout | undefined = this.props.recyclerRef.getLayout(currentStickyIndice);
+                const currentHeight: number | null = currentLayout ? currentLayout.height : null;
+
+                if (nextY && nextHeight) {
+                    let nextYd: number;
+                    let screenHeight: number | null;
+                    let scrollY: number | null;
+                    if (this._stickyType === StickyType.HEADER) {
+                        nextYd = nextY;
+                        scrollY = offsetY;
+                    } else {
+                        nextYd = -1 * (nextY + nextHeight);
+                        screenHeight = this.props.recyclerRef.getScrollableHeight();
+                        scrollY = screenHeight ? -1 * (offsetY + screenHeight) : null;
+                    }
+                    if (currentHeight && nextYd && scrollY && scrollY + currentHeight > nextYd) {
+                        if (scrollY <= nextYd) {
+                            const translate = (scrollY - nextYd + currentHeight) * (-1 * this._stickyTypeMultiplier);
+                            this._stickyViewOffset.setValue(translate);
+                        } else if (scrollY > nextYd) {
+                            this._currentIndice += this._stickyTypeMultiplier;
                             this._stickyViewOffset.setValue(0);
                             this.stickyViewVisible(true);
-                        }
-                    }
-                }
-            } else {
-                if (nextStickyIndice) {
-                    const nextLayout: Layout | undefined = this.props.recyclerRef.getLayout(nextStickyIndice);
-                    const nextY: number | null = nextLayout ? nextLayout.y : null;
-                    const nextHeight: number | null = nextLayout ? nextLayout.height : null;
-                    const currentLayout: Layout | undefined = this.props.recyclerRef.getLayout(currentStickyIndice);
-                    const currentY: number | null = currentLayout ? currentLayout.y : null;
-                    const currentHeight: number | null = currentLayout ? currentLayout.height : null;
-
-                    if (nextY && nextHeight) {
-                        const nextYd = -1 * (nextY + nextHeight);
-                        const screenHeight: number | null = this.props.recyclerRef.getScrollableHeight();
-                        const scrollY: number | null = screenHeight ? -1 * (offsetY + screenHeight) : null;
-                        if (currentHeight && nextYd && scrollY && scrollY + currentHeight > nextYd) {
-                            if (scrollY <= nextYd) {
-                                const translate = scrollY - nextYd + currentHeight;
-                                this._stickyViewOffset.setValue(translate);
-                            } else if (scrollY > nextYd) {
-                                this._currentIndice -= 1;
-                                this._stickyViewOffset.setValue(0);
-                                this.stickyViewVisible(true);
-                            }
                         }
                     }
                 }
