@@ -65,32 +65,48 @@ export default class StickyObject<P extends StickyObjectProps, S extends StickyO
             const currentStickyIndice = this.props.stickyIndices[this._currentIndice];
             const previousStickyIndice = this.props.stickyIndices[this._currentIndice - this._stickyTypeMultiplier];
             const nextStickyIndice = this.props.stickyIndices[this._currentIndice + this._stickyTypeMultiplier];
-            if (this._stickyType === StickyType.HEADER) {
-                if (previousStickyIndice || this.state.tentativeSliding) {
-                    const previousLayout: Layout | undefined = this.props.recyclerRef.getLayout(previousStickyIndice);
-                    const previousHeight: number | null = previousLayout ? previousLayout.height : null;
-                    const currentLayout: Layout | undefined = this.props.recyclerRef.getLayout(currentStickyIndice);
-                    const currentY: number | null = currentLayout ? currentLayout.y : null;
-                    if (currentY && previousHeight && offsetY < currentY) {
-                        if (offsetY > currentY - previousHeight) {
-                            this._currentIndice -= 1;
-                            const y = offsetY + previousHeight - currentY;
-                            this._stickyViewOffset.setValue(-1 * y);
+            if (previousStickyIndice || this.state.tentativeSliding) {
+                const previousLayout: Layout | undefined = this.props.recyclerRef.getLayout(previousStickyIndice);
+                const previousHeight: number | null = previousLayout ? previousLayout.height : null;
+                const currentLayout: Layout | undefined = this.props.recyclerRef.getLayout(currentStickyIndice);
+                const currentY: number | null = currentLayout ? currentLayout.y : null;
+                const currentHeight: number | null = currentLayout ? currentLayout.height : null;
+
+                if (currentY && currentHeight) {
+                    let currentYd: number;
+                    let screenHeight: number | null;
+                    let scrollY: number | null;
+                    if (this._stickyType === StickyType.HEADER) {
+                        currentYd = currentY;
+                        scrollY = offsetY;
+                    } else {
+                        currentYd = -1 * (currentY + currentHeight);
+                        screenHeight = this.props.recyclerRef.getScrollableHeight();
+                        scrollY = screenHeight ? -1 * (offsetY + screenHeight) : null;
+                    }
+                    if (previousHeight && scrollY && scrollY < currentYd) {
+                        if (scrollY > currentYd - previousHeight) {
+                            this._currentIndice -= this._stickyTypeMultiplier;
+                            const translate = (scrollY + previousHeight - currentYd) * (-1 * this._stickyTypeMultiplier);
+                            this._stickyViewOffset.setValue(translate);
                             this.stickyViewVisible(true, true);
                         }
                     }
                 }
+            }
+            if (this._stickyType === StickyType.HEADER) {
                 if (nextStickyIndice) {
                     const nextLayout: Layout | undefined = this.props.recyclerRef.getLayout(nextStickyIndice);
                     const nextY: number | null = nextLayout ? nextLayout.y : null;
                     const currentLayout: Layout | undefined = this.props.recyclerRef.getLayout(currentStickyIndice);
                     const currentHeight: number | null = currentLayout ? currentLayout.height : null;
-                    if (nextY && currentHeight && offsetY + currentHeight > nextY) {
-                        if (offsetY <= nextY) {
+                    const scrollY = offsetY;
+                    if (nextY && currentHeight && scrollY + currentHeight > nextY) {
+                        if (scrollY <= nextY) {
                             const y = offsetY + currentHeight - nextY;
                             this._stickyViewOffset.setValue(-1 * y);
                         }
-                        if (offsetY > nextY) {
+                        if (scrollY > nextY) {
                             this._currentIndice += 1;
                             this._stickyViewOffset.setValue(0);
                             this.stickyViewVisible(true);
@@ -98,27 +114,6 @@ export default class StickyObject<P extends StickyObjectProps, S extends StickyO
                     }
                 }
             } else {
-                if (previousStickyIndice || this.state.tentativeSliding) {
-                    const previousLayout: Layout | undefined = this.props.recyclerRef.getLayout(previousStickyIndice);
-                    const previousHeight: number | null = previousLayout ? previousLayout.height : null;
-                    const currentLayout: Layout | undefined = this.props.recyclerRef.getLayout(currentStickyIndice);
-                    const currentY: number | null = currentLayout ? currentLayout.y : null;
-                    const currentHeight: number | null = currentLayout ? currentLayout.height : null;
-
-                    if (currentY && currentHeight) {
-                        const currentYd = -1 * (currentY + currentHeight);
-                        const screenHeight: number | null = this.props.recyclerRef.getScrollableHeight();
-                        const scrollY: number | null = screenHeight ? -1 * (offsetY + screenHeight) : null;
-                        if (previousHeight && scrollY && scrollY < currentYd) {
-                            if (scrollY > currentYd - previousHeight) {
-                                this._currentIndice += 1;
-                                const translate = scrollY - currentYd + previousHeight;
-                                this._stickyViewOffset.setValue(translate);
-                                this.stickyViewVisible(true, true);
-                            }
-                        }
-                    }
-                }
                 if (nextStickyIndice) {
                     const nextLayout: Layout | undefined = this.props.recyclerRef.getLayout(nextStickyIndice);
                     const nextY: number | null = nextLayout ? nextLayout.y : null;
