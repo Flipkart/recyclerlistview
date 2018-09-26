@@ -31,7 +31,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     constructor(props: P, context?: any) {
         super(props, context);
-        this.setStickyType();
+
+        this.initStickyParams();
         this.state = {
             visible: this.initialVisibility,
             tentativeSliding: false,
@@ -40,8 +41,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     public render(): JSX.Element | null {
         return (
-            <Animated.View style={[
-                {position: "absolute", transform: [{translateY: this._stickyViewOffset}]}, this.containerPosition]}>
+            <Animated.View style={[{position: "absolute", transform: [{translateY: this._stickyViewOffset}]}, this.containerPosition]}>
                 {this.state.visible ?
                     this.props.rowRenderer ? this.props.rowRenderer(this.props.stickyIndices[this._currentIndice], null, 0) : null
                     : null}
@@ -129,7 +129,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         }
     }
 
-    protected abstract setStickyType(): void;
+    protected abstract initStickyParams(): void;
 
     private stickyViewVisible(_visible: boolean, _tentativeSliding?: boolean): void {
         this.setState({
