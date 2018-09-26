@@ -19,7 +19,6 @@ export interface StickyObjectProps {
 }
 export interface StickyObjectState {
     visible: boolean;
-    tentativeSliding: boolean;
 }
 export default abstract class StickyObject<P extends StickyObjectProps, S extends StickyObjectState> extends React.Component<P, S> {
     protected stickyType: StickyType = StickyType.HEADER;
@@ -35,7 +34,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         this.initStickyParams();
         this.state = {
             visible: this.initialVisibility,
-            tentativeSliding: false,
         } as S;
     }
 
@@ -66,7 +64,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             const currentStickyIndice = this.props.stickyIndices[this._currentIndice];
             const previousStickyIndice = this.props.stickyIndices[this._currentIndice - this.stickyTypeMultiplier];
             const nextStickyIndice = this.props.stickyIndices[this._currentIndice + this.stickyTypeMultiplier];
-            if (previousStickyIndice || this.state.tentativeSliding) {
+            if (previousStickyIndice) {
                 const previousLayout: Layout | undefined = this.props.recyclerRef.getLayout(previousStickyIndice);
                 const previousHeight: number | null = previousLayout ? previousLayout.height : null;
                 const currentLayout: Layout | undefined = this.props.recyclerRef.getLayout(currentStickyIndice);
@@ -90,7 +88,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                             this._currentIndice -= this.stickyTypeMultiplier;
                             const translate = (scrollY - currentYd + previousHeight) * (-1 * this.stickyTypeMultiplier);
                             this._stickyViewOffset.setValue(translate);
-                            this.stickyViewVisible(true, true);
+                            this.stickyViewVisible(true);
                         }
                     }
                 }
@@ -131,10 +129,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     protected abstract initStickyParams(): void;
 
-    private stickyViewVisible(_visible: boolean, _tentativeSliding?: boolean): void {
+    private stickyViewVisible(_visible: boolean): void {
         this.setState({
             visible: _visible,
-            tentativeSliding: _tentativeSliding ? _tentativeSliding : false,
         });
     }
 }
