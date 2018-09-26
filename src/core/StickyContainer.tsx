@@ -18,8 +18,6 @@ export interface StickyContainerProps {
 }
 export interface StickyContainerState {
     topVisible: boolean;
-    bottomVisible: boolean;
-    headerTentativeSliding: boolean;
 }
 export default class StickyContainer<P extends StickyContainerProps, S extends StickyContainerState> extends React.Component<P, S> {
     private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null;
@@ -34,8 +32,6 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
 
         this.state = {
             topVisible: false,
-            bottomVisible: !!this.props.stickyFooterIndices,
-            headerTentativeSliding: false,
         } as S;
     }
 
@@ -71,16 +67,9 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         );
     }
 
-    public bottomStickyViewVisible(visible: boolean): void {
-        this.setState({
-            bottomVisible: visible,
-        });
-    }
-
-    public topStickyViewVisible(visible: boolean, tentativeSliding?: boolean): void {
+    public topStickyViewVisible(visible: boolean): void {
         this.setState({
             topVisible: visible,
-            headerTentativeSliding: tentativeSliding ? tentativeSliding : false,
         });
     }
 
