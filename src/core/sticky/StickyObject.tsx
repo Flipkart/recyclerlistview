@@ -27,19 +27,20 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     protected containerPosition: StyleProp<ViewStyle>;
 
     protected previousLayout: Layout | undefined;
-    // protected previousHeight: number | null;
+    protected previousHeight: number | undefined;
     protected nextLayout: Layout | undefined;
-    // protected nextY: number | null;
-    // protected nextHeight: number | null;
+    protected nextY: number | undefined;
+    protected nextHeight: number | undefined;
     protected currentLayout: Layout | undefined;
-    // protected currentY: number | null;
-    // protected currentHeight: number | null;
+    protected currentY: number | undefined;
+    protected currentHeight: number | undefined;
 
     private _stickyViewOffset: Animated.Value = new Animated.Value(0);
     private _currentIndice: number = 0;
     private _currentStickyIndice: number = 0;
     private _previousStickyIndice: number = 0;
     private _nextStickyIndice: number = 0;
+    private _firstCompute: boolean = true;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -61,78 +62,66 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     public onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
+        if (this._firstCompute) {
+            this._computeLayouts(this.props.recyclerRef);
+            this._firstCompute = false;
+        }
         //TODO Ananya: Use hashmaps
-        if (this.props.stickyIndices) {
-            const stickyHeaderIndice: number = this.props.stickyIndices[this._currentIndice];
-            if (all.indexOf(stickyHeaderIndice) >= 0 && all.indexOf(stickyHeaderIndice - this.stickyTypeMultiplier) === -1) {
-                this.stickyViewVisible(true);
-            } else if (all.indexOf(stickyHeaderIndice) >= 0 && all.indexOf(stickyHeaderIndice - this.stickyTypeMultiplier) >= 0) {
-                this.stickyViewVisible(false);
-            }
+        if (all.indexOf(this._currentStickyIndice) >= 0 && all.indexOf(this._currentStickyIndice - this.stickyTypeMultiplier) === -1) {
+            this._stickyViewVisible(true);
+        } else if (all.indexOf(this._currentStickyIndice) >= 0 && all.indexOf(this._currentStickyIndice - this.stickyTypeMultiplier) >= 0) {
+            this._stickyViewVisible(false);
         }
     }
 
     public onScroll(offsetY: number): void {
         if (this.props.recyclerRef) {
-            const currentStickyIndice = this.props.stickyIndices[this._currentIndice];
-            const previousStickyIndice = this.props.stickyIndices[this._currentIndice - this.stickyTypeMultiplier];
-            const nextStickyIndice = this.props.stickyIndices[this._currentIndice + this.stickyTypeMultiplier];
-            if (previousStickyIndice) {
-                const previousLayout: Layout | undefined = this.props.recyclerRef.getLayout(previousStickyIndice);
-                const previousHeight: number | null = previousLayout ? previousLayout.height : null;
-                const currentLayout: Layout | undefined = this.props.recyclerRef.getLayout(currentStickyIndice);
-                const currentY: number | null = currentLayout ? currentLayout.y : null;
-                const currentHeight: number | null = currentLayout ? currentLayout.height : null;
-
-                if (currentY && currentHeight) {
+            if (this._previousStickyIndice) {
+                if (this.currentY && this.currentHeight) {
                     let currentYd: number;
                     let screenHeight: number | null;
                     let scrollY: number | null;
                     if (this.stickyType === StickyType.HEADER) {
-                        currentYd = currentY;
+                        currentYd = this.currentY;
                         scrollY = offsetY;
                     } else {
-                        currentYd = -1 * (currentY + currentHeight);
+                        currentYd = -1 * (this.currentY + this.currentHeight);
                         screenHeight = this.props.recyclerRef.getScrollableHeight();
                         scrollY = screenHeight ? -1 * (offsetY + screenHeight) : null;
                     }
-                    if (previousHeight && scrollY && scrollY < currentYd) {
-                        if (scrollY > currentYd - previousHeight) {
+                    if (this.previousHeight && scrollY && scrollY < currentYd) {
+                        if (scrollY > currentYd - this.previousHeight) {
                             this._currentIndice -= this.stickyTypeMultiplier;
-                            const translate = (scrollY - currentYd + previousHeight) * (-1 * this.stickyTypeMultiplier);
+                            const translate = (scrollY - currentYd + this.previousHeight) * (-1 * this.stickyTypeMultiplier);
                             this._stickyViewOffset.setValue(translate);
-                            this.stickyViewVisible(true);
+                            this._computeLayouts(this.props.recyclerRef);
+                            this._stickyViewVisible(true);
                         }
                     }
                 }
             }
-            if (nextStickyIndice) {
-                const nextLayout: Layout | undefined = this.props.recyclerRef.getLayout(nextStickyIndice);
-                const nextY: number | null = nextLayout ? nextLayout.y : null;
-                const nextHeight: number | null = nextLayout ? nextLayout.height : null;
-                const currentLayout: Layout | undefined = this.props.recyclerRef.getLayout(currentStickyIndice);
-                const currentHeight: number | null = currentLayout ? currentLayout.height : null;
-
-                if (nextY && nextHeight) {
+            if (this._nextStickyIndice) {
+                if (this.nextY && this.nextHeight) {
                     let nextYd: number;
                     let screenHeight: number | null;
                     let scrollY: number | null;
                     if (this.stickyType === StickyType.HEADER) {
-                        nextYd = nextY;
+                        nextYd = this.nextY;
                         scrollY = offsetY;
                     } else {
-                        nextYd = -1 * (nextY + nextHeight);
+                        nextYd = -1 * (this.nextY + this.nextHeight);
                         screenHeight = this.props.recyclerRef.getScrollableHeight();
                         scrollY = screenHeight ? -1 * (offsetY + screenHeight) : null;
                     }
-                    if (currentHeight && nextYd && scrollY && scrollY + currentHeight > nextYd) {
+                    if (this.currentHeight && nextYd && scrollY && scrollY + this.currentHeight > nextYd) {
                         if (scrollY <= nextYd) {
-                            const translate = (scrollY - nextYd + currentHeight) * (-1 * this.stickyTypeMultiplier);
+                            const translate = (scrollY - nextYd + this.currentHeight) * (-1 * this.stickyTypeMultiplier);
                             this._stickyViewOffset.setValue(translate);
                         } else if (scrollY > nextYd) {
                             this._currentIndice += this.stickyTypeMultiplier;
                             this._stickyViewOffset.setValue(0);
-                            this.stickyViewVisible(true);
+                            this._computeLayouts(this.props.recyclerRef);
+                            this._stickyViewVisible(true);
                         }
                     }
                 }
@@ -142,9 +131,31 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     protected abstract initStickyParams(): void;
 
-    private stickyViewVisible(_visible: boolean): void {
+    private _stickyViewVisible(_visible: boolean): void {
         this.setState({
             visible: _visible,
         });
+    }
+
+    private _computeLayouts(recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
+        if (recyclerRef) {
+            this._currentStickyIndice = this.props.stickyIndices[this._currentIndice];
+            this._previousStickyIndice = this.props.stickyIndices[this._currentIndice - this.stickyTypeMultiplier];
+            this._nextStickyIndice = this.props.stickyIndices[this._currentIndice + this.stickyTypeMultiplier];
+            if (this._currentStickyIndice) {
+                this.currentLayout = recyclerRef.getLayout(this._currentStickyIndice);
+                this.currentY = this.currentLayout ? this.currentLayout.y : undefined;
+                this.currentHeight = this.currentLayout ? this.currentLayout.height : undefined;
+            }
+            if (this._previousStickyIndice) {
+                this.previousLayout = recyclerRef.getLayout(this._previousStickyIndice);
+                this.previousHeight = this.previousLayout ? this.previousLayout.height : undefined;
+            }
+            if (this._nextStickyIndice) {
+                this.nextLayout = recyclerRef.getLayout(this._nextStickyIndice);
+                this.nextY = this.nextLayout ? this.nextLayout.y : undefined;
+                this.nextHeight = this.nextLayout ? this.nextLayout.height : undefined;
+            }
+        }
     }
 }
