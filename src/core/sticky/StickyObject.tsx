@@ -35,6 +35,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     protected currentY: number | undefined;
     protected currentHeight: number | undefined;
 
+    protected nextYd: number | undefined;
+    protected currentYd: number | undefined;
+
     private _stickyViewOffset: Animated.Value = new Animated.Value(0);
     private _currentIndice: number = 0;
     private _currentStickyIndice: number = 0;
@@ -78,17 +81,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         if (this.props.recyclerRef) {
             if (this._previousStickyIndice) {
                 if (this.currentY && this.currentHeight) {
-                    let currentYd: number;
-                    let screenHeight: number | null;
-                    let scrollY: number | null;
-                    if (this.stickyType === StickyType.HEADER) {
-                        currentYd = this.currentY;
-                        scrollY = offsetY;
-                    } else {
-                        currentYd = -1 * (this.currentY + this.currentHeight);
-                        screenHeight = this.props.recyclerRef.getScrollableHeight();
-                        scrollY = screenHeight ? -1 * (offsetY + screenHeight) : null;
-                    }
+                    const currentYd: number = this.getCurrentYd(this.currentY, this.currentHeight);
+                    const scrollableHeight: number | null = this.props.recyclerRef.getScrollableHeight(); //TODO
+                    const scrollY: number | null = this.getScrollY(offsetY, scrollableHeight);
                     if (this.previousHeight && scrollY && scrollY < currentYd) {
                         if (scrollY > currentYd - this.previousHeight) {
                             this._currentIndice -= this.stickyTypeMultiplier;
@@ -102,17 +97,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             }
             if (this._nextStickyIndice) {
                 if (this.nextY && this.nextHeight) {
-                    let nextYd: number;
-                    let screenHeight: number | null;
-                    let scrollY: number | null;
-                    if (this.stickyType === StickyType.HEADER) {
-                        nextYd = this.nextY;
-                        scrollY = offsetY;
-                    } else {
-                        nextYd = -1 * (this.nextY + this.nextHeight);
-                        screenHeight = this.props.recyclerRef.getScrollableHeight();
-                        scrollY = screenHeight ? -1 * (offsetY + screenHeight) : null;
-                    }
+                    const nextYd: number = this.getNextYd(this.nextY, this.nextHeight);
+                    const scrollableHeight: number | null = this.props.recyclerRef.getScrollableHeight(); //TODO
+                    const scrollY: number | null = this.getScrollY(offsetY, scrollableHeight);
                     if (this.currentHeight && nextYd && scrollY && scrollY + this.currentHeight > nextYd) {
                         if (scrollY <= nextYd) {
                             const translate = (scrollY - nextYd + this.currentHeight) * (-1 * this.stickyTypeMultiplier);
@@ -130,6 +117,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     protected abstract initStickyParams(): void;
+    protected abstract getNextYd(nextY: number, nextHeight: number): number;
+    protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
+    protected abstract getScrollY(offsetY: number, scrollableHeight: number | null): number | null;
 
     private _stickyViewVisible(_visible: boolean): void {
         this.setState({

@@ -15,4 +15,16 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
         this.initialVisibility = true;
         this.containerPosition = {bottom: 0};
     }
+
+    protected getNextYd(nextY: number, nextHeight: number): number {
+        return -1 * (nextY + nextHeight);
+    }
+
+    protected getCurrentYd(currentY: number, currentHeight: number): number {
+        return -1 * (currentY + currentHeight);
+    }
+
+    protected getScrollY(offsetY: number, scrollableHeight: number): number | null {
+        return scrollableHeight ? -1 * (offsetY + scrollableHeight) : null;
+    }
 }

@@ -15,4 +15,16 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
         this.initialVisibility = false;
         this.containerPosition = {top: 0};
     }
+
+    protected getNextYd(nextY: number, nextHeight: number): number {
+        return nextY;
+    }
+
+    protected getCurrentYd(currentY: number, currentHeight: number): number {
+        return currentY;
+    }
+
+    protected getScrollY(offsetY: number, scrollableHeight: number): number | null {
+        return offsetY;
+    }
 }
