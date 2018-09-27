@@ -67,13 +67,11 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         );
     }
 
-    public topStickyViewVisible(visible: boolean): void {
-        this.setState({
-            topVisible: visible,
-        });
+    private _getRecyclerRef = (recycler: any) => {
+        this._recyclerRef = recycler as (RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null);
+        //TODO: Forcing rerender after recyclerRef obtained. Look for better solution.
+        this.setState(this.state);
     }
-
-    private _getRecyclerRef = (recycler: any) => { this._recyclerRef = recycler as (RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null); };
 
     private _onVisibleIndexesChanged(all: number[], now: number[], notNow: number[]): void {
         if (this._stickyHeaderRef) {
@@ -82,9 +80,6 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         if (this._stickyFooterRef) {
             this._stickyFooterRef.onVisibleIndicesChanged(all, now, notNow);
         }
-
-        //TODO Ananya: Hack to rerender to get recyclerRef. To be solved.
-        this.topStickyViewVisible(false);
     }
 
     private _onScroll(rawEvent: ScrollEvent, offsetX: number, offsetY: number): void {

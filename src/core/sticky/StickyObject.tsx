@@ -25,8 +25,21 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     protected stickyTypeMultiplier: number = 1;
     protected initialVisibility: boolean = false;
     protected containerPosition: StyleProp<ViewStyle>;
+
+    protected previousLayout: Layout | undefined;
+    // protected previousHeight: number | null;
+    protected nextLayout: Layout | undefined;
+    // protected nextY: number | null;
+    // protected nextHeight: number | null;
+    protected currentLayout: Layout | undefined;
+    // protected currentY: number | null;
+    // protected currentHeight: number | null;
+
     private _stickyViewOffset: Animated.Value = new Animated.Value(0);
     private _currentIndice: number = 0;
+    private _currentStickyIndice: number = 0;
+    private _previousStickyIndice: number = 0;
+    private _nextStickyIndice: number = 0;
 
     constructor(props: P, context?: any) {
         super(props, context);
