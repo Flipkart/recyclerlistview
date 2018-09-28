@@ -309,11 +309,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         return viewabilityTracker ? viewabilityTracker.findFirstLogicallyVisibleIndex() : 0;
     }
 
-    public getScrollableHeight(): number | null {
-        if (this._scrollComponent) {
-            return this._scrollComponent.getHeight();
-        }
-        return null;
+    public getLayoutDimension(): Dimension {
+        return this._layout;
     }
 
     public render(): JSX.Element {

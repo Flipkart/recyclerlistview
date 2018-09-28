@@ -34,14 +34,6 @@ export default class ScrollComponent extends BaseScrollComponent {
         }
     }
 
-    public getHeight(): number {
-        return this._height;
-    }
-
-    public getWidth(): number {
-        return this._width;
-    }
-
     public render(): JSX.Element {
         const Scroller = this.props.externalScrollView as any; //TSI
         return (

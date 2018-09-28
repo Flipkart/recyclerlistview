@@ -74,6 +74,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     }
 
     private _onVisibleIndexesChanged(all: number[], now: number[], notNow: number[]): void {
+        //TODO: Make sure to call original method
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onVisibleIndicesChanged(all, now, notNow);
         }
@@ -83,6 +84,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     }
 
     private _onScroll(rawEvent: ScrollEvent, offsetX: number, offsetY: number): void {
+        //TODO: Make sure to call original method
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onScroll(offsetY);
         }
