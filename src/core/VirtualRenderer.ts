@@ -226,7 +226,8 @@ export default class VirtualRenderer {
                 key = getStableId(index);
                 if (renderStack[key]) {
                     //Probable collision, warn and avoid
-                    console.warn("Possible stableId collision @", index); //tslint:disable-line
+                    //TODO: Disabled incorrectly triggering in some cases
+                    //console.warn("Possible stableId collision @", index); //tslint:disable-line
                     key = this._getCollisionAvoidingKey();
                 }
                 renderStack[key] = { dataIndex: index };
