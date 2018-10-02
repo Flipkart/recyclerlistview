@@ -7,6 +7,8 @@ import { BaseItemAnimator } from "./core/ItemAnimator";
 import { AutoScroll } from "./utils/AutoScroll";
 import { LayoutManager, WrapGridLayoutManager, Point, Layout } from "./core/layoutmanager/LayoutManager";
 import ProgressiveListView from "./core/ProgressiveListView";
+import { DebugConfig } from "./core/RecyclerListView";
+
 export {
     ContextProvider,
     DataProvider,
@@ -23,4 +25,5 @@ export {
     Point,
     Layout,
     OnRecreateParams,
+    DebugConfig,
 };

@@ -104,6 +104,7 @@ export interface RecyclerListViewProps {
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object;
+    debugConfig?: DebugConfig;
 
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
@@ -111,6 +112,12 @@ export interface RecyclerListViewProps {
 }
 export interface RecyclerListViewState {
     renderStack: RenderStack;
+}
+
+export interface DebugConfig {
+    relaxation: Dimension;
+    onRelaxationViolation: (expectedDim: Dimension, actualDim: Dimension, index: number) => void;
+    forceEnable?: boolean;
 }
 
 export default class RecyclerListView<P extends RecyclerListViewProps, S extends RecyclerListViewState> extends React.Component<P, S> {
@@ -502,6 +509,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _onViewContainerSizeChange = (dim: Dimension, index: number): void => {
+
+        if (this.props.debugConfig && (__DEV__ || this.props.debugConfig.forceEnable)) {
+            this._handleDebug(dim, index);
+        }
+
         //Cannot be null here
         (this._virtualRenderer.getLayoutManager() as LayoutManager).overrideLayout(index, dim);
         if (this._relayoutReqIndex === -1) {
@@ -510,6 +522,29 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
         }
         this._queueStateRefresh();
+    }
+
+    private _handleDebug = (dim: Dimension, index: number): void => {
+        const debugConfig: DebugConfig | undefined = this.props.debugConfig;
+        const itemRect = (this._virtualRenderer.getLayoutManager() as LayoutManager).getLayouts()[index];
+        const expectedDim: Dimension = { width: 0, height: 0 };
+        const actualDim: Dimension = { width: 0, height: 0 };
+        let isViolated: boolean = false;
+        if (debugConfig && debugConfig.relaxation.height >= 0 && Math.abs(dim.height - itemRect.height) >= debugConfig.relaxation.height) {
+            expectedDim.height = itemRect.height;
+            actualDim.height = dim.height;
+            isViolated = true;
+        }
+
+        if (debugConfig && debugConfig.relaxation.width >= 0 && Math.abs(dim.width - itemRect.width) >= debugConfig.relaxation.width) {
+            expectedDim.width = itemRect.width;
+            actualDim.width = dim.width;
+            isViolated = true;
+        }
+
+        if (debugConfig && isViolated) {
+            debugConfig.onRelaxationViolation({ width: itemRect.width, height: itemRect.height }, dim, index);
+        }
     }
 
     private _checkExpectedDimensionDiscrepancy(itemRect: Dimension, type: string | number, index: number): void {
