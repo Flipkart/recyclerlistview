@@ -27,7 +27,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
 
     constructor(props: P, context?: any) {
         super(props, context);
-        this._onVisibleIndexesChanged = this._onVisibleIndexesChanged.bind(this);
+        this._onVisibleIndicesChanged = this._onVisibleIndicesChanged.bind(this);
         this._onScroll = this._onScroll.bind(this);
 
         this.state = {
@@ -38,7 +38,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     public render(): JSX.Element {
         const recycler = React.cloneElement(this.props.children, {
             ref: this._getRecyclerRef,
-            onVisibleIndexesChanged: this._onVisibleIndexesChanged,
+            onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,
         });
         if (this._recyclerRef) {
@@ -73,7 +73,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         this.setState(this.state);
     }
 
-    private _onVisibleIndexesChanged(all: number[], now: number[], notNow: number[]): void {
+    private _onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
         //TODO: Make sure to call original method
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onVisibleIndicesChanged(all, now, notNow);

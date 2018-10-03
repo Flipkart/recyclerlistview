@@ -30,13 +30,11 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 import { Point, Layout, LayoutManager } from "./layoutmanager/LayoutManager";
 import { Constants } from "./constants/Constants";
 import { Messages } from "./constants/Messages";
-import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
-import { Platform, View, Text } from "react-native";
-import StickyContainer from "./StickyContainer";
+import { Platform } from "react-native";
 
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
@@ -91,6 +89,7 @@ export interface RecyclerListViewProps {
     onEndReached?: () => void;
     onEndReachedThreshold?: number;
     onVisibleIndexesChanged?: TOnItemStatusChanged;
+    onVisibleIndicesChanged?: TOnItemStatusChanged;
     renderFooter?: () => JSX.Element | JSX.Element[] | null;
     externalScrollView?: { new(props: ScrollViewDefaultProps): BaseScrollView };
     initialOffset?: number;
@@ -163,10 +162,17 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     public componentWillReceiveProps(newProps: RecyclerListViewProps): void {
         this._assertDependencyPresence(newProps);
         this._checkAndChangeLayouts(newProps);
-        if (!this.props.onVisibleIndexesChanged) {
+        if (!this.props.onVisibleIndexesChanged && !this.props.onVisibleIndicesChanged) {
             this._virtualRenderer.removeVisibleItemsListener();
         } else {
-            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged!);
+            if (this.props.onVisibleIndexesChanged) {
+                this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged!);
+                console.warn("onVisibleIndexesChanged deprecated. Please use onVisibleIndicesChanged instead."); //tslint:disable-line
+            }
+            if (this.props.onVisibleIndicesChanged) {
+                this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndicesChanged!);
+
+            }
         }
     }
 
@@ -323,6 +329,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         //     onEndReached,
         //     onEndReachedThreshold,
         //     onVisibleIndexesChanged,
+        //     onVisibleIndicesChanged,
         //     initialOffset,
         //     initialRenderIndex,
         //     disableRecycling,
@@ -431,6 +438,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this._assertDependencyPresence(this.props);
         if (this.props.onVisibleIndexesChanged) {
             this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged!);
+        }
+        if (this.props.onVisibleIndicesChanged) {
+            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndicesChanged!);
         }
         this._params = {
             initialOffset: this._initialOffset ? this._initialOffset : this.props.initialOffset,
@@ -607,8 +617,11 @@ RecyclerListView.propTypes = {
     //Specify how many pixels in advance you onEndReached callback
     onEndReachedThreshold: PropTypes.number,
 
-    //Provides visible index, helpful in sending impression events etc, onVisibleIndexesChanged(all, now, notNow)
+    //Deprecated. Please use onVisibleIndicesChanged instead.
     onVisibleIndexesChanged: PropTypes.func,
+
+    //Provides visible index, helpful in sending impression events etc, onVisibleIndicesChanged(all, now, notNow)
+    onVisibleIndicesChanged: PropTypes.func,
 
     //Provide this method if you want to render a footer. Helpful in showing a loader while doing incremental loads.
     renderFooter: PropTypes.func,
