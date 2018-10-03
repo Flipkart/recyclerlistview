@@ -35,12 +35,14 @@ import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcom
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
+import { DebugHandler } from "./devutils/debughandlers/DebugHandler";
 
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
 import { Platform } from "react-native";
+
 const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
 
@@ -51,7 +53,7 @@ const IS_WEB = !Platform || Platform.OS === "web";
 //#if [WEB]
 //import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
 //import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
-//import { DefaultWebItemAnimator as DefaultItemAnimator} from "../platform/web/itemanimators/DefaultWebItemAnimator";
+//import { DefaultWebItemAnimator as DefaultItemAnimator } from "../platform/web/itemanimators/DefaultWebItemAnimator";
 //const IS_WEB = true;
 //#endif
 
@@ -60,7 +62,7 @@ const refreshRequestDebouncer = debounce((executable: () => void) => {
 });
 
 /***
- * This is the main component, please refer to samples to understand how to use.
+ * This is the maDebugHandlerin component, please refer to samples to understand how to use.
  * For advanced usage check out prop descriptions below.
  * You also get common methods such as: scrollToIndex, scrollToItem, scrollToTop, scrollToEnd, scrollToOffset, getCurrentScrollOffset,
  * findApproxFirstVisibleIndex.
@@ -78,6 +80,7 @@ const refreshRequestDebouncer = debounce((executable: () => void) => {
 export interface OnRecreateParams {
     lastOffset?: number;
 }
+
 export interface RecyclerListViewProps {
     layoutProvider: BaseLayoutProvider;
     dataProvider: DataProvider;
@@ -104,20 +107,15 @@ export interface RecyclerListViewProps {
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object;
-    debugConfig?: DebugConfig;
+    debugHandler?: DebugHandler;
 
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
 }
+
 export interface RecyclerListViewState {
     renderStack: RenderStack;
-}
-
-export interface DebugConfig {
-    relaxation: Dimension;
-    onRelaxationViolation: (expectedDim: Dimension, actualDim: Dimension, index: number) => void;
-    forceEnable?: boolean;
 }
 
 export default class RecyclerListView<P extends RecyclerListViewProps, S extends RecyclerListViewState> extends React.Component<P, S> {
@@ -488,63 +486,44 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             }
             return (
                 <ViewRenderer key={key} data={data}
-                    dataHasChanged={this._dataHasChanged}
-                    x={itemRect.x}
-                    y={itemRect.y}
-                    layoutType={type}
-                    index={dataIndex}
-                    styleOverrides={styleOverrides}
-                    layoutProvider={this.props.layoutProvider}
-                    forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
-                    isHorizontal={this.props.isHorizontal}
-                    onSizeChanged={this._onViewContainerSizeChange}
-                    childRenderer={this.props.rowRenderer}
-                    height={itemRect.height}
-                    width={itemRect.width}
-                    itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
-                    extendedState={this.props.extendedState} />
+                              dataHasChanged={this._dataHasChanged}
+                              x={itemRect.x}
+                              y={itemRect.y}
+                              layoutType={type}
+                              index={dataIndex}
+                              styleOverrides={styleOverrides}
+                              layoutProvider={this.props.layoutProvider}
+                              forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
+                              isHorizontal={this.props.isHorizontal}
+                              onSizeChanged={this._onViewContainerSizeChange}
+                              childRenderer={this.props.rowRenderer}
+                              height={itemRect.height}
+                              width={itemRect.width}
+                              itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
+                              extendedState={this.props.extendedState}/>
             );
         }
         return null;
     }
 
     private _onViewContainerSizeChange = (dim: Dimension, index: number): void => {
+        //Cannot be null here
+        const layoutManager: LayoutManager = this._virtualRenderer.getLayoutManager() as LayoutManager;
 
-        if (this.props.debugConfig && (__DEV__ || this.props.debugConfig.forceEnable)) {
-            this._handleDebug(dim, index);
+        if (this.props.debugHandler
+            && this.props.debugHandler.resizeDebug
+            && (__DEV__ || this.props.debugHandler.getDebugConfig().forceEnable)) {
+            const itemRect = layoutManager.getLayouts()[index];
+            this.props.debugHandler.resizeDebug({ width: itemRect.width, height: itemRect.height }, dim, index);
         }
 
-        //Cannot be null here
-        (this._virtualRenderer.getLayoutManager() as LayoutManager).overrideLayout(index, dim);
+        layoutManager.overrideLayout(index, dim);
         if (this._relayoutReqIndex === -1) {
             this._relayoutReqIndex = index;
         } else {
             this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
         }
         this._queueStateRefresh();
-    }
-
-    private _handleDebug = (dim: Dimension, index: number): void => {
-        const debugConfig: DebugConfig | undefined = this.props.debugConfig;
-        const itemRect = (this._virtualRenderer.getLayoutManager() as LayoutManager).getLayouts()[index];
-        const expectedDim: Dimension = { width: 0, height: 0 };
-        const actualDim: Dimension = { width: 0, height: 0 };
-        let isViolated: boolean = false;
-        if (debugConfig && debugConfig.relaxation.height >= 0 && Math.abs(dim.height - itemRect.height) >= debugConfig.relaxation.height) {
-            expectedDim.height = itemRect.height;
-            actualDim.height = dim.height;
-            isViolated = true;
-        }
-
-        if (debugConfig && debugConfig.relaxation.width >= 0 && Math.abs(dim.width - itemRect.width) >= debugConfig.relaxation.width) {
-            expectedDim.width = itemRect.width;
-            actualDim.width = dim.width;
-            isViolated = true;
-        }
-
-        if (debugConfig && isViolated) {
-            debugConfig.onRelaxationViolation({ width: itemRect.width, height: itemRect.height }, dim, index);
-        }
     }
 
     private _checkExpectedDimensionDiscrepancy(itemRect: Dimension, type: string | number, index: number): void {

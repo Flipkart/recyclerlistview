@@ -1,13 +1,13 @@
 import ContextProvider from "./core/dependencies/ContextProvider";
 import DataProvider from "./core/dependencies/DataProvider";
-import { LayoutProvider, BaseLayoutProvider, Dimension } from "./core/dependencies/LayoutProvider";
+import { BaseLayoutProvider, Dimension, LayoutProvider } from "./core/dependencies/LayoutProvider";
 import RecyclerListView, { OnRecreateParams } from "./core/RecyclerListView";
 import BaseScrollView from "./core/scrollcomponent/BaseScrollView";
 import { BaseItemAnimator } from "./core/ItemAnimator";
 import { AutoScroll } from "./utils/AutoScroll";
-import { LayoutManager, WrapGridLayoutManager, Point, Layout } from "./core/layoutmanager/LayoutManager";
+import { Layout, LayoutManager, Point, WrapGridLayoutManager } from "./core/layoutmanager/LayoutManager";
 import ProgressiveListView from "./core/ProgressiveListView";
-import { DebugConfig } from "./core/RecyclerListView";
+import { DebugHandler } from "./core/devutils/debughandlers/DebugHandler";
 
 export {
     ContextProvider,
@@ -25,5 +25,5 @@ export {
     Point,
     Layout,
     OnRecreateParams,
-    DebugConfig,
+    DebugHandler,
 };
