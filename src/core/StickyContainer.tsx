@@ -11,7 +11,7 @@ import StickyHeader from "./sticky/StickyHeader";
 import StickyFooter from "./sticky/StickyFooter";
 
 export interface StickyContainerProps {
-    children: any;
+    children: any; //TODO Ananya: Resolve 'as any'
     stickyHeaderIndices: number[];
     stickyFooterIndices: number[];
     stickyView?: JSX.Element;
@@ -69,7 +69,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
 
     private _getRecyclerRef = (recycler: any) => {
         this._recyclerRef = recycler as (RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null);
-        //TODO Ananya: Forcing rerender after recyclerRef obtained. Look for better solution.
+        //TODO Ananya: Forcing rerender after recyclerRef obtained hack
         this.setState(this.state);
     }
 
@@ -87,7 +87,10 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     }
 
     private _onScroll(rawEvent: ScrollEvent, offsetX: number, offsetY: number): void {
-        //TODO Ananya: Make sure to call original method
+        //TODO Ananya: Resolve 'as any'
+        if (this.props.children && (this.props.children as any).props.onScroll) {
+            (this.props.children as any).props.onScroll();
+        }
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onScroll(offsetY);
         }

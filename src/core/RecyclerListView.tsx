@@ -165,6 +165,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (!this.props.onVisibleIndexesChanged && !this.props.onVisibleIndicesChanged) {
             this._virtualRenderer.removeVisibleItemsListener();
         }
+        //TODO Ananya: componentWillReceiveProps being called on load due to clone element
         // else {
         //     if (this.props.onVisibleIndexesChanged) {
         //         this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged!);
