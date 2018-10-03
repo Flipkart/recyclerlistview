@@ -69,12 +69,15 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
 
     private _getRecyclerRef = (recycler: any) => {
         this._recyclerRef = recycler as (RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null);
-        //TODO: Forcing rerender after recyclerRef obtained. Look for better solution.
+        //TODO Ananya: Forcing rerender after recyclerRef obtained. Look for better solution.
         this.setState(this.state);
     }
 
     private _onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
-        //TODO: Make sure to call original method
+        //TODO Ananya: Resolve 'as any'
+        if (this.props.children && (this.props.children as any).props.onVisibleIndicesChanged) {
+            (this.props.children as any).props.onVisibleIndicesChanged();
+        }
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onVisibleIndicesChanged(all, now, notNow);
         }
@@ -84,7 +87,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     }
 
     private _onScroll(rawEvent: ScrollEvent, offsetX: number, offsetY: number): void {
-        //TODO: Make sure to call original method
+        //TODO Ananya: Make sure to call original method
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onScroll(offsetY);
         }

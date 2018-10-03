@@ -164,16 +164,15 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this._checkAndChangeLayouts(newProps);
         if (!this.props.onVisibleIndexesChanged && !this.props.onVisibleIndicesChanged) {
             this._virtualRenderer.removeVisibleItemsListener();
-        } else {
-            if (this.props.onVisibleIndexesChanged) {
-                this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged!);
-                console.warn("onVisibleIndexesChanged deprecated. Please use onVisibleIndicesChanged instead."); //tslint:disable-line
-            }
-            if (this.props.onVisibleIndicesChanged) {
-                this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndicesChanged!);
-
-            }
         }
+        // else {
+        //     if (this.props.onVisibleIndexesChanged) {
+        //         this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged!);
+        //         console.warn("onVisibleIndexesChanged deprecated. Please use onVisibleIndicesChanged instead."); //tslint:disable-line
+        //     } else if (this.props.onVisibleIndicesChanged) {
+        //         this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndicesChanged!);
+        //     }
+        // }
     }
 
     public componentDidUpdate(): void {
