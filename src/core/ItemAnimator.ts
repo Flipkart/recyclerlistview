@@ -20,6 +20,8 @@ export default interface ItemAnimator {
 
     //Called before unmount
     animateWillUnmount: (atX: number, atY: number, itemRef: object, itemIndex: number) => void;
+
+    shouldPersistStyleOverrides?: () => boolean;
 }
 
 export class BaseItemAnimator implements ItemAnimator {

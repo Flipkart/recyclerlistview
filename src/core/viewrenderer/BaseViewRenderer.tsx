@@ -41,6 +41,9 @@ export default abstract class BaseViewRenderer<T> extends React.Component<ViewRe
         const hasDataChanged = (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data));
         let shouldUpdate = hasSizeChanged || hasDataChanged || hasExtendedStateChanged;
 
+        if (this.animatorStyleOverrides && (!this.props.itemAnimator.shouldPersistStyleOverrides || !this.props.itemAnimator.shouldPersistStyleOverrides())) {
+            this.animatorStyleOverrides = undefined;
+        }
         if (shouldUpdate) {
             newProps.itemAnimator.animateWillUpdate(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
         } else if (hasMoved) {
@@ -49,7 +52,6 @@ export default abstract class BaseViewRenderer<T> extends React.Component<ViewRe
         return shouldUpdate;
     }
     public componentDidMount(): void {
-        this.animatorStyleOverrides = undefined;
         this.props.itemAnimator.animateDidMount(this.props.x, this.props.y, this.getRef() as object, this.props.index);
     }
     public componentWillMount(): void {

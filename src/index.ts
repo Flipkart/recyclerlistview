@@ -7,6 +7,7 @@ import { BaseItemAnimator } from "./core/ItemAnimator";
 import { AutoScroll } from "./utils/AutoScroll";
 import { LayoutManager, WrapGridLayoutManager, Point, Layout } from "./core/layoutmanager/LayoutManager";
 import ProgressiveListView from "./core/ProgressiveListView";
+import { LayoutStabilizerAnimator } from "./platform/common/itemanimators/LayoutStabilizerAnimator";
 export {
     ContextProvider,
     DataProvider,
@@ -23,4 +24,5 @@ export {
     Point,
     Layout,
     OnRecreateParams,
+    LayoutStabilizerAnimator,
 };
