@@ -45,6 +45,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     private _previousStickyIndice: number = 0;
     private _nextStickyIndice: number = 0;
     private _firstCompute: boolean = true;
+    private _visibleIndices: {[key: number]: boolean} = {};
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -68,14 +69,15 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     public onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
         if (this._firstCompute) {
+            this._setVisibleIndices(all, true);
             this._initParams(this.props.recyclerRef);
             this._firstCompute = false;
         }
-        //TODO Ananya: Use hashmaps
-        if (all.indexOf(this._currentStickyIndice) >= 0 && all.indexOf(this._currentStickyIndice - this.stickyTypeMultiplier) === -1) {
-            this._stickyViewVisible(true);
-        } else if (all.indexOf(this._currentStickyIndice) >= 0 && all.indexOf(this._currentStickyIndice - this.stickyTypeMultiplier) >= 0) {
-            this._stickyViewVisible(false);
+
+        this._setVisibleIndices(now, true);
+        this._setVisibleIndices(notNow, false);
+        if (this._visibleIndices[this._currentStickyIndice]) {
+            this._stickyViewVisible(!this._visibleIndices[this._currentStickyIndice - this.stickyTypeMultiplier]);
         }
     }
 
@@ -153,6 +155,12 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                 this.nextHeight = this.nextLayout ? this.nextLayout.height : undefined;
                 this.nextYd = this.nextY && this.nextHeight ? this.getNextYd(this.nextY, this.nextHeight) : undefined;
             }
+        }
+    }
+
+    private _setVisibleIndices(indicesArray: number[], setValue: boolean): void {
+        for (const index of indicesArray) {
+            this._visibleIndices[index] = setValue;
         }
     }
 }
