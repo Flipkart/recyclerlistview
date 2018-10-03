@@ -8,7 +8,7 @@ export class RAFToken {
     }
 }
 export class RAFHelper {
-    public static excuteOnRAF(func: (token: RAFToken) => void, rafNesting: number): void {
+    public static executeOnRAF(func: (token: RAFToken) => void, rafNesting: number): void {
         let rAFExecutable = (tokenValue: RAFToken) => {
             func(tokenValue);
             if (!tokenValue.isTerminated()) {

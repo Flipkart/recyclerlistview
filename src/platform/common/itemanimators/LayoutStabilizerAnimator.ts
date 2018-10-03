@@ -62,7 +62,7 @@ export class LayoutStabilizerAnimator implements BaseItemAnimator {
             this._lastProcessingIndex = itemIndex;
             if (!this._hasStabilizationStartedOrComplete()) {
                 this._startStabilization();
-                RAFHelper.excuteOnRAF((token) => {
+                RAFHelper.executeOnRAF((token) => {
                     if (this._lastProcessingIndex === itemIndex) {
                         token.terminate();
                         this._completeStabilization();
