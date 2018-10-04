@@ -11,7 +11,7 @@ import StickyHeader from "./sticky/StickyHeader";
 import StickyFooter from "./sticky/StickyFooter";
 
 export interface StickyContainerProps {
-    children: any; //TODO Ananya: Resolve 'as any'
+    children: any; //TODO Ananya: Resolve any
     stickyHeaderIndices: number[];
     stickyFooterIndices: number[];
     stickyView?: JSX.Element;
@@ -20,7 +20,7 @@ export interface StickyContainerState {
     topVisible: boolean;
 }
 export default class StickyContainer<P extends StickyContainerProps, S extends StickyContainerState> extends React.Component<P, S> {
-    private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null;
+    private _recyclerRef: any | null = null; //TODO Ananya: Resolve any
     private _stickyHeaderRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
     private _stickyFooterRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
     private _rowRenderer: ((type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null) | null = null;
@@ -74,7 +74,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     }
 
     private _onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
-        //TODO Ananya: Resolve 'as any'
+        //TODO Ananya: Resolve any
         if (this.props.children && (this.props.children as any).props.onVisibleIndicesChanged) {
             (this.props.children as any).props.onVisibleIndicesChanged();
         }
@@ -87,7 +87,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     }
 
     private _onScroll(rawEvent: ScrollEvent, offsetX: number, offsetY: number): void {
-        //TODO Ananya: Resolve 'as any'
+        //TODO Ananya: Resolve any
         if (this.props.children && (this.props.children as any).props.onScroll) {
             (this.props.children as any).props.onScroll();
         }
