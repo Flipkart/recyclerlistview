@@ -35,7 +35,7 @@ import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcom
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
-import { DebugHandler } from "./devutils/debughandlers/DebugHandler";
+import { DebugHandlers } from "..";
 
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
@@ -62,7 +62,7 @@ const refreshRequestDebouncer = debounce((executable: () => void) => {
 });
 
 /***
- * This is the maDebugHandlerin component, please refer to samples to understand how to use.
+ * This is the main component, please refer to samples to understand how to use.
  * For advanced usage check out prop descriptions below.
  * You also get common methods such as: scrollToIndex, scrollToItem, scrollToTop, scrollToEnd, scrollToOffset, getCurrentScrollOffset,
  * findApproxFirstVisibleIndex.
@@ -107,7 +107,7 @@ export interface RecyclerListViewProps {
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object;
-    debugHandler?: DebugHandler;
+    debugHandlers?: DebugHandlers;
 
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
@@ -510,11 +510,12 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         //Cannot be null here
         const layoutManager: LayoutManager = this._virtualRenderer.getLayoutManager() as LayoutManager;
 
-        if (this.props.debugHandler
-            && this.props.debugHandler.resizeDebug
-            && (__DEV__ || this.props.debugHandler.getDebugConfig().forceEnable)) {
+        if (this.props.debugHandlers && this.props.debugHandlers.resizeDebugHandler) {
             const itemRect = layoutManager.getLayouts()[index];
-            this.props.debugHandler.resizeDebug({ width: itemRect.width, height: itemRect.height }, dim, index);
+            this.props.debugHandlers.resizeDebugHandler.resizeDebug({
+                width: itemRect.width,
+                height: itemRect.height,
+            }, dim, index);
         }
 
         layoutManager.overrideLayout(index, dim);
