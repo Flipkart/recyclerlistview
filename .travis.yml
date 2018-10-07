@@ -4,6 +4,4 @@ branches:
     - 'master'
 node_js:
   - 'stable'
-before_script:
-    - npm run setup
 script: npm run build
