@@ -6,19 +6,20 @@ import * as React from "react";
 import {Animated, StyleProp, ViewStyle} from "react-native";
 import {Layout} from "../layoutmanager/LayoutManager";
 import RecyclerListView, {RecyclerListViewProps, RecyclerListViewState} from "../RecyclerListView";
+import {Dimension} from "../dependencies/LayoutProvider";
 
 export enum StickyType {
     HEADER,
     FOOTER,
 }
 export interface StickyObjectProps {
-    rowRenderer: ((type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null) | null;
     stickyIndices: number[];
-    recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null;
-
 }
 export interface StickyObjectState {
     visible: boolean;
+}
+export interface VisibleIndices {
+    [key: number]: boolean;
 }
 export default abstract class StickyObject<P extends StickyObjectProps, S extends StickyObjectState> extends React.Component<P, S> {
     protected stickyType: StickyType = StickyType.HEADER;
@@ -38,6 +39,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     protected nextYd: number | undefined;
     protected currentYd: number | undefined;
     private _scrollableHeight: number | null = null;
+    private _scrollableWidth: number | null = null;
 
     private _stickyViewOffset: Animated.Value = new Animated.Value(0);
     private _currentIndice: number = 0;
@@ -45,44 +47,53 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     private _previousStickyIndice: number = 0;
     private _nextStickyIndice: number = 0;
     private _firstCompute: boolean = true;
-    private _visibleIndices: {[key: number]: boolean} = {};
+    private _visibleIndices: VisibleIndices = {};
+
+    private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null;
+    private _rowRenderer: ((type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null) | null = null;
 
     constructor(props: P, context?: any) {
         super(props, context);
-
-        this.initStickyParams();
         this.state = {
             visible: this.initialVisibility,
         } as S;
     }
 
     public render(): JSX.Element | null {
-        //TODO: send passedData in rowrenderer
+        // TODO Ananya: send passedData in rowrenderer
         return (
-            <Animated.View style={[{position: "absolute", transform: [{translateY: this._stickyViewOffset}]}, this.containerPosition]}>
+            <Animated.View style={[
+                {position: "absolute", width: this._scrollableWidth, transform: [{translateY: this._stickyViewOffset}]},
+                this.containerPosition,
+            ]}>
                 {this.state.visible ?
-                    this.props.rowRenderer ? this.props.rowRenderer(this.props.stickyIndices[this._currentIndice], null, 0) : null
+                    this._rowRenderer ? this._rowRenderer("sticky", null, this.props.stickyIndices[this._currentIndice]) : null
                     : null}
             </Animated.View>
         );
     }
 
-    public onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
+    public onVisibleIndicesChanged(all: number[], now: number[], notNow: number[],
+                                   recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
         if (this._firstCompute) {
             this._setVisibleIndices(all, true);
-            this._initParams(this.props.recyclerRef);
+            this._initParams(recyclerRef);
+            this.initStickyParams(this._visibleIndices, this._currentStickyIndice);
+            if (this.initialVisibility) {
+                this._stickyViewVisible(true);
+            }
             this._firstCompute = false;
-        }
-
-        this._setVisibleIndices(now, true);
-        this._setVisibleIndices(notNow, false);
-        if (this._visibleIndices[this._currentStickyIndice]) {
-            this._stickyViewVisible(!this._visibleIndices[this._currentStickyIndice - this.stickyTypeMultiplier]);
+        } else {
+            this._setVisibleIndices(now, true);
+            this._setVisibleIndices(notNow, false);
+            if (this._visibleIndices[this._currentStickyIndice]) {
+                this._stickyViewVisible(!this._visibleIndices[this._currentStickyIndice - this.stickyTypeMultiplier]);
+            }
         }
     }
 
     public onScroll(offsetY: number): void {
-        if (this.props.recyclerRef) {
+        if (this._recyclerRef) {
             if (this._previousStickyIndice) {
                 if (this.currentY && this.currentHeight) {
                     const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
@@ -91,7 +102,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                             this._currentIndice -= this.stickyTypeMultiplier;
                             const translate = (scrollY - this.currentYd + this.previousHeight) * (-1 * this.stickyTypeMultiplier);
                             this._stickyViewOffset.setValue(translate);
-                            this._computeLayouts(this.props.recyclerRef);
+                            this._computeLayouts(this._recyclerRef);
                             this._stickyViewVisible(true);
                         }
                     }
@@ -107,7 +118,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                         } else if (scrollY > this.nextYd) {
                             this._currentIndice += this.stickyTypeMultiplier;
                             this._stickyViewOffset.setValue(0);
-                            this._computeLayouts(this.props.recyclerRef);
+                            this._computeLayouts(this._recyclerRef);
                             this._stickyViewVisible(true);
                         }
                     }
@@ -116,7 +127,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         }
     }
 
-    protected abstract initStickyParams(): void;
+    protected abstract initStickyParams(visibleIndices: VisibleIndices, currentIndice: number): void;
     protected abstract getNextYd(nextY: number, nextHeight: number): number;
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
     protected abstract getScrollY(offsetY: number, scrollableHeight: number | null): number | null;
@@ -129,8 +140,14 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     private _initParams(recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
         if (recyclerRef) {
-            this._scrollableHeight = this.props.recyclerRef ? recyclerRef.getLayoutDimension().height : null;
-            this._computeLayouts(this.props.recyclerRef);
+            this._recyclerRef = recyclerRef;
+            this._rowRenderer = recyclerRef.props.rowRenderer;
+            const dimension: Dimension | null = recyclerRef ? recyclerRef.getLayoutDimension() : null;
+            if (dimension) {
+                this._scrollableHeight = dimension.height;
+                this._scrollableWidth = dimension.width;
+            }
+            this._computeLayouts(recyclerRef);
         }
     }
 

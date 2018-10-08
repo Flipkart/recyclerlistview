@@ -12,8 +12,8 @@
  * DONE: Add Initial render Index support
  * DONE: Add animated scroll to web scrollviewer
  * DONE: Animate list view transition, including add/remove
+ * DONE: Implement sticky headers
  * TODO: Destroy less frequently used items in recycle pool, this will help in case of too many types.
- * TODO: Implement sticky headers
  * TODO: Make viewability callbacks configurable
  * TODO: Observe size changes on web to optimize for reflowability
  * TODO: Solve //TSI

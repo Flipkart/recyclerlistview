@@ -41,9 +41,6 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,
         });
-        if (this._recyclerRef) {
-            this._rowRenderer = this._recyclerRef.props.rowRenderer;
-        }
         return (
             <View style={{flex: 1}}>
                 {recycler}
@@ -51,17 +48,13 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
                     <StickyHeader ref={(stickyHeaderRef: any) => {
                     this._stickyHeaderRef = stickyHeaderRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
                 }}
-                              rowRenderer={this._rowRenderer}
-                              stickyIndices={this.props.stickyHeaderIndices}
-                              recyclerRef={this._recyclerRef}/>
+                              stickyIndices={this.props.stickyHeaderIndices}/>
                 ) : null}
                 {this.props.stickyFooterIndices ? (
                     <StickyFooter ref={(stickyFooterRef: any) => {
                     this._stickyFooterRef = stickyFooterRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
                 }}
-                              rowRenderer={this._rowRenderer}
-                              stickyIndices={this.props.stickyFooterIndices}
-                              recyclerRef={this._recyclerRef}/>
+                              stickyIndices={this.props.stickyFooterIndices}/>
                 ) : null}
             </View>
         );
@@ -69,8 +62,6 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
 
     private _getRecyclerRef = (recycler: any) => {
         this._recyclerRef = recycler as (RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null);
-        //TODO Ananya: Forcing rerender after recyclerRef obtained hack
-        this.setState(this.state);
     }
 
     private _onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
@@ -79,10 +70,10 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
             (this.props.children as any).props.onVisibleIndicesChanged();
         }
         if (this._stickyHeaderRef) {
-            this._stickyHeaderRef.onVisibleIndicesChanged(all, now, notNow);
+            this._stickyHeaderRef.onVisibleIndicesChanged(all, now, notNow, this._recyclerRef);
         }
         if (this._stickyFooterRef) {
-            this._stickyFooterRef.onVisibleIndicesChanged(all, now, notNow);
+            this._stickyFooterRef.onVisibleIndicesChanged(all, now, notNow, this._recyclerRef);
         }
     }
 
