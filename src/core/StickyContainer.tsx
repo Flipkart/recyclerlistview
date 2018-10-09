@@ -20,7 +20,7 @@ export interface StickyContainerState {
     topVisible: boolean;
 }
 export default class StickyContainer<P extends StickyContainerProps, S extends StickyContainerState> extends React.Component<P, S> {
-    private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null; //TODO Ananya: Resolve any
+    private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null;
     private _stickyHeaderRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
     private _stickyFooterRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
     private _rowRenderer: ((type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null) | null = null;
