@@ -162,18 +162,15 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     public componentWillReceiveProps(newProps: RecyclerListViewProps): void {
         this._assertDependencyPresence(newProps);
         this._checkAndChangeLayouts(newProps);
-        if (!this.props.onVisibleIndexesChanged && !this.props.onVisibleIndicesChanged) {
+        if (!this.props.onVisibleIndicesChanged) {
             this._virtualRenderer.removeVisibleItemsListener();
         }
-        //TODO Ananya: componentWillReceiveProps being called on load due to clone element
-        // else {
-        //     if (this.props.onVisibleIndexesChanged) {
-        //         this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged!);
-        //         console.warn("onVisibleIndexesChanged deprecated. Please use onVisibleIndicesChanged instead."); //tslint:disable-line
-        //     } else if (this.props.onVisibleIndicesChanged) {
-        //         this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndicesChanged!);
-        //     }
-        // }
+        if (this.props.onVisibleIndexesChanged) {
+            console.warn(Messages.VISIBLE_INDEXES_CHANGED_DEPRECATED); //tslint:disable-line
+        }
+        if (this.props.onVisibleIndicesChanged) {
+            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndicesChanged!);
+        }
     }
 
     public componentDidUpdate(): void {
@@ -328,7 +325,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         //     renderAheadOffset,
         //     onEndReached,
         //     onEndReachedThreshold,
-        //     onVisibleIndexesChanged,
         //     onVisibleIndicesChanged,
         //     initialOffset,
         //     initialRenderIndex,
@@ -437,7 +433,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _initTrackers(): void {
         this._assertDependencyPresence(this.props);
         if (this.props.onVisibleIndexesChanged) {
-            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndexesChanged!);
+            console.warn(Messages.VISIBLE_INDEXES_CHANGED_DEPRECATED); //tslint:disable-line
         }
         if (this.props.onVisibleIndicesChanged) {
             this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndicesChanged!);

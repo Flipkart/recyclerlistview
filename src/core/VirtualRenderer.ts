@@ -32,7 +32,7 @@ export type StableIdProvider = (index: number) => string;
 
 export default class VirtualRenderer {
 
-    private _onVisibleItemsChangedCallbacks: TOnItemStatusChanged[] | null;
+    private _onVisibleItemsChangedCallback: TOnItemStatusChanged | null;
 
     private _scrollOnNextUpdate: (point: Point) => void;
     private _stableIdToRenderKeyMap: { [key: string]: StableIdMapItem | undefined };
@@ -76,7 +76,7 @@ export default class VirtualRenderer {
         //Would be surprised if someone exceeds this
         this._startKey = 0;
 
-        this._onVisibleItemsChangedCallbacks = [];
+        this._onVisibleItemsChangedCallback = null;
     }
 
     public getLayoutDimension(): Dimension {
@@ -100,13 +100,11 @@ export default class VirtualRenderer {
     }
 
     public attachVisibleItemsListener(callback: TOnItemStatusChanged): void {
-        if (this._onVisibleItemsChangedCallbacks) {
-            this._onVisibleItemsChangedCallbacks.push(callback);
-        }
+        this._onVisibleItemsChangedCallback = callback;
     }
 
     public removeVisibleItemsListener(): void {
-        this._onVisibleItemsChangedCallbacks = [];
+        this._onVisibleItemsChangedCallback = null;
 
         if (this._viewabilityTracker) {
             this._viewabilityTracker.onVisibleRowsChanged = null;
@@ -324,7 +322,7 @@ export default class VirtualRenderer {
     private _prepareViewabilityTracker(): void {
         if (this._viewabilityTracker && this._layoutManager && this._dimensions && this._params) {
             this._viewabilityTracker.onEngagedRowsChanged = this._onEngagedItemsChanged;
-            if (this._onVisibleItemsChangedCallbacks) {
+            if (this._onVisibleItemsChangedCallback) {
                 this._viewabilityTracker.onVisibleRowsChanged = this._onVisibleItemsChanged;
             }
             this._viewabilityTracker.setLayouts(this._layoutManager.getLayouts(), this._params.isHorizontal ?
@@ -340,10 +338,8 @@ export default class VirtualRenderer {
     }
 
     private _onVisibleItemsChanged = (all: number[], now: number[], notNow: number[]): void => {
-        if (this._onVisibleItemsChangedCallbacks && this._onVisibleItemsChangedCallbacks.length > 0) {
-            for (const callback of this._onVisibleItemsChangedCallbacks) {
-                callback(all, now, notNow);
-            }
+        if (this._onVisibleItemsChangedCallback) {
+            this._onVisibleItemsChangedCallback(all, now, notNow);
         }
     }
 
