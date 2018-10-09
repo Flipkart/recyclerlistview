@@ -12,7 +12,7 @@ interface UnmountAwareView {
  * This is stateful and thus, will work once per mount. Make sure you pass a new instance for every
  * new RLV mount.
  */
-export class LayoutStabilizerAnimator implements BaseItemAnimator {
+export class LayoutStabilizerAnimator extends BaseItemAnimator {
     private _isQueueComplete: boolean = false;
     private _stabilizationInProgress = false;
     private _stabilizationComplete = false;
@@ -26,7 +26,10 @@ export class LayoutStabilizerAnimator implements BaseItemAnimator {
     }
 
     public animateWillMount(atX: number, atY: number, itemIndex: number): object | undefined {
-        if (!this._isQueueComplete) {
+        if (this.isRecreateFlow && !this._isStabilizationComplete()) {
+            this._completeStabilization();
+            this._isQueueComplete = true;
+        } else if (!this._isQueueComplete) {
             this._indexBounds.min = Math.min(itemIndex, this._indexBounds.min);
             this._indexBounds.max = Math.max(itemIndex, this._indexBounds.max);
             return { opacity: 0 };
@@ -34,7 +37,7 @@ export class LayoutStabilizerAnimator implements BaseItemAnimator {
         return undefined;
     }
     public animateDidMount(atX: number, atY: number, itemRef: object, itemIndex: number): void {
-        if (itemIndex >= this._indexBounds.min && itemIndex <= this._indexBounds.max) {
+        if (!this._isQueueComplete && itemIndex >= this._indexBounds.min && itemIndex <= this._indexBounds.max) {
             if (this._viewCache) {
                 this._viewCache.push(itemRef);
                 if (itemIndex === this._indexBounds.max) {

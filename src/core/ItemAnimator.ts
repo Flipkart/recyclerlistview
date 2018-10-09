@@ -22,10 +22,12 @@ export default interface ItemAnimator {
     animateWillUnmount: (atX: number, atY: number, itemRef: object, itemIndex: number) => void;
 
     shouldPersistStyleOverrides?: () => boolean;
+    isRecreateFlow?: boolean;
 }
 
 export class BaseItemAnimator implements ItemAnimator {
     public static USE_NATIVE_DRIVER = true;
+    public isRecreateFlow = false;
     public animateWillMount(atX: number, atY: number, itemIndex: number): object | undefined {
         return undefined;
     }

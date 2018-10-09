@@ -4,7 +4,7 @@ import { BaseItemAnimator } from "../../../core/ItemAnimator";
  * Default implementation of RLV layout animations for web. We simply hook in transform transitions to beautifully animate all
  * shift events.
  */
-export class DefaultWebItemAnimator implements BaseItemAnimator {
+export class DefaultWebItemAnimator extends BaseItemAnimator {
     public shouldAnimateOnce: boolean = true;
     private _hasAnimatedOnce: boolean = false;
     private _isTimerOn: boolean = false;

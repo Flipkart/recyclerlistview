@@ -215,6 +215,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 const offset = this.props.contextProvider.get(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX);
                 if (typeof offset === "number" && offset > 0) {
                     this._initialOffset = offset;
+                    this._defaultItemAnimator.isRecreateFlow = true;
                     if (this.props.onRecreate) {
                         this.props.onRecreate({ lastOffset: this._initialOffset });
                     }
