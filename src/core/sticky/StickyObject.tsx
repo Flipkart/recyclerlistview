@@ -44,6 +44,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     private _stickyViewOffset: Animated.Value = new Animated.Value(0);
     private _currentIndice: number = 0;
     private _currentStickyIndice: number = 0;
+    private _stickyData: any | null = null;
     private _previousStickyIndice: number = 0;
     private _nextStickyIndice: number = 0;
     private _firstCompute: boolean = true;
@@ -60,14 +61,13 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     public render(): JSX.Element | null {
-        // TODO Ananya: send passedData in rowrenderer
         return (
             <Animated.View style={[
                 {position: "absolute", width: this._scrollableWidth, transform: [{translateY: this._stickyViewOffset}]},
                 this.containerPosition,
             ]}>
                 {this.state.visible ?
-                    this._rowRenderer ? this._rowRenderer("sticky", null, this.props.stickyIndices[this._currentIndice]) : null
+                    this._rowRenderer ? this._rowRenderer("", this._stickyData, this._currentStickyIndice) : null
                     : null}
             </Animated.View>
         );
@@ -156,6 +156,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     private _computeLayouts(recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
         if (recyclerRef) {
             this._currentStickyIndice = this.props.stickyIndices[this._currentIndice];
+            this._stickyData = this._recyclerRef && this._recyclerRef.props.dataProvider ?
+                this._recyclerRef.props.dataProvider.getDataForIndex(this._currentStickyIndice)
+                : null;
             this._previousStickyIndice = this.props.stickyIndices[this._currentIndice - this.stickyTypeMultiplier];
             this._nextStickyIndice = this.props.stickyIndices[this._currentIndice + this.stickyTypeMultiplier];
             if (this._currentStickyIndice) {
