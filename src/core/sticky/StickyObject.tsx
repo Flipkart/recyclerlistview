@@ -77,8 +77,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                                    recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
         if (this._firstCompute) {
             this._setVisibleIndices(all, true);
+            this.initStickyParams();
             this._initParams(recyclerRef);
-            this.initStickyParams(this._visibleIndices, this._currentStickyIndice);
+            this.isInitiallyVisible(this._visibleIndices, this._currentStickyIndice);
             if (this.initialVisibility) {
                 this._stickyViewVisible(true);
             }
@@ -127,7 +128,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         }
     }
 
-    protected abstract initStickyParams(visibleIndices: VisibleIndices, currentIndice: number): void;
+    protected abstract initStickyParams(): void;
+    protected abstract isInitiallyVisible(visibleIndices: VisibleIndices, currentIndice: number): void;
     protected abstract getNextYd(nextY: number, nextHeight: number): number;
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
     protected abstract getScrollY(offsetY: number, scrollableHeight: number | null): number | null;

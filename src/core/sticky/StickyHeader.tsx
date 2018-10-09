@@ -9,11 +9,15 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
         super(props, context);
     }
 
-    protected initStickyParams(visibleIndices: VisibleIndices, currentIndice: number): void {
+    protected initStickyParams(): void {
         this.stickyType = StickyType.HEADER;
         this.stickyTypeMultiplier = 1;
-        this.initialVisibility = false;
         this.containerPosition = {top: 0};
+    }
+
+    protected isInitiallyVisible(visibleIndices: VisibleIndices, currentIndice: number): void {
+        //TODO Ananya: Handle recycler scrollTo case
+        this.initialVisibility = false;
     }
 
     protected getNextYd(nextY: number, nextHeight: number): number {

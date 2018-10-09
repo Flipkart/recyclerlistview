@@ -9,11 +9,15 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
         super(props, context);
     }
 
-    protected initStickyParams(visibleIndices: VisibleIndices, currentIndice: number): void {
+    protected initStickyParams(): void {
         this.stickyType = StickyType.FOOTER;
         this.stickyTypeMultiplier = -1;
-        this.initialVisibility = !visibleIndices[currentIndice + 1];
         this.containerPosition = {bottom: 0};
+    }
+
+    protected isInitiallyVisible(visibleIndices: VisibleIndices, currentIndice: number): void {
+        //TODO Ananya: Handle recycler scrollTo case
+        this.initialVisibility = !visibleIndices[currentIndice + 1];
     }
 
     protected getNextYd(nextY: number, nextHeight: number): number {
