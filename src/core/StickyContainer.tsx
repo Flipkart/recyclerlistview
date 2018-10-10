@@ -23,7 +23,6 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null;
     private _stickyHeaderRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
     private _stickyFooterRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
-    private _rowRenderer: ((type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null) | null = null;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -67,8 +66,8 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
 
     private _onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
         //TODO Ananya: Resolve any
-        if (this.props.children && (this.props.children as any).props.onVisibleIndicesChanged) {
-            (this.props.children as any).props.onVisibleIndicesChanged(all, now, notNow);
+        if (this.props.children && (this.props.children as RecyclerListView<RecyclerListViewProps, RecyclerListViewState>).props.onVisibleIndicesChanged) {
+            (this.props.children as RecyclerListView<RecyclerListViewProps, RecyclerListViewState>).props.onVisibleIndicesChanged(all, now, notNow);
         }
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onVisibleIndicesChanged(all, now, notNow, this._recyclerRef);
@@ -80,8 +79,8 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
 
     private _onScroll(rawEvent: ScrollEvent, offsetX: number, offsetY: number): void {
         //TODO Ananya: Resolve any
-        if (this.props.children && (this.props.children as any).props.onScroll) {
-            (this.props.children as any).props.onScroll(rawEvent, offsetX, offsetY);
+        if (this.props.children && (this.props.children as RecyclerListView<RecyclerListViewProps, RecyclerListViewState>).props.onScroll) {
+            (this.props.children as RecyclerListView<RecyclerListViewProps, RecyclerListViewState>).props.onScroll(rawEvent, offsetX, offsetY);
         }
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onScroll(offsetY);
