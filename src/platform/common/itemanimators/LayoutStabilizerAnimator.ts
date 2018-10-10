@@ -16,10 +16,15 @@ export class LayoutStabilizerAnimator extends BaseItemAnimator {
     private _isQueueComplete: boolean = false;
     private _stabilizationInProgress = false;
     private _stabilizationComplete = false;
-    private _shouldPersistStyles = true;
-    private _lastProcessingIndex: number = 0;
+    private _lastProcessingTS: number = 0;
     private _indexBounds = { min: 0, max: 0 };
     private _viewCache?: object[] = [];
+    private readonly _numberOfFramesToBatch: number;
+
+    public constructor(numberOfFramesToBatch: number = 3) {
+        super();
+        this._numberOfFramesToBatch = numberOfFramesToBatch;
+    }
 
     public shouldPersistStyleOverrides(): boolean {
         return !this._isStabilizationComplete();
@@ -44,15 +49,16 @@ export class LayoutStabilizerAnimator extends BaseItemAnimator {
                     this._isQueueComplete = true;
                 }
             }
+            this._checkForMovementAndStabilize(itemIndex);
         }
     }
 
     public animateWillUpdate(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): void {
-        this._checkForMovementAndStabilize(fromX, fromY, toX, toY, itemRef, itemIndex);
+        this._checkForMovementAndStabilize(itemIndex);
     }
 
     public animateShift(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): boolean {
-        this._checkForMovementAndStabilize(fromX, fromY, toX, toY, itemRef, itemIndex);
+        this._checkForMovementAndStabilize(itemIndex);
         return false;
     }
 
@@ -60,20 +66,21 @@ export class LayoutStabilizerAnimator extends BaseItemAnimator {
         (itemRef as UnmountAwareView)._isUnmountedForRecyclerListView = true;
     }
 
-    private _checkForMovementAndStabilize(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): void {
+    private _checkForMovementAndStabilize(itemIndex: number): void {
         if (itemIndex >= this._indexBounds.min && itemIndex <= this._indexBounds.max) {
-            this._lastProcessingIndex = itemIndex;
+            let currentTS = Date.now();
+            this._lastProcessingTS = Date.now();
             if (!this._hasStabilizationStartedOrComplete()) {
                 this._startStabilization();
                 RAFHelper.executeOnRAF((token) => {
-                    if (this._lastProcessingIndex === itemIndex) {
+                    if (this._lastProcessingTS === currentTS) {
                         token.terminate();
                         this._completeStabilization();
                         this._unHideViews();
                     } else {
-                        itemIndex = this._lastProcessingIndex;
+                        currentTS = this._lastProcessingTS;
                     }
-                }, 1);
+                }, this._numberOfFramesToBatch);
             }
         }
     }
