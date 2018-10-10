@@ -216,6 +216,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 if (typeof offset === "number" && offset > 0) {
                     this._initialOffset = offset;
                     this._defaultItemAnimator.isRecreateFlow = true;
+                    if (this.props.itemAnimator) {
+                        this.props.itemAnimator.isRecreateFlow = true;
+                    }
                     if (this.props.onRecreate) {
                         this.props.onRecreate({ lastOffset: this._initialOffset });
                     }
