@@ -35,12 +35,14 @@ import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcom
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
+import { DebugHandlers } from "..";
 
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
 import { Platform } from "react-native";
+
 const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
 
@@ -51,7 +53,7 @@ const IS_WEB = !Platform || Platform.OS === "web";
 //#if [WEB]
 //import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
 //import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
-//import { DefaultWebItemAnimator as DefaultItemAnimator} from "../platform/web/itemanimators/DefaultWebItemAnimator";
+//import { DefaultWebItemAnimator as DefaultItemAnimator } from "../platform/web/itemanimators/DefaultWebItemAnimator";
 //const IS_WEB = true;
 //#endif
 
@@ -78,6 +80,7 @@ const refreshRequestDebouncer = debounce((executable: () => void) => {
 export interface OnRecreateParams {
     lastOffset?: number;
 }
+
 export interface RecyclerListViewProps {
     layoutProvider: BaseLayoutProvider;
     dataProvider: DataProvider;
@@ -104,11 +107,13 @@ export interface RecyclerListViewProps {
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object;
+    debugHandlers?: DebugHandlers;
 
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
 }
+
 export interface RecyclerListViewState {
     renderStack: RenderStack;
 }
@@ -485,21 +490,21 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             }
             return (
                 <ViewRenderer key={key} data={data}
-                    dataHasChanged={this._dataHasChanged}
-                    x={itemRect.x}
-                    y={itemRect.y}
-                    layoutType={type}
-                    index={dataIndex}
-                    styleOverrides={styleOverrides}
-                    layoutProvider={this.props.layoutProvider}
-                    forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
-                    isHorizontal={this.props.isHorizontal}
-                    onSizeChanged={this._onViewContainerSizeChange}
-                    childRenderer={this.props.rowRenderer}
-                    height={itemRect.height}
-                    width={itemRect.width}
-                    itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
-                    extendedState={this.props.extendedState} />
+                              dataHasChanged={this._dataHasChanged}
+                              x={itemRect.x}
+                              y={itemRect.y}
+                              layoutType={type}
+                              index={dataIndex}
+                              styleOverrides={styleOverrides}
+                              layoutProvider={this.props.layoutProvider}
+                              forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
+                              isHorizontal={this.props.isHorizontal}
+                              onSizeChanged={this._onViewContainerSizeChange}
+                              childRenderer={this.props.rowRenderer}
+                              height={itemRect.height}
+                              width={itemRect.width}
+                              itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
+                              extendedState={this.props.extendedState}/>
             );
         }
         return null;
@@ -507,7 +512,17 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _onViewContainerSizeChange = (dim: Dimension, index: number): void => {
         //Cannot be null here
-        (this._virtualRenderer.getLayoutManager() as LayoutManager).overrideLayout(index, dim);
+        const layoutManager: LayoutManager = this._virtualRenderer.getLayoutManager() as LayoutManager;
+
+        if (this.props.debugHandlers && this.props.debugHandlers.resizeDebugHandler) {
+            const itemRect = layoutManager.getLayouts()[index];
+            this.props.debugHandlers.resizeDebugHandler.resizeDebug({
+                width: itemRect.width,
+                height: itemRect.height,
+            }, dim, index);
+        }
+
+        layoutManager.overrideLayout(index, dim);
         if (this._relayoutReqIndex === -1) {
             this._relayoutReqIndex = index;
         } else {
