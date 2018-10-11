@@ -1,6 +1,6 @@
-import IResizeDebugHandler from "./resize/IResizeDebugHandler";
+import ResizeDebugHandler from "./resize/ResizeDebugHandler";
 
 // It is basically container of all debugHandlers.
 export interface DebugHandlers {
-    resizeDebugHandler?: IResizeDebugHandler;
+    resizeDebugHandler?: ResizeDebugHandler;
 }

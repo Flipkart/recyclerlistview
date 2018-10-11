@@ -1,7 +1,7 @@
 import { Dimension } from "../../../..";
-import IResizeDebugHandler from "./IResizeDebugHandler";
+import ResizeDebugHandler from "./ResizeDebugHandler";
 
-export default class DefaultResizeDebugHandler implements IResizeDebugHandler {
+export default class DefaultResizeDebugHandler implements ResizeDebugHandler {
     private readonly relaxation: Dimension;
     private readonly onRelaxationViolation: (expectedDim: Dimension, actualDim: Dimension, index: number) => void;
 
