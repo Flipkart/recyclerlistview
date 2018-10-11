@@ -96,32 +96,28 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     public onScroll(offsetY: number): void {
         if (this._recyclerRef) {
             if (this._previousStickyIndice) {
-                if (this._currentY && this._currentHeight) {
-                    const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
-                    if (this._previousHeight && this._currentYd && scrollY && scrollY < this._currentYd) {
-                        if (scrollY > this._currentYd - this._previousHeight) {
-                            this._currentIndice -= this.stickyTypeMultiplier;
-                            const translate = (scrollY - this._currentYd + this._previousHeight) * (-1 * this.stickyTypeMultiplier);
-                            this._stickyViewOffset.setValue(translate);
-                            this._computeLayouts(this._recyclerRef);
-                            this._stickyViewVisible(true);
-                        }
+                const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
+                if (this._previousHeight && this._currentYd && scrollY && scrollY < this._currentYd) {
+                    if (scrollY > this._currentYd - this._previousHeight) {
+                        this._currentIndice -= this.stickyTypeMultiplier;
+                        const translate = (scrollY - this._currentYd + this._previousHeight) * (-1 * this.stickyTypeMultiplier);
+                        this._stickyViewOffset.setValue(translate);
+                        this._computeLayouts(this._recyclerRef);
+                        this._stickyViewVisible(true);
                     }
                 }
             }
             if (this._nextStickyIndice) {
-                if (this._nextY && this._nextHeight) {
-                    const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
-                    if (this._currentHeight && this._nextYd && scrollY && scrollY + this._currentHeight > this._nextYd) {
-                        if (scrollY <= this._nextYd) {
-                            const translate = (scrollY - this._nextYd + this._currentHeight) * (-1 * this.stickyTypeMultiplier);
-                            this._stickyViewOffset.setValue(translate);
-                        } else if (scrollY > this._nextYd) {
-                            this._currentIndice += this.stickyTypeMultiplier;
-                            this._stickyViewOffset.setValue(0);
-                            this._computeLayouts(this._recyclerRef);
-                            this._stickyViewVisible(true);
-                        }
+                const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
+                if (this._currentHeight && this._nextYd && scrollY && scrollY + this._currentHeight > this._nextYd) {
+                    if (scrollY <= this._nextYd) {
+                        const translate = (scrollY - this._nextYd + this._currentHeight) * (-1 * this.stickyTypeMultiplier);
+                        this._stickyViewOffset.setValue(translate);
+                    } else if (scrollY > this._nextYd) {
+                        this._currentIndice += this.stickyTypeMultiplier;
+                        this._stickyViewOffset.setValue(0);
+                        this._computeLayouts(this._recyclerRef);
+                        this._stickyViewVisible(true);
                     }
                 }
             }
@@ -130,7 +126,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     protected abstract initStickyParams(): void;
     protected abstract isInitiallyVisible(visibleIndices: VisibleIndices, currentIndice: number): void;
-    protected abstract get_nextYd(_nextY: number, nextHeight: number): number;
+    protected abstract getNextYd(_nextY: number, nextHeight: number): number;
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
     protected abstract getScrollY(offsetY: number, scrollableHeight: number | null): number | null;
 
@@ -175,7 +171,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                 this._nextLayout = recyclerRef.getLayout(this._nextStickyIndice);
                 this._nextY = this._nextLayout ? this._nextLayout.y : undefined;
                 this._nextHeight = this._nextLayout ? this._nextLayout.height : undefined;
-                this._nextYd = this._nextY && this._nextHeight ? this.get_nextYd(this._nextY, this._nextHeight) : undefined;
+                this._nextYd = this._nextY && this._nextHeight ? this.getNextYd(this._nextY, this._nextHeight) : undefined;
             }
         }
     }
