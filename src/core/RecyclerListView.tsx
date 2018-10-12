@@ -35,13 +35,13 @@ import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcom
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
-import { DebugHandlers } from "..";
 
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
 import { Platform } from "react-native";
+import { DebugHandlers } from "./devutils/debughandlers/DebugHandlers";
 
 const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
@@ -54,6 +54,7 @@ const IS_WEB = !Platform || Platform.OS === "web";
 //import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
 //import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
 //import { DefaultWebItemAnimator as DefaultItemAnimator } from "../platform/web/itemanimators/DefaultWebItemAnimator";
+//import { DebugHandlers } from "./devutils/debughandlers/DebugHandlers";
 //const IS_WEB = true;
 //#endif
 
