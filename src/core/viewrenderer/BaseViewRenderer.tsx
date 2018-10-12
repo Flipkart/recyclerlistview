@@ -41,7 +41,7 @@ export default abstract class BaseViewRenderer<T> extends React.Component<ViewRe
         const hasDataChanged = (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data));
         let shouldUpdate = hasSizeChanged || hasDataChanged || hasExtendedStateChanged;
 
-        if (this.animatorStyleOverrides && (!this.props.itemAnimator.shouldPersistStyleOverrides || !this.props.itemAnimator.shouldPersistStyleOverrides())) {
+        if (this.animatorStyleOverrides && (!newProps.itemAnimator.shouldPersistStyleOverrides || !newProps.itemAnimator.shouldPersistStyleOverrides())) {
             this.animatorStyleOverrides = undefined;
         }
         if (shouldUpdate) {
