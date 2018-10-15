@@ -15,9 +15,32 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
         this.containerPosition = {top: 0};
     }
 
-    protected isInitiallyVisible(visibleIndices: VisibleIndices, currentIndice: number): void {
+    protected isInitiallyVisible(
+        visibleIndices: VisibleIndices, stickyIndices: number[], currentIndice: number, smallestVisibleIndex: number, largestVisibleIndex: number,
+    ): void {
         //TODO Ananya: Handle recycler scrollTo case
-        this.initialVisibility = false;
+        if (smallestVisibleIndex < stickyIndices[0]) {
+            this.initialVisibility = false;
+        } else {
+            this.initialVisibility = true;
+            let i: number = 0;
+            let resolved: boolean = false;
+            let lastIndex: number = -1;
+            for (const index of stickyIndices) {
+                if (smallestVisibleIndex < index) {
+                    this.currentIndice = i - 1;
+                    this.currentStickyIndice = lastIndex;
+                    resolved = true;
+                    break;
+                }
+                i++;
+                lastIndex = index;
+            }
+            if (!resolved) {
+                this.currentIndice = i - 1;
+                this.currentStickyIndice = lastIndex;
+            }
+        }
     }
 
     protected getNextYd(nextY: number, nextHeight: number): number {

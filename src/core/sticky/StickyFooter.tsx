@@ -15,7 +15,9 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
         this.containerPosition = {bottom: 0};
     }
 
-    protected isInitiallyVisible(visibleIndices: VisibleIndices, currentIndice: number): void {
+    protected isInitiallyVisible(
+        visibleIndices: VisibleIndices, stickyIndices: number[], currentIndice: number, smallestVisibleIndex: number, largestVisibleIndex: number,
+    ): void {
         //TODO Ananya: Handle recycler scrollTo case
         this.initialVisibility = !visibleIndices[currentIndice + 1];
     }
