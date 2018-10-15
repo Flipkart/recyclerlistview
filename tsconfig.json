@@ -1,9 +1,7 @@
 {
   "compilerOptions": {
-    "lib": [
-      "es6",
-      "dom"
-    ], // target Node.js(v6)
+    "lib": ["es6", "dom"], // target Node.js(v6)
+    "types": ["react", "react-native"],
     "module": "commonjs", // export compatibility
     "target": "es5", // target Node.js(v6)
     "moduleResolution": "node", // target Node.js(v6)
@@ -13,6 +11,7 @@
     "noImplicitReturns": true,
     "removeComments": false,
     "jsx": "react",
-    "sourceMap": true
+    "sourceMap": true,
+    "skipLibCheck": true
   }
 }
