@@ -3,6 +3,7 @@
  */
 
 import * as React from "react";
+import * as PropTypes from "prop-types";
 import {View} from "react-native";
 import RecyclerListView, {RecyclerListViewState, RecyclerListViewProps} from "./RecyclerListView";
 import { ScrollEvent } from "./scrollcomponent/BaseScrollView";
@@ -14,12 +15,12 @@ export interface StickyContainerProps {
     children: any; //TODO Ananya: Resolve any
     stickyHeaderIndices: number[];
     stickyFooterIndices: number[];
-    stickyView?: JSX.Element;
 }
 export interface StickyContainerState {
     topVisible: boolean;
 }
 export default class StickyContainer<P extends StickyContainerProps, S extends StickyContainerState> extends React.Component<P, S> {
+    public static propTypes = {};
     private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null;
     private _stickyHeaderRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
     private _stickyFooterRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
@@ -63,7 +64,9 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         this._recyclerRef = recycler as (RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null);
         //TODO Ananya: Resolve any
         //TODO Ananya: Mandatory to pass ref as a function
-        (this.props.children as any).ref(recycler);
+        if ((this.props.children as any).ref) {
+            (this.props.children as any).ref(recycler);
+        }
     }
 
     private _onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
@@ -94,3 +97,14 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         }
     }
 }
+
+StickyContainer.propTypes = {
+
+    // Provide an array of indices whose corresponding items need to be stuck to the top of the recyclerView once the items scroll off the top.
+    // Every subsequent sticky index view will push the previous sticky view off the top to take its place.
+    // Note: Array indices need to be in ascending sort order.
+    stickyHeaderIndices: PropTypes.arrayOf(PropTypes.number),
+
+    // Works same as sticky headers, but for views to be stuck at the bottom of the recyclerView.
+    stickyFooterIndices: PropTypes.arrayOf(PropTypes.number),
+};
