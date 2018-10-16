@@ -131,7 +131,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     };
 
     public static propTypes = {};
-    public _virtualRenderer: VirtualRenderer;
+    private _virtualRenderer: VirtualRenderer;
     private _onEndReachedCalled = false;
     private _initComplete = false;
     private _relayoutReqIndex: number = -1;

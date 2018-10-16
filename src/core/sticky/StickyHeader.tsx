@@ -27,8 +27,8 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
             let lastIndex: number = -1;
             for (const index of stickyIndices) {
                 if (smallestVisibleIndex < index) {
-                    this.currentIndice = i - 1;
-                    this.currentStickyIndice = lastIndex;
+                    this.currentIndex = i - 1;
+                    this.currentStickyIndex = lastIndex;
                     resolved = true;
                     break;
                 }
@@ -36,8 +36,8 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
                 lastIndex = index;
             }
             if (!resolved) {
-                this.currentIndice = i - 1;
-                this.currentStickyIndice = lastIndex;
+                this.currentIndex = i - 1;
+                this.currentStickyIndex = lastIndex;
             }
         }
     }
