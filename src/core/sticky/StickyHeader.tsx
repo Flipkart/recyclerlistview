@@ -18,7 +18,6 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
     protected isInitiallyVisible(
         visibleIndices: VisibleIndices, stickyIndices: number[], currentIndice: number, smallestVisibleIndex: number, largestVisibleIndex: number,
     ): void {
-        //TODO Ananya: Handle recycler scrollTo case
         if (smallestVisibleIndex < stickyIndices[0]) {
             this.initialVisibility = false;
         } else {

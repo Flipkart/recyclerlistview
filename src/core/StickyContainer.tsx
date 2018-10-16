@@ -106,5 +106,6 @@ StickyContainer.propTypes = {
     stickyHeaderIndices: PropTypes.arrayOf(PropTypes.number),
 
     // Works same as sticky headers, but for views to be stuck at the bottom of the recyclerView.
+    // Note: Array indices need to be in ascending sort order.
     stickyFooterIndices: PropTypes.arrayOf(PropTypes.number),
 };

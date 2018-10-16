@@ -19,7 +19,7 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
         visibleIndices: VisibleIndices, stickyIndices: number[], currentIndice: number, smallestVisibleIndex: number, largestVisibleIndex: number,
     ): void {
         //TODO Ananya: Handle recycler scrollTo case
-        this.initialVisibility = !visibleIndices[currentIndice + 1];
+        this.initialVisibility = !visibleIndices[stickyIndices[currentIndice + 1]];
     }
 
     protected getNextYd(nextY: number, nextHeight: number): number {
