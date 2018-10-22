@@ -18,8 +18,28 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
     protected isInitiallyVisible(
         visibleIndices: VisibleIndices, stickyIndices: number[], currentIndice: number, smallestVisibleIndex: number, largestVisibleIndex: number,
     ): void {
-        //TODO Ananya: Handle recycler scrollTo case
-        this.initialVisibility = !visibleIndices[stickyIndices[currentIndice + 1]];
+        if (largestVisibleIndex > stickyIndices[stickyIndices.length - 1]) {
+            this.initialVisibility = false;
+        } else {
+            this.initialVisibility = true;
+            let resolved: boolean = false;
+            let i = stickyIndices.length - 1;
+            let lastIndex: number = -1;
+            for (i; i >= 0; i--) {
+                const index = stickyIndices[i];
+                if (largestVisibleIndex > index) {
+                    this.currentIndex = i + 1;
+                    this.currentStickyIndex = lastIndex;
+                    resolved = true;
+                    break;
+                }
+                lastIndex = index;
+            }
+            if (!resolved) {
+                this.currentIndex = i + 1;
+                this.currentStickyIndex = lastIndex;
+            }
+        }
     }
 
     protected getNextYd(nextY: number, nextHeight: number): number {
