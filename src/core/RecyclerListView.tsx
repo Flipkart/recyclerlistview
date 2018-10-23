@@ -30,6 +30,7 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 import { Point, Layout, LayoutManager } from "./layoutmanager/LayoutManager";
 import { Constants } from "./constants/Constants";
 import { Messages } from "./constants/Messages";
+import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
@@ -147,7 +148,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
     private _cachedLayouts?: Layout[];
-    private _scrollComponent: ScrollComponent | null = null;
+    private _scrollComponent: BaseScrollComponent | null = null;
 
     private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
 
@@ -343,7 +344,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
         return (
             <ScrollComponent
-                ref={(scrollComponent) => this._scrollComponent = scrollComponent as ScrollComponent | null}
+                ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
                 {...this.props}
                 {...this.props.scrollViewProps}
                 onScroll={this._onScroll}
