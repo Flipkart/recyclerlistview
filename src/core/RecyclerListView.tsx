@@ -318,7 +318,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         return viewabilityTracker ? viewabilityTracker.findFirstLogicallyVisibleIndex() : 0;
     }
 
-    public getLayoutDimension(): Dimension {
+    public getRenderedSize(): Dimension {
         return this._layout;
     }
 

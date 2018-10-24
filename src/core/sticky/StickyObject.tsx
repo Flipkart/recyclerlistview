@@ -147,7 +147,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         if (recyclerRef) {
             this._recyclerRef = recyclerRef;
             this._rowRenderer = recyclerRef.props.rowRenderer;
-            const dimension: Dimension | null = recyclerRef ? recyclerRef.getLayoutDimension() : null;
+            const dimension: Dimension | null = recyclerRef ? recyclerRef.getRenderedSize() : null;
             if (dimension) {
                 this._scrollableHeight = dimension.height;
                 this._scrollableWidth = dimension.width;
