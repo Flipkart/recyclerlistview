@@ -42,7 +42,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     }
 
     public render(): JSX.Element {
-        //TODO Ananya: Throw exception if more than one child and if not instance of RLV
+        this._assertChildType();
         const recycler = React.cloneElement(this.props.children, {
             ref: this._getRecyclerRef,
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
@@ -100,12 +100,25 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         }
     }
 
-    // private assertChildType() {
-    //
-    // }
+    private _assertChildType(): void {
+        if (React.Children.count(this.props.children) !== 1 || !this._isChildRecyclerInstance()) {
+            throw new CustomError(RecyclerListViewExceptions.wrongStickyChildTypeException);
+        }
+    }
+
+    private _isChildRecyclerInstance(): boolean {
+        return (
+            this.props.children.props.dataProvider
+            && this.props.children.props.rowRenderer
+            && this.props.children.props.layoutProvider
+        );
+    }
 }
 
 StickyContainer.propTypes = {
+
+    // Mandatory to pass a single child of RecyclerListView or any of its children classes. Exception will be thrown otherwise.
+    children: PropTypes.element.isRequired,
 
     // Provide an array of indices whose corresponding items need to be stuck to the top of the recyclerView once the items scroll off the top.
     // Every subsequent sticky index view will push the previous sticky view off the top to take its place.

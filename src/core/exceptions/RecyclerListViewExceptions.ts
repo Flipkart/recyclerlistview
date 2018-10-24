@@ -28,8 +28,12 @@ const RecyclerListViewExceptions: {[key: string]: Exception} = {
         type: "UnresolvedDependenciesException",
     },
     refNotAsFunctionException: {
-        message: "When using StickyContainer, RLV needs to use ref as a function and not as a string.",
+        message: "When using StickyContainer, RecyclerListView needs to use ref as a function and not as a string.",
         type: "RefNotAsFunctionException",
+    },
+    wrongStickyChildTypeException: {
+        message: "StickyContainer can only have a single child of type RecyclerListView.",
+        type: "WrongStickyChildTypeException",
     },
 };
 export default RecyclerListViewExceptions;
