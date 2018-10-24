@@ -27,5 +27,9 @@ const RecyclerListViewExceptions: {[key: string]: Exception} = {
         message: "missing datasource or layout provider, cannot proceed without it",
         type: "UnresolvedDependenciesException",
     },
+    refNotAsFunctionException: {
+        message: "When using StickyContainer, RLV needs to use ref as a function and not as a string.",
+        type: "RefNotAsFunctionException",
+    },
 };
 export default RecyclerListViewExceptions;
