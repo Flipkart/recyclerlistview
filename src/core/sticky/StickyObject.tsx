@@ -153,6 +153,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                 this._scrollableHeight = dimension.height;
                 this._scrollableWidth = dimension.width;
             }
+            this._computeLayouts(recyclerRef);
         }
     }
 
