@@ -68,8 +68,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                 {position: "absolute", width: this._scrollableWidth, transform: [{translateY: this._stickyViewOffset}]},
                 this.containerPosition,
             ]}>
-                {this.state.visible ?
-                    this._rowRenderer ? this._rowRenderer("", this._stickyData, this.currentStickyIndex) : null
+                {this.state.visible && this._rowRenderer ?
+                    this._rowRenderer("", this._stickyData, this.currentStickyIndex)
                     : null}
             </Animated.View>
         );
@@ -99,8 +99,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     public onScroll(offsetY: number): void {
-        this._computeLayouts(this._recyclerRef);
         if (this._recyclerRef) {
+            this._computeLayouts(this._recyclerRef);
             if (this._previousStickyIndex) {
                 const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
                 if (this._previousHeight && this._currentYd && scrollY && scrollY < this._currentYd) {
@@ -159,8 +159,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     private _computeLayouts(recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
         if (recyclerRef) {
             this.currentStickyIndex = this.props.stickyIndices[this.currentIndex];
-            this._stickyData = this._recyclerRef && this._recyclerRef.props.dataProvider ?
-                this._recyclerRef.props.dataProvider.getDataForIndex(this.currentStickyIndex)
+            this._stickyData = recyclerRef && recyclerRef.props.dataProvider ?
+                recyclerRef.props.dataProvider.getDataForIndex(this.currentStickyIndex)
                 : null;
             this._previousStickyIndex = this.props.stickyIndices[this.currentIndex - this.stickyTypeMultiplier];
             this._nextStickyIndex = this.props.stickyIndices[this.currentIndex + this.stickyTypeMultiplier];
