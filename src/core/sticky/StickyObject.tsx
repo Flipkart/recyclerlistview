@@ -99,6 +99,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     public onScroll(offsetY: number): void {
+        this._computeLayouts(this._recyclerRef);
         if (this._recyclerRef) {
             if (this._previousStickyIndex) {
                 const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
@@ -152,7 +153,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                 this._scrollableHeight = dimension.height;
                 this._scrollableWidth = dimension.width;
             }
-            this._computeLayouts(recyclerRef);
         }
     }
 
