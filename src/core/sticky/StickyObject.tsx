@@ -125,6 +125,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                         this._computeLayouts(this._recyclerRef);
                         this._stickyViewVisible(true);
                     }
+                } else {
+                    this._stickyViewOffset.setValue(0);
                 }
             }
         }
