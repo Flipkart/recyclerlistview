@@ -36,10 +36,10 @@ export class ScrollEventNormalizer {
             nativeEvent: {
                 contentOffset: {
                     get x(): number {
-                        return window.scrollX;
+                        return window.scrollX === undefined ? window.pageXOffset : window.scrollX;
                     },
                     get y(): number {
-                        return window.scrollY;
+                        return window.scrollY === undefined ? window.pageYOffset : window.scrollY;
                     },
                 },
                 contentSize: {
