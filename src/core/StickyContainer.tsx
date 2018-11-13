@@ -15,8 +15,8 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 
 export interface StickyContainerProps {
     children: RecyclerChild;
-    stickyHeaderIndices: number[];
-    stickyFooterIndices: number[];
+    stickyHeaderIndices?: number[];
+    stickyFooterIndices?: number[];
 }
 export interface StickyContainerState {
     topVisible: boolean;
