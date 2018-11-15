@@ -17,7 +17,7 @@ export interface StickyContainerProps {
     children: RecyclerChild;
     stickyHeaderIndices?: number[];
     stickyFooterIndices?: number[];
-    overrideRowRenderer?: (index: number, type: string | number, data?: any) => JSX.Element | JSX.Element[] | null;
+    overrideRowRenderer?: (type: string | number, index: number, data?: any) => JSX.Element | JSX.Element[] | null;
 }
 export interface StickyContainerState {
     topVisible: boolean;
@@ -54,15 +54,17 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
                 {recycler}
                 {this.props.stickyHeaderIndices ? (
                     <StickyHeader ref={(stickyHeaderRef: any) => {
-                    this._stickyHeaderRef = stickyHeaderRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
-                }}
-                              stickyIndices={this.props.stickyHeaderIndices}/>
+                        this._stickyHeaderRef = stickyHeaderRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
+                    }}
+                                  stickyIndices={this.props.stickyHeaderIndices ? this.props.stickyHeaderIndices : []}
+                                  overrideRowRenderer={this.props.overrideRowRenderer}/>
                 ) : null}
                 {this.props.stickyFooterIndices ? (
                     <StickyFooter ref={(stickyFooterRef: any) => {
-                    this._stickyFooterRef = stickyFooterRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
-                }}
-                              stickyIndices={this.props.stickyFooterIndices}/>
+                        this._stickyFooterRef = stickyFooterRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
+                    }}
+                                  stickyIndices={this.props.stickyFooterIndices ? this.props.stickyFooterIndices : []}
+                                  overrideRowRenderer={this.props.overrideRowRenderer}/>
                 ) : null}
             </View>
         );

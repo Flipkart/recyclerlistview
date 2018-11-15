@@ -14,6 +14,7 @@ export enum StickyType {
 }
 export interface StickyObjectProps {
     stickyIndices: number[];
+    overrideRowRenderer?: ((type: string | number, index: number, data?: any) => JSX.Element | JSX.Element[] | null) | null;
 }
 export interface StickyObjectState {
     visible: boolean;
@@ -45,7 +46,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     private _stickyViewOffset: Animated.Value = new Animated.Value(0);
     private _stickyData: any | null = null;
-    private _stickyLayoutType: string | number;
+    private _stickyLayoutType: string | number = "";
     private _previousStickyIndex: number = 0;
     private _nextStickyIndex: number = 0;
     private _firstCompute: boolean = true;
@@ -69,9 +70,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                 {position: "absolute", width: this._scrollableWidth, transform: [{translateY: this._stickyViewOffset}]},
                 this.containerPosition,
             ]}>
-                {this.state.visible && this._rowRenderer ?
-                    this._rowRenderer(this._stickyLayoutType, this._stickyData, this.currentStickyIndex)
-                    : null}
+                {this.state.visible ?
+                    this._renderSticky()
+                : null}
             </Animated.View>
         );
     }
@@ -205,5 +206,15 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         }
         this._smallestVisibleIndexOnLoad = tempSmallestIndex;
         this._largestVisibleIndexOnLoad = tempLargestIndex;
+    }
+
+    private _renderSticky(): JSX.Element | JSX.Element[] | null {
+        if (this.props.overrideRowRenderer) {
+            return this.props.overrideRowRenderer(this._stickyLayoutType, this.currentStickyIndex, this._stickyData);
+        } else if (this._rowRenderer) {
+            return this._rowRenderer(this._stickyLayoutType, this._stickyData, this.currentStickyIndex);
+        } else {
+            return null;
+        }
     }
 }
