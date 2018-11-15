@@ -15,8 +15,8 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 
 export interface StickyContainerProps {
     children: RecyclerChild;
-    stickyHeaderIndices?: number[];
-    stickyFooterIndices?: number[];
+    stickyHeaderIndices: number[]; //TODO Ananya: make optional
+    stickyFooterIndices: number[]; //TODO Ananya: make optional
     overrideRowRenderer?: (type: string | number, index: number, data?: any) => JSX.Element | JSX.Element[] | null;
 }
 export interface StickyContainerState {
@@ -56,14 +56,14 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
                     <StickyHeader ref={(stickyHeaderRef: any) => {
                         this._stickyHeaderRef = stickyHeaderRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
                     }}
-                                  stickyIndices={this.props.stickyHeaderIndices ? this.props.stickyHeaderIndices : []}
+                                  stickyIndices={this.props.stickyHeaderIndices}
                                   overrideRowRenderer={this.props.overrideRowRenderer}/>
                 ) : null}
                 {this.props.stickyFooterIndices ? (
                     <StickyFooter ref={(stickyFooterRef: any) => {
                         this._stickyFooterRef = stickyFooterRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
                     }}
-                                  stickyIndices={this.props.stickyFooterIndices ? this.props.stickyFooterIndices : []}
+                                  stickyIndices={this.props.stickyFooterIndices}
                                   overrideRowRenderer={this.props.overrideRowRenderer}/>
                 ) : null}
             </View>
