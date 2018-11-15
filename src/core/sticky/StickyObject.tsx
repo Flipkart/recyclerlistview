@@ -45,6 +45,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     private _stickyViewOffset: Animated.Value = new Animated.Value(0);
     private _stickyData: any | null = null;
+    private _stickyLayoutType: string | number;
     private _previousStickyIndex: number = 0;
     private _nextStickyIndex: number = 0;
     private _firstCompute: boolean = true;
@@ -69,7 +70,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                 this.containerPosition,
             ]}>
                 {this.state.visible && this._rowRenderer ?
-                    this._rowRenderer("", this._stickyData, this.currentStickyIndex)
+                    this._rowRenderer(this._stickyLayoutType, this._stickyData, this.currentStickyIndex)
                     : null}
             </Animated.View>
         );
@@ -162,9 +163,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     private _computeLayouts(recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
         if (recyclerRef) {
             this.currentStickyIndex = this.props.stickyIndices[this.currentIndex];
-            this._stickyData = recyclerRef && recyclerRef.props.dataProvider ?
-                recyclerRef.props.dataProvider.getDataForIndex(this.currentStickyIndex)
-                : null;
+            this._stickyData = recyclerRef.props.dataProvider.getDataForIndex(this.currentStickyIndex);
+            this._stickyLayoutType = recyclerRef.props.layoutProvider.getLayoutTypeForIndex(this.currentStickyIndex);
             this._previousStickyIndex = this.props.stickyIndices[this.currentIndex - this.stickyTypeMultiplier];
             this._nextStickyIndex = this.props.stickyIndices[this.currentIndex + this.stickyTypeMultiplier];
             if (this.currentStickyIndex) {

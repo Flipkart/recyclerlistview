@@ -17,6 +17,7 @@ export interface StickyContainerProps {
     children: RecyclerChild;
     stickyHeaderIndices?: number[];
     stickyFooterIndices?: number[];
+    overrideRowRenderer?: (index: number, type: string | number, data?: any) => JSX.Element | JSX.Element[] | null;
 }
 export interface StickyContainerState {
     topVisible: boolean;
