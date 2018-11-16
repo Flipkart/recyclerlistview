@@ -210,7 +210,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     private _renderSticky(): JSX.Element | JSX.Element[] | null {
         if (this.props.overrideRowRenderer) {
-            return this.props.overrideRowRenderer(this._stickyLayoutType, this._stickyData, this.currentStickyIndex, this._recyclerRef.props.extendedState);
+            const extendedState: object | undefined = this._recyclerRef ? this._recyclerRef.props.extendedState : undefined;
+            return this.props.overrideRowRenderer(this._stickyLayoutType, this._stickyData, this.currentStickyIndex, extendedState);
         } else if (this._rowRenderer) {
             return this._rowRenderer(this._stickyLayoutType, this._stickyData, this.currentStickyIndex);
         } else {
