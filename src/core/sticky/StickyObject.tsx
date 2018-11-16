@@ -14,7 +14,7 @@ export enum StickyType {
 }
 export interface StickyObjectProps {
     stickyIndices: number[];
-    overrideRowRenderer?: ((type: string | number, index: number, data?: any) => JSX.Element | JSX.Element[] | null) | null;
+    overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
 }
 export interface StickyObjectState {
     visible: boolean;
@@ -210,7 +210,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     private _renderSticky(): JSX.Element | JSX.Element[] | null {
         if (this.props.overrideRowRenderer) {
-            return this.props.overrideRowRenderer(this._stickyLayoutType, this.currentStickyIndex, this._stickyData);
+            return this.props.overrideRowRenderer(this._stickyLayoutType, this._stickyData, this.currentStickyIndex, this._recyclerRef.props.extendedState);
         } else if (this._rowRenderer) {
             return this._rowRenderer(this._stickyLayoutType, this._stickyData, this.currentStickyIndex);
         } else {

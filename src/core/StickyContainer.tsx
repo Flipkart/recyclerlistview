@@ -17,7 +17,7 @@ export interface StickyContainerProps {
     children: RecyclerChild;
     stickyHeaderIndices: number[]; //TODO Ananya: make optional
     stickyFooterIndices: number[]; //TODO Ananya: make optional
-    overrideRowRenderer?: (type: string | number, index: number, data?: any) => JSX.Element | JSX.Element[] | null;
+    overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
 }
 export interface StickyContainerState {
     topVisible: boolean;

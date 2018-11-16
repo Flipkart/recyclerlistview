@@ -84,7 +84,7 @@ export interface OnRecreateParams {
 export interface RecyclerListViewProps {
     layoutProvider: BaseLayoutProvider;
     dataProvider: DataProvider;
-    rowRenderer: (type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null;
+    rowRenderer: (type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
     contextProvider?: ContextProvider;
     renderAheadOffset?: number;
     isHorizontal?: boolean;
