@@ -13,7 +13,7 @@ export enum StickyType {
     FOOTER,
 }
 export interface StickyObjectProps {
-    stickyIndices: number[];
+    stickyIndices: () => number[] | undefined;
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
 }
 export interface StickyObjectState {
@@ -84,7 +84,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             this._setSmallestAndLargestVisibleIndices(all);
             this.initStickyParams();
             this.isInitiallyVisible(
-                this._visibleIndices, this.props.stickyIndices, this.currentStickyIndex, this._smallestVisibleIndexOnLoad, this._largestVisibleIndexOnLoad,
+                this._visibleIndices, this.props.stickyIndices(), this.currentStickyIndex, this._smallestVisibleIndexOnLoad, this._largestVisibleIndexOnLoad,
             );
             this._initParams(recyclerRef);
             if (this.initialVisibility) {
@@ -136,7 +136,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     protected abstract initStickyParams(): void;
     protected abstract isInitiallyVisible(
-        visibleIndices: VisibleIndices, stickyIndices: number[], currentIndice: number, smallestVisibleIndex: number, largestVisibleIndex: number,
+        visibleIndices: VisibleIndices, stickyIndices: number[] | undefined, currentIndice: number, smallestVisibleIndex: number, largestVisibleIndex: number,
     ): void;
     protected abstract getNextYd(_nextY: number, nextHeight: number): number;
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
@@ -162,12 +162,13 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     private _computeLayouts(recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
-        if (recyclerRef) {
-            this.currentStickyIndex = this.props.stickyIndices[this.currentIndex];
+        const stickyIndices = this.props.stickyIndices();
+        if (stickyIndices && recyclerRef) {
+            this.currentStickyIndex = stickyIndices[this.currentIndex];
             this._stickyData = recyclerRef.props.dataProvider.getDataForIndex(this.currentStickyIndex);
             this._stickyLayoutType = recyclerRef.props.layoutProvider.getLayoutTypeForIndex(this.currentStickyIndex);
-            this._previousStickyIndex = this.props.stickyIndices[this.currentIndex - this.stickyTypeMultiplier];
-            this._nextStickyIndex = this.props.stickyIndices[this.currentIndex + this.stickyTypeMultiplier];
+            this._previousStickyIndex = stickyIndices[this.currentIndex - this.stickyTypeMultiplier];
+            this._nextStickyIndex = stickyIndices[this.currentIndex + this.stickyTypeMultiplier];
             if (this.currentStickyIndex) {
                 this._currentLayout = recyclerRef.getLayout(this.currentStickyIndex);
                 this._currentY = this._currentLayout ? this._currentLayout.y : undefined;

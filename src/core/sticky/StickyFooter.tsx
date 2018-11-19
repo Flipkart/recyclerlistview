@@ -16,28 +16,30 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
     }
 
     protected isInitiallyVisible(
-        visibleIndices: VisibleIndices, stickyIndices: number[], currentIndice: number, smallestVisibleIndex: number, largestVisibleIndex: number,
+        visibleIndices: VisibleIndices, stickyIndices: number[] | undefined, currentIndice: number, smallestVisibleIndex: number, largestVisibleIndex: number,
     ): void {
-        if (largestVisibleIndex > stickyIndices[stickyIndices.length - 1]) {
-            this.initialVisibility = false;
-        } else {
-            this.initialVisibility = true;
-            let resolved: boolean = false;
-            let i = stickyIndices.length - 1;
-            let lastIndex: number = -1;
-            for (i; i >= 0; i--) {
-                const index = stickyIndices[i];
-                if (largestVisibleIndex > index) {
+        if (stickyIndices) {
+            if (largestVisibleIndex > stickyIndices[stickyIndices.length - 1]) {
+                this.initialVisibility = false;
+            } else {
+                this.initialVisibility = true;
+                let resolved: boolean = false;
+                let i = stickyIndices.length - 1;
+                let lastIndex: number = -1;
+                for (i; i >= 0; i--) {
+                    const index = stickyIndices[i];
+                    if (largestVisibleIndex > index) {
+                        this.currentIndex = i + 1;
+                        this.currentStickyIndex = lastIndex;
+                        resolved = true;
+                        break;
+                    }
+                    lastIndex = index;
+                }
+                if (!resolved) {
                     this.currentIndex = i + 1;
                     this.currentStickyIndex = lastIndex;
-                    resolved = true;
-                    break;
                 }
-                lastIndex = index;
-            }
-            if (!resolved) {
-                this.currentIndex = i + 1;
-                this.currentStickyIndex = lastIndex;
             }
         }
     }

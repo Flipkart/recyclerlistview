@@ -16,28 +16,30 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
     }
 
     protected isInitiallyVisible(
-        visibleIndices: VisibleIndices, stickyIndices: number[], currentIndice: number, smallestVisibleIndex: number, largestVisibleIndex: number,
+        visibleIndices: VisibleIndices, stickyIndices: number[] | undefined, currentIndice: number, smallestVisibleIndex: number, largestVisibleIndex: number,
     ): void {
-        if (smallestVisibleIndex < stickyIndices[0]) {
-            this.initialVisibility = false;
-        } else {
-            this.initialVisibility = true;
-            let i: number = 0;
-            let resolved: boolean = false;
-            let lastIndex: number = -1;
-            for (const index of stickyIndices) {
-                if (smallestVisibleIndex < index) {
+        if (stickyIndices) {
+            if (smallestVisibleIndex < stickyIndices[0]) {
+                this.initialVisibility = false;
+            } else {
+                this.initialVisibility = true;
+                let i: number = 0;
+                let resolved: boolean = false;
+                let lastIndex: number = -1;
+                for (const index of stickyIndices) {
+                    if (smallestVisibleIndex < index) {
+                        this.currentIndex = i - 1;
+                        this.currentStickyIndex = lastIndex;
+                        resolved = true;
+                        break;
+                    }
+                    i++;
+                    lastIndex = index;
+                }
+                if (!resolved) {
                     this.currentIndex = i - 1;
                     this.currentStickyIndex = lastIndex;
-                    resolved = true;
-                    break;
                 }
-                i++;
-                lastIndex = index;
-            }
-            if (!resolved) {
-                this.currentIndex = i - 1;
-                this.currentStickyIndex = lastIndex;
             }
         }
     }
