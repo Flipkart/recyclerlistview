@@ -92,6 +92,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             }
             this._firstCompute = false;
         } else {
+            this._computeLayouts(recyclerRef);
             this._setVisibleIndices(now, true);
             this._setVisibleIndices(notNow, false);
             if (this._visibleIndices[this.currentStickyIndex]) {
