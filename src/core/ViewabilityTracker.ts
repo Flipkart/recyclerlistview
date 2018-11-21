@@ -102,8 +102,7 @@ export default class ViewabilityTracker {
         return this._engagedIndexes;
     }
 
-    public findFirstLogicallyVisibleIndex(): number {
-        const relevantIndex = this._findFirstVisibleIndexUsingBS(0.001);
+    public findLogicallyVisibleIndex(relevantIndex: number): number {
         let result = relevantIndex;
         for (let i = relevantIndex - 1; i >= 0; i--) {
             if (this._isHorizontal) {
@@ -120,6 +119,24 @@ export default class ViewabilityTracker {
                 }
             }
         }
+        return result;
+    }
+
+    public findFirstLogicallyVisibleIndex(): number {
+        const relevantIndex = this._findFirstVisibleIndexUsingBS(0.001);
+        const result = this.findLogicallyVisibleIndex(relevantIndex);
+        return result;
+    }
+
+    public findLastLogicallyVisibleIndex(): number {
+        const relevantIndex = this._findLastVisibleIndexUsingBS(0.001);
+        const result = this.findLogicallyVisibleIndex(relevantIndex);
+        return result;
+    }
+
+    public findMiddleLogicallyVisibleIndex(): number {
+        const relevantIndex = this._findMiddleVisibleIndex();
+        const result = this.findLogicallyVisibleIndex(relevantIndex);
         return result;
     }
 
@@ -178,6 +195,17 @@ export default class ViewabilityTracker {
     private _findFirstVisibleIndexUsingBS(bias = 0): number {
         const count = this._layouts.length;
         return BinarySearch.findClosestHigherValueIndex(count, this._visibleWindow.start + bias, this._valueExtractorForBinarySearch);
+    }
+
+    private _findLastVisibleIndexUsingBS(bias = 0): number {
+        const count = this._layouts.length;
+        return BinarySearch.findClosestHigherValueIndex(count, this._visibleWindow.end - bias, this._valueExtractorForBinarySearch);
+    }
+
+    private _findMiddleVisibleIndex(): number {
+        const count = this._layouts.length;
+        const targetValue = Math.round( (this._visibleWindow.start + this._visibleWindow.end) / 2 );
+        return BinarySearch.findClosestHigherValueIndex(count, targetValue, this._valueExtractorForBinarySearch);
     }
 
     private _valueExtractorForBinarySearch = (index: number): number => {
