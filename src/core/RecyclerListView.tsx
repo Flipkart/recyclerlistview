@@ -64,8 +64,9 @@ const refreshRequestDebouncer = debounce((executable: () => void) => {
 /***
  * This is the main component, please refer to samples to understand how to use.
  * For advanced usage check out prop descriptions below.
- * You also get common methods such as: scrollToIndex, scrollToItem, scrollToTop, scrollToEnd, scrollToOffset, getCurrentScrollOffset,
- * findApproxFirstVisibleIndex.
+ * You also get common methods such as: scrollToApproxFirstVisibleIndex, scrollToApproxLastVisibleIndex, scrollToApproxMiddleVisibleIndex,
+ * scrollToIndex, scrollToItem, scrollToTop, scrollToEnd, scrollToOffset, getCurrentScrollOffset, findApproxFirstVisibleIndex, findApproxLastVisibleIndex,
+ * findApproxMiddleVisibleIndex.
  * You'll need a ref to Recycler in order to call these
  * Needs to have bounded size in all cases other than window scrolling (web).
  *
@@ -270,6 +271,24 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this.scrollToIndex(lastIndex, animate);
     }
 
+    public scrollToApproxFirstVisibleIndex(animate?: boolean): void {
+        const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
+        const index = viewabilityTracker ? viewabilityTracker.findFirstLogicallyVisibleIndex() : 0;
+        this.scrollToIndex(index, animate);
+    }
+
+    public scrollToApproxMiddleVisibleIndex(animate?: boolean): void {
+        const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
+        const index = viewabilityTracker ? viewabilityTracker.findMiddleLogicallyVisibleIndex() : 0;
+        this.scrollToIndex(index, animate);
+    }
+
+    public scrollToApproxLastVisibleIndex(animate?: boolean): void {
+        const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
+        const index = viewabilityTracker ? viewabilityTracker.findLastLogicallyVisibleIndex() : 0;
+        this.scrollToIndex(index, animate);
+    }
+
     public scrollToOffset = (x: number, y: number, animate: boolean = false): void => {
         if (this._scrollComponent) {
             if (this.props.isHorizontal) {
@@ -311,6 +330,16 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     public findApproxFirstVisibleIndex(): number {
         const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
         return viewabilityTracker ? viewabilityTracker.findFirstLogicallyVisibleIndex() : 0;
+    }
+
+    public findApproxLastVisibleIndex(): number {
+        const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
+        return viewabilityTracker ? viewabilityTracker.findLastLogicallyVisibleIndex() : 0;
+    }
+
+    public findApproxMiddleVisibleIndex(): number {
+        const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
+        return viewabilityTracker ? viewabilityTracker.findMiddleLogicallyVisibleIndex() : 0;
     }
 
     public render(): JSX.Element {
