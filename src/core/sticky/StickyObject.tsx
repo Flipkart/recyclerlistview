@@ -80,25 +80,17 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     public onVisibleIndicesChanged(all: number[], now: number[], notNow: number[],
                                    recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
         if (this._firstCompute) {
-            this._setVisibleIndices(all, true);
-            this._setSmallestAndLargestVisibleIndices(all);
             this.initStickyParams();
-            this.isInitiallyVisible(
-                this._visibleIndices, this.props.stickyIndices, this.currentStickyIndex, this._smallestVisibleIndexOnLoad, this._largestVisibleIndexOnLoad,
-            );
             this._initParams(recyclerRef);
-            if (this.initialVisibility) {
-                this._stickyViewVisible(true);
-            }
             this._firstCompute = false;
-        } else {
-            this._computeLayouts(recyclerRef);
-            this._setVisibleIndices(now, true);
-            this._setVisibleIndices(notNow, false);
-            if (this._visibleIndices[this.currentStickyIndex]) {
-                this._stickyViewVisible(!this._visibleIndices[this.currentStickyIndex - this.stickyTypeMultiplier]);
-            }
         }
+        this._setVisibleIndices(all, true);
+        this._setSmallestAndLargestVisibleIndices(all);
+        this.isInitiallyVisible(
+            this._visibleIndices, this.props.stickyIndices, this.currentStickyIndex, this._smallestVisibleIndexOnLoad, this._largestVisibleIndexOnLoad,
+        );
+        this._computeLayouts(recyclerRef);
+        this._stickyViewVisible(this.initialVisibility);
     }
 
     public onScroll(offsetY: number): void {
@@ -158,7 +150,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                 this._scrollableHeight = dimension.height;
                 this._scrollableWidth = dimension.width;
             }
-            this._computeLayouts(recyclerRef);
         }
     }
 
