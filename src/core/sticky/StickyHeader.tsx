@@ -2,7 +2,7 @@
  * Created by ananya.chandra on 20/09/18.
  */
 
-import StickyObject, {StickyObjectProps, StickyObjectState, StickyType, VisibleIndices} from "./StickyObject";
+import StickyObject, {StickyObjectProps, StickyObjectState, StickyType} from "./StickyObject";
 
 export default class StickyHeader<P extends StickyObjectProps, S extends StickyObjectState> extends StickyObject<P, S> {
     constructor(props: P, context?: any) {
@@ -16,7 +16,7 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
     }
 
     protected isInitiallyVisible(
-        visibleIndices: VisibleIndices, stickyIndices: number[] | undefined, currentIndice: number, smallestVisibleIndex: number, largestVisibleIndex: number,
+        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
     ): void {
         if (stickyIndices) {
             if (smallestVisibleIndex < stickyIndices[0]) {

@@ -19,9 +19,6 @@ export interface StickyObjectProps {
 export interface StickyObjectState {
     visible: boolean;
 }
-export interface VisibleIndices {
-    [key: number]: boolean;
-}
 export default abstract class StickyObject<P extends StickyObjectProps, S extends StickyObjectState> extends React.Component<P, S> {
     protected stickyType: StickyType = StickyType.HEADER;
     protected stickyTypeMultiplier: number = 1;
@@ -50,7 +47,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     private _previousStickyIndex: number = 0;
     private _nextStickyIndex: number = 0;
     private _firstCompute: boolean = true;
-    private _visibleIndices: VisibleIndices = {};
     private _smallestVisibleIndexOnLoad: number = 0;
     private _largestVisibleIndexOnLoad: number = 0;
 
@@ -84,10 +80,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             this._initParams(recyclerRef);
             this._firstCompute = false;
         }
-        this._setVisibleIndices(all, true);
         this._setSmallestAndLargestVisibleIndices(all);
         this.isInitiallyVisible(
-            this._visibleIndices, this.props.stickyIndices, this.currentStickyIndex, this._smallestVisibleIndexOnLoad, this._largestVisibleIndexOnLoad,
+            this.props.stickyIndices, this._smallestVisibleIndexOnLoad, this._largestVisibleIndexOnLoad,
         );
         this._computeLayouts(recyclerRef);
         this._stickyViewVisible(this.initialVisibility);
@@ -131,7 +126,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     protected abstract initStickyParams(): void;
     protected abstract isInitiallyVisible(
-        visibleIndices: VisibleIndices, stickyIndices: number[] | undefined, currentIndice: number, smallestVisibleIndex: number, largestVisibleIndex: number,
+        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
     ): void;
     protected abstract getNextYd(_nextY: number, nextHeight: number): number;
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
@@ -179,12 +174,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                 this._nextHeight = this._nextLayout ? this._nextLayout.height : undefined;
                 this._nextYd = this._nextY && this._nextHeight ? this.getNextYd(this._nextY, this._nextHeight) : undefined;
             }
-        }
-    }
-
-    private _setVisibleIndices(indicesArray: number[], setValue: boolean): void {
-        for (const index of indicesArray) {
-            this._visibleIndices[index] = setValue;
         }
     }
 
