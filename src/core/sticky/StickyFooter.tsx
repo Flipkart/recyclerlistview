@@ -15,7 +15,7 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
         this.containerPosition = {bottom: 0};
     }
 
-    protected isInitiallyVisible(
+    protected calculateVisibleStickyIndex(
         stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
     ): void {
         if (stickyIndices) {

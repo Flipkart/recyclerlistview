@@ -81,7 +81,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             this._firstCompute = false;
         }
         this._setSmallestAndLargestVisibleIndices(all);
-        this.isInitiallyVisible(
+        this.calculateVisibleStickyIndex(
             this.props.stickyIndices, this._smallestVisibleIndexOnLoad, this._largestVisibleIndexOnLoad,
         );
         this._computeLayouts(recyclerRef);
@@ -125,7 +125,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     protected abstract initStickyParams(): void;
-    protected abstract isInitiallyVisible(
+    protected abstract calculateVisibleStickyIndex(
         stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
     ): void;
     protected abstract getNextYd(_nextY: number, nextHeight: number): number;

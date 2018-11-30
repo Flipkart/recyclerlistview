@@ -15,7 +15,7 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
         this.containerPosition = {top: 0};
     }
 
-    protected isInitiallyVisible(
+    protected calculateVisibleStickyIndex(
         stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
     ): void {
         if (stickyIndices) {
