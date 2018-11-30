@@ -15,8 +15,8 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 
 export interface StickyContainerProps {
     children: RecyclerChild;
-    stickyHeaderIndices: () => number[] | undefined; //TODO Ananya: make optional
-    stickyFooterIndices: () => number[] | undefined; //TODO Ananya: make optional
+    stickyHeaderIndices: number[] | undefined; //TODO Ananya: make optional
+    stickyFooterIndices: number[] | undefined; //TODO Ananya: make optional
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
 }
 export interface StickyContainerState {

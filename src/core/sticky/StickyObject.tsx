@@ -13,7 +13,7 @@ export enum StickyType {
     FOOTER,
 }
 export interface StickyObjectProps {
-    stickyIndices: () => number[] | undefined;
+    stickyIndices: number[] | undefined;
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
 }
 export interface StickyObjectState {
@@ -84,7 +84,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             this._setSmallestAndLargestVisibleIndices(all);
             this.initStickyParams();
             this.isInitiallyVisible(
-                this._visibleIndices, this.props.stickyIndices(), this.currentStickyIndex, this._smallestVisibleIndexOnLoad, this._largestVisibleIndexOnLoad,
+                this._visibleIndices, this.props.stickyIndices, this.currentStickyIndex, this._smallestVisibleIndexOnLoad, this._largestVisibleIndexOnLoad,
             );
             this._initParams(recyclerRef);
             if (this.initialVisibility) {
@@ -163,7 +163,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     private _computeLayouts(recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
-        const stickyIndices = this.props.stickyIndices();
+        const stickyIndices: number[] | undefined = this.props.stickyIndices;
         if (stickyIndices && recyclerRef) {
             this.currentStickyIndex = stickyIndices[this.currentIndex];
             this._stickyData = recyclerRef.props.dataProvider.getDataForIndex(this.currentStickyIndex);
