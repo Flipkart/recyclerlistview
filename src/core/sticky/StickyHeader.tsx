@@ -20,9 +20,9 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
     ): void {
         if (stickyIndices) {
             if (smallestVisibleIndex < stickyIndices[0]) {
-                this.initialVisibility = false;
+                this.stickyVisiblity = false;
             } else {
-                this.initialVisibility = true;
+                this.stickyVisiblity = true;
                 let i: number = 0;
                 let resolved: boolean = false;
                 let lastIndex: number = -1;

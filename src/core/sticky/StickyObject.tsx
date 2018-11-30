@@ -22,7 +22,7 @@ export interface StickyObjectState {
 export default abstract class StickyObject<P extends StickyObjectProps, S extends StickyObjectState> extends React.Component<P, S> {
     protected stickyType: StickyType = StickyType.HEADER;
     protected stickyTypeMultiplier: number = 1;
-    protected initialVisibility: boolean = false;
+    protected stickyVisiblity: boolean = false;
     protected containerPosition: StyleProp<ViewStyle>;
     protected currentIndex: number = 0;
     protected currentStickyIndex: number = 0;
@@ -56,7 +56,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     constructor(props: P, context?: any) {
         super(props, context);
         this.state = {
-            visible: this.initialVisibility,
+            visible: this.stickyVisiblity,
         } as S;
     }
 
@@ -85,7 +85,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             this.props.stickyIndices, this._smallestVisibleIndexOnLoad, this._largestVisibleIndexOnLoad,
         );
         this._computeLayouts(recyclerRef);
-        this._stickyViewVisible(this.initialVisibility);
+        this._stickyViewVisible(this.stickyVisiblity);
     }
 
     public onScroll(offsetY: number): void {

@@ -20,9 +20,9 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
     ): void {
         if (stickyIndices) {
             if (largestVisibleIndex > stickyIndices[stickyIndices.length - 1]) {
-                this.initialVisibility = false;
+                this.stickyVisiblity = false;
             } else {
-                this.initialVisibility = true;
+                this.stickyVisiblity = true;
                 let resolved: boolean = false;
                 let i = stickyIndices.length - 1;
                 let lastIndex: number = -1;
