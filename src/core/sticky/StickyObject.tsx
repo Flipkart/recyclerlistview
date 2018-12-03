@@ -65,7 +65,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     public render(): JSX.Element | null {
-        console.log("VisibleIndices", "Object Render", this.props.stickyIndices, this.currentStickyIndex);  //tslint:disable-line
         return (
             <Animated.View style={[
                 {position: "absolute", width: this._scrollableWidth, transform: [{translateY: this._stickyViewOffset}]},
@@ -91,7 +90,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         );
         this._computeLayouts();
         this._stickyViewVisible(this.stickyVisiblity);
-        console.log("VisibleIndices", 2, this.props.stickyIndices, this.currentStickyIndex);  //tslint:disable-line
     }
 
     public onScroll(offsetY: number): void {
@@ -157,9 +155,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     private _computeLayouts(newStickyIndices?: number[]): void {
-        if (newStickyIndices) {
-            console.log("VisibleIndices", "Updating Indices", newStickyIndices, this.currentStickyIndex);  //tslint:disable-line
-        }
         const stickyIndices: number[] | undefined = newStickyIndices ? newStickyIndices : this.props.stickyIndices;
         if (stickyIndices && this._recyclerRef) {
             this.currentStickyIndex = stickyIndices[this.currentIndex];
@@ -183,9 +178,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                 this._nextHeight = this._nextLayout ? this._nextLayout.height : undefined;
                 this._nextYd = this._nextY && this._nextHeight ? this.getNextYd(this._nextY, this._nextHeight) : undefined;
             }
-        }
-        if (newStickyIndices) {
-            console.log("VisibleIndices", "Updating Indices", newStickyIndices, this.currentStickyIndex);  //tslint:disable-line
         }
     }
 

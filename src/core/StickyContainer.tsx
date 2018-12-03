@@ -43,7 +43,6 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     }
 
     public render(): JSX.Element {
-        console.log("VisibleIndices", "Container Render", this.props.stickyFooterIndices);  //tslint:disable-line
         this._assertChildType();
         const recycler = React.cloneElement(this.props.children, {
             ref: this._getRecyclerRef,
@@ -54,16 +53,12 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
             <View style={{flex: 1}}>
                 {recycler}
                 {this.props.stickyHeaderIndices ? (
-                    <StickyHeader ref={(stickyHeaderRef: any) => {
-                        this._stickyHeaderRef = stickyHeaderRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
-                    }}
+                    <StickyHeader ref={(stickyHeaderRef: any) => this._getStickyHeaderRef(stickyHeaderRef)}
                                   stickyIndices={this.props.stickyHeaderIndices}
                                   overrideRowRenderer={this.props.overrideRowRenderer}/>
                 ) : null}
                 {this.props.stickyFooterIndices ? (
-                    <StickyFooter ref={(stickyFooterRef: any) => {
-                        this._stickyFooterRef = stickyFooterRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
-                    }}
+                    <StickyFooter ref={(stickyFooterRef: any) => this._getStickyFooterRef(stickyFooterRef)}
                                   stickyIndices={this.props.stickyFooterIndices}
                                   overrideRowRenderer={this.props.overrideRowRenderer}/>
                 ) : null}
@@ -82,8 +77,23 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         }
     }
 
+    private _getStickyHeaderRef = (stickyHeaderRef: any) => {
+        if (!this._stickyHeaderRef) {
+            this._stickyHeaderRef = stickyHeaderRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
+            // TODO: Resetting state once ref is initialized. Can look for better solution.
+            this.setState({});
+        }
+    }
+
+    private _getStickyFooterRef = (stickyFooterRef: any) => {
+        if (!this._stickyFooterRef) {
+            this._stickyFooterRef = stickyFooterRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
+            // TODO: Resetting state once ref is initialized. Can look for better solution.
+            this.setState({});
+        }
+    }
+
     private _onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
-        console.log("VisibleIndices", 1);  //tslint:disable-line
         if (this.props.children && this.props.children.props && this.props.children.props.onVisibleIndicesChanged) {
             this.props.children.props.onVisibleIndicesChanged(all, now, notNow);
         }
