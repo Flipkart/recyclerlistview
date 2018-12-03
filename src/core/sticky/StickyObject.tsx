@@ -60,6 +60,10 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         } as S;
     }
 
+    public componentWillReceiveProps(newProps: StickyObjectProps): void {
+        this._computeLayouts(newProps.stickyIndices);
+    }
+
     public render(): JSX.Element | null {
         console.log("VisibleIndices", "Object Render", this.props.stickyIndices, this.currentStickyIndex);  //tslint:disable-line
         return (
@@ -85,14 +89,14 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         this.calculateVisibleStickyIndex(
             this.props.stickyIndices, this._smallestVisibleIndexOnLoad, this._largestVisibleIndexOnLoad,
         );
-        this.computeLayouts();
+        this._computeLayouts();
         this._stickyViewVisible(this.stickyVisiblity);
         console.log("VisibleIndices", 2, this.props.stickyIndices, this.currentStickyIndex);  //tslint:disable-line
     }
 
     public onScroll(offsetY: number): void {
         if (this._recyclerRef) {
-            this.computeLayouts();
+            this._computeLayouts();
             if (this._previousStickyIndex) {
                 const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
                 if (this._previousHeight && this._currentYd && scrollY && scrollY < this._currentYd) {
@@ -100,7 +104,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                         this.currentIndex -= this.stickyTypeMultiplier;
                         const translate = (scrollY - this._currentYd + this._previousHeight) * (-1 * this.stickyTypeMultiplier);
                         this._stickyViewOffset.setValue(translate);
-                        this.computeLayouts();
+                        this._computeLayouts();
                         this._stickyViewVisible(true);
                     }
                 } else {
@@ -116,7 +120,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                     } else if (scrollY > this._nextYd) {
                         this.currentIndex += this.stickyTypeMultiplier;
                         this._stickyViewOffset.setValue(0);
-                        this.computeLayouts();
+                        this._computeLayouts();
                         this._stickyViewVisible(true);
                     }
                 } else {
@@ -126,7 +130,33 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         }
     }
 
-    public computeLayouts(newStickyIndices?: number[]): void {
+    protected abstract initStickyParams(): void;
+    protected abstract calculateVisibleStickyIndex(
+        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
+    ): void;
+    protected abstract getNextYd(_nextY: number, nextHeight: number): number;
+    protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
+    protected abstract getScrollY(offsetY: number, scrollableHeight: number | null): number | null;
+
+    private _stickyViewVisible(_visible: boolean): void {
+        this.setState({
+            visible: _visible,
+        });
+    }
+
+    private _initParams(recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
+        if (recyclerRef) {
+            this._recyclerRef = recyclerRef;
+            this._rowRenderer = recyclerRef.props.rowRenderer;
+            const dimension: Dimension | null = recyclerRef ? recyclerRef.getRenderedSize() : null;
+            if (dimension) {
+                this._scrollableHeight = dimension.height;
+                this._scrollableWidth = dimension.width;
+            }
+        }
+    }
+
+    private _computeLayouts(newStickyIndices?: number[]): void {
         if (newStickyIndices) {
             console.log("VisibleIndices", "Updating Indices", newStickyIndices, this.currentStickyIndex);  //tslint:disable-line
         }
@@ -156,32 +186,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         }
         if (newStickyIndices) {
             console.log("VisibleIndices", "Updating Indices", newStickyIndices, this.currentStickyIndex);  //tslint:disable-line
-        }
-    }
-
-    protected abstract initStickyParams(): void;
-    protected abstract calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
-    ): void;
-    protected abstract getNextYd(_nextY: number, nextHeight: number): number;
-    protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
-    protected abstract getScrollY(offsetY: number, scrollableHeight: number | null): number | null;
-
-    private _stickyViewVisible(_visible: boolean): void {
-        this.setState({
-            visible: _visible,
-        });
-    }
-
-    private _initParams(recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
-        if (recyclerRef) {
-            this._recyclerRef = recyclerRef;
-            this._rowRenderer = recyclerRef.props.rowRenderer;
-            const dimension: Dimension | null = recyclerRef ? recyclerRef.getRenderedSize() : null;
-            if (dimension) {
-                this._scrollableHeight = dimension.height;
-                this._scrollableWidth = dimension.width;
-            }
         }
     }
 

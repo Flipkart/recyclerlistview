@@ -42,15 +42,6 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         } as S;
     }
 
-    public componentWillReceiveProps(newProps: StickyContainerProps): void {
-        if (this._stickyHeaderRef) {
-            this._stickyHeaderRef.computeLayouts(newProps.stickyHeaderIndices);
-        }
-        if (this._stickyFooterRef) {
-            this._stickyFooterRef.computeLayouts(newProps.stickyFooterIndices);
-        }
-    }
-
     public render(): JSX.Element {
         console.log("VisibleIndices", "Container Render", this.props.stickyFooterIndices);  //tslint:disable-line
         this._assertChildType();
