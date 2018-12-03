@@ -61,6 +61,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     public render(): JSX.Element | null {
+        console.log("VisibleIndices", "Object Render", this.props.stickyIndices, this.currentStickyIndex);  //tslint:disable-line
         return (
             <Animated.View style={[
                 {position: "absolute", width: this._scrollableWidth, transform: [{translateY: this._stickyViewOffset}]},
@@ -84,13 +85,14 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         this.calculateVisibleStickyIndex(
             this.props.stickyIndices, this._smallestVisibleIndexOnLoad, this._largestVisibleIndexOnLoad,
         );
-        this._computeLayouts(recyclerRef);
+        this.computeLayouts();
         this._stickyViewVisible(this.stickyVisiblity);
+        console.log("VisibleIndices", 2, this.props.stickyIndices, this.currentStickyIndex);  //tslint:disable-line
     }
 
     public onScroll(offsetY: number): void {
         if (this._recyclerRef) {
-            this._computeLayouts(this._recyclerRef);
+            this.computeLayouts();
             if (this._previousStickyIndex) {
                 const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
                 if (this._previousHeight && this._currentYd && scrollY && scrollY < this._currentYd) {
@@ -98,7 +100,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                         this.currentIndex -= this.stickyTypeMultiplier;
                         const translate = (scrollY - this._currentYd + this._previousHeight) * (-1 * this.stickyTypeMultiplier);
                         this._stickyViewOffset.setValue(translate);
-                        this._computeLayouts(this._recyclerRef);
+                        this.computeLayouts();
                         this._stickyViewVisible(true);
                     }
                 } else {
@@ -114,13 +116,46 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                     } else if (scrollY > this._nextYd) {
                         this.currentIndex += this.stickyTypeMultiplier;
                         this._stickyViewOffset.setValue(0);
-                        this._computeLayouts(this._recyclerRef);
+                        this.computeLayouts();
                         this._stickyViewVisible(true);
                     }
                 } else {
                     this._stickyViewOffset.setValue(0);
                 }
             }
+        }
+    }
+
+    public computeLayouts(newStickyIndices?: number[]): void {
+        if (newStickyIndices) {
+            console.log("VisibleIndices", "Updating Indices", newStickyIndices, this.currentStickyIndex);  //tslint:disable-line
+        }
+        const stickyIndices: number[] | undefined = newStickyIndices ? newStickyIndices : this.props.stickyIndices;
+        if (stickyIndices && this._recyclerRef) {
+            this.currentStickyIndex = stickyIndices[this.currentIndex];
+            this._stickyData = this._recyclerRef.props.dataProvider.getDataForIndex(this.currentStickyIndex);
+            this._stickyLayoutType = this._recyclerRef.props.layoutProvider.getLayoutTypeForIndex(this.currentStickyIndex);
+            this._previousStickyIndex = stickyIndices[this.currentIndex - this.stickyTypeMultiplier];
+            this._nextStickyIndex = stickyIndices[this.currentIndex + this.stickyTypeMultiplier];
+            if (this.currentStickyIndex) {
+                this._currentLayout = this._recyclerRef.getLayout(this.currentStickyIndex);
+                this._currentY = this._currentLayout ? this._currentLayout.y : undefined;
+                this._currentHeight = this._currentLayout ? this._currentLayout.height : undefined;
+                this._currentYd = this._currentY && this._currentHeight ? this.getCurrentYd(this._currentY, this._currentHeight) : undefined;
+            }
+            if (this._previousStickyIndex) {
+                this._previousLayout = this._recyclerRef.getLayout(this._previousStickyIndex);
+                this._previousHeight = this._previousLayout ? this._previousLayout.height : undefined;
+            }
+            if (this._nextStickyIndex) {
+                this._nextLayout = this._recyclerRef.getLayout(this._nextStickyIndex);
+                this._nextY = this._nextLayout ? this._nextLayout.y : undefined;
+                this._nextHeight = this._nextLayout ? this._nextLayout.height : undefined;
+                this._nextYd = this._nextY && this._nextHeight ? this.getNextYd(this._nextY, this._nextHeight) : undefined;
+            }
+        }
+        if (newStickyIndices) {
+            console.log("VisibleIndices", "Updating Indices", newStickyIndices, this.currentStickyIndex);  //tslint:disable-line
         }
     }
 
@@ -146,33 +181,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             if (dimension) {
                 this._scrollableHeight = dimension.height;
                 this._scrollableWidth = dimension.width;
-            }
-        }
-    }
-
-    private _computeLayouts(recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
-        const stickyIndices: number[] | undefined = this.props.stickyIndices;
-        if (stickyIndices && recyclerRef) {
-            this.currentStickyIndex = stickyIndices[this.currentIndex];
-            this._stickyData = recyclerRef.props.dataProvider.getDataForIndex(this.currentStickyIndex);
-            this._stickyLayoutType = recyclerRef.props.layoutProvider.getLayoutTypeForIndex(this.currentStickyIndex);
-            this._previousStickyIndex = stickyIndices[this.currentIndex - this.stickyTypeMultiplier];
-            this._nextStickyIndex = stickyIndices[this.currentIndex + this.stickyTypeMultiplier];
-            if (this.currentStickyIndex) {
-                this._currentLayout = recyclerRef.getLayout(this.currentStickyIndex);
-                this._currentY = this._currentLayout ? this._currentLayout.y : undefined;
-                this._currentHeight = this._currentLayout ? this._currentLayout.height : undefined;
-                this._currentYd = this._currentY && this._currentHeight ? this.getCurrentYd(this._currentY, this._currentHeight) : undefined;
-            }
-            if (this._previousStickyIndex) {
-                this._previousLayout = recyclerRef.getLayout(this._previousStickyIndex);
-                this._previousHeight = this._previousLayout ? this._previousLayout.height : undefined;
-            }
-            if (this._nextStickyIndex) {
-                this._nextLayout = recyclerRef.getLayout(this._nextStickyIndex);
-                this._nextY = this._nextLayout ? this._nextLayout.y : undefined;
-                this._nextHeight = this._nextLayout ? this._nextLayout.height : undefined;
-                this._nextYd = this._nextY && this._nextHeight ? this.getNextYd(this._nextY, this._nextHeight) : undefined;
             }
         }
     }

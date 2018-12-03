@@ -42,7 +42,17 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         } as S;
     }
 
+    public componentWillReceiveProps(newProps: StickyContainerProps): void {
+        if (this._stickyHeaderRef) {
+            this._stickyHeaderRef.computeLayouts(newProps.stickyHeaderIndices);
+        }
+        if (this._stickyFooterRef) {
+            this._stickyFooterRef.computeLayouts(newProps.stickyFooterIndices);
+        }
+    }
+
     public render(): JSX.Element {
+        console.log("VisibleIndices", "Container Render", this.props.stickyFooterIndices);  //tslint:disable-line
         this._assertChildType();
         const recycler = React.cloneElement(this.props.children, {
             ref: this._getRecyclerRef,
@@ -82,6 +92,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     }
 
     private _onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
+        console.log("VisibleIndices", 1);  //tslint:disable-line
         if (this.props.children && this.props.children.props && this.props.children.props.onVisibleIndicesChanged) {
             this.props.children.props.onVisibleIndicesChanged(all, now, notNow);
         }
