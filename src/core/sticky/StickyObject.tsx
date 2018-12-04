@@ -51,7 +51,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     private _largestVisibleIndexOnLoad: number = 0;
 
     private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null;
-    private _rowRenderer: ((type: string | number, data: any, index: number) => JSX.Element | JSX.Element[] | null) | null = null;
+    private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null) | null = null;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -197,11 +197,11 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     private _renderSticky(): JSX.Element | JSX.Element[] | null {
+        const extendedState: object | undefined = this._recyclerRef ? this._recyclerRef.props.extendedState : undefined;
         if (this.props.overrideRowRenderer) {
-            const extendedState: object | undefined = this._recyclerRef ? this._recyclerRef.props.extendedState : undefined;
             return this.props.overrideRowRenderer(this._stickyLayoutType, this._stickyData, this.currentStickyIndex, extendedState);
         } else if (this._rowRenderer) {
-            return this._rowRenderer(this._stickyLayoutType, this._stickyData, this.currentStickyIndex);
+            return this._rowRenderer(this._stickyLayoutType, this._stickyData, this.currentStickyIndex, extendedState);
         } else {
             return null;
         }
