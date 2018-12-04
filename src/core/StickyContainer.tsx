@@ -78,7 +78,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
                 throw new CustomError(RecyclerListViewExceptions.refNotAsFunctionException);
             }
         }
-    }
+    };
 
     private _getStickyHeaderRef = (stickyHeaderRef: any) => {
         if (!this._stickyHeaderRef) {
@@ -86,7 +86,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
             // TODO: Resetting state once ref is initialized. Can look for better solution.
             this._stickyOnVisibleIndices(this._initIndicesAll, this._initIndicesNow, this._initIndicesNotNow);
         }
-    }
+    };
 
     private _getStickyFooterRef = (stickyFooterRef: any) => {
         if (!this._stickyFooterRef) {
@@ -94,7 +94,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
             // TODO: Resetting state once ref is initialized. Can look for better solution.
             this._stickyOnVisibleIndices(this._initIndicesAll, this._initIndicesNow, this._initIndicesNotNow);
         }
-    }
+    };
 
     private _onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
         if (this._initIndicesAll.length === 0) {
