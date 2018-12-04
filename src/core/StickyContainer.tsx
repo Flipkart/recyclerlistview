@@ -15,8 +15,8 @@ import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions"
 
 export interface StickyContainerProps {
     children: RecyclerChild;
-    stickyHeaderIndices: number[] | undefined; //TODO Ananya: make optional
-    stickyFooterIndices: number[] | undefined; //TODO Ananya: make optional
+    stickyHeaderIndices?: number[];
+    stickyFooterIndices?: number[];
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
 }
 export interface StickyContainerState {
@@ -31,6 +31,9 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null;
     private _stickyHeaderRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
     private _stickyFooterRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
+    private _initIndicesAll: number[] = [];
+    private _initIndicesNow: number[] = [];
+    private _initIndicesNotNow: number[] = [];
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -81,7 +84,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         if (!this._stickyHeaderRef) {
             this._stickyHeaderRef = stickyHeaderRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
             // TODO: Resetting state once ref is initialized. Can look for better solution.
-            this.setState({});
+            this._stickyOnVisibleIndices(this._initIndicesAll, this._initIndicesNow, this._initIndicesNotNow);
         }
     }
 
@@ -89,14 +92,23 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         if (!this._stickyFooterRef) {
             this._stickyFooterRef = stickyFooterRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
             // TODO: Resetting state once ref is initialized. Can look for better solution.
-            this.setState({});
+            this._stickyOnVisibleIndices(this._initIndicesAll, this._initIndicesNow, this._initIndicesNotNow);
         }
     }
 
     private _onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
+        if (this._initIndicesAll.length === 0) {
+            this._initIndicesAll = all;
+            this._initIndicesNow = now;
+            this._initIndicesNotNow = notNow;
+        }
         if (this.props.children && this.props.children.props && this.props.children.props.onVisibleIndicesChanged) {
             this.props.children.props.onVisibleIndicesChanged(all, now, notNow);
         }
+        this._stickyOnVisibleIndices(all, now, notNow);
+    }
+
+    private _stickyOnVisibleIndices(all: number[], now: number[], notNow: number[]): void {
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onVisibleIndicesChanged(all, now, notNow, this._recyclerRef);
         }
