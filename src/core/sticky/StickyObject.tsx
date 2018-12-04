@@ -47,8 +47,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     private _previousStickyIndex: number = 0;
     private _nextStickyIndex: number = 0;
     private _firstCompute: boolean = true;
-    private _smallestVisibleIndexOnLoad: number = 0;
-    private _largestVisibleIndexOnLoad: number = 0;
+    private _smallestVisibleIndex: number = 0;
+    private _largestVisibleIndex: number = 0;
 
     private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null;
     private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null) | null = null;
@@ -86,7 +86,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         }
         this._setSmallestAndLargestVisibleIndices(all);
         this.calculateVisibleStickyIndex(
-            this.props.stickyIndices, this._smallestVisibleIndexOnLoad, this._largestVisibleIndexOnLoad,
+            this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
         );
         this._computeLayouts();
         this._stickyViewVisible(this.stickyVisiblity);
@@ -192,8 +192,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                 tempLargestIndex = index;
             }
         }
-        this._smallestVisibleIndexOnLoad = tempSmallestIndex;
-        this._largestVisibleIndexOnLoad = tempLargestIndex;
+        this._smallestVisibleIndex = tempSmallestIndex;
+        this._largestVisibleIndex = tempLargestIndex;
     }
 
     private _renderSticky(): JSX.Element | JSX.Element[] | null {
