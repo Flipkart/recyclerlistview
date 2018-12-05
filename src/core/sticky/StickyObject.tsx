@@ -61,7 +61,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     public componentWillReceiveProps(newProps: StickyObjectProps): void {
+        this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex);
         this._computeLayouts(newProps.stickyIndices);
+        this._stickyViewVisible(this.stickyVisiblity);
     }
 
     public render(): JSX.Element | null {
@@ -85,9 +87,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         }
         this._initParams(recyclerRef); // TODO: Putting outside firstCompute because recycler dims aren't obtained initially sometimes.
         this._setSmallestAndLargestVisibleIndices(all);
-        this.calculateVisibleStickyIndex(
-            this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
-        );
+        this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex);
         this._computeLayouts();
         this._stickyViewVisible(this.stickyVisiblity);
     }
