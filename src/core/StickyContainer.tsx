@@ -102,10 +102,10 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
             this._initIndicesNow = now;
             this._initIndicesNotNow = notNow;
         }
+        this._stickyOnVisibleIndices(all, now, notNow);
         if (this.props.children && this.props.children.props && this.props.children.props.onVisibleIndicesChanged) {
             this.props.children.props.onVisibleIndicesChanged(all, now, notNow);
         }
-        this._stickyOnVisibleIndices(all, now, notNow);
     }
 
     private _stickyOnVisibleIndices(all: number[], now: number[], notNow: number[]): void {
@@ -118,14 +118,14 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     }
 
     private _onScroll(rawEvent: ScrollEvent, offsetX: number, offsetY: number): void {
-        if (this.props.children && this.props.children.props.onScroll) {
-            (this.props.children as any).props.onScroll(rawEvent, offsetX, offsetY);
-        }
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onScroll(offsetY);
         }
         if (this._stickyFooterRef) {
             this._stickyFooterRef.onScroll(offsetY);
+        }
+        if (this.props.children && this.props.children.props.onScroll) {
+            (this.props.children as any).props.onScroll(rawEvent, offsetX, offsetY);
         }
     }
 
