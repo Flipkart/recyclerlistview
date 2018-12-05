@@ -6,7 +6,7 @@ import * as React from "react";
 import * as PropTypes from "prop-types";
 import {View} from "react-native";
 import RecyclerListView, {RecyclerListViewState, RecyclerListViewProps} from "./RecyclerListView";
-import { ScrollEvent } from "./scrollcomponent/BaseScrollView";
+import {ScrollEvent} from "./scrollcomponent/BaseScrollView";
 import StickyObject, {StickyObjectProps, StickyObjectState} from "./sticky/StickyObject";
 import StickyHeader from "./sticky/StickyHeader";
 import StickyFooter from "./sticky/StickyFooter";
@@ -31,9 +31,9 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null;
     private _stickyHeaderRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
     private _stickyFooterRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
-    private _initIndicesAll: number[] = [];
-    private _initIndicesNow: number[] = [];
-    private _initIndicesNotNow: number[] = [];
+    private _visibleIndicesAll: number[] = [];
+    private _visibleIndicesNow: number[] = [];
+    private _visibleIndicesNotNow: number[] = [];
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -84,7 +84,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         if (!this._stickyHeaderRef) {
             this._stickyHeaderRef = stickyHeaderRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
             // TODO: Resetting state once ref is initialized. Can look for better solution.
-            this._stickyOnVisibleIndices(this._initIndicesAll, this._initIndicesNow, this._initIndicesNotNow);
+            this._stickyOnVisibleIndices(this._visibleIndicesAll, this._visibleIndicesNow, this._visibleIndicesNotNow);
         }
     }
 
@@ -92,16 +92,14 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         if (!this._stickyFooterRef) {
             this._stickyFooterRef = stickyFooterRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
             // TODO: Resetting state once ref is initialized. Can look for better solution.
-            this._stickyOnVisibleIndices(this._initIndicesAll, this._initIndicesNow, this._initIndicesNotNow);
+            this._stickyOnVisibleIndices(this._visibleIndicesAll, this._visibleIndicesNow, this._visibleIndicesNotNow);
         }
     }
 
     private _onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
-        if (this._initIndicesAll.length === 0) {
-            this._initIndicesAll = all;
-            this._initIndicesNow = now;
-            this._initIndicesNotNow = notNow;
-        }
+        this._visibleIndicesAll = all;
+        this._visibleIndicesNow = now;
+        this._visibleIndicesNotNow = notNow;
         this._stickyOnVisibleIndices(all, now, notNow);
         if (this.props.children && this.props.children.props && this.props.children.props.onVisibleIndicesChanged) {
             this.props.children.props.onVisibleIndicesChanged(all, now, notNow);
