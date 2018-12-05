@@ -37,9 +37,6 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
 
     constructor(props: P, context?: any) {
         super(props, context);
-        this._onVisibleIndicesChanged = this._onVisibleIndicesChanged.bind(this);
-        this._onScroll = this._onScroll.bind(this);
-
         this.state = {
             topVisible: false,
         } as S;
@@ -84,7 +81,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         if (!this._stickyHeaderRef) {
             this._stickyHeaderRef = stickyHeaderRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
             // TODO: Resetting state once ref is initialized. Can look for better solution.
-            this._stickyOnVisibleIndices(this._visibleIndicesAll, this._visibleIndicesNow, this._visibleIndicesNotNow);
+            this._callStickyObjectsOnVisibleIndicesChanged(this._visibleIndicesAll, this._visibleIndicesNow, this._visibleIndicesNotNow);
         }
     }
 
@@ -92,21 +89,21 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         if (!this._stickyFooterRef) {
             this._stickyFooterRef = stickyFooterRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
             // TODO: Resetting state once ref is initialized. Can look for better solution.
-            this._stickyOnVisibleIndices(this._visibleIndicesAll, this._visibleIndicesNow, this._visibleIndicesNotNow);
+            this._callStickyObjectsOnVisibleIndicesChanged(this._visibleIndicesAll, this._visibleIndicesNow, this._visibleIndicesNotNow);
         }
     }
 
-    private _onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
+    private _onVisibleIndicesChanged = (all: number[], now: number[], notNow: number[]) => {
         this._visibleIndicesAll = all;
         this._visibleIndicesNow = now;
         this._visibleIndicesNotNow = notNow;
-        this._stickyOnVisibleIndices(all, now, notNow);
+        this._callStickyObjectsOnVisibleIndicesChanged(all, now, notNow);
         if (this.props.children && this.props.children.props && this.props.children.props.onVisibleIndicesChanged) {
             this.props.children.props.onVisibleIndicesChanged(all, now, notNow);
         }
     }
 
-    private _stickyOnVisibleIndices(all: number[], now: number[], notNow: number[]): void {
+    private _callStickyObjectsOnVisibleIndicesChanged = (all: number[], now: number[], notNow: number[]) => {
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onVisibleIndicesChanged(all, now, notNow, this._recyclerRef);
         }
@@ -115,7 +112,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         }
     }
 
-    private _onScroll(rawEvent: ScrollEvent, offsetX: number, offsetY: number): void {
+    private _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onScroll(offsetY);
         }
