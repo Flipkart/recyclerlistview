@@ -18,7 +18,7 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
     protected calculateVisibleStickyIndex(
         stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
     ): void {
-        if (stickyIndices) {
+        if (stickyIndices && largestVisibleIndex) {
             if (largestVisibleIndex > stickyIndices[stickyIndices.length - 1]) {
                 this.stickyVisiblity = false;
             } else {

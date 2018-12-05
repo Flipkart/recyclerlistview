@@ -18,7 +18,7 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
     protected calculateVisibleStickyIndex(
         stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
     ): void {
-        if (stickyIndices) {
+        if (stickyIndices && smallestVisibleIndex) {
             if (smallestVisibleIndex < stickyIndices[0]) {
                 this.stickyVisiblity = false;
             } else {

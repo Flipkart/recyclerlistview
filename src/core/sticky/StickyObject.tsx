@@ -81,9 +81,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                                    recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
         if (this._firstCompute) {
             this.initStickyParams();
-            this._initParams(recyclerRef);
             this._firstCompute = false;
         }
+        this._initParams(recyclerRef); // TODO: Putting outside firstCompute because recycler dims aren't obtained initially sometimes.
         this._setSmallestAndLargestVisibleIndices(all);
         this.calculateVisibleStickyIndex(
             this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
