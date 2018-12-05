@@ -85,7 +85,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             this.initStickyParams();
             this._firstCompute = false;
         }
-        this._initParams(recyclerRef); // TODO: Putting outside firstCompute because recycler dims aren't obtained initially sometimes.
+        this._initParams(recyclerRef); // TODO: Putting outside firstCompute because sometimes recycler dims aren't obtained initially.
         this._setSmallestAndLargestVisibleIndices(all);
         this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex);
         this._computeLayouts();
