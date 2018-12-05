@@ -181,18 +181,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     private _setSmallestAndLargestVisibleIndices(indicesArray: number[]): void {
-        let tempLargestIndex: number = indicesArray[0];
-        let tempSmallestIndex: number = indicesArray[0];
-        for (const index of indicesArray) {
-            if (index < tempSmallestIndex) {
-                tempSmallestIndex = index;
-            }
-            if (index > tempLargestIndex) {
-                tempLargestIndex = index;
-            }
-        }
-        this._smallestVisibleIndex = tempSmallestIndex;
-        this._largestVisibleIndex = tempLargestIndex;
+        this._smallestVisibleIndex = indicesArray[0];
+        this._largestVisibleIndex = indicesArray[indicesArray.length - 1];
     }
 
     private _renderSticky(): JSX.Element | JSX.Element[] | null {
