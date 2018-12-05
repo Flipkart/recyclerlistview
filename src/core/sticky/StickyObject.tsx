@@ -94,7 +94,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     public onScroll(offsetY: number): void {
         if (this._recyclerRef) {
-            this._computeLayouts();
             if (this._previousStickyIndex) {
                 const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
                 if (this._previousHeight && this._currentYd && scrollY && scrollY < this._currentYd) {
