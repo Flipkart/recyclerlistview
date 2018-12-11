@@ -45,6 +45,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     public render(): JSX.Element {
         this._assertChildType();
         const recycler = React.cloneElement(this.props.children, {
+            ...this.props.children.props,
             ref: this._getRecyclerRef,
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,

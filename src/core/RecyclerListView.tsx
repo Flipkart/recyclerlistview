@@ -51,10 +51,10 @@ const IS_WEB = !Platform || Platform.OS === "web";
  */
 
 //#if [WEB]
-//import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
-//import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
-//import { DefaultWebItemAnimator as DefaultItemAnimator } from "../platform/web/itemanimators/DefaultWebItemAnimator";
-//const IS_WEB = true;
+// import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
+// import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
+// import { DefaultWebItemAnimator as DefaultItemAnimator } from "../platform/web/itemanimators/DefaultWebItemAnimator";
+// const IS_WEB = true;
 //#endif
 
 const refreshRequestDebouncer = debounce((executable: () => void) => {
