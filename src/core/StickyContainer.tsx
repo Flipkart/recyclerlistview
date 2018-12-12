@@ -4,7 +4,7 @@
 
 import * as React from "react";
 import * as PropTypes from "prop-types";
-import {View} from "react-native";
+import {StyleProp, View, ViewStyle} from "react-native";
 import RecyclerListView, {RecyclerListViewState, RecyclerListViewProps} from "./RecyclerListView";
 import {ScrollEvent} from "./scrollcomponent/BaseScrollView";
 import StickyObject, {StickyObjectProps, StickyObjectState} from "./sticky/StickyObject";
@@ -18,6 +18,7 @@ export interface StickyContainerProps {
     stickyHeaderIndices?: number[];
     stickyFooterIndices?: number[];
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
+    style?: StyleProp<ViewStyle>;
 }
 export interface StickyContainerState {
     topVisible: boolean;
@@ -51,7 +52,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
             onScroll: this._onScroll,
         });
         return (
-            <View style={{flex: 1}}>
+            <View style={this.props.style ? this.props.style : {flex: 1}}>
                 {recycler}
                 {this.props.stickyHeaderIndices ? (
                     <StickyHeader ref={(stickyHeaderRef: any) => this._getStickyHeaderRef(stickyHeaderRef)}
