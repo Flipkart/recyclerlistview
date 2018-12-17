@@ -61,6 +61,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     public componentWillReceiveProps(newProps: StickyObjectProps): void {
+        if (newProps.stickyIndices) {
+            newProps.stickyIndices.sort();
+        }
         this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex);
         this._computeLayouts(newProps.stickyIndices);
         this._stickyViewVisible(this.stickyVisiblity);
@@ -82,6 +85,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     public onVisibleIndicesChanged(all: number[], now: number[], notNow: number[],
                                    recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
         if (this._firstCompute) {
+            if (this.props.stickyIndices) {
+                this.props.stickyIndices.sort();
+            }
             this.initStickyParams();
             this._firstCompute = false;
         }
