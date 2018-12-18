@@ -14,6 +14,12 @@ export enum StickyType {
 }
 export interface StickyObjectProps {
     stickyIndices: number[] | undefined;
+    getLayoutForIndex: (index: number) => Layout | undefined;
+    getDataForIndex: (index: number) => any | null;
+    getLayoutTypeForIndex: (index: number) => string | number;
+    getExtendedState: () => object | undefined;
+    getRLVRenderedSize: () => Dimension | null;
+    getRowRenderer: () => ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null) | null;
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
 }
 export interface StickyObjectState {
@@ -42,16 +48,11 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     private _scrollableWidth: number | null = null;
 
     private _stickyViewOffset: Animated.Value = new Animated.Value(0);
-    private _stickyData: any | null = null;
-    private _stickyLayoutType: string | number = "";
     private _previousStickyIndex: number = 0;
     private _nextStickyIndex: number = 0;
     private _firstCompute: boolean = true;
     private _smallestVisibleIndex: number = 0;
     private _largestVisibleIndex: number = 0;
-
-    private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null;
-    private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null) | null = null;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -61,9 +62,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     public componentWillReceiveProps(newProps: StickyObjectProps): void {
-        if (newProps.stickyIndices) {
-            newProps.stickyIndices.sort();
-        }
+        this._sortAscending(newProps.stickyIndices);
         this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex);
         this._computeLayouts(newProps.stickyIndices);
         this._stickyViewVisible(this.stickyVisiblity);
@@ -82,16 +81,13 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         );
     }
 
-    public onVisibleIndicesChanged(all: number[], now: number[], notNow: number[],
-                                   recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
+    public onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
         if (this._firstCompute) {
-            if (this.props.stickyIndices) {
-                this.props.stickyIndices.sort();
-            }
+            this._sortAscending(this.props.stickyIndices);
             this.initStickyParams();
             this._firstCompute = false;
         }
-        this._initParams(recyclerRef); // TODO: Putting outside firstCompute because sometimes recycler dims aren't obtained initially.
+        this._initParams(); // TODO: Putting outside firstCompute because sometimes recycler dims aren't obtained initially.
         this._setSmallestAndLargestVisibleIndices(all);
         this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex);
         this._computeLayouts();
@@ -99,36 +95,34 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     public onScroll(offsetY: number): void {
-        if (this._recyclerRef) {
-            if (this._previousStickyIndex) {
-                const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
-                if (this._previousHeight && this._currentYd && scrollY && scrollY < this._currentYd) {
-                    if (scrollY > this._currentYd - this._previousHeight) {
-                        this.currentIndex -= this.stickyTypeMultiplier;
-                        const translate = (scrollY - this._currentYd + this._previousHeight) * (-1 * this.stickyTypeMultiplier);
-                        this._stickyViewOffset.setValue(translate);
-                        this._computeLayouts();
-                        this._stickyViewVisible(true);
-                    }
-                } else {
-                    this._stickyViewOffset.setValue(0);
+        if (this._previousStickyIndex) {
+            const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
+            if (this._previousHeight && this._currentYd && scrollY && scrollY < this._currentYd) {
+                if (scrollY > this._currentYd - this._previousHeight) {
+                    this.currentIndex -= this.stickyTypeMultiplier;
+                    const translate = (scrollY - this._currentYd + this._previousHeight) * (-1 * this.stickyTypeMultiplier);
+                    this._stickyViewOffset.setValue(translate);
+                    this._computeLayouts();
+                    this._stickyViewVisible(true);
                 }
+            } else {
+                this._stickyViewOffset.setValue(0);
             }
-            if (this._nextStickyIndex) {
-                const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
-                if (this._currentHeight && this._nextYd && scrollY && scrollY + this._currentHeight > this._nextYd) {
-                    if (scrollY <= this._nextYd) {
-                        const translate = (scrollY - this._nextYd + this._currentHeight) * (-1 * this.stickyTypeMultiplier);
-                        this._stickyViewOffset.setValue(translate);
-                    } else if (scrollY > this._nextYd) {
-                        this.currentIndex += this.stickyTypeMultiplier;
-                        this._stickyViewOffset.setValue(0);
-                        this._computeLayouts();
-                        this._stickyViewVisible(true);
-                    }
-                } else {
+        }
+        if (this._nextStickyIndex) {
+            const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
+            if (this._currentHeight && this._nextYd && scrollY && scrollY + this._currentHeight > this._nextYd) {
+                if (scrollY <= this._nextYd) {
+                    const translate = (scrollY - this._nextYd + this._currentHeight) * (-1 * this.stickyTypeMultiplier);
+                    this._stickyViewOffset.setValue(translate);
+                } else if (scrollY > this._nextYd) {
+                    this.currentIndex += this.stickyTypeMultiplier;
                     this._stickyViewOffset.setValue(0);
+                    this._computeLayouts();
+                    this._stickyViewVisible(true);
                 }
+            } else {
+                this._stickyViewOffset.setValue(0);
             }
         }
     }
@@ -147,38 +141,32 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         });
     }
 
-    private _initParams(recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null): void {
-        if (recyclerRef) {
-            this._recyclerRef = recyclerRef;
-            this._rowRenderer = recyclerRef.props.rowRenderer;
-            const dimension: Dimension | null = recyclerRef ? recyclerRef.getRenderedSize() : null;
-            if (dimension) {
-                this._scrollableHeight = dimension.height;
-                this._scrollableWidth = dimension.width;
-            }
+    private _initParams(): void {
+        const dimension: Dimension | null = this.props.getRLVRenderedSize();
+        if (dimension) {
+            this._scrollableHeight = dimension.height;
+            this._scrollableWidth = dimension.width;
         }
     }
 
     private _computeLayouts(newStickyIndices?: number[]): void {
         const stickyIndices: number[] | undefined = newStickyIndices ? newStickyIndices : this.props.stickyIndices;
-        if (stickyIndices && this._recyclerRef) {
+        if (stickyIndices) {
             this.currentStickyIndex = stickyIndices[this.currentIndex];
-            this._stickyData = this._recyclerRef.props.dataProvider.getDataForIndex(this.currentStickyIndex);
-            this._stickyLayoutType = this._recyclerRef.props.layoutProvider.getLayoutTypeForIndex(this.currentStickyIndex);
             this._previousStickyIndex = stickyIndices[this.currentIndex - this.stickyTypeMultiplier];
             this._nextStickyIndex = stickyIndices[this.currentIndex + this.stickyTypeMultiplier];
             if (this.currentStickyIndex) {
-                this._currentLayout = this._recyclerRef.getLayout(this.currentStickyIndex);
+                this._currentLayout = this.props.getLayoutForIndex(this.currentStickyIndex);
                 this._currentY = this._currentLayout ? this._currentLayout.y : undefined;
                 this._currentHeight = this._currentLayout ? this._currentLayout.height : undefined;
                 this._currentYd = this._currentY && this._currentHeight ? this.getCurrentYd(this._currentY, this._currentHeight) : undefined;
             }
             if (this._previousStickyIndex) {
-                this._previousLayout = this._recyclerRef.getLayout(this._previousStickyIndex);
+                this._previousLayout = this.props.getLayoutForIndex(this._previousStickyIndex);
                 this._previousHeight = this._previousLayout ? this._previousLayout.height : undefined;
             }
             if (this._nextStickyIndex) {
-                this._nextLayout = this._recyclerRef.getLayout(this._nextStickyIndex);
+                this._nextLayout = this.props.getLayoutForIndex(this._nextStickyIndex);
                 this._nextY = this._nextLayout ? this._nextLayout.y : undefined;
                 this._nextHeight = this._nextLayout ? this._nextLayout.height : undefined;
                 this._nextYd = this._nextY && this._nextHeight ? this.getNextYd(this._nextY, this._nextHeight) : undefined;
@@ -192,13 +180,23 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     private _renderSticky(): JSX.Element | JSX.Element[] | null {
-        const extendedState: object | undefined = this._recyclerRef ? this._recyclerRef.props.extendedState : undefined;
+        const _stickyData: any | null = this.props.getDataForIndex(this.currentStickyIndex);
+        const _stickyLayoutType: string | number = this.props.getLayoutTypeForIndex(this.currentStickyIndex);
+        const _extendedState: object | undefined = this.props.getExtendedState();
+        const _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object)
+            => JSX.Element | JSX.Element[] | null) | null = this.props.getRowRenderer();
         if (this.props.overrideRowRenderer) {
-            return this.props.overrideRowRenderer(this._stickyLayoutType, this._stickyData, this.currentStickyIndex, extendedState);
-        } else if (this._rowRenderer) {
-            return this._rowRenderer(this._stickyLayoutType, this._stickyData, this.currentStickyIndex, extendedState);
+            return this.props.overrideRowRenderer(_stickyLayoutType, _stickyData, this.currentStickyIndex, _extendedState);
+        } else if (_rowRenderer) {
+            return _rowRenderer(_stickyLayoutType, _stickyData, this.currentStickyIndex, _extendedState);
         } else {
             return null;
+        }
+    }
+
+    private _sortAscending(array: number[] | undefined): void {
+        if (array) {
+            array.sort((a, b) => (a - b));
         }
     }
 }

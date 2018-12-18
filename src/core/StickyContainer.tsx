@@ -12,6 +12,8 @@ import StickyHeader from "./sticky/StickyHeader";
 import StickyFooter from "./sticky/StickyFooter";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
+import {Layout} from "./layoutmanager/LayoutManager";
+import {Dimension} from "./dependencies/LayoutProvider";
 
 export interface StickyContainerProps {
     children: RecyclerChild;
@@ -57,11 +59,23 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
                 {this.props.stickyHeaderIndices ? (
                     <StickyHeader ref={(stickyHeaderRef: any) => this._getStickyHeaderRef(stickyHeaderRef)}
                                   stickyIndices={this.props.stickyHeaderIndices}
+                                  getLayoutForIndex={this._getLayoutForIndex}
+                                  getDataForIndex={this._getDataForIndex}
+                                  getLayoutTypeForIndex={this._getLayoutTypeForIndex}
+                                  getExtendedState={this._getExtendedState}
+                                  getRLVRenderedSize={this._getRLVRenderedSize}
+                                  getRowRenderer={this._getRowRenderer}
                                   overrideRowRenderer={this.props.overrideRowRenderer}/>
                 ) : null}
                 {this.props.stickyFooterIndices ? (
                     <StickyFooter ref={(stickyFooterRef: any) => this._getStickyFooterRef(stickyFooterRef)}
                                   stickyIndices={this.props.stickyFooterIndices}
+                                  getLayoutForIndex={this._getLayoutForIndex}
+                                  getDataForIndex={this._getDataForIndex}
+                                  getLayoutTypeForIndex={this._getLayoutTypeForIndex}
+                                  getExtendedState={this._getExtendedState}
+                                  getRLVRenderedSize={this._getRLVRenderedSize}
+                                  getRowRenderer={this._getRowRenderer}
                                   overrideRowRenderer={this.props.overrideRowRenderer}/>
                 ) : null}
             </View>
@@ -107,10 +121,10 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
 
     private _callStickyObjectsOnVisibleIndicesChanged = (all: number[], now: number[], notNow: number[]) => {
         if (this._stickyHeaderRef) {
-            this._stickyHeaderRef.onVisibleIndicesChanged(all, now, notNow, this._recyclerRef);
+            this._stickyHeaderRef.onVisibleIndicesChanged(all, now, notNow);
         }
         if (this._stickyFooterRef) {
-            this._stickyFooterRef.onVisibleIndicesChanged(all, now, notNow, this._recyclerRef);
+            this._stickyFooterRef.onVisibleIndicesChanged(all, now, notNow);
         }
     }
 
@@ -126,18 +140,57 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         }
     }
 
-    private _assertChildType(): void {
+    private _assertChildType = (): void => {
         if (React.Children.count(this.props.children) !== 1 || !this._isChildRecyclerInstance()) {
             throw new CustomError(RecyclerListViewExceptions.wrongStickyChildTypeException);
         }
     }
 
-    private _isChildRecyclerInstance(): boolean {
+    private _isChildRecyclerInstance = (): boolean => {
         return (
             this.props.children.props.dataProvider
             && this.props.children.props.rowRenderer
             && this.props.children.props.layoutProvider
         );
+    }
+
+    private _getLayoutForIndex = (index: number): Layout | undefined => {
+        if (this._recyclerRef) {
+            return this._recyclerRef.getLayout(index);
+        }
+        return undefined;
+    }
+
+    private _getDataForIndex = (index: number): any | null => {
+        if (this._recyclerRef) {
+            return this._recyclerRef.props.dataProvider.getDataForIndex(index);
+        }
+        return null;
+    }
+
+    private _getLayoutTypeForIndex = (index: number): string | number => {
+        if (this._recyclerRef) {
+            return this._recyclerRef.props.layoutProvider.getLayoutTypeForIndex(index);
+        }
+        return "";
+    }
+
+    private _getExtendedState = (): object | undefined => {
+        return this._recyclerRef ? this._recyclerRef.props.extendedState : undefined;
+    }
+
+    private _getRowRenderer = (): ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null) | null => {
+        if (this._recyclerRef) {
+            return this._recyclerRef.props.rowRenderer;
+        }
+        return null;
+    }
+
+    private _getRLVRenderedSize = (): Dimension | null => {
+        if (this._recyclerRef) {
+            return this._recyclerRef.getRenderedSize();
+        }
+        return null;
     }
 }
 
