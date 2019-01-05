@@ -18,6 +18,7 @@ For latest beta:
 * **[Why?](#why)**
 * **[Demo](#demo)**
 * **[Props](#props)**
+* **[Typescript](#typescript)**
 * **[Guides](#guides)**
 * **[License](#license)**
 * **[Contact us](#contact-us)**
@@ -105,6 +106,33 @@ not be as fast.
 
 For full feature set have a look at prop definitions of [RecyclerListView](https://github.com/Flipkart/recyclerlistview/blob/21049cc89ad606ec9fe8ea045dc73732ff29eac9/src/core/RecyclerListView.tsx#L540-L634)
 (bottom of the file). All `ScrollView` features like `RefreshControl` also work out of the box.
+
+## Typescript
+
+Typescript works out of the box. The only execption is with the inherited Scrollview props. In order for Typescript to work with inherited Scrollview props, you must place said inherited Scrollview props within the scrollViewProps prop.
+
+```javascript
+<RecyclerListView
+  rowRenderer={this.rowRenderer}
+  dataProvider={queue}
+  layoutProvider={this.layoutProvider}
+  onScroll={this.checkRefetch}
+  renderFooter={this.renderFooter}
+  scrollViewProps={{
+    refreshControl: (
+      <RefreshControl
+        refreshing={loading}
+        onRefresh={async () => {
+          this.setState({ loading: true });
+          analytics.logEvent('Event_Stagg_pull_to_refresh');
+          await refetchQueue();
+          this.setState({ loading: false });
+        }}
+      />
+    )
+  }}
+/>
+```
 
 ## Guides
 * **[Sample Code](https://github.com/Flipkart/recyclerlistview/tree/master/docs/guides/samplecode)**
