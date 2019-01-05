@@ -75,10 +75,42 @@ not be as fast.
 ## Props
 For full feature set have a look at prop definitions of [RecyclerListView](https://github.com/Flipkart/recyclerlistview/blob/21049cc89ad606ec9fe8ea045dc73732ff29eac9/src/core/RecyclerListView.tsx#L540-L634)
 (bottom of the file). All `ScrollView` features like `RefreshControl` also work out of the box.
+| Prop | Required | Description |
+| --- | --- | --- |
+| layoutProvider | Yes | Constructor function that defines the layout (height / width) of each element |
+| dataProvider | Yes | Constructor function the defines the data of each element |
+| contextProvider | No | Used to maintain scroll position in case view gets destroyed, which often happens with back navigation |
+| rowRenderer | Yes | Method that returns react component to be rendered. You get the type and data of the view in the callback | 
+| initialOffset | No | Initial offset you want to start rendering from; This is very useful if you want to maintan scroll context across pages. | 
+| renderAheadOfOffset | No | 
+specify how many pixels in advance you want views to be rendered. Increasing this value can help reduce blanks (if any). However, keeping this as low as possible should be the intent. Higher values also increase re-render compute |
+| isHorizontal | No | If true, the list will operate horizontally rather than vertically | 
+| onScroll | No | On scroll callback function that executes as a user scrolls |
+| onRecreate | No | callback function that gets executed when recreating the recycler view from context provider |
+| externalScrollView | No | Use this to inherit any properties from React-Native's Scrollview component |
+| onEndReached | No | Callback function executed when the end of the view is hit (minus onEndThreshold if defined) |
+| onEndReachThreshold | No | Specify how many pixels in advance for the onEndReached callback |
+| onVisibleIndexesChanged | No | Provides visible index; helpful in sending impression events |
+| renderFooter | No | Provide this method if you want to render a footer. Helpful in showing a loader while doing incremental loads |
+| initialRenderIndex | No | Specify the initial item index you want rendering to start from. Prefered over initialOffset if both specified |
+| scrollThrottle | No | iOS only; Scroll throttle duration |
+| canChangeSize | No | Specify if size can change |
+| distanceFromWindow | No | Web only; Specify how far away the first list item is from window top |
+| useWindowScroll | No | Web only; Layout Elements in window instead of a scrollable div |
+| disableRecycling | No | Turns off recycling |
+| forceNonDeterministicRenering | No | Default is false; if enabled dimensions provided in layout provider will not be strictly enforced |
+| extendedState | No | In some cases the data passed at row level may not contain all the info that the item depends upon, you can keep all other info
+    outside and pass it down via this prop. Changing this object will cause everything to re-render. Make sure you don't change
+    it often to ensure performance. Re-renders are heavy. |
+| itemAnimator | No | Enables animating RecyclerListView item cells (shift, add, remove, etc) |
+| optimizeForInsertDeleteAnimations | No | Enables you to utilize layout animations better by unmounting removed items |
+| style | No | To pass down style to innter ScrollView |
+| scrollViewProps | No | For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread and passed down. |
 
 ## Guides
 * **[Sample Code](https://github.com/Flipkart/recyclerlistview/tree/master/docs/guides/samplecode)**
 * **[Performance](https://github.com/Flipkart/recyclerlistview/tree/master/docs/guides/performance)**
+* **[McAboy Digital's Tutorial](https://www.youtube.com/watch?v=32ZM72CKtTE)**
 * **Web Support:** Works with React Native Web out of the box. For use with ReactJS start importing from `recyclerlistview/web` e.g., `import { RecyclerListView } from "recyclerlistview/web"`. Use aliases if you want to preserve import path. Only platform specific code is part of the build so, no unnecessary code will ship with your app.
 * **Polyfills Needed:** `requestAnimationFrame`
 
