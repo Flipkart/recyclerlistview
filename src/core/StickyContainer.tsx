@@ -13,7 +13,9 @@ import StickyFooter from "./sticky/StickyFooter";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
 import {Layout} from "./layoutmanager/LayoutManager";
-import {Dimension} from "./dependencies/LayoutProvider";
+import {BaseLayoutProvider, Dimension} from "./dependencies/LayoutProvider";
+import DataProvider from "./dependencies/DataProvider";
+import {ReactElement} from "react";
 
 export interface StickyContainerProps {
     children: RecyclerChild;
@@ -31,7 +33,12 @@ export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps>
 }
 export default class StickyContainer<P extends StickyContainerProps, S extends StickyContainerState> extends React.Component<P, S> {
     public static propTypes = {};
-    private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null = null;
+    private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | undefined = undefined;
+    private _dataProvider: DataProvider;
+    private _layoutProvider: BaseLayoutProvider;
+    private _extendedState: object | undefined;
+    private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
+
     private _stickyHeaderRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
     private _stickyFooterRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
     private _visibleIndicesAll: number[] = [];
@@ -40,6 +47,13 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
 
     constructor(props: P, context?: any) {
         super(props, context);
+        this._assertChildType();
+        const childProps: RecyclerListViewProps = this.props.children.props;
+        this._dataProvider = childProps.dataProvider;
+        this._dataProvider = childProps.dataProvider;
+        this._layoutProvider = childProps.layoutProvider;
+        this._extendedState = childProps.extendedState;
+        this._rowRenderer = childProps.rowRenderer;
         this.state = {
             topVisible: false,
         } as S;
@@ -47,7 +61,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
 
     public render(): JSX.Element {
         this._assertChildType();
-        const recycler = React.cloneElement(this.props.children, {
+        const recycler: ReactElement<RecyclerListViewProps> = React.cloneElement(this.props.children, {
             ...this.props.children.props,
             ref: this._getRecyclerRef,
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
@@ -82,8 +96,15 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         );
     }
 
+    private _initRecyclerProps = (props: RecyclerListViewProps): void => {
+        this._dataProvider = props.dataProvider;
+        this._layoutProvider = props.layoutProvider;
+        this._extendedState = props.extendedState;
+        this._rowRenderer = props.rowRenderer;
+    }
+
     private _getRecyclerRef = (recycler: any) => {
-        this._recyclerRef = recycler as (RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | null);
+        this._recyclerRef = recycler as (RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | undefined);
         if (this.props.children.ref) {
             if (typeof this.props.children.ref === "function") {
                 (this.props.children).ref(recycler);
@@ -161,36 +182,28 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         return undefined;
     }
 
-    private _getDataForIndex = (index: number): any | null => {
-        if (this._recyclerRef) {
-            return this._recyclerRef.props.dataProvider.getDataForIndex(index);
-        }
-        return null;
+    private _getDataForIndex = (index: number): any => {
+        return this._dataProvider.getDataForIndex(index);
     }
 
     private _getLayoutTypeForIndex = (index: number): string | number => {
-        if (this._recyclerRef) {
-            return this._recyclerRef.props.layoutProvider.getLayoutTypeForIndex(index);
-        }
-        return "";
+        return this._layoutProvider.getLayoutTypeForIndex(index);
     }
 
     private _getExtendedState = (): object | undefined => {
-        return this._recyclerRef ? this._recyclerRef.props.extendedState : undefined;
+        return this._extendedState;
     }
 
-    private _getRowRenderer = (): ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null) | null => {
-        if (this._recyclerRef) {
-            return this._recyclerRef.props.rowRenderer;
-        }
-        return null;
+    private _getRowRenderer = (): ((type: string | number, data: any, index: number, extendedState?: object)
+        => JSX.Element | JSX.Element[] | null) => {
+        return this._rowRenderer;
     }
 
-    private _getRLVRenderedSize = (): Dimension | null => {
+    private _getRLVRenderedSize = (): Dimension | undefined => {
         if (this._recyclerRef) {
             return this._recyclerRef.getRenderedSize();
         }
-        return null;
+        return undefined;
     }
 }
 

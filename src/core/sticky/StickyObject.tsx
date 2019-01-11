@@ -15,11 +15,11 @@ export enum StickyType {
 export interface StickyObjectProps {
     stickyIndices: number[] | undefined;
     getLayoutForIndex: (index: number) => Layout | undefined;
-    getDataForIndex: (index: number) => any | null;
+    getDataForIndex: (index: number) => any;
     getLayoutTypeForIndex: (index: number) => string | number;
     getExtendedState: () => object | undefined;
-    getRLVRenderedSize: () => Dimension | null;
-    getRowRenderer: () => ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null) | null;
+    getRLVRenderedSize: () => Dimension | undefined;
+    getRowRenderer: () => ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
 }
 export interface StickyObjectState {
@@ -142,7 +142,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     private _initParams(): void {
-        const dimension: Dimension | null = this.props.getRLVRenderedSize();
+        const dimension: Dimension | undefined = this.props.getRLVRenderedSize();
         if (dimension) {
             this._scrollableHeight = dimension.height;
             this._scrollableWidth = dimension.width;
@@ -180,17 +180,15 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     private _renderSticky(): JSX.Element | JSX.Element[] | null {
-        const _stickyData: any | null = this.props.getDataForIndex(this.currentStickyIndex);
+        const _stickyData: any = this.props.getDataForIndex(this.currentStickyIndex);
         const _stickyLayoutType: string | number = this.props.getLayoutTypeForIndex(this.currentStickyIndex);
         const _extendedState: object | undefined = this.props.getExtendedState();
         const _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object)
-            => JSX.Element | JSX.Element[] | null) | null = this.props.getRowRenderer();
+            => JSX.Element | JSX.Element[] | null) = this.props.getRowRenderer();
         if (this.props.overrideRowRenderer) {
             return this.props.overrideRowRenderer(_stickyLayoutType, _stickyData, this.currentStickyIndex, _extendedState);
-        } else if (_rowRenderer) {
-            return _rowRenderer(_stickyLayoutType, _stickyData, this.currentStickyIndex, _extendedState);
         } else {
-            return null;
+            return _rowRenderer(_stickyLayoutType, _stickyData, this.currentStickyIndex, _extendedState);
         }
     }
 
