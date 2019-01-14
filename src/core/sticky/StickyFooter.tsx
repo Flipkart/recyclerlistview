@@ -24,7 +24,7 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
                 this.stickyVisiblity = false;
             } else {
                 this.stickyVisiblity = true;
-                const valueAndIndex: ValueAndIndex | undefined = BinarySearch.findValueLargerThanTarget(stickyIndices, smallestVisibleIndex);
+                const valueAndIndex: ValueAndIndex | undefined = BinarySearch.findValueLargerThanTarget(stickyIndices, largestVisibleIndex);
                 if (valueAndIndex) {
                     this.currentIndex = valueAndIndex.index;
                     this.currentStickyIndex = valueAndIndex.value;
