@@ -45,28 +45,16 @@ export default class BinarySearch {
         }
         return result;
     }
-    /**
-     * Largest value from given values that is smaller or equal to the target number.
-     */
-    public static findValueSmallerThanGivenRange(values: number[], target: number): ValueAndIndex {
-        let high = values.length - 1;
-        if (target > values[high]) {
-            return {
-                value: values[high],
-                index: high,
-            };
-        }
+    public static findClosestValueToTarget(values: number[], target: number): ValueAndIndex {
         let low = 0;
+        let high = values.length - 1;
         let mid = Math.floor((low + high) / 2);
         let midValue = values[mid];
         let lastMidValue = midValue + 1;
 
         while (low <= high && midValue !== lastMidValue) {
             if (midValue === target) {
-                return {
-                    value: midValue,
-                    index: mid,
-                };
+                break;
             } else if (midValue < target) {
                 low = mid;
             } else if (midValue > target) {
@@ -76,8 +64,29 @@ export default class BinarySearch {
             lastMidValue = midValue;
             midValue = values[mid];
         }
-
-        if (midValue < target) {
+        return {
+            value: midValue,
+            index: mid,
+        };
+    }
+    /**
+     * Largest value from given values that is smaller or equal to the target number.
+     */
+    public static findValueSmallerThanTarget(values: number[], target: number): ValueAndIndex | undefined {
+        const low = 0;
+        const high = values.length - 1;
+        if (target > values[high]) {
+            return {
+                value: values[high],
+                index: high,
+            };
+        } else if (target < values[low]) {
+            return undefined;
+        }
+        const midValueAndIndex: ValueAndIndex = this.findClosestValueToTarget(values, target);
+        const midValue: number = midValueAndIndex.value;
+        const mid: number = midValueAndIndex.index;
+        if (midValue <= target) {
             return {
                 value: midValue,
                 index: mid,
@@ -86,6 +95,35 @@ export default class BinarySearch {
             return {
                 value: values[mid - 1],
                 index: mid - 1,
+            };
+        }
+    }
+    /**
+     * Smallest value from given values that is larger or equal to the target number.
+     */
+    public static findValueLargerThanTarget(values: number[], target: number): ValueAndIndex | undefined {
+        const low = 0;
+        const high = values.length - 1;
+        if (target < values[low]) {
+            return {
+                value: values[low],
+                index: low,
+            };
+        } else if (target > values[high]) {
+            return undefined;
+        }
+        const midValueAndIndex: ValueAndIndex = this.findClosestValueToTarget(values, target);
+        const midValue: number = midValueAndIndex.value;
+        const mid: number = midValueAndIndex.index;
+        if (midValue >= target) {
+            return {
+                value: midValue,
+                index: mid,
+            };
+        } else {
+            return {
+                value: values[mid + 1],
+                index: mid + 1,
             };
         }
     }

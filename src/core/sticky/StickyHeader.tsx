@@ -24,9 +24,13 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
                 this.stickyVisiblity = false;
             } else {
                 this.stickyVisiblity = true;
-                const valueAndIndex: ValueAndIndex = BinarySearch.findValueSmallerThanGivenRange(stickyIndices, smallestVisibleIndex);
-                this.currentIndex = valueAndIndex.index;
-                this.currentStickyIndex = valueAndIndex.value;
+                const valueAndIndex: ValueAndIndex | undefined = BinarySearch.findValueSmallerThanTarget(stickyIndices, smallestVisibleIndex);
+                if (valueAndIndex) {
+                    this.currentIndex = valueAndIndex.index;
+                    this.currentStickyIndex = valueAndIndex.value;
+                } else {
+                    console.log("Header sticky index calculation gone wrong."); //tslint:disable-line
+                }
             }
         }
     }

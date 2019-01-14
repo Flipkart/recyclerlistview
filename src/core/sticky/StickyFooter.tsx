@@ -3,6 +3,7 @@
  */
 
 import StickyObject, {StickyObjectProps, StickyObjectState, StickyType} from "./StickyObject";
+import BinarySearch, {ValueAndIndex} from "../../utils/BinarySearch";
 
 export default class StickyFooter<P extends StickyObjectProps, S extends StickyObjectState> extends StickyObject<P, S> {
     constructor(props: P, context?: any) {
@@ -23,22 +24,12 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
                 this.stickyVisiblity = false;
             } else {
                 this.stickyVisiblity = true;
-                let resolved: boolean = false;
-                let i = stickyIndices.length - 1;
-                let lastIndex: number = -1;
-                for (i; i >= 0; i--) {
-                    const index = stickyIndices[i];
-                    if (largestVisibleIndex > index) {
-                        this.currentIndex = i + 1;
-                        this.currentStickyIndex = lastIndex;
-                        resolved = true;
-                        break;
-                    }
-                    lastIndex = index;
-                }
-                if (!resolved) {
-                    this.currentIndex = i + 1;
-                    this.currentStickyIndex = lastIndex;
+                const valueAndIndex: ValueAndIndex | undefined = BinarySearch.findValueLargerThanTarget(stickyIndices, smallestVisibleIndex);
+                if (valueAndIndex) {
+                    this.currentIndex = valueAndIndex.index;
+                    this.currentStickyIndex = valueAndIndex.value;
+                } else {
+                    console.log("Footer sticky index calculation gone wrong."); //tslint:disable-line
                 }
             }
         }
