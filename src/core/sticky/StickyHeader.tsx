@@ -3,6 +3,7 @@
  */
 
 import StickyObject, {StickyObjectProps, StickyObjectState, StickyType} from "./StickyObject";
+import BinarySearch, {ValueAndIndex} from "../../utils/BinarySearch";
 
 export default class StickyHeader<P extends StickyObjectProps, S extends StickyObjectState> extends StickyObject<P, S> {
     constructor(props: P, context?: any) {
@@ -23,23 +24,9 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
                 this.stickyVisiblity = false;
             } else {
                 this.stickyVisiblity = true;
-                let i: number = 0;
-                let resolved: boolean = false;
-                let lastIndex: number = -1;
-                for (const index of stickyIndices) {
-                    if (smallestVisibleIndex < index) {
-                        this.currentIndex = i - 1;
-                        this.currentStickyIndex = lastIndex;
-                        resolved = true;
-                        break;
-                    }
-                    i++;
-                    lastIndex = index;
-                }
-                if (!resolved) {
-                    this.currentIndex = i - 1;
-                    this.currentStickyIndex = lastIndex;
-                }
+                const valueAndIndex: ValueAndIndex = BinarySearch.findValueSmallerThanGivenRange(stickyIndices, smallestVisibleIndex);
+                this.currentIndex = valueAndIndex.index;
+                this.currentStickyIndex = valueAndIndex.value;
             }
         }
     }

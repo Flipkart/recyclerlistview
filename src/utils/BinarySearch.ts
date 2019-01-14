@@ -1,5 +1,9 @@
 import CustomError from "../core/exceptions/CustomError";
 
+export interface ValueAndIndex {
+    value: number;
+    index: number;
+}
 export default class BinarySearch {
     public static findClosestHigherValueIndex(size: number, targetValue: number, valueExtractor: (index: number) => number): number {
         let low = 0;
@@ -40,6 +44,50 @@ export default class BinarySearch {
             }
         }
         return result;
+    }
+    /**
+     * Largest value from given values that is smaller or equal to the target number.
+     */
+    public static findValueSmallerThanGivenRange(values: number[], target: number): ValueAndIndex {
+        let high = values.length - 1;
+        if (target > values[high]) {
+            return {
+                value: values[high],
+                index: high,
+            };
+        }
+        let low = 0;
+        let mid = Math.floor((low + high) / 2);
+        let midValue = values[mid];
+        let lastMidValue = midValue + 1;
+
+        while (low <= high && midValue !== lastMidValue) {
+            if (midValue === target) {
+                return {
+                    value: midValue,
+                    index: mid,
+                };
+            } else if (midValue < target) {
+                low = mid;
+            } else if (midValue > target) {
+                high = mid;
+            }
+            mid = Math.floor((low + high) / 2);
+            lastMidValue = midValue;
+            midValue = values[mid];
+        }
+
+        if (midValue < target) {
+            return {
+                value: midValue,
+                index: mid,
+            };
+        } else {
+            return {
+                value: values[mid - 1],
+                index: mid - 1,
+            };
+        }
     }
     public static findIndexOf(array: number[], value: number): number {
         let j = 0;
