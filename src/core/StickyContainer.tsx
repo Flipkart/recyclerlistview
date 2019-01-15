@@ -96,13 +96,6 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
         );
     }
 
-    private _initRecyclerProps = (props: RecyclerListViewProps): void => {
-        this._dataProvider = props.dataProvider;
-        this._layoutProvider = props.layoutProvider;
-        this._extendedState = props.extendedState;
-        this._rowRenderer = props.rowRenderer;
-    }
-
     private _getRecyclerRef = (recycler: any) => {
         this._recyclerRef = recycler as (RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | undefined);
         if (this.props.children.ref) {
