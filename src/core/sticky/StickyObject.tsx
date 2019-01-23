@@ -62,7 +62,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     public componentWillReceiveProps(newProps: StickyObjectProps): void {
-        this._sortAscending(newProps.stickyIndices);
         this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex);
         this._computeLayouts(newProps.stickyIndices);
         this._stickyViewVisible(this.stickyVisiblity);
@@ -83,7 +82,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     public onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
         if (this._firstCompute) {
-            this._sortAscending(this.props.stickyIndices);
             this.initStickyParams();
             this._firstCompute = false;
         }
@@ -189,12 +187,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             return this.props.overrideRowRenderer(_stickyLayoutType, _stickyData, this.currentStickyIndex, _extendedState);
         } else {
             return _rowRenderer(_stickyLayoutType, _stickyData, this.currentStickyIndex, _extendedState);
-        }
-    }
-
-    private _sortAscending(array: number[] | undefined): void {
-        if (array) {
-            array.sort((a, b) => (a - b));
         }
     }
 }

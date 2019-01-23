@@ -207,8 +207,16 @@ StickyContainer.propTypes = {
 
     // Provide an array of indices whose corresponding items need to be stuck to the top of the recyclerView once the items scroll off the top.
     // Every subsequent sticky index view will push the previous sticky view off the top to take its place.
+    // Note - Needs to be sorted ascending
     stickyHeaderIndices: PropTypes.arrayOf(PropTypes.number),
 
     // Works same as sticky headers, but for views to be stuck at the bottom of the recyclerView.
+    // Note - Needs to be sorted ascending
     stickyFooterIndices: PropTypes.arrayOf(PropTypes.number),
+
+    // Will be called instead of rowRenderer for all sticky items. Any changes to the item for when they are stuck can be done here.
+    overrideRowRenderer: PropTypes.func,
+
+    // For all practical purposes, pass the style that is applied to the RecyclerListView component here.
+    style: PropTypes.object,
 };

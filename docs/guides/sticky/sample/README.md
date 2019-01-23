@@ -1,5 +1,9 @@
 ```js
-export default class LifestyleRecycler extends React.Component {
+import React from 'react';
+import {View} from 'react-native';
+import {RecyclerListView, DataProvider, LayoutProvider} from 'recyclerlistview';
+import StickyContainer from 'recyclerlistview/dist/reactnative/core/StickyContainer';
+export default class StickySample extends React.Component {
 
     constructor(props) {
         super(props);
@@ -17,7 +21,7 @@ export default class LifestyleRecycler extends React.Component {
             },
             (type, dimension) => {
                 dimension.height = 100;
-                dimension.width = WindowDimensions.getWindowWidth();
+                dimension.width = 360;
             }
         );
     }
