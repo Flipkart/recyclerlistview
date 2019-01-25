@@ -39,11 +39,9 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     private _extendedState: object | undefined;
     private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
 
-    private _stickyHeaderRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
-    private _stickyFooterRef: StickyObject<StickyObjectProps, StickyObjectState> | null = null;
+    private _stickyHeaderRef: StickyHeader<StickyObjectProps, StickyObjectState> | null = null;
+    private _stickyFooterRef: StickyFooter<StickyObjectProps, StickyObjectState> | null = null;
     private _visibleIndicesAll: number[] = [];
-    private _visibleIndicesNow: number[] = [];
-    private _visibleIndicesNotNow: number[] = [];
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -66,6 +64,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
             ref: this._getRecyclerRef,
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,
+            onEndReached: this._onEndReached,
         });
         return (
             <View style={this.props.style ? this.props.style : {flex: 1}}>
@@ -109,48 +108,58 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
 
     private _getStickyHeaderRef = (stickyHeaderRef: any) => {
         if (!this._stickyHeaderRef) {
-            this._stickyHeaderRef = stickyHeaderRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
+            this._stickyHeaderRef = stickyHeaderRef as (StickyHeader<StickyObjectProps, StickyObjectState> | null);
             // TODO: Resetting state once ref is initialized. Can look for better solution.
-            this._callStickyObjectsOnVisibleIndicesChanged(this._visibleIndicesAll, this._visibleIndicesNow, this._visibleIndicesNotNow);
+            this._callStickyObjectsOnVisibleIndicesChanged(this._visibleIndicesAll);
         }
     }
 
     private _getStickyFooterRef = (stickyFooterRef: any) => {
         if (!this._stickyFooterRef) {
-            this._stickyFooterRef = stickyFooterRef as (StickyObject<StickyObjectProps, StickyObjectState> | null);
+            this._stickyFooterRef = stickyFooterRef as (StickyFooter<StickyObjectProps, StickyObjectState> | null);
             // TODO: Resetting state once ref is initialized. Can look for better solution.
-            this._callStickyObjectsOnVisibleIndicesChanged(this._visibleIndicesAll, this._visibleIndicesNow, this._visibleIndicesNotNow);
+            this._callStickyObjectsOnVisibleIndicesChanged(this._visibleIndicesAll);
         }
     }
 
     private _onVisibleIndicesChanged = (all: number[], now: number[], notNow: number[]) => {
         this._visibleIndicesAll = all;
-        this._visibleIndicesNow = now;
-        this._visibleIndicesNotNow = notNow;
-        this._callStickyObjectsOnVisibleIndicesChanged(all, now, notNow);
+        this._callStickyObjectsOnVisibleIndicesChanged(all);
         if (this.props.children && this.props.children.props && this.props.children.props.onVisibleIndicesChanged) {
             this.props.children.props.onVisibleIndicesChanged(all, now, notNow);
         }
     }
 
-    private _callStickyObjectsOnVisibleIndicesChanged = (all: number[], now: number[], notNow: number[]) => {
+    private _callStickyObjectsOnVisibleIndicesChanged = (all: number[]) => {
         if (this._stickyHeaderRef) {
-            this._stickyHeaderRef.onVisibleIndicesChanged(all, now, notNow);
+            this._stickyHeaderRef.onVisibleIndicesChanged(all);
         }
         if (this._stickyFooterRef) {
-            this._stickyFooterRef.onVisibleIndicesChanged(all, now, notNow);
+            this._stickyFooterRef.onVisibleIndicesChanged(all);
         }
     }
 
     private _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onScroll(offsetY);
+            if (offsetY === 0) {
+                this._stickyHeaderRef.onStartReached();
+            }
         }
         if (this._stickyFooterRef) {
             this._stickyFooterRef.onScroll(offsetY);
         }
         if (this.props.children && this.props.children.props.onScroll) {
-            (this.props.children as any).props.onScroll(rawEvent, offsetX, offsetY);
+            this.props.children.props.onScroll(rawEvent, offsetX, offsetY);
+        }
+    }
+
+    private _onEndReached = () => {
+        if (this._stickyFooterRef) {
+            this._stickyFooterRef.onEndReached();
+        }
+        if (this.props.children && this.props.children.props.onEndReached) {
+            this.props.children.props.onEndReached();
         }
     }
 

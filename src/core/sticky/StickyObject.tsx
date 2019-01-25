@@ -32,6 +32,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     protected containerPosition: StyleProp<ViewStyle>;
     protected currentIndex: number = 0;
     protected currentStickyIndex: number = 0;
+    protected onBoundaryReached: boolean = false;
 
     private _previousLayout: Layout | undefined;
     private _previousHeight: number | undefined;
@@ -53,6 +54,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     private _firstCompute: boolean = true;
     private _smallestVisibleIndex: number = 0;
     private _largestVisibleIndex: number = 0;
+    private _visibleIndices: number[] = [];
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -80,7 +82,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         );
     }
 
-    public onVisibleIndicesChanged(all: number[], now: number[], notNow: number[]): void {
+    public onVisibleIndicesChanged(all: number[]): void {
         if (this._firstCompute) {
             this.initStickyParams();
             this._firstCompute = false;
@@ -93,6 +95,10 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     public onScroll(offsetY: number): void {
+        if (this.onBoundaryReached) {
+            this.onBoundaryReached = false;
+            this.onVisibleIndicesChanged(this._visibleIndices);
+        }
         if (this._previousStickyIndex) {
             const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
             if (this._previousHeight && this._currentYd && scrollY && scrollY < this._currentYd) {
@@ -133,7 +139,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
     protected abstract getScrollY(offsetY: number, scrollableHeight: number | null): number | null;
 
-    private _stickyViewVisible(_visible: boolean): void {
+    protected _stickyViewVisible(_visible: boolean): void {
         this.setState({
             visible: _visible,
         });
@@ -173,6 +179,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     private _setSmallestAndLargestVisibleIndices(indicesArray: number[]): void {
+        this._visibleIndices = indicesArray;
         this._smallestVisibleIndex = indicesArray[0];
         this._largestVisibleIndex = indicesArray[indicesArray.length - 1];
     }

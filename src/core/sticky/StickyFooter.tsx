@@ -10,6 +10,11 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
         super(props, context);
     }
 
+    public onEndReached(): void {
+        this._stickyViewVisible(false);
+        this.onBoundaryReached = true;
+    }
+
     protected initStickyParams(): void {
         this.stickyType = StickyType.FOOTER;
         this.stickyTypeMultiplier = -1;

@@ -10,6 +10,11 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
         super(props, context);
     }
 
+    public onStartReached(): void {
+        this._stickyViewVisible(false);
+        this.onBoundaryReached = true;
+    }
+
     protected initStickyParams(): void {
         this.stickyType = StickyType.HEADER;
         this.stickyTypeMultiplier = 1;
