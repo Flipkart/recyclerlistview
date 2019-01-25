@@ -15,17 +15,20 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
         this.onBoundaryReached = true;
     }
 
-    protected initStickyParams(): void {
+    protected initStickyParams(offsetY: number): void {
         this.stickyType = StickyType.HEADER;
         this.stickyTypeMultiplier = 1;
         this.containerPosition = {top: 0};
+        if (offsetY === 0) {
+            this.onBoundaryReached = true;
+        }
     }
 
     protected calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
+        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number,
     ): void {
-        if (stickyIndices && smallestVisibleIndex) {
-            if (smallestVisibleIndex < stickyIndices[0]) {
+        if (stickyIndices && smallestVisibleIndex !== undefined) {
+            if (smallestVisibleIndex < stickyIndices[0] || offsetY === 0) {
                 this.stickyVisiblity = false;
             } else {
                 this.stickyVisiblity = true;

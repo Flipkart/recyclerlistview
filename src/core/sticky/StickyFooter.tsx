@@ -15,14 +15,14 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
         this.onBoundaryReached = true;
     }
 
-    protected initStickyParams(): void {
+    protected initStickyParams(offsetY: number): void {
         this.stickyType = StickyType.FOOTER;
         this.stickyTypeMultiplier = -1;
         this.containerPosition = {bottom: 0};
     }
 
     protected calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
+        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number,
     ): void {
         if (stickyIndices && largestVisibleIndex) {
             if (largestVisibleIndex > stickyIndices[stickyIndices.length - 1]) {

@@ -34,6 +34,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     protected currentStickyIndex: number = 0;
     protected onBoundaryReached: boolean = false;
 
+    private _offsetY = 0;
     private _previousLayout: Layout | undefined;
     private _previousHeight: number | undefined;
     private _nextLayout: Layout | undefined;
@@ -64,7 +65,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     public componentWillReceiveProps(newProps: StickyObjectProps): void {
-        this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex);
+        this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex, this._offsetY);
         this._computeLayouts(newProps.stickyIndices);
         this._stickyViewVisible(this.stickyVisiblity);
     }
@@ -84,17 +85,18 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     public onVisibleIndicesChanged(all: number[]): void {
         if (this._firstCompute) {
-            this.initStickyParams();
+            this.initStickyParams(this._offsetY);
             this._firstCompute = false;
         }
         this._initParams(); // TODO: Putting outside firstCompute because sometimes recycler dims aren't obtained initially.
         this._setSmallestAndLargestVisibleIndices(all);
-        this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex);
+        this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex, this._offsetY);
         this._computeLayouts();
         this._stickyViewVisible(this.stickyVisiblity);
     }
 
     public onScroll(offsetY: number): void {
+        this._offsetY = offsetY;
         if (this.onBoundaryReached) {
             this.onBoundaryReached = false;
             this.onVisibleIndicesChanged(this._visibleIndices);
@@ -131,9 +133,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         }
     }
 
-    protected abstract initStickyParams(): void;
+    protected abstract initStickyParams(offsetY: number): void;
     protected abstract calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
+        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number,
     ): void;
     protected abstract getNextYd(_nextY: number, nextHeight: number): number;
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
