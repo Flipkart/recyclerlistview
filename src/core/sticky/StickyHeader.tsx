@@ -12,7 +12,14 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
 
     public onStartReached(): void {
         this._stickyViewVisible(false);
-        this.onBoundaryReached = true;
+        this.boundaryReached = true;
+    }
+
+    protected boundaryProcessing(): void {
+        if (this.boundaryReached) {
+            this.boundaryReached = false;
+            this.onVisibleIndicesChanged(this.visibleIndices);
+        }
     }
 
     protected initStickyParams(offsetY: number): void {
@@ -20,7 +27,7 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
         this.stickyTypeMultiplier = 1;
         this.containerPosition = {top: 0};
         if (offsetY === 0) {
-            this.onBoundaryReached = true;
+            this.boundaryReached = true;
         }
     }
 
