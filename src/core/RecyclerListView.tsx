@@ -91,6 +91,7 @@ export interface RecyclerListViewProps {
     onScroll?: (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => void;
     onRecreate?: (params: OnRecreateParams) => void;
     onEndReached?: () => void;
+    onVisibleEndReached?: () => void;
     onEndReachedThreshold?: number;
     onVisibleIndexesChanged?: TOnItemStatusChanged;
     onVisibleIndicesChanged?: TOnItemStatusChanged;
@@ -570,16 +571,19 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _processOnEndReached(): void {
-        if (this.props.onEndReached && this._virtualRenderer) {
+        if ((this.props.onEndReached || this.props.onVisibleEndReached) && this._virtualRenderer) {
             const layout = this._virtualRenderer.getLayoutDimension();
             const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
             if (viewabilityTracker) {
                 const windowBound = this.props.isHorizontal ? layout.width - this._layout.width : layout.height - this._layout.height;
                 const lastOffset = viewabilityTracker ? viewabilityTracker.getLastOffset() : 0;
                 if (windowBound - lastOffset <= Default.value<number>(this.props.onEndReachedThreshold, 0)) {
-                    if (!this._onEndReachedCalled) {
+                    if (this.props.onEndReached && !this._onEndReachedCalled) {
                         this._onEndReachedCalled = true;
                         this.props.onEndReached();
+                    }
+                    if (this.props.onVisibleEndReached && windowBound - lastOffset <= 0) {
+                        this.props.onVisibleEndReached();
                     }
                 } else {
                     this._onEndReachedCalled = false;
