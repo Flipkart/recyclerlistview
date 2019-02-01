@@ -6,36 +6,32 @@ import StickyObject, {StickyObjectProps, StickyObjectState, StickyType} from "./
 import BinarySearch, {ValueAndIndex} from "../../utils/BinarySearch";
 
 export default class StickyHeader<P extends StickyObjectProps, S extends StickyObjectState> extends StickyObject<P, S> {
+    private _normalScrollingResumed: boolean = true;
     constructor(props: P, context?: any) {
         super(props, context);
     }
 
-    public onStartReached(): void {
-        this._stickyViewVisible(false);
-        this.boundaryReached = true;
-    }
-
-    protected boundaryProcessing(): void {
-        if (this.boundaryReached) {
-            this.boundaryReached = false;
+    protected boundaryProcessing(offsetY: number, _scrollableHeight?: number): void {
+        if (this._hasReachedStart(offsetY)) {
+            this._normalScrollingResumed = false;
+            this.stickyViewVisible(false);
+        } else if (!this._hasReachedStart(offsetY) && !this._normalScrollingResumed) {
+            this._normalScrollingResumed = true;
             this.onVisibleIndicesChanged(this.visibleIndices);
         }
     }
 
-    protected initStickyParams(offsetY: number): void {
+    protected initStickyParams(): void {
         this.stickyType = StickyType.HEADER;
         this.stickyTypeMultiplier = 1;
         this.containerPosition = {top: 0};
-        if (offsetY === 0) {
-            this.boundaryReached = true;
-        }
     }
 
     protected calculateVisibleStickyIndex(
         stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number,
     ): void {
         if (stickyIndices && smallestVisibleIndex !== undefined) {
-            if (smallestVisibleIndex < stickyIndices[0] || offsetY === 0) {
+            if (smallestVisibleIndex < stickyIndices[0] || offsetY <= 0) {
                 this.stickyVisiblity = false;
             } else {
                 this.stickyVisiblity = true;
@@ -58,7 +54,11 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
         return currentY;
     }
 
-    protected getScrollY(offsetY: number, scrollableHeight: number): number | null {
+    protected getScrollY(offsetY: number, scrollableHeight: number): number | undefined {
         return offsetY;
+    }
+
+    private _hasReachedStart(offsetY: number): boolean {
+        return offsetY <= 0;
     }
 }

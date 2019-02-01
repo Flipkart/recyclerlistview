@@ -32,7 +32,6 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     protected containerPosition: StyleProp<ViewStyle>;
     protected currentIndex: number = 0;
     protected currentStickyIndex: number = 0;
-    protected boundaryReached: boolean = false;
     protected visibleIndices: number[] = [];
 
     private _offsetY = 0;
@@ -47,8 +46,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     private _nextYd: number | undefined;
     private _currentYd: number | undefined;
-    private _scrollableHeight: number | null = null;
-    private _scrollableWidth: number | null = null;
+    private _scrollableHeight: number | undefined;
+    private _scrollableWidth: number | undefined;
 
     private _stickyViewOffset: Animated.Value = new Animated.Value(0);
     private _previousStickyIndex: number = 0;
@@ -67,7 +66,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     public componentWillReceiveProps(newProps: StickyObjectProps): void {
         this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex, this._offsetY);
         this._computeLayouts(newProps.stickyIndices);
-        this._stickyViewVisible(this.stickyVisiblity);
+        this.stickyViewVisible(this.stickyVisiblity);
     }
 
     public render(): JSX.Element | null {
@@ -85,35 +84,35 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     public onVisibleIndicesChanged(all: number[]): void {
         if (this._firstCompute) {
-            this.initStickyParams(this._offsetY);
+            this.initStickyParams();
             this._firstCompute = false;
         }
         this._initParams(); // TODO: Putting outside firstCompute because sometimes recycler dims aren't obtained initially.
         this._setSmallestAndLargestVisibleIndices(all);
         this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex, this._offsetY);
         this._computeLayouts();
-        this._stickyViewVisible(this.stickyVisiblity);
+        this.stickyViewVisible(this.stickyVisiblity);
     }
 
     public onScroll(offsetY: number): void {
         this._offsetY = offsetY;
-        this.boundaryProcessing();
+        this.boundaryProcessing(offsetY, this._scrollableHeight);
         if (this._previousStickyIndex) {
-            const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
+            const scrollY: number | undefined = this.getScrollY(offsetY, this._scrollableHeight);
             if (this._previousHeight && this._currentYd && scrollY && scrollY < this._currentYd) {
                 if (scrollY > this._currentYd - this._previousHeight) {
                     this.currentIndex -= this.stickyTypeMultiplier;
                     const translate = (scrollY - this._currentYd + this._previousHeight) * (-1 * this.stickyTypeMultiplier);
                     this._stickyViewOffset.setValue(translate);
                     this._computeLayouts();
-                    this._stickyViewVisible(true);
+                    this.stickyViewVisible(true);
                 }
             } else {
                 this._stickyViewOffset.setValue(0);
             }
         }
         if (this._nextStickyIndex) {
-            const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
+            const scrollY: number | undefined = this.getScrollY(offsetY, this._scrollableHeight);
             if (this._currentHeight && this._nextYd && scrollY && scrollY + this._currentHeight > this._nextYd) {
                 if (scrollY <= this._nextYd) {
                     const translate = (scrollY - this._nextYd + this._currentHeight) * (-1 * this.stickyTypeMultiplier);
@@ -122,7 +121,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                     this.currentIndex += this.stickyTypeMultiplier;
                     this._stickyViewOffset.setValue(0);
                     this._computeLayouts();
-                    this._stickyViewVisible(true);
+                    this.stickyViewVisible(true);
                 }
             } else {
                 this._stickyViewOffset.setValue(0);
@@ -130,19 +129,21 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         }
     }
 
-    protected abstract boundaryProcessing(): void;
-    protected abstract initStickyParams(offsetY: number): void;
+    protected abstract boundaryProcessing(offsetY: number, scrollableHeight?: number): void;
+    protected abstract initStickyParams(): void;
     protected abstract calculateVisibleStickyIndex(
         stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number,
     ): void;
     protected abstract getNextYd(_nextY: number, nextHeight: number): number;
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
-    protected abstract getScrollY(offsetY: number, scrollableHeight: number | null): number | null;
+    protected abstract getScrollY(offsetY: number, scrollableHeight?: number): number | undefined;
 
-    protected _stickyViewVisible(_visible: boolean): void {
-        this.setState({
-            visible: _visible,
-        });
+    protected stickyViewVisible(_visible: boolean): void {
+        if (_visible !== this.state.visible) {
+            this.setState({
+                visible: _visible,
+            });
+        }
     }
 
     private _initParams(): void {

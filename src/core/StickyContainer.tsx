@@ -64,7 +64,6 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
             ref: this._getRecyclerRef,
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,
-            onVisibleEndReached: this._onEndReached,
         });
         return (
             <View style={this.props.style ? this.props.style : {flex: 1}}>
@@ -142,21 +141,12 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     private _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onScroll(offsetY);
-            if (offsetY === 0) {
-                this._stickyHeaderRef.onStartReached();
-            }
         }
         if (this._stickyFooterRef) {
             this._stickyFooterRef.onScroll(offsetY);
         }
         if (this.props.children && this.props.children.props.onScroll) {
             this.props.children.props.onScroll(rawEvent, offsetX, offsetY);
-        }
-    }
-
-    private _onEndReached = () => {
-        if (this._stickyFooterRef) {
-            this._stickyFooterRef.onEndReached();
         }
     }
 
