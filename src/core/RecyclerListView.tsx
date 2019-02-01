@@ -320,6 +320,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         return this._layout;
     }
 
+    public getContentDimension(): Dimension {
+        return this._virtualRenderer.getLayoutDimension();
+    }
+
     public render(): JSX.Element {
         //TODO:Talha
         // const {

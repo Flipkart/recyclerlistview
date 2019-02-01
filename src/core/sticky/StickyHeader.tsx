@@ -6,17 +6,17 @@ import StickyObject, {StickyObjectProps, StickyObjectState, StickyType} from "./
 import BinarySearch, {ValueAndIndex} from "../../utils/BinarySearch";
 
 export default class StickyHeader<P extends StickyObjectProps, S extends StickyObjectState> extends StickyObject<P, S> {
-    private _normalScrollingResumed: boolean = true;
+    private _bounceScrolling: boolean = true;
     constructor(props: P, context?: any) {
         super(props, context);
     }
 
     protected boundaryProcessing(offsetY: number, _scrollableHeight?: number): void {
         if (this._hasReachedStart(offsetY)) {
-            this._normalScrollingResumed = false;
+            this._bounceScrolling = true;
             this.stickyViewVisible(false);
-        } else if (!this._hasReachedStart(offsetY) && !this._normalScrollingResumed) {
-            this._normalScrollingResumed = true;
+        } else if (!this._hasReachedStart(offsetY) && this._bounceScrolling) {
+            this._bounceScrolling = false;
             this.onVisibleIndicesChanged(this.visibleIndices);
         }
     }
@@ -28,10 +28,10 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
     }
 
     protected calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number,
+        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
     ): void {
         if (stickyIndices && smallestVisibleIndex !== undefined) {
-            if (smallestVisibleIndex < stickyIndices[0] || offsetY <= 0) {
+            if (smallestVisibleIndex < stickyIndices[0] || this._bounceScrolling) {
                 this.stickyVisiblity = false;
             } else {
                 this.stickyVisiblity = true;

@@ -76,6 +76,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
                                   getLayoutTypeForIndex={this._getLayoutTypeForIndex}
                                   getExtendedState={this._getExtendedState}
                                   getRLVRenderedSize={this._getRLVRenderedSize}
+                                  getContentDimension={this._getContentDimension}
                                   getRowRenderer={this._getRowRenderer}
                                   overrideRowRenderer={this.props.overrideRowRenderer}/>
                 ) : null}
@@ -87,6 +88,7 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
                                   getLayoutTypeForIndex={this._getLayoutTypeForIndex}
                                   getExtendedState={this._getExtendedState}
                                   getRLVRenderedSize={this._getRLVRenderedSize}
+                                  getContentDimension={this._getContentDimension}
                                   getRowRenderer={this._getRowRenderer}
                                   overrideRowRenderer={this.props.overrideRowRenderer}/>
                 ) : null}
@@ -191,6 +193,13 @@ export default class StickyContainer<P extends StickyContainerProps, S extends S
     private _getRLVRenderedSize = (): Dimension | undefined => {
         if (this._recyclerRef) {
             return this._recyclerRef.getRenderedSize();
+        }
+        return undefined;
+    }
+
+    private _getContentDimension = (): Dimension | undefined => {
+        if (this._recyclerRef) {
+            return this._recyclerRef.getContentDimension();
         }
         return undefined;
     }
