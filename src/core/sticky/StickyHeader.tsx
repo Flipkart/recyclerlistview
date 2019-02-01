@@ -6,6 +6,8 @@ import StickyObject, {StickyObjectProps, StickyObjectState, StickyType} from "./
 import BinarySearch, {ValueAndIndex} from "../../utils/BinarySearch";
 
 export default class StickyHeader<P extends StickyObjectProps, S extends StickyObjectState> extends StickyObject<P, S> {
+    // Kept as true contrary to as in StickyFooter because in case of initialOffset not given, onScroll isn't called and boundaryProcessing isn't done.
+    // Default behaviour in that case will be sticky header hidden.
     private _bounceScrolling: boolean = true;
     constructor(props: P, context?: any) {
         super(props, context);

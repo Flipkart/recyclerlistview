@@ -6,7 +6,7 @@ import StickyObject, {StickyObjectProps, StickyObjectState, StickyType} from "./
 import BinarySearch, {ValueAndIndex} from "../../utils/BinarySearch";
 
 export default class StickyFooter<P extends StickyObjectProps, S extends StickyObjectState> extends StickyObject<P, S> {
-    private _bounceScrolling: boolean = true;
+    private _bounceScrolling: boolean = false;
     constructor(props: P, context?: any) {
         super(props, context);
     }

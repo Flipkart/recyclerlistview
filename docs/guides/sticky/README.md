@@ -14,6 +14,7 @@ _setRef(recycler) {
     this._recyclerRef = recycler;
 }
 ```
+* If using `overrideRowRenderer`, keep in mind that upon scrolling to the very top or bottom of the content, stickies will be hidden. eg. If the first item in the list is given as sticky, scrolling to the top will display the original view and not the overridden view.
 
 ### 2) Props
 * `stickyHeaderIndices`   - An array of indices whose corresponding items need to be stuck to the top of the RecyclerListView once the items scroll off the top. Every subsequent sticky index view will push the previous sticky view off the top to take its place. Needs to be sorted ascending.
