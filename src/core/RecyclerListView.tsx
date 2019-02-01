@@ -577,12 +577,13 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             if (viewabilityTracker) {
                 const windowBound = this.props.isHorizontal ? layout.width - this._layout.width : layout.height - this._layout.height;
                 const lastOffset = viewabilityTracker ? viewabilityTracker.getLastOffset() : 0;
-                if (windowBound - lastOffset <= Default.value<number>(this.props.onEndReachedThreshold, 0)) {
+                const endReachedMargin = Math.floor(windowBound - lastOffset);
+                if (endReachedMargin <= Default.value<number>(this.props.onEndReachedThreshold, 0)) {
                     if (this.props.onEndReached && !this._onEndReachedCalled) {
                         this._onEndReachedCalled = true;
                         this.props.onEndReached();
                     }
-                    if (this.props.onVisibleEndReached && windowBound - lastOffset <= 0) {
+                    if (this.props.onVisibleEndReached && endReachedMargin <= 0) {
                         this.props.onVisibleEndReached();
                     }
                 } else {
