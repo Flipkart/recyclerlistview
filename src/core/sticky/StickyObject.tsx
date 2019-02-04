@@ -56,6 +56,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     private _firstCompute: boolean = true;
     private _smallestVisibleIndex: number = 0;
     private _largestVisibleIndex: number = 0;
+    private _offsetY: number = 0;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -66,7 +67,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     public componentWillReceiveProps(newProps: StickyObjectProps): void {
         this._initParams();
-        this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex);
+        this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex, this._offsetY, this._windowBound);
         this._computeLayouts(newProps.stickyIndices);
         this.stickyViewVisible(this.stickyVisiblity);
     }
@@ -89,14 +90,15 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             this.initStickyParams();
             this._firstCompute = false;
         }
-        this._initParams(); // TODO: Putting outside firstCompute because sometimes recycler dims aren't obtained initially.
+        this._initParams();
         this._setSmallestAndLargestVisibleIndices(all);
-        this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex);
+        this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex, this._offsetY, this._windowBound);
         this._computeLayouts();
         this.stickyViewVisible(this.stickyVisiblity);
     }
 
     public onScroll(offsetY: number): void {
+        this._offsetY = offsetY;
         this.boundaryProcessing(offsetY, this._windowBound);
         if (this._previousStickyIndex) {
             const scrollY: number | undefined = this.getScrollY(offsetY, this._scrollableHeight);
@@ -133,7 +135,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     protected abstract boundaryProcessing(offsetY: number, windowBound?: number): void;
     protected abstract initStickyParams(): void;
     protected abstract calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
+        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, windowBound ?: number,
     ): void;
     protected abstract getNextYd(_nextY: number, nextHeight: number): number;
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;

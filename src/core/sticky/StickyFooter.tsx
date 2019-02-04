@@ -12,12 +12,14 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
     }
 
     protected boundaryProcessing(offsetY: number, windowBound?: number): void {
-        if (this._hasReachedEnd(offsetY, windowBound)) {
-            this._bounceScrolling = true;
-            this.stickyViewVisible(false);
-        } else if (!this._hasReachedEnd(offsetY, windowBound) && this._bounceScrolling) {
-            this._bounceScrolling = false;
-            this.onVisibleIndicesChanged(this.visibleIndices);
+        const hasReachedEnd = this._hasReachedEnd(offsetY, windowBound);
+        if (this._bounceScrolling !== hasReachedEnd) {
+            this._bounceScrolling = hasReachedEnd;
+            if (this._bounceScrolling) {
+                this.stickyViewVisible(false);
+            } else {
+                this.onVisibleIndicesChanged(this.visibleIndices);
+            }
         }
     }
 
@@ -28,9 +30,10 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
     }
 
     protected calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, _smallestVisibleIndex: number, largestVisibleIndex: number,
+        stickyIndices: number[] | undefined, _smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, windowBound ?: number,
     ): void {
         if (stickyIndices && largestVisibleIndex) {
+            this._bounceScrolling = this._hasReachedEnd(offsetY, windowBound);
             if (largestVisibleIndex > stickyIndices[stickyIndices.length - 1] || this._bounceScrolling) {
                 this.stickyVisiblity = false;
             } else {
