@@ -6,34 +6,26 @@ import StickyObject, {StickyObjectProps, StickyObjectState, StickyType} from "./
 import BinarySearch, {ValueAndIndex} from "../../utils/BinarySearch";
 
 export default class StickyHeader<P extends StickyObjectProps, S extends StickyObjectState> extends StickyObject<P, S> {
-    // Kept as true contrary to as in StickyFooter because in case of initialOffset not given, onScroll isn't called and boundaryProcessing isn't done.
-    // Default behaviour in that case will be sticky header hidden.
-    private _bounceScrolling: boolean = true;
     constructor(props: P, context?: any) {
         super(props, context);
-    }
-
-    protected boundaryProcessing(offsetY: number, _scrollableHeight?: number): void {
-        if (this._hasReachedStart(offsetY)) {
-            this._bounceScrolling = true;
-            this.stickyViewVisible(false);
-        } else if (!this._hasReachedStart(offsetY) && this._bounceScrolling) {
-            this._bounceScrolling = false;
-            this.onVisibleIndicesChanged(this.visibleIndices);
-        }
     }
 
     protected initStickyParams(): void {
         this.stickyType = StickyType.HEADER;
         this.stickyTypeMultiplier = 1;
         this.containerPosition = {top: 0};
+
+        // Kept as true contrary to as in StickyFooter because in case of initialOffset not given, onScroll isn't called and boundaryProcessing isn't done.
+        // Default behaviour in that case will be sticky header hidden.
+        this.bounceScrolling = true;
     }
 
     protected calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
+        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number,
     ): void {
         if (stickyIndices && smallestVisibleIndex !== undefined) {
-            if (smallestVisibleIndex < stickyIndices[0] || this._bounceScrolling) {
+            this.bounceScrolling = this.hasReachedBoundary(offsetY);
+            if (smallestVisibleIndex < stickyIndices[0] || this.bounceScrolling) {
                 this.stickyVisiblity = false;
             } else {
                 this.stickyVisiblity = true;
@@ -60,7 +52,7 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
         return offsetY;
     }
 
-    private _hasReachedStart(offsetY: number): boolean {
+    protected hasReachedBoundary(offsetY: number, _windowBound?: number): boolean {
         return offsetY <= 0;
     }
 }

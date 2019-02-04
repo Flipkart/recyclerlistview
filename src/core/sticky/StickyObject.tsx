@@ -34,6 +34,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     protected currentIndex: number = 0;
     protected currentStickyIndex: number = 0;
     protected visibleIndices: number[] = [];
+    protected bounceScrolling: boolean = false;
 
     private _previousLayout: Layout | undefined;
     private _previousHeight: number | undefined;
@@ -132,7 +133,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         }
     }
 
-    protected abstract boundaryProcessing(offsetY: number, windowBound?: number): void;
+    protected abstract hasReachedBoundary(offsetY: number, windowBound?: number): boolean;
     protected abstract initStickyParams(): void;
     protected abstract calculateVisibleStickyIndex(
         stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, windowBound ?: number,
@@ -142,10 +143,20 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     protected abstract getScrollY(offsetY: number, scrollableHeight?: number): number | undefined;
 
     protected stickyViewVisible(_visible: boolean): void {
-        if (_visible !== this.state.visible) {
-            this.setState({
-                visible: _visible,
-            });
+        this.setState({
+            visible: _visible,
+        });
+    }
+
+    protected boundaryProcessing(offsetY: number, windowBound?: number): void {
+        const hasReachedBoundary: boolean = this.hasReachedBoundary(offsetY, windowBound);
+        if (this.bounceScrolling !== hasReachedBoundary) {
+            this.bounceScrolling = hasReachedBoundary;
+            if (this.bounceScrolling) {
+                this.stickyViewVisible(false);
+            } else {
+                this.onVisibleIndicesChanged(this.visibleIndices);
+            }
         }
     }
 

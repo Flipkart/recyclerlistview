@@ -6,35 +6,23 @@ import StickyObject, {StickyObjectProps, StickyObjectState, StickyType} from "./
 import BinarySearch, {ValueAndIndex} from "../../utils/BinarySearch";
 
 export default class StickyFooter<P extends StickyObjectProps, S extends StickyObjectState> extends StickyObject<P, S> {
-    private _bounceScrolling: boolean = false;
     constructor(props: P, context?: any) {
         super(props, context);
-    }
-
-    protected boundaryProcessing(offsetY: number, windowBound?: number): void {
-        const hasReachedEnd = this._hasReachedEnd(offsetY, windowBound);
-        if (this._bounceScrolling !== hasReachedEnd) {
-            this._bounceScrolling = hasReachedEnd;
-            if (this._bounceScrolling) {
-                this.stickyViewVisible(false);
-            } else {
-                this.onVisibleIndicesChanged(this.visibleIndices);
-            }
-        }
     }
 
     protected initStickyParams(): void {
         this.stickyType = StickyType.FOOTER;
         this.stickyTypeMultiplier = -1;
         this.containerPosition = {bottom: 0};
+        this.bounceScrolling = false;
     }
 
     protected calculateVisibleStickyIndex(
         stickyIndices: number[] | undefined, _smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, windowBound ?: number,
     ): void {
         if (stickyIndices && largestVisibleIndex) {
-            this._bounceScrolling = this._hasReachedEnd(offsetY, windowBound);
-            if (largestVisibleIndex > stickyIndices[stickyIndices.length - 1] || this._bounceScrolling) {
+            this.bounceScrolling = this.hasReachedBoundary(offsetY, windowBound);
+            if (largestVisibleIndex > stickyIndices[stickyIndices.length - 1] || this.bounceScrolling) {
                 this.stickyVisiblity = false;
             } else {
                 this.stickyVisiblity = true;
@@ -61,7 +49,7 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
         return scrollableHeight ? -1 * (offsetY + scrollableHeight) : undefined;
     }
 
-    private _hasReachedEnd(offsetY: number, windowBound?: number): boolean {
+    protected hasReachedBoundary(offsetY: number, windowBound?: number): boolean {
         return windowBound ? offsetY >= windowBound : false;
     }
 }
