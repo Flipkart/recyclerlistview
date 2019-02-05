@@ -5,7 +5,6 @@
 import * as React from "react";
 import {Animated, StyleProp, ViewStyle} from "react-native";
 import {Layout} from "../layoutmanager/LayoutManager";
-import RecyclerListView, {RecyclerListViewProps, RecyclerListViewState} from "../RecyclerListView";
 import {Dimension} from "../dependencies/LayoutProvider";
 
 export enum StickyType {
@@ -21,6 +20,7 @@ export interface StickyObjectProps {
     getRLVRenderedSize: () => Dimension | undefined;
     getContentDimension: () => Dimension | undefined;
     getRowRenderer: () => ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
+    getDistanceFromWindow: () => number;
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
 }
 export interface StickyObjectState {
@@ -99,10 +99,12 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     public onScroll(offsetY: number): void {
-        this._offsetY = offsetY;
-        this.boundaryProcessing(offsetY, this._windowBound);
+        this._initParams();
+        const y: number = offsetY - this.props.getDistanceFromWindow();
+        this._offsetY = y;
+        this.boundaryProcessing(y, this._windowBound);
         if (this._previousStickyIndex) {
-            const scrollY: number | undefined = this.getScrollY(offsetY, this._scrollableHeight);
+            const scrollY: number | undefined = this.getScrollY(y, this._scrollableHeight);
             if (this._previousHeight && this._currentYd && scrollY && scrollY < this._currentYd) {
                 if (scrollY > this._currentYd - this._previousHeight) {
                     this.currentIndex -= this.stickyTypeMultiplier;
@@ -116,7 +118,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             }
         }
         if (this._nextStickyIndex) {
-            const scrollY: number | undefined = this.getScrollY(offsetY, this._scrollableHeight);
+            const scrollY: number | undefined = this.getScrollY(y, this._scrollableHeight);
             if (this._currentHeight && this._nextYd && scrollY && scrollY + this._currentHeight > this._nextYd) {
                 if (scrollY <= this._nextYd) {
                     const translate = (scrollY - this._nextYd + this._currentHeight) * (-1 * this.stickyTypeMultiplier);
