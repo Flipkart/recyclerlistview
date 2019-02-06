@@ -18,10 +18,11 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
     }
 
     protected calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, _smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, windowBound ?: number,
+        stickyIndices: number[] | undefined, _smallestVisibleIndex: number, largestVisibleIndex: number,
+        offsetY: number, distanceFromWindow: number, windowBound ?: number,
     ): void {
         if (stickyIndices && largestVisibleIndex) {
-            this.bounceScrolling = this.hasReachedBoundary(offsetY, windowBound);
+            this.bounceScrolling = this.hasReachedBoundary(offsetY, distanceFromWindow, windowBound);
             if (largestVisibleIndex > stickyIndices[stickyIndices.length - 1] || this.bounceScrolling) {
                 this.stickyVisiblity = false;
             } else {
@@ -51,7 +52,7 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
 
     protected hasReachedBoundary(offsetY: number, distanceFromWindow: number, windowBound?: number): boolean {
         if (windowBound) {
-            const endReachedMargin = Math.round(offsetY - windowBound + distanceFromWindow);
+            const endReachedMargin = Math.round(offsetY - (windowBound + distanceFromWindow));
             return endReachedMargin >= 0;
         }
         return false;

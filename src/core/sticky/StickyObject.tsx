@@ -68,7 +68,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     public componentWillReceiveProps(newProps: StickyObjectProps): void {
         this._initParams();
-        this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex, this._offsetY, this._windowBound);
+        this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
+            this._offsetY, newProps.getDistanceFromWindow(), this._windowBound);
         this._computeLayouts(newProps.stickyIndices);
         this.stickyViewVisible(this.stickyVisiblity);
     }
@@ -93,7 +94,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         }
         this._initParams();
         this._setSmallestAndLargestVisibleIndices(all);
-        this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex, this._offsetY, this._windowBound);
+        this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
+            this._offsetY, this.props.getDistanceFromWindow(), this._windowBound);
         this._computeLayouts();
         this.stickyViewVisible(this.stickyVisiblity);
     }
@@ -137,7 +139,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     protected abstract hasReachedBoundary(offsetY: number, distanceFromWindow: number, windowBound?: number): boolean;
     protected abstract initStickyParams(): void;
     protected abstract calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, windowBound ?: number,
+        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
+        offsetY: number, distanceFromWindow: number, windowBound ?: number,
     ): void;
     protected abstract getNextYd(_nextY: number, nextHeight: number): number;
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
