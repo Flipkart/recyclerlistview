@@ -12,7 +12,7 @@
  * DONE: Add Initial render Index support
  * DONE: Add animated scroll to web scrollviewer
  * DONE: Animate list view transition, including add/remove
- * DONE: Implement sticky headers
+ * DONE: Implement sticky headers and footers
  * TODO: Destroy less frequently used items in recycle pool, this will help in case of too many types.
  * TODO: Make viewability callbacks configurable
  * TODO: Observe size changes on web to optimize for reflowability
@@ -49,10 +49,10 @@ const IS_WEB = !Platform || Platform.OS === "web";
  */
 
 //#if [WEB]
-// import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
-// import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
-// import { DefaultWebItemAnimator as DefaultItemAnimator } from "../platform/web/itemanimators/DefaultWebItemAnimator";
-// const IS_WEB = true;
+//import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
+//import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
+//import { DefaultWebItemAnimator as DefaultItemAnimator } from "../platform/web/itemanimators/DefaultWebItemAnimator";
+//const IS_WEB = true;
 //#endif
 
 const refreshRequestDebouncer = debounce((executable: () => void) => {
