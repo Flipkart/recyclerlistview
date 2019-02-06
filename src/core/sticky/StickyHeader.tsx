@@ -52,7 +52,7 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
         return offsetY;
     }
 
-    protected hasReachedBoundary(offsetY: number, _windowBound?: number): boolean {
-        return offsetY <= 0;
+    protected hasReachedBoundary(offsetY: number, distanceFromWindow: number, _windowBound?: number): boolean {
+        return offsetY <= distanceFromWindow;
     }
 }

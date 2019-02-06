@@ -49,9 +49,9 @@ export default class StickyFooter<P extends StickyObjectProps, S extends StickyO
         return scrollableHeight ? -1 * (offsetY + scrollableHeight) : undefined;
     }
 
-    protected hasReachedBoundary(offsetY: number, windowBound?: number): boolean {
+    protected hasReachedBoundary(offsetY: number, distanceFromWindow: number, windowBound?: number): boolean {
         if (windowBound) {
-            const endReachedMargin = Math.round(offsetY - windowBound);
+            const endReachedMargin = Math.round(offsetY - windowBound + distanceFromWindow);
             return endReachedMargin >= 0;
         }
         return false;

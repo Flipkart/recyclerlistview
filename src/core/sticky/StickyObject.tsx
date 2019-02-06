@@ -100,11 +100,10 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     public onScroll(offsetY: number): void {
         this._initParams();
-        const y: number = offsetY - this.props.getDistanceFromWindow();
-        this._offsetY = y;
-        this.boundaryProcessing(y, this._windowBound);
+        this._offsetY = offsetY;
+        this.boundaryProcessing(offsetY, this.props.getDistanceFromWindow(), this._windowBound);
         if (this._previousStickyIndex) {
-            const scrollY: number | undefined = this.getScrollY(y, this._scrollableHeight);
+            const scrollY: number | undefined = this.getScrollY(offsetY, this._scrollableHeight);
             if (this._previousHeight && this._currentYd && scrollY && scrollY < this._currentYd) {
                 if (scrollY > this._currentYd - this._previousHeight) {
                     this.currentIndex -= this.stickyTypeMultiplier;
@@ -118,7 +117,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             }
         }
         if (this._nextStickyIndex) {
-            const scrollY: number | undefined = this.getScrollY(y, this._scrollableHeight);
+            const scrollY: number | undefined = this.getScrollY(offsetY, this._scrollableHeight);
             if (this._currentHeight && this._nextYd && scrollY && scrollY + this._currentHeight > this._nextYd) {
                 if (scrollY <= this._nextYd) {
                     const translate = (scrollY - this._nextYd + this._currentHeight) * (-1 * this.stickyTypeMultiplier);
@@ -135,7 +134,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         }
     }
 
-    protected abstract hasReachedBoundary(offsetY: number, windowBound?: number): boolean;
+    protected abstract hasReachedBoundary(offsetY: number, distanceFromWindow: number, windowBound?: number): boolean;
     protected abstract initStickyParams(): void;
     protected abstract calculateVisibleStickyIndex(
         stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, windowBound ?: number,
@@ -150,8 +149,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         });
     }
 
-    protected boundaryProcessing(offsetY: number, windowBound?: number): void {
-        const hasReachedBoundary: boolean = this.hasReachedBoundary(offsetY, windowBound);
+    protected boundaryProcessing(offsetY: number, distanceFromWindow: number, windowBound?: number): void {
+        const hasReachedBoundary: boolean = this.hasReachedBoundary(offsetY, distanceFromWindow, windowBound);
         if (this.bounceScrolling !== hasReachedBoundary) {
             this.bounceScrolling = hasReachedBoundary;
             if (this.bounceScrolling) {
