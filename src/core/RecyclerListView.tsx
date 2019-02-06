@@ -36,13 +36,11 @@ import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 import { DebugHandlers } from "..";
-
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
 import { Platform } from "react-native";
-
 const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
 
@@ -91,7 +89,6 @@ export interface RecyclerListViewProps {
     onScroll?: (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => void;
     onRecreate?: (params: OnRecreateParams) => void;
     onEndReached?: () => void;
-    onVisibleEndReached?: () => void;
     onEndReachedThreshold?: number;
     onVisibleIndexesChanged?: TOnItemStatusChanged;
     onVisibleIndicesChanged?: TOnItemStatusChanged;
@@ -321,6 +318,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     public getRenderedSize(): Dimension {
         return this._layout;
+    }
+
+    public getContentDimension(): Dimension {
+        return this._virtualRenderer.getLayoutDimension();
     }
 
     public render(): JSX.Element {
@@ -571,7 +572,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _processOnEndReached(): void {
-        if ((this.props.onEndReached || this.props.onVisibleEndReached) && this._virtualRenderer) {
+        if (this.props.onEndReached && this._virtualRenderer) {
             const layout = this._virtualRenderer.getLayoutDimension();
             const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
             if (viewabilityTracker) {
@@ -582,9 +583,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     if (this.props.onEndReached && !this._onEndReachedCalled) {
                         this._onEndReachedCalled = true;
                         this.props.onEndReached();
-                    }
-                    if (this.props.onVisibleEndReached && endReachedMargin <= 0) {
-                        this.props.onVisibleEndReached();
                     }
                 } else {
                     this._onEndReachedCalled = false;

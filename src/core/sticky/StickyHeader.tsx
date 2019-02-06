@@ -10,32 +10,22 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
         super(props, context);
     }
 
-    public onStartReached(): void {
-        this._stickyViewVisible(false);
-        this.boundaryReached = true;
-    }
-
-    protected boundaryProcessing(): void {
-        if (this.boundaryReached) {
-            this.boundaryReached = false;
-            this.onVisibleIndicesChanged(this.visibleIndices);
-        }
-    }
-
-    protected initStickyParams(offsetY: number): void {
+    protected initStickyParams(): void {
         this.stickyType = StickyType.HEADER;
         this.stickyTypeMultiplier = 1;
         this.containerPosition = {top: 0};
-        if (offsetY === 0) {
-            this.boundaryReached = true;
-        }
+
+        // Kept as true contrary to as in StickyFooter because in case of initialOffset not given, onScroll isn't called and boundaryProcessing isn't done.
+        // Default behaviour in that case will be sticky header hidden.
+        this.bounceScrolling = true;
     }
 
     protected calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number,
+        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, distanceFromWindow: number,
     ): void {
         if (stickyIndices && smallestVisibleIndex !== undefined) {
-            if (smallestVisibleIndex < stickyIndices[0] || offsetY === 0) {
+            this.bounceScrolling = this.hasReachedBoundary(offsetY, distanceFromWindow);
+            if (smallestVisibleIndex < stickyIndices[0] || this.bounceScrolling) {
                 this.stickyVisiblity = false;
             } else {
                 this.stickyVisiblity = true;
@@ -58,7 +48,11 @@ export default class StickyHeader<P extends StickyObjectProps, S extends StickyO
         return currentY;
     }
 
-    protected getScrollY(offsetY: number, scrollableHeight: number): number | null {
+    protected getScrollY(offsetY: number, scrollableHeight: number): number | undefined {
         return offsetY;
+    }
+
+    protected hasReachedBoundary(offsetY: number, distanceFromWindow: number, _windowBound?: number): boolean {
+        return offsetY <= distanceFromWindow;
     }
 }

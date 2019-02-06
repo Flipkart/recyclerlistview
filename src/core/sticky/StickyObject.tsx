@@ -5,7 +5,6 @@
 import * as React from "react";
 import {Animated, StyleProp, ViewStyle} from "react-native";
 import {Layout} from "../layoutmanager/LayoutManager";
-import RecyclerListView, {RecyclerListViewProps, RecyclerListViewState} from "../RecyclerListView";
 import {Dimension} from "../dependencies/LayoutProvider";
 
 export enum StickyType {
@@ -19,7 +18,9 @@ export interface StickyObjectProps {
     getLayoutTypeForIndex: (index: number) => string | number;
     getExtendedState: () => object | undefined;
     getRLVRenderedSize: () => Dimension | undefined;
+    getContentDimension: () => Dimension | undefined;
     getRowRenderer: () => ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
+    getDistanceFromWindow: () => number;
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
 }
 export interface StickyObjectState {
@@ -32,10 +33,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     protected containerPosition: StyleProp<ViewStyle>;
     protected currentIndex: number = 0;
     protected currentStickyIndex: number = 0;
-    protected boundaryReached: boolean = false;
     protected visibleIndices: number[] = [];
+    protected bounceScrolling: boolean = false;
 
-    private _offsetY = 0;
     private _previousLayout: Layout | undefined;
     private _previousHeight: number | undefined;
     private _nextLayout: Layout | undefined;
@@ -47,8 +47,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     private _nextYd: number | undefined;
     private _currentYd: number | undefined;
-    private _scrollableHeight: number | null = null;
-    private _scrollableWidth: number | null = null;
+    private _scrollableHeight: number | undefined;
+    private _scrollableWidth: number | undefined;
+    private _windowBound: number | undefined;
 
     private _stickyViewOffset: Animated.Value = new Animated.Value(0);
     private _previousStickyIndex: number = 0;
@@ -56,6 +57,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     private _firstCompute: boolean = true;
     private _smallestVisibleIndex: number = 0;
     private _largestVisibleIndex: number = 0;
+    private _offsetY: number = 0;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -65,9 +67,11 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     }
 
     public componentWillReceiveProps(newProps: StickyObjectProps): void {
-        this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex, this._offsetY);
+        this._initParams();
+        this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
+            this._offsetY, newProps.getDistanceFromWindow(), this._windowBound);
         this._computeLayouts(newProps.stickyIndices);
-        this._stickyViewVisible(this.stickyVisiblity);
+        this.stickyViewVisible(this.stickyVisiblity);
     }
 
     public render(): JSX.Element | null {
@@ -85,35 +89,37 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
 
     public onVisibleIndicesChanged(all: number[]): void {
         if (this._firstCompute) {
-            this.initStickyParams(this._offsetY);
+            this.initStickyParams();
             this._firstCompute = false;
         }
-        this._initParams(); // TODO: Putting outside firstCompute because sometimes recycler dims aren't obtained initially.
+        this._initParams();
         this._setSmallestAndLargestVisibleIndices(all);
-        this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex, this._offsetY);
+        this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
+            this._offsetY, this.props.getDistanceFromWindow(), this._windowBound);
         this._computeLayouts();
-        this._stickyViewVisible(this.stickyVisiblity);
+        this.stickyViewVisible(this.stickyVisiblity);
     }
 
     public onScroll(offsetY: number): void {
+        this._initParams();
         this._offsetY = offsetY;
-        this.boundaryProcessing();
+        this.boundaryProcessing(offsetY, this.props.getDistanceFromWindow(), this._windowBound);
         if (this._previousStickyIndex) {
-            const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
+            const scrollY: number | undefined = this.getScrollY(offsetY, this._scrollableHeight);
             if (this._previousHeight && this._currentYd && scrollY && scrollY < this._currentYd) {
                 if (scrollY > this._currentYd - this._previousHeight) {
                     this.currentIndex -= this.stickyTypeMultiplier;
                     const translate = (scrollY - this._currentYd + this._previousHeight) * (-1 * this.stickyTypeMultiplier);
                     this._stickyViewOffset.setValue(translate);
                     this._computeLayouts();
-                    this._stickyViewVisible(true);
+                    this.stickyViewVisible(true);
                 }
             } else {
                 this._stickyViewOffset.setValue(0);
             }
         }
         if (this._nextStickyIndex) {
-            const scrollY: number | null = this.getScrollY(offsetY, this._scrollableHeight);
+            const scrollY: number | undefined = this.getScrollY(offsetY, this._scrollableHeight);
             if (this._currentHeight && this._nextYd && scrollY && scrollY + this._currentHeight > this._nextYd) {
                 if (scrollY <= this._nextYd) {
                     const translate = (scrollY - this._nextYd + this._currentHeight) * (-1 * this.stickyTypeMultiplier);
@@ -122,7 +128,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                     this.currentIndex += this.stickyTypeMultiplier;
                     this._stickyViewOffset.setValue(0);
                     this._computeLayouts();
-                    this._stickyViewVisible(true);
+                    this.stickyViewVisible(true);
                 }
             } else {
                 this._stickyViewOffset.setValue(0);
@@ -130,26 +136,43 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         }
     }
 
-    protected abstract boundaryProcessing(): void;
-    protected abstract initStickyParams(offsetY: number): void;
+    protected abstract hasReachedBoundary(offsetY: number, distanceFromWindow: number, windowBound?: number): boolean;
+    protected abstract initStickyParams(): void;
     protected abstract calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number,
+        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
+        offsetY: number, distanceFromWindow: number, windowBound ?: number,
     ): void;
     protected abstract getNextYd(_nextY: number, nextHeight: number): number;
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
-    protected abstract getScrollY(offsetY: number, scrollableHeight: number | null): number | null;
+    protected abstract getScrollY(offsetY: number, scrollableHeight?: number): number | undefined;
 
-    protected _stickyViewVisible(_visible: boolean): void {
+    protected stickyViewVisible(_visible: boolean): void {
         this.setState({
             visible: _visible,
         });
     }
 
+    protected boundaryProcessing(offsetY: number, distanceFromWindow: number, windowBound?: number): void {
+        const hasReachedBoundary: boolean = this.hasReachedBoundary(offsetY, distanceFromWindow, windowBound);
+        if (this.bounceScrolling !== hasReachedBoundary) {
+            this.bounceScrolling = hasReachedBoundary;
+            if (this.bounceScrolling) {
+                this.stickyViewVisible(false);
+            } else {
+                this.onVisibleIndicesChanged(this.visibleIndices);
+            }
+        }
+    }
+
     private _initParams(): void {
-        const dimension: Dimension | undefined = this.props.getRLVRenderedSize();
-        if (dimension) {
-            this._scrollableHeight = dimension.height;
-            this._scrollableWidth = dimension.width;
+        const rlvDimension: Dimension | undefined = this.props.getRLVRenderedSize();
+        if (rlvDimension) {
+            this._scrollableHeight = rlvDimension.height;
+            this._scrollableWidth = rlvDimension.width;
+        }
+        const contentDimension: Dimension | undefined = this.props.getContentDimension();
+        if (contentDimension && this._scrollableHeight) {
+            this._windowBound = contentDimension.height - this._scrollableHeight;
         }
     }
 
