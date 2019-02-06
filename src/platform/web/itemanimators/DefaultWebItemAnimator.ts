@@ -24,7 +24,7 @@ export class DefaultWebItemAnimator implements BaseItemAnimator {
             const element = itemRef as HTMLDivElement;
             if (!this.shouldAnimateOnce || this.shouldAnimateOnce && !this._hasAnimatedOnce) {
                 const transitionEndCallback: EventListener = (event) => {
-                    element.style.transition = null;
+                    element.style.transition = "";
                     element.removeEventListener("transitionend", transitionEndCallback);
                     this._hasAnimatedOnce = true;
                 };
