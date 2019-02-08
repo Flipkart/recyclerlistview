@@ -106,7 +106,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         this._initParams();
         this._offsetY = offsetY;
         this.boundaryProcessing(offsetY, this.props.getDistanceFromWindow(), this._windowBound);
-        if (this._previousStickyIndex) {
+        if (this._previousStickyIndex !== undefined) {
             if (this._previousStickyIndex * this.stickyTypeMultiplier >= this.currentStickyIndex * this.stickyTypeMultiplier) {
                 throw new CustomError(RecyclerListViewExceptions.stickyIndicesArraySortError);
             }
@@ -123,7 +123,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                 this._stickyViewOffset.setValue(0);
             }
         }
-        if (this._nextStickyIndex) {
+        if (this._nextStickyIndex !== undefined) {
             if (this._nextStickyIndex * this.stickyTypeMultiplier <= this.currentStickyIndex * this.stickyTypeMultiplier) {
                 throw new CustomError(RecyclerListViewExceptions.stickyIndicesArraySortError);
             }
@@ -190,17 +190,17 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             this.currentStickyIndex = stickyIndices[this.currentIndex];
             this._previousStickyIndex = stickyIndices[this.currentIndex - this.stickyTypeMultiplier];
             this._nextStickyIndex = stickyIndices[this.currentIndex + this.stickyTypeMultiplier];
-            if (this.currentStickyIndex) {
+            if (this.currentStickyIndex !== undefined) {
                 this._currentLayout = this.props.getLayoutForIndex(this.currentStickyIndex);
                 this._currentY = this._currentLayout ? this._currentLayout.y : undefined;
                 this._currentHeight = this._currentLayout ? this._currentLayout.height : undefined;
                 this._currentYd = this._currentY && this._currentHeight ? this.getCurrentYd(this._currentY, this._currentHeight) : undefined;
             }
-            if (this._previousStickyIndex) {
+            if (this._previousStickyIndex !== undefined) {
                 this._previousLayout = this.props.getLayoutForIndex(this._previousStickyIndex);
                 this._previousHeight = this._previousLayout ? this._previousLayout.height : undefined;
             }
-            if (this._nextStickyIndex) {
+            if (this._nextStickyIndex !== undefined) {
                 this._nextLayout = this.props.getLayoutForIndex(this._nextStickyIndex);
                 this._nextY = this._nextLayout ? this._nextLayout.y : undefined;
                 this._nextHeight = this._nextLayout ? this._nextLayout.height : undefined;
