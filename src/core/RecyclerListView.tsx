@@ -170,7 +170,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             this._virtualRenderer.removeVisibleItemsListener();
         }
         if (this.props.onVisibleIndexesChanged) {
-            console.warn(Messages.VISIBLE_INDEXES_CHANGED_DEPRECATED); //tslint:disable-line
+            throw new CustomError(RecyclerListViewExceptions.usingOldVisibleIndexesChangedParam);
         }
         if (this.props.onVisibleIndicesChanged) {
             this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndicesChanged!);
@@ -441,7 +441,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _initTrackers(): void {
         this._assertDependencyPresence(this.props);
         if (this.props.onVisibleIndexesChanged) {
-            console.warn(Messages.VISIBLE_INDEXES_CHANGED_DEPRECATED); //tslint:disable-line
+            throw new CustomError(RecyclerListViewExceptions.usingOldVisibleIndexesChangedParam);
         }
         if (this.props.onVisibleIndicesChanged) {
             this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndicesChanged!);

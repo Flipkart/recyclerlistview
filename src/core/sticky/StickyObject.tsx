@@ -6,6 +6,8 @@ import * as React from "react";
 import {Animated, StyleProp, ViewStyle} from "react-native";
 import {Layout} from "../layoutmanager/LayoutManager";
 import {Dimension} from "../dependencies/LayoutProvider";
+import RecyclerListViewExceptions from "../exceptions/RecyclerListViewExceptions";
+import CustomError from "../exceptions/CustomError";
 
 export enum StickyType {
     HEADER,
@@ -105,6 +107,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
         this._offsetY = offsetY;
         this.boundaryProcessing(offsetY, this.props.getDistanceFromWindow(), this._windowBound);
         if (this._previousStickyIndex) {
+            if (this._previousStickyIndex * this.stickyTypeMultiplier >= this.currentStickyIndex * this.stickyTypeMultiplier) {
+                throw new CustomError(RecyclerListViewExceptions.stickyIndicesArraySortError);
+            }
             const scrollY: number | undefined = this.getScrollY(offsetY, this._scrollableHeight);
             if (this._previousHeight && this._currentYd && scrollY && scrollY < this._currentYd) {
                 if (scrollY > this._currentYd - this._previousHeight) {
@@ -119,6 +124,9 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
             }
         }
         if (this._nextStickyIndex) {
+            if (this._nextStickyIndex * this.stickyTypeMultiplier <= this.currentStickyIndex * this.stickyTypeMultiplier) {
+                throw new CustomError(RecyclerListViewExceptions.stickyIndicesArraySortError);
+            }
             const scrollY: number | undefined = this.getScrollY(offsetY, this._scrollableHeight);
             if (this._currentHeight && this._nextYd && scrollY && scrollY + this._currentHeight > this._nextYd) {
                 if (scrollY <= this._nextYd) {
