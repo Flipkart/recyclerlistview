@@ -3,7 +3,7 @@
  A scrollable list with different item type
  */
 import React, {Component} from 'react';
-import {RecyclerListView, DataProvider, LayoutProvider} from 'recyclerlistview';
+import {RecyclerListView, DataProvider, LayoutProvider} from 'recyclerlistview/web';
 
 const ViewTypes = {
     FULL: 0,
