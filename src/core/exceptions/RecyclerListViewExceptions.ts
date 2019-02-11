@@ -27,5 +27,21 @@ const RecyclerListViewExceptions: {[key: string]: Exception} = {
         message: "missing datasource or layout provider, cannot proceed without it",
         type: "UnresolvedDependenciesException",
     },
+    refNotAsFunctionException: {
+        message: "When using StickyContainer, RecyclerListView needs to use ref as a function and not as a string.",
+        type: "RefNotAsFunctionException",
+    },
+    wrongStickyChildTypeException: {
+        message: "StickyContainer can only have a single child of type RecyclerListView.",
+        type: "WrongStickyChildTypeException",
+    },
+    usingOldVisibleIndexesChangedParam: {
+        message: "onVisibleIndexesChanged has been deprecated. Please use onVisibleIndicesChanged instead.",
+        type: "usingOldVisibleIndexesChangedParam",
+    },
+    stickyIndicesArraySortError: {
+        message: "The sticky indices array passed to StickyContainer isn't sorted in ascending order.",
+        type: "stickyIndicesArraySortError",
+    },
 };
 export default RecyclerListViewExceptions;
