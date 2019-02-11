@@ -4,9 +4,9 @@
 All you need to do to get started is wrap your `RecyclerListView` component with the `StickyContainer` component and pass either or both `stickyHeaderIndices` and `stickyFooterIndices`.
 
 ### 1) Important points to note
-* `stickyHeaderIndices` and `stickyFooterIndices` should be sorted arrays, otherwise behaviour will be unexpected.
-* `StickyContainer` should have a single child component of type `RecyclerListView` or any that extends it.
-* In your `RecyclerListView` component, pass ref as a function and not as a string.
+* `stickyHeaderIndices` and `stickyFooterIndices` should be sorted arrays, otherwise error will be thrown.
+* `StickyContainer` should have a single child component of type `RecyclerListView` or any that extends it, otherwise error will be thrown.
+* In your `RecyclerListView` component, pass ref as a function and not as a string, otherwise error will be thrown.
 ```js
 <RecyclerListView ref={this._setRef}/>
 
