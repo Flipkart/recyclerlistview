@@ -32,7 +32,9 @@ export abstract class LayoutManager {
     //RLV will call this method in case of mismatch with actual rendered dimensions in case of non deterministic rendering
     //You are expected to cache this value and prefer it over estimates provided
     //No need to relayout which RLV will trigger. You should only relayout when relayoutFromIndex is called.
-    public abstract overrideLayout(index: number, dim: Dimension): void;
+    //Layout managers can choose to ignore the override requests like in case of grid layout where width changes
+    //can be ignored for a vertical layout given it gets computed via the given column span.
+    public abstract overrideLayout(index: number, dim: Dimension): boolean;
 
     //Recompute layouts from given index, compute heavy stuff should be here
     public abstract relayoutFromIndex(startIndex: number, itemCount: number): void;
@@ -75,13 +77,14 @@ export class WrapGridLayoutManager extends LayoutManager {
         }
     }
 
-    public overrideLayout(index: number, dim: Dimension): void {
+    public overrideLayout(index: number, dim: Dimension): boolean {
         const layout = this._layouts[index];
         if (layout) {
             layout.isOverridden = true;
             layout.width = dim.width;
             layout.height = dim.height;
         }
+        return true;
     }
 
     public setMaxBounds(itemDim: Dimension): void {
