@@ -500,21 +500,21 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             }
             return (
                 <ViewRenderer key={key} data={data}
-                              dataHasChanged={this._dataHasChanged}
-                              x={itemRect.x}
-                              y={itemRect.y}
-                              layoutType={type}
-                              index={dataIndex}
-                              styleOverrides={styleOverrides}
-                              layoutProvider={this.props.layoutProvider}
-                              forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
-                              isHorizontal={this.props.isHorizontal}
-                              onSizeChanged={this._onViewContainerSizeChange}
-                              childRenderer={this.props.rowRenderer}
-                              height={itemRect.height}
-                              width={itemRect.width}
-                              itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
-                              extendedState={this.props.extendedState}/>
+                    dataHasChanged={this._dataHasChanged}
+                    x={itemRect.x}
+                    y={itemRect.y}
+                    layoutType={type}
+                    index={dataIndex}
+                    styleOverrides={styleOverrides}
+                    layoutProvider={this.props.layoutProvider}
+                    forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
+                    isHorizontal={this.props.isHorizontal}
+                    onSizeChanged={this._onViewContainerSizeChange}
+                    childRenderer={this.props.rowRenderer}
+                    height={itemRect.height}
+                    width={itemRect.width}
+                    itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
+                    extendedState={this.props.extendedState} />
             );
         }
         return null;
@@ -532,13 +532,14 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             }, dim, index);
         }
 
-        layoutManager.overrideLayout(index, dim);
-        if (this._relayoutReqIndex === -1) {
-            this._relayoutReqIndex = index;
-        } else {
-            this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
+        if (layoutManager.overrideLayout(index, dim)) {
+            if (this._relayoutReqIndex === -1) {
+                this._relayoutReqIndex = index;
+            } else {
+                this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
+            }
+            this._queueStateRefresh();
         }
-        this._queueStateRefresh();
     }
 
     private _checkExpectedDimensionDiscrepancy(itemRect: Dimension, type: string | number, index: number): void {
