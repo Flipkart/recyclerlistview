@@ -32,7 +32,7 @@ export type StableIdProvider = (index: number) => string;
 
 export default class VirtualRenderer {
 
-    public onVisibleItemsChanged: TOnItemStatusChanged | null;
+    private onVisibleItemsChanged: TOnItemStatusChanged | null;
 
     private _scrollOnNextUpdate: (point: Point) => void;
     private _stableIdToRenderKeyMap: { [key: string]: StableIdMapItem | undefined };
