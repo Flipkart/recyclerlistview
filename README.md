@@ -79,30 +79,31 @@ not be as fast.
 | Prop | Required | Params Type | Description |
 | --- | --- | --- | --- |
 | layoutProvider | Yes | BaseLayoutProvider | Constructor function that defines the layout (height / width) of each element |
-| dataProvider | Yes | DataProvider | Constructor function the defines the data of each element |
+| dataProvider | Yes | DataProvider | Constructor function the defines the data for each element |
 | contextProvider | No | ContextProvider | Used to maintain scroll position in case view gets destroyed, which often happens with back navigation |
-| rowRenderer | Yes | (type: string \| number, data: any, index: number) => JSX.Element \| JSX.Element[] \| null | Method that returns react component to be rendered. You get the type and data of the view in the callback | 
+| rowRenderer | Yes | (type: string \| number, data: any, index: number) => JSX.Element \| JSX.Element[] \| null | Method that returns react component to be rendered. You get the type, data, index and extendedState of the view in the callback | 
 | initialOffset | No | number | Initial offset you want to start rendering from; This is very useful if you want to maintan scroll context across pages. | 
-| renderAheadOfOffset | No | number | specify how many pixels in advance you want views to be rendered. Increasing this value can help reduce blanks (if any). However, keeping this as low as possible should be the intent. Higher values also increase re-render compute |
+| renderAheadOffset | No | number | specify how many pixels in advance you want views to be rendered. Increasing this value can help reduce blanks (if any). However, keeping this as low as possible should be the intent. Higher values also increase re-render compute |
 | isHorizontal | No | boolean | If true, the list will operate horizontally rather than vertically | 
 | onScroll | No | rawEvent: ScrollEvent, offsetX: number, offsetY: number) => void | On scroll callback function that executes as a user scrolls |
 | onRecreate | No | (params: OnRecreateParams) => void | callback function that gets executed when recreating the recycler view from context provider |
-| externalScrollView | No | { new (props: ScrollViewDefaultProps): BaseScrollView } | Use this to inherit any properties from React-Native's Scrollview component |
+| externalScrollView | No | { new (props: ScrollViewDefaultProps): BaseScrollView } | Use this to pass your on implementation of BaseScrollView |
 | onEndReached | No | () => void | Callback function executed when the end of the view is hit (minus onEndThreshold if defined) |
-| onEndReachThreshold | No | number | Specify how many pixels in advance for the onEndReached callback |
-| onVisibleIndexesChanged | No | TOnItemStatusChanged | Provides visible index; helpful in sending impression events |
+| onEndReachedThreshold | No | number | Specify how many pixels in advance for the onEndReached callback |
+| onVisibleIndicesChanged | No | TOnItemStatusChanged | Provides visible index; helpful in sending impression events |
+| onVisibleIndexesChanged | No | TOnItemStatusChanged | (Deprecated in 2.0 beta) Provides visible index; helpful in sending impression events |
 | renderFooter | No | () => JSX.Element \| JSX.Element[] \| null | Provide this method if you want to render a footer. Helpful in showing a loader while doing incremental loads |
-| initialRenderIndex | No | number | Specify the initial item index you want rendering to start from. Prefered over initialOffset if both specified |
+| initialRenderIndex | No | number | Specify the initial item index you want rendering to start from. Preferred over initialOffset if both specified |
 | scrollThrottle | No | number |iOS only; Scroll throttle duration |
 | canChangeSize | No | boolean | Specify if size can change |
 | distanceFromWindow | No | number | Web only; Specify how far away the first list item is from window top |
 | useWindowScroll | No | boolean | Web only; Layout Elements in window instead of a scrollable div |
 | disableRecycling | No | boolean | Turns off recycling |
-| forceNonDeterministicRenering | No | boolean | Default is false; if enabled dimensions provided in layout provider will not be strictly enforced |
+| forceNonDeterministicRendering | No | boolean | Default is false; if enabled dimensions provided in layout provider will not be strictly enforced. Use this if item dimensions cannot be accurately determined |
 | extendedState | No | object | In some cases the data passed at row level may not contain all the info that the item depends upon, you can keep all other info outside and pass it down via this prop. Changing this object will cause everything to re-render. Make sure you don't change it often to ensure performance. Re-renders are heavy. |
 | itemAnimator | No | ItemAnimator | Enables animating RecyclerListView item cells (shift, add, remove, etc) |
 | optimizeForInsertDeleteAnimations | No | boolean | Enables you to utilize layout animations better by unmounting removed items |
-| style | No | object | To pass down style to innter ScrollView |
+| style | No | object | To pass down style to inner ScrollView |
 | scrollViewProps | No | object | For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread and passed down. |
 
 For full feature set have a look at prop definitions of [RecyclerListView](https://github.com/Flipkart/recyclerlistview/blob/21049cc89ad606ec9fe8ea045dc73732ff29eac9/src/core/RecyclerListView.tsx#L540-L634)
