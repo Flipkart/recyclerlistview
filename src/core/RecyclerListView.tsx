@@ -105,7 +105,7 @@ export interface RecyclerListViewProps {
     extendedState?: object;
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
-    style?: object;
+    style?: object|number;
     debugHandlers?: DebugHandlers;
 
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
@@ -686,8 +686,10 @@ RecyclerListView.propTypes = {
     optimizeForInsertDeleteAnimations: PropTypes.bool,
 
     //To pass down style to inner ScrollView
-    style: PropTypes.object,
-
+    style: PropTypes.oneOfType([
+        PropTypes.object,
+        PropTypes.number,
+      ]),
     //For TS use case, not necessary with JS use.
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down.
