@@ -410,8 +410,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _onSizeChanged = (layout: Dimension): void => {
-        const hasHeightChanged = this._layout.height !== layout.height;
-        const hasWidthChanged = this._layout.width !== layout.width;
+        const hasHeightChanged = Math.abs(this._layout.height - layout.height) > 1;
+        const hasWidthChanged = Math.abs(this._layout.width - layout.width) > 1;
         this._layout.height = layout.height;
         this._layout.width = layout.width;
         if (layout.height === 0 || layout.width === 0) {
