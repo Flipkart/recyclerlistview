@@ -32,7 +32,7 @@ import { Constants } from "./constants/Constants";
 import { Messages } from "./constants/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
-import { TOnItemStatusChanged } from "./ViewabilityTracker";
+import {TOnItemStatusChanged, default as ViewabilityTracker} from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 import { DebugHandlers } from "..";
@@ -40,7 +40,7 @@ import { DebugHandlers } from "..";
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
-import { Platform } from "react-native";
+import {Platform, View} from "react-native";
 const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
 
@@ -49,10 +49,11 @@ const IS_WEB = !Platform || Platform.OS === "web";
  */
 
 //#if [WEB]
-//import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
-//import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
-//import { DefaultWebItemAnimator as DefaultItemAnimator } from "../platform/web/itemanimators/DefaultWebItemAnimator";
-//const IS_WEB = true;
+// import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
+// import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
+// import { DefaultWebItemAnimator as DefaultItemAnimator } from "../platform/web/itemanimators/DefaultWebItemAnimator";
+// import {View} from "react-native";
+// const IS_WEB = true;
 //#endif
 
 const refreshRequestDebouncer = debounce((executable: () => void) => {
@@ -149,6 +150,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _scrollComponent: BaseScrollComponent | null = null;
 
     private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
+    private _relayoutIndices: Record<number, boolean> = {};
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -343,23 +345,39 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         //     rowRenderer,
         //     ...props,
         // } = this.props;
-
         return (
-            <ScrollComponent
-                ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
-                {...this.props}
-                {...this.props.scrollViewProps}
-                onScroll={this._onScroll}
-                onSizeChanged={this._onSizeChanged}
-                contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
-                contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}>
-                {this._generateRenderStack()}
-            </ScrollComponent>
+            <View style={{flex: 1}}>
+                <ScrollComponent
+                    ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
+                    {...this.props}
+                    {...this.props.scrollViewProps}
+                    onScroll={this._onScroll}
+                    onSizeChanged={this._onSizeChanged}
+                    contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
+                    contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}>
+                    {this._generateRenderStack()}
+                </ScrollComponent>
+                {!this._removeOverlay() && <View style={{ height: 600, width: 360, position: "absolute", backgroundColor: "white" } }/>}
+            </View>
         );
     }
 
     protected getVirtualRenderer(): VirtualRenderer {
         return this._virtualRenderer;
+    }
+
+    private _removeOverlay(): boolean {
+        const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
+        const initialVisibleIndices: number[] = viewabilityTracker && viewabilityTracker.getInitialVisibleIndexes() ?
+            viewabilityTracker.getInitialVisibleIndexes() : [];
+        console.log(initialVisibleIndices, this._relayoutIndices); //tslint:disable-line
+        const bool = this.arraysEqual(initialVisibleIndices[initialVisibleIndices.length - 1], this._relayoutIndices);
+        console.log(bool); //tslint:disable-line
+        return bool;
+    }
+
+    private arraysEqual(lastIndex: number, array2: Record<number, boolean>): boolean {
+        return array2[lastIndex];
     }
 
     private _checkAndChangeLayouts(newProps: RecyclerListViewProps, forceFullRender?: boolean): void {
@@ -372,7 +390,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
         if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
-            this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout, newProps.isHorizontal));
+            this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout,
+                this._relayoutCompleteForIndex, newProps.isHorizontal));
             if (newProps.layoutProvider.shouldRefreshWithAnchoring) {
                 this._virtualRenderer.refreshWithAnchor();
             } else {
@@ -454,7 +473,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             renderAheadOffset: this.props.renderAheadOffset,
         };
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
-        const layoutManager = this.props.layoutProvider.newLayoutManager(this._layout, this.props.isHorizontal, this._cachedLayouts);
+        const layoutManager = this.props.layoutProvider.newLayoutManager(this._layout, this._relayoutCompleteForIndex,
+            this.props.isHorizontal, this._cachedLayouts);
         this._virtualRenderer.setLayoutManager(layoutManager);
         this._virtualRenderer.setLayoutProvider(this.props.layoutProvider);
         this._virtualRenderer.init();
@@ -467,6 +487,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         } else {
             this._virtualRenderer.startViewabilityTracker();
         }
+    }
+
+    private _relayoutCompleteForIndex = (index: number): void => {
+        this._relayoutIndices[index] = true;
     }
 
     private _assertDependencyPresence(props: RecyclerListViewProps): void {

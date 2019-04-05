@@ -29,42 +29,42 @@ export class DefaultJSItemAnimator implements BaseItemAnimator {
     }
 
     public animateShift(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): boolean {
-        if (fromX !== toX || fromY !== toY) {
-            if (!this.shouldAnimateOnce || this.shouldAnimateOnce && !this._hasAnimatedOnce) {
-                const viewRef = itemRef as UnmountAwareView;
-                const animXY = new Animated.ValueXY({ x: fromX, y: fromY });
-                animXY.addListener((value) => {
-                    if (viewRef._isUnmountedForRecyclerListView || (this.shouldAnimateOnce && this._hasAnimatedOnce)) {
-                        animXY.stopAnimation();
-                        return;
-                    }
-                    viewRef.setNativeProps(this._getNativePropObject(value.x, value.y));
-                });
-                if (viewRef._lastAnimVal) {
-                    viewRef._lastAnimVal.stopAnimation();
-                }
-                viewRef._lastAnimVal = animXY;
-                Animated.timing(animXY, {
-                    toValue: { x: toX, y: toY },
-                    duration: 200,
-                    easing: Easing.out(Easing.ease),
-                    useNativeDriver: BaseItemAnimator.USE_NATIVE_DRIVER,
-                }).start(() => {
-                    viewRef._lastAnimVal = null;
-                    this._hasAnimatedOnce = true;
-                });
-                return true;
-            }
-        } else {
-            if (!this._isTimerOn) {
-                this._isTimerOn = true;
-                if (!this._hasAnimatedOnce) {
-                    setTimeout(() => {
-                        this._hasAnimatedOnce = true;
-                    }, 1000);
-                }
-            }
-        }
+        // if (fromX !== toX || fromY !== toY) {
+        //     if (!this.shouldAnimateOnce || this.shouldAnimateOnce && !this._hasAnimatedOnce) {
+        //         const viewRef = itemRef as UnmountAwareView;
+        //         const animXY = new Animated.ValueXY({ x: fromX, y: fromY });
+        //         animXY.addListener((value) => {
+        //             if (viewRef._isUnmountedForRecyclerListView || (this.shouldAnimateOnce && this._hasAnimatedOnce)) {
+        //                 animXY.stopAnimation();
+        //                 return;
+        //             }
+        //             viewRef.setNativeProps(this._getNativePropObject(value.x, value.y));
+        //         });
+        //         if (viewRef._lastAnimVal) {
+        //             viewRef._lastAnimVal.stopAnimation();
+        //         }
+        //         viewRef._lastAnimVal = animXY;
+        //         Animated.timing(animXY, {
+        //             toValue: { x: toX, y: toY },
+        //             duration: 200,
+        //             easing: Easing.out(Easing.ease),
+        //             useNativeDriver: BaseItemAnimator.USE_NATIVE_DRIVER,
+        //         }).start(() => {
+        //             viewRef._lastAnimVal = null;
+        //             this._hasAnimatedOnce = true;
+        //         });
+        //         return true;
+        //     }
+        // } else {
+        //     if (!this._isTimerOn) {
+        //         this._isTimerOn = true;
+        //         if (!this._hasAnimatedOnce) {
+        //             setTimeout(() => {
+        //                 this._hasAnimatedOnce = true;
+        //             }, 1000);
+        //         }
+        //     }
+        // }
         return false;
     }
 

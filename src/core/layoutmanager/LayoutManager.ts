@@ -47,8 +47,10 @@ export class WrapGridLayoutManager extends LayoutManager {
     private _totalWidth: number;
     private _isHorizontal: boolean;
     private _layouts: Layout[];
+    private _relayoutForIndex: (index: number) => void;
 
-    constructor(layoutProvider: LayoutProvider, renderWindowSize: Dimension, isHorizontal: boolean = false, cachedLayouts?: Layout[]) {
+    constructor(layoutProvider: LayoutProvider, renderWindowSize: Dimension, isHorizontal: boolean = false, relayoutForIndex: (index: number) => void,
+                cachedLayouts?: Layout[]) {
         super();
         this._layoutProvider = layoutProvider;
         this._window = renderWindowSize;
@@ -56,6 +58,7 @@ export class WrapGridLayoutManager extends LayoutManager {
         this._totalWidth = 0;
         this._isHorizontal = !!isHorizontal;
         this._layouts = cachedLayouts ? cachedLayouts : [];
+        this._relayoutForIndex = relayoutForIndex;
     }
 
     public getContentDimension(): Dimension {
@@ -147,6 +150,7 @@ export class WrapGridLayoutManager extends LayoutManager {
             } else {
                 itemRect = this._layouts[i];
                 itemRect.x = startX;
+                this._setRelayoutIndex(itemRect.y !== startY, i);
                 itemRect.y = startY;
                 itemRect.type = layoutType;
                 itemRect.width = itemDim.width;
@@ -163,6 +167,12 @@ export class WrapGridLayoutManager extends LayoutManager {
             this._layouts.splice(itemCount, oldItemCount - itemCount);
         }
         this._setFinalDimensions(maxBound);
+    }
+
+    private _setRelayoutIndex(isYChanged: boolean, index: number): void {
+        if (isYChanged) {
+            this._relayoutForIndex(index);
+        }
     }
 
     private _pointDimensionsToRect(itemRect: Layout): void {

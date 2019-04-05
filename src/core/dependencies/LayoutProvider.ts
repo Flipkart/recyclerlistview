@@ -20,7 +20,8 @@ export abstract class BaseLayoutProvider {
 
     //Return your layout manager, you get all required dependencies here. Also, make sure to use cachedLayouts. RLV might cache layouts and give back to
     //in cases of conxtext preservation. Make sure you use them if provided.
-    public abstract newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager;
+    public abstract newLayoutManager(renderWindowSize: Dimension, relayoutForIndex: (index: number) => void,
+                                     isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager;
 
     //Given an index a provider is expected to return a view type which used to recycling choices
     public abstract getLayoutTypeForIndex(index: number): string | number;
@@ -44,8 +45,9 @@ export class LayoutProvider extends BaseLayoutProvider {
         this._tempDim = { height: 0, width: 0 };
     }
 
-    public newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager {
-        this._lastLayoutManager = new WrapGridLayoutManager(this, renderWindowSize, isHorizontal, cachedLayouts);
+    public newLayoutManager(renderWindowSize: Dimension, relayoutForIndex: (index: number) => void,
+                            isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager {
+        this._lastLayoutManager = new WrapGridLayoutManager(this, renderWindowSize, isHorizontal, relayoutForIndex, cachedLayouts);
         return this._lastLayoutManager;
     }
 

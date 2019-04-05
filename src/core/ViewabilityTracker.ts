@@ -27,6 +27,8 @@ export default class ViewabilityTracker {
     private _relevantDim: Range;
     private _isHorizontal: boolean;
     private _windowBound: number;
+    private _initialVisibleIndexes: number[];
+    private _firstLoad: boolean;
     private _visibleIndexes: number[];
     private _engagedIndexes: number[];
     private _layouts: Layout[] = [];
@@ -42,6 +44,8 @@ export default class ViewabilityTracker {
         this._isHorizontal = false;
         this._windowBound = 0;
 
+        this._firstLoad = true;
+        this._initialVisibleIndexes = [];
         this._visibleIndexes = [];  //needs to be sorted
         this._engagedIndexes = [];  //needs to be sorted
 
@@ -100,6 +104,10 @@ export default class ViewabilityTracker {
 
     public getEngagedIndexes(): number[] {
         return this._engagedIndexes;
+    }
+
+    public getInitialVisibleIndexes(): number[] {
+        return this._initialVisibleIndexes;
     }
 
     public findFirstLogicallyVisibleIndex(): number {
@@ -291,6 +299,10 @@ export default class ViewabilityTracker {
     private _diffUpdateOriginalIndexesAndRaiseEvents(newVisibleItems: number[], newEngagedItems: number[]): void {
         this._diffArraysAndCallFunc(newVisibleItems, this._visibleIndexes, this.onVisibleRowsChanged);
         this._diffArraysAndCallFunc(newEngagedItems, this._engagedIndexes, this.onEngagedRowsChanged);
+        if (this._firstLoad) {
+            this._initialVisibleIndexes = newVisibleItems;
+            this._firstLoad = false;
+        }
         this._visibleIndexes = newVisibleItems;
         this._engagedIndexes = newEngagedItems;
     }
