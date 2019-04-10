@@ -20,18 +20,20 @@ export interface ViewRendererProps<T> {
     onSizeChanged: (dim: Dimension, index: number) => void;
     data: any;
     index: number;
-    itemAnimator: ItemAnimator;
+    itemAnimator?: ItemAnimator;
     styleOverrides?: object;
     forceNonDeterministicRendering?: boolean;
     isHorizontal?: boolean;
     extendedState?: object;
     layoutProvider?: BaseLayoutProvider;
+    isVisible?: boolean;
 }
 export default abstract class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {
     protected animatorStyleOverrides: object | undefined;
 
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
         const hasMoved = this.props.x !== newProps.x || this.props.y !== newProps.y;
+        const hasVisibilityChanged = this.props.isVisible !== newProps.isVisible;
 
         const hasSizeChanged = !newProps.forceNonDeterministicRendering &&
             (this.props.width !== newProps.width || this.props.height !== newProps.height) ||
@@ -41,22 +43,32 @@ export default abstract class BaseViewRenderer<T> extends React.Component<ViewRe
         const hasDataChanged = (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data));
         let shouldUpdate = hasSizeChanged || hasDataChanged || hasExtendedStateChanged;
 
-        if (shouldUpdate) {
-            newProps.itemAnimator.animateWillUpdate(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
-        } else if (hasMoved) {
-            shouldUpdate = !newProps.itemAnimator.animateShift(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
+        if (newProps.itemAnimator) {
+            if (shouldUpdate) {
+                newProps.itemAnimator.animateWillUpdate(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
+            } else if (hasMoved) {
+                shouldUpdate = !newProps.itemAnimator.animateShift(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
+            }
+            return shouldUpdate;
+        } else {
+            return shouldUpdate || hasMoved || hasVisibilityChanged;
         }
-        return shouldUpdate;
     }
     public componentDidMount(): void {
-        this.animatorStyleOverrides = undefined;
-        this.props.itemAnimator.animateDidMount(this.props.x, this.props.y, this.getRef() as object, this.props.index);
+        if (this.props.itemAnimator) {
+            this.animatorStyleOverrides = undefined;
+            this.props.itemAnimator.animateDidMount(this.props.x, this.props.y, this.getRef() as object, this.props.index);
+        }
     }
     public componentWillMount(): void {
-        this.animatorStyleOverrides = this.props.itemAnimator.animateWillMount(this.props.x, this.props.y, this.props.index);
+        if (this.props.itemAnimator) {
+            this.animatorStyleOverrides = this.props.itemAnimator.animateWillMount(this.props.x, this.props.y, this.props.index);
+        }
     }
     public componentWillUnmount(): void {
-        this.props.itemAnimator.animateWillUnmount(this.props.x, this.props.y, this.getRef() as object, this.props.index);
+        if (this.props.itemAnimator) {
+            this.props.itemAnimator.animateWillUnmount(this.props.x, this.props.y, this.getRef() as object, this.props.index);
+        }
     }
     protected abstract getRef(): object | null;
     protected renderChild(): JSX.Element | JSX.Element[] | null {

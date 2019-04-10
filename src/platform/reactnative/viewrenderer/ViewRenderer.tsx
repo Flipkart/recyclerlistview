@@ -23,6 +23,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                     top: this.props.y,
                     ...this.props.styleOverrides,
                     ...this.animatorStyleOverrides,
+                    opacity: this.props.isVisible ? 1 : 0,
                 }}>
                 {this.renderChild()}
             </View>

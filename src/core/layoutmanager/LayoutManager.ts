@@ -18,7 +18,7 @@ export abstract class LayoutManager {
         }
     }
 
-    //You can ovveride this incase you want to override style in some cases e.g, say you want to enfore width but not height
+    //You can override this in case you want to override style in some cases e.g, say you want to enforce width but not height
     public getStyleOverridesForIndex(index: number): object | undefined {
         return undefined;
     }
@@ -47,9 +47,10 @@ export class WrapGridLayoutManager extends LayoutManager {
     private _totalWidth: number;
     private _isHorizontal: boolean;
     private _layouts: Layout[];
-    private _relayoutForIndex: (index: number) => void;
+    private _makeItemsVisible: () => void;
 
-    constructor(layoutProvider: LayoutProvider, renderWindowSize: Dimension, isHorizontal: boolean = false, relayoutForIndex: (index: number) => void,
+    constructor(layoutProvider: LayoutProvider, renderWindowSize: Dimension, isHorizontal: boolean = false,
+                makeItemsVisible: () => void,
                 cachedLayouts?: Layout[]) {
         super();
         this._layoutProvider = layoutProvider;
@@ -58,7 +59,7 @@ export class WrapGridLayoutManager extends LayoutManager {
         this._totalWidth = 0;
         this._isHorizontal = !!isHorizontal;
         this._layouts = cachedLayouts ? cachedLayouts : [];
-        this._relayoutForIndex = relayoutForIndex;
+        this._makeItemsVisible = makeItemsVisible;
     }
 
     public getContentDimension(): Dimension {
@@ -171,7 +172,8 @@ export class WrapGridLayoutManager extends LayoutManager {
 
     private _setRelayoutIndex(isYChanged: boolean, index: number): void {
         if (isYChanged) {
-            this._relayoutForIndex(index);
+            console.log("#######################"); //tslint:disable-line
+            this._makeItemsVisible();
         }
     }
 

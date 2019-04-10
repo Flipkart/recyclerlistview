@@ -144,13 +144,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     };
     private _layout: Dimension = { height: 0, width: 0 };
     private _pendingScrollToOffset: Point | null = null;
-    private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
-
-    private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
-    private _relayoutIndices: Record<number, boolean> = {};
+    private _itemsVisibility: boolean;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -159,7 +156,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }, (index) => {
             return this.props.dataProvider.getStableId(index);
         }, !props.disableRecycling);
-
+        this._itemsVisibility = !!this.props.itemAnimator;
         this.state = {
             renderStack: {},
         } as S;
@@ -357,7 +354,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}>
                     {this._generateRenderStack()}
                 </ScrollComponent>
-                {!this._removeOverlay() && <View style={{ height: 600, width: 360, position: "absolute", backgroundColor: "white" } }/>}
             </View>
         );
     }
@@ -366,18 +362,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         return this._virtualRenderer;
     }
 
-    private _removeOverlay(): boolean {
-        const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
-        const initialVisibleIndices: number[] = viewabilityTracker && viewabilityTracker.getInitialVisibleIndexes() ?
-            viewabilityTracker.getInitialVisibleIndexes() : [];
-        console.log(initialVisibleIndices, this._relayoutIndices); //tslint:disable-line
-        const bool = this.arraysEqual(initialVisibleIndices[initialVisibleIndices.length - 1], this._relayoutIndices);
-        console.log(bool); //tslint:disable-line
-        return bool;
-    }
-
-    private arraysEqual(lastIndex: number, array2: Record<number, boolean>): boolean {
-        return array2[lastIndex];
+    private _makeItemsVisible = (): void => {
+        this._itemsVisibility = true;
     }
 
     private _checkAndChangeLayouts(newProps: RecyclerListViewProps, forceFullRender?: boolean): void {
@@ -391,7 +377,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
             this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout,
-                this._relayoutCompleteForIndex, newProps.isHorizontal));
+                this._makeItemsVisible, newProps.isHorizontal));
             if (newProps.layoutProvider.shouldRefreshWithAnchoring) {
                 this._virtualRenderer.refreshWithAnchor();
             } else {
@@ -473,7 +459,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             renderAheadOffset: this.props.renderAheadOffset,
         };
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
-        const layoutManager = this.props.layoutProvider.newLayoutManager(this._layout, this._relayoutCompleteForIndex,
+        const layoutManager = this.props.layoutProvider.newLayoutManager(this._layout, this._makeItemsVisible,
             this.props.isHorizontal, this._cachedLayouts);
         this._virtualRenderer.setLayoutManager(layoutManager);
         this._virtualRenderer.setLayoutProvider(this.props.layoutProvider);
@@ -487,10 +473,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         } else {
             this._virtualRenderer.startViewabilityTracker();
         }
-    }
-
-    private _relayoutCompleteForIndex = (index: number): void => {
-        this._relayoutIndices[index] = true;
     }
 
     private _assertDependencyPresence(props: RecyclerListViewProps): void {
@@ -537,11 +519,16 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     childRenderer={this.props.rowRenderer}
                     height={itemRect.height}
                     width={itemRect.width}
-                    itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
+                    itemAnimator={this.props.itemAnimator}
+                    isVisible={this._getItemsVisibility()}
                     extendedState={this.props.extendedState} />
             );
         }
         return null;
+    }
+
+    private _getItemsVisibility = (): boolean => {
+        return this._itemsVisibility;
     }
 
     private _onViewContainerSizeChange = (dim: Dimension, index: number): void => {
