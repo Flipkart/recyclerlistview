@@ -148,6 +148,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
     private _itemsVisibility: boolean;
+    private _heightUnchangedForIndex: Record<number, boolean> = {};
+    private _initialVisibleIndices: number[] = [];
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -376,8 +378,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
         if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
-            this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout,
-                this._makeItemsVisible, newProps.isHorizontal));
+            this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout, newProps.isHorizontal));
             if (newProps.layoutProvider.shouldRefreshWithAnchoring) {
                 this._virtualRenderer.refreshWithAnchor();
             } else {
@@ -459,8 +460,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             renderAheadOffset: this.props.renderAheadOffset,
         };
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
-        const layoutManager = this.props.layoutProvider.newLayoutManager(this._layout, this._makeItemsVisible,
-            this.props.isHorizontal, this._cachedLayouts);
+        const layoutManager = this.props.layoutProvider.newLayoutManager(this._layout, this.props.isHorizontal, this._cachedLayouts);
         this._virtualRenderer.setLayoutManager(layoutManager);
         this._virtualRenderer.setLayoutProvider(this.props.layoutProvider);
         this._virtualRenderer.init();
@@ -520,15 +520,33 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     height={itemRect.height}
                     width={itemRect.width}
                     itemAnimator={this.props.itemAnimator}
-                    isVisible={this._getItemsVisibility()}
+                    isVisible={this._itemsVisibility}
+                    makeItemsVisible={this._makeItemsVisible}
+                    indexHeightUnchanged={this._indexHeightUnchanged}
                     extendedState={this.props.extendedState} />
             );
         }
         return null;
     }
 
-    private _getItemsVisibility = (): boolean => {
-        return this._itemsVisibility;
+    private _indexHeightUnchanged = (index: number): void => {
+        if (!this._itemsVisibility) {
+            this._heightUnchangedForIndex[index] = true;
+            this._checkVisibleIndicesUnchangedHeights();
+        }
+    }
+
+    private _checkVisibleIndicesUnchangedHeights = (): void => {
+        if (this._initialVisibleIndices.length === 0) {
+            const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
+            this._initialVisibleIndices = viewabilityTracker ? viewabilityTracker.getInitialVisibleIndices() : [];
+        }
+        if (this._initialVisibleIndices.every((index: number) => {
+            return this._heightUnchangedForIndex[index];
+        })) {
+            this._itemsVisibility = true;
+            this._queueStateRefresh();
+        }
     }
 
     private _onViewContainerSizeChange = (dim: Dimension, index: number): void => {
