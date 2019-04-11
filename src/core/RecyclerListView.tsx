@@ -102,7 +102,7 @@ export interface RecyclerListViewProps {
     useWindowScroll?: boolean;
     disableRecycling?: boolean;
     forceNonDeterministicRendering?: boolean;
-    removeNonDeterministicJitter?: boolean;
+    removeNonDeterministicShifting?: boolean;
     extendedState?: object;
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
@@ -161,7 +161,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             return this.props.dataProvider.getStableId(index);
         }, !props.disableRecycling);
 
-        if (this.props.removeNonDeterministicJitter && this.props.forceNonDeterministicRendering && !this.props.itemAnimator) {
+        if (this.props.removeNonDeterministicShifting && this.props.forceNonDeterministicRendering && !this.props.itemAnimator) {
             this._itemsVisibility = false;
         } else {
             this._itemsVisibility = true;
@@ -711,10 +711,10 @@ RecyclerListView.propTypes = {
     //Rendered dimensions will be used to relayout items. Slower if enabled.
     forceNonDeterministicRendering: PropTypes.bool,
 
-    //To be used with forceNonDeterministicRendering to remove the initial jitter while recalculating the y offsets and shifting items.
+    //To be used with forceNonDeterministicRendering to skip the initial shifting of items while recalculating the y offsets and relayouting.
     //If enabled, will remove the default implementation of itemAnimator.
     //Note - Will not work if itemAnimator prop is passed.
-    removeNonDeterministicJitter: PropTypes.bool,
+    removeNonDeterministicShifting: PropTypes.bool,
 
     //In some cases the data passed at row level may not contain all the info that the item depends upon, you can keep all other info
     //outside and pass it down via this prop. Changing this object will cause everything to re-render. Make sure you don't change
