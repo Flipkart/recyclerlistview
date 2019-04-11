@@ -32,15 +32,15 @@ import { Constants } from "./constants/Constants";
 import { Messages } from "./constants/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
-import {TOnItemStatusChanged, default as ViewabilityTracker} from "./ViewabilityTracker";
+import {TOnItemStatusChanged} from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 import { DebugHandlers } from "..";
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
-import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
-import {Platform, View} from "react-native";
+import {DefaultJSItemAnimator as DefaultItemAnimator} from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
+import {Platform} from "react-native";
 const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
 
@@ -52,7 +52,6 @@ const IS_WEB = !Platform || Platform.OS === "web";
 // import ScrollComponent from "../platform/web/scrollcomponent/ScrollComponent";
 // import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
 // import { DefaultWebItemAnimator as DefaultItemAnimator } from "../platform/web/itemanimators/DefaultWebItemAnimator";
-// import {View} from "react-native";
 // const IS_WEB = true;
 //#endif
 
@@ -103,6 +102,7 @@ export interface RecyclerListViewProps {
     useWindowScroll?: boolean;
     disableRecycling?: boolean;
     forceNonDeterministicRendering?: boolean;
+    removeNonDeterministicJitter?: boolean;
     extendedState?: object;
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
@@ -147,6 +147,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _initialOffset = 0;
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
+
+    private _defaultItemAnimator: ItemAnimator | undefined;
     private _itemsVisibility: boolean;
     private _heightUnchangedForIndex: Record<number, boolean> = {};
     private _initialVisibleIndices: number[] = [];
@@ -158,7 +160,14 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }, (index) => {
             return this.props.dataProvider.getStableId(index);
         }, !props.disableRecycling);
-        this._itemsVisibility = !!this.props.itemAnimator;
+
+        if (this.props.removeNonDeterministicJitter) {
+            this._itemsVisibility = false;
+        } else {
+            this._itemsVisibility = true;
+            this._defaultItemAnimator = new DefaultItemAnimator();
+        }
+
         this.state = {
             renderStack: {},
         } as S;
@@ -345,18 +354,16 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         //     ...props,
         // } = this.props;
         return (
-            <View style={{flex: 1}}>
-                <ScrollComponent
-                    ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
-                    {...this.props}
-                    {...this.props.scrollViewProps}
-                    onScroll={this._onScroll}
-                    onSizeChanged={this._onSizeChanged}
-                    contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
-                    contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}>
-                    {this._generateRenderStack()}
-                </ScrollComponent>
-            </View>
+            <ScrollComponent
+                ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
+                {...this.props}
+                {...this.props.scrollViewProps}
+                onScroll={this._onScroll}
+                onSizeChanged={this._onSizeChanged}
+                contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
+                contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}>
+                {this._generateRenderStack()}
+            </ScrollComponent>
         );
     }
 
@@ -364,6 +371,12 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         return this._virtualRenderer;
     }
 
+    /**
+     * Making items visible when there's even a single item with discrepancy in height from what was provided in LayoutProvider.
+     * OR when none of the visible items have a discrepancy in height.
+     * This approach assumes that the items will shift instantaneously which should work on most phones.
+     * In later revisions, a more robust approach will be used where items will be made visible only after we know that they have shifted.
+     */
     private _makeItemsVisible = (): void => {
         this._itemsVisibility = true;
     }
@@ -519,7 +532,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     childRenderer={this.props.rowRenderer}
                     height={itemRect.height}
                     width={itemRect.width}
-                    itemAnimator={this.props.itemAnimator}
+                    itemAnimator={Default.value<ItemAnimator | undefined>(this.props.itemAnimator, this._defaultItemAnimator)}
                     isVisible={this._itemsVisibility}
                     makeItemsVisible={this._makeItemsVisible}
                     indexHeightUnchanged={this._indexHeightUnchanged}
@@ -544,7 +557,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (this._initialVisibleIndices.every((index: number) => {
             return this._heightUnchangedForIndex[index];
         })) {
-            this._itemsVisibility = true;
+            this._makeItemsVisible();
             this._queueStateRefresh();
         }
     }
@@ -696,6 +709,11 @@ RecyclerListView.propTypes = {
     //Default is false, if enabled dimensions provided in layout provider will not be strictly enforced.
     //Rendered dimensions will be used to relayout items. Slower if enabled.
     forceNonDeterministicRendering: PropTypes.bool,
+
+    //To be used with forceNonDeterministicRendering to remove the initial jitter while recalculating the y offsets and shifting items.
+    //If enabled, will remove the default implementation of itemAnimator.
+    //Note - Will not work if itemAnimator prop is given.
+    removeNonDeterministicJitter: PropTypes.bool,
 
     //In some cases the data passed at row level may not contain all the info that the item depends upon, you can keep all other info
     //outside and pass it down via this prop. Changing this object will cause everything to re-render. Make sure you don't change
