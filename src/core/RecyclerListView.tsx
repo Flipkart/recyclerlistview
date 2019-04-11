@@ -32,15 +32,15 @@ import { Constants } from "./constants/Constants";
 import { Messages } from "./constants/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
-import {TOnItemStatusChanged} from "./ViewabilityTracker";
+import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 import { DebugHandlers } from "..";
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
-import {DefaultJSItemAnimator as DefaultItemAnimator} from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
-import {Platform} from "react-native";
+import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
+import { Platform } from "react-native";
 const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
 
@@ -161,7 +161,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             return this.props.dataProvider.getStableId(index);
         }, !props.disableRecycling);
 
-        if (this.props.removeNonDeterministicJitter) {
+        if (this.props.removeNonDeterministicJitter && this.props.forceNonDeterministicRendering && !this.props.itemAnimator) {
             this._itemsVisibility = false;
         } else {
             this._itemsVisibility = true;
@@ -353,6 +353,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         //     rowRenderer,
         //     ...props,
         // } = this.props;
+
         return (
             <ScrollComponent
                 ref={(scrollComponent) => this._scrollComponent = scrollComponent as BaseScrollComponent | null}
@@ -374,7 +375,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     /**
      * Making items visible when there's even a single item with discrepancy in height from what was provided in LayoutProvider.
      * OR when none of the visible items have a discrepancy in height.
-     * This approach assumes that the items will shift instantaneously which should work on most phones.
+     * This approach assumes that the items will shift instantaneously, after which they will be made visible, which should work on most phones.
      * In later revisions, a more robust approach will be used where items will be made visible only after we know that they have shifted.
      */
     private _makeItemsVisible = (): void => {
@@ -712,7 +713,7 @@ RecyclerListView.propTypes = {
 
     //To be used with forceNonDeterministicRendering to remove the initial jitter while recalculating the y offsets and shifting items.
     //If enabled, will remove the default implementation of itemAnimator.
-    //Note - Will not work if itemAnimator prop is given.
+    //Note - Will not work if itemAnimator prop is passed.
     removeNonDeterministicJitter: PropTypes.bool,
 
     //In some cases the data passed at row level may not contain all the info that the item depends upon, you can keep all other info

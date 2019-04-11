@@ -20,6 +20,8 @@ export interface ViewRendererProps<T> {
     onSizeChanged: (dim: Dimension, index: number) => void;
     data: any;
     index: number;
+    makeItemsVisible: () => void;
+    indexHeightUnchanged: (index: number) => void;
     itemAnimator?: ItemAnimator;
     styleOverrides?: object;
     forceNonDeterministicRendering?: boolean;
@@ -27,8 +29,6 @@ export interface ViewRendererProps<T> {
     extendedState?: object;
     layoutProvider?: BaseLayoutProvider;
     isVisible?: boolean;
-    makeItemsVisible: () => void;
-    indexHeightUnchanged: (index: number) => void;
 }
 export default abstract class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {
     protected animatorStyleOverrides: object | undefined;
