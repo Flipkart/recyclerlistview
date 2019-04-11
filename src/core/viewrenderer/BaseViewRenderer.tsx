@@ -1,7 +1,6 @@
 import * as React from "react";
 import { Dimension, BaseLayoutProvider } from "../dependencies/LayoutProvider";
 import ItemAnimator from "../ItemAnimator";
-import { LayoutManager } from "../layoutmanager/LayoutManager";
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.

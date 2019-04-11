@@ -1,7 +1,7 @@
 import * as React from "react";
 import { LayoutChangeEvent, View, ViewProperties } from "react-native";
 import { Dimension } from "../../../core/dependencies/LayoutProvider";
-import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
+import BaseViewRenderer from "../../../core/viewrenderer/BaseViewRenderer";
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
@@ -13,6 +13,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
     public render(): JSX.Element {
+        const overrideOpacity = this.props.styleOverrides && (this.props.styleOverrides as any).opacity;
         return this.props.forceNonDeterministicRendering ? (
             <View ref={this._setRef}
             onLayout={this._onLayout}
@@ -23,7 +24,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                     top: this.props.y,
                     ...this.props.styleOverrides,
                     ...this.animatorStyleOverrides,
-                    opacity: this.props.isVisible ? 1 : 0,
+                    opacity: this.props.isVisible ? overrideOpacity || 1 : 0,
                 }}>
                 {this.renderChild()}
             </View>
