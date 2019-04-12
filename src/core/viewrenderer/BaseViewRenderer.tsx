@@ -19,7 +19,6 @@ export interface ViewRendererProps<T> {
     onSizeChanged: (dim: Dimension, index: number) => void;
     data: any;
     index: number;
-    makeItemsVisible: () => void;
     indexHeightUnchanged: (index: number) => void;
     itemAnimator?: ItemAnimator;
     styleOverrides?: object;
