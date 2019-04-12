@@ -100,6 +100,7 @@ not be as fast.
 | useWindowScroll | No | boolean | Web only; Layout Elements in window instead of a scrollable div |
 | disableRecycling | No | boolean | Turns off recycling |
 | forceNonDeterministicRendering | No | boolean | Default is false; if enabled dimensions provided in layout provider will not be strictly enforced. Use this if item dimensions cannot be accurately determined |
+| tryRemoveNonDeterministicShift | No | boolean | Enabled when passed as true along with forceNonDeterministicRendering, and itemAnimator isn't passed. Skips the initial rendering of shifting of items due to recalculation of y offsets and relayouting.
 | extendedState | No | object | In some cases the data passed at row level may not contain all the info that the item depends upon, you can keep all other info outside and pass it down via this prop. Changing this object will cause everything to re-render. Make sure you don't change it often to ensure performance. Re-renders are heavy. |
 | itemAnimator | No | ItemAnimator | Enables animating RecyclerListView item cells (shift, add, remove, etc) |
 | optimizeForInsertDeleteAnimations | No | boolean | Enables you to utilize layout animations better by unmounting removed items |
