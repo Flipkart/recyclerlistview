@@ -148,7 +148,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
 
-    private _defaultItemAnimator: ItemAnimator | undefined;
+    private _defaultItemAnimator: ItemAnimator;
     private _itemsVisibility: boolean;
     private _heightUnchangedForIndex: Record<number, boolean> = {};
     private _initialVisibleIndices: number[] = [];
@@ -163,6 +163,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
         if (this.props.tryRemoveNonDeterministicShift && this.props.forceNonDeterministicRendering && !this.props.itemAnimator) {
             this._itemsVisibility = false;
+            this._defaultItemAnimator = new BaseItemAnimator();
         } else {
             this._itemsVisibility = true;
             this._defaultItemAnimator = new DefaultItemAnimator();
@@ -409,6 +410,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             const layoutManager = this._virtualRenderer.getLayoutManager();
             if (layoutManager) {
                 layoutManager.relayoutFromIndex(this._relayoutReqIndex, newProps.dataProvider.getSize());
+                this._makeItemsVisible();
                 this._relayoutReqIndex = -1;
                 this._refreshViewability();
             }
@@ -533,7 +535,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     childRenderer={this.props.rowRenderer}
                     height={itemRect.height}
                     width={itemRect.width}
-                    itemAnimator={Default.value<ItemAnimator | undefined>(this.props.itemAnimator, this._defaultItemAnimator)}
+                    itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
                     isVisible={this._itemsVisibility}
                     indexHeightUnchanged={this._indexHeightUnchanged}
                     extendedState={this.props.extendedState} />
@@ -563,7 +565,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _onViewContainerSizeChange = (dim: Dimension, index: number): void => {
-        this._makeItemsVisible();
         //Cannot be null here
         const layoutManager: LayoutManager = this._virtualRenderer.getLayoutManager() as LayoutManager;
 
