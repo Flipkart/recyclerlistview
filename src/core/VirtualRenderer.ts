@@ -314,6 +314,10 @@ export default class VirtualRenderer {
                 }
             }
         }
+
+        // Future calls to get stable IDs must use the function
+        // provided by the new data provider.
+        this._fetchStableId = getStableId;
     }
 
     private _getCollisionAvoidingKey(): string {
