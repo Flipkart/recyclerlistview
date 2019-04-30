@@ -18,9 +18,10 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             onLayout={this._onLayout}
                 style={{
                     flexDirection: this.props.isHorizontal ? "column" : "row",
-                    left: this.props.x,
-                    position: "absolute",
-                    top: this.props.y,
+                    left: this.props.useAbsolutes ? this.props.x : 0,
+                    top: this.props.useAbsolutes ? this.props.y : 0,
+                    marginLeft: this.props.isFirst && this.props.isHorizontal ? this.props.x : 0,
+                    marginTop: this.props.isFirst && !this.props.isHorizontal ? this.props.y : 0,
                     ...this.props.styleOverrides,
                     ...this.animatorStyleOverrides,
                 }}>
@@ -54,7 +55,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         //Preventing layout thrashing in super fast scrolls where RN messes up onLayout event
         const xDiff = Math.abs(this.props.x - event.nativeEvent.layout.x);
         const yDiff = Math.abs(this.props.y - event.nativeEvent.layout.y);
-        if (xDiff < 1 && yDiff < 1 &&
+        if (
             (this.props.height !== event.nativeEvent.layout.height ||
                 this.props.width !== event.nativeEvent.layout.width)) {
             this._dim.height = event.nativeEvent.layout.height;

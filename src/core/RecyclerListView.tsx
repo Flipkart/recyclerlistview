@@ -105,7 +105,7 @@ export interface RecyclerListViewProps {
     extendedState?: object;
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
-    style?: object|number;
+    style?: object | number;
     debugHandlers?: DebugHandlers;
 
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
@@ -498,6 +498,14 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             if (!this.props.forceNonDeterministicRendering) {
                 this._checkExpectedDimensionDiscrepancy(itemRect, type, dataIndex);
             }
+            const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
+            let shouldBeAbsolute = true;
+            let isFirst = false;
+            if (viewabilityTracker != null) {
+                const eI = viewabilityTracker.getEngagedIndexes();
+                shouldBeAbsolute = !(dataIndex >= eI[0] && dataIndex <= eI[eI.length - 1]);
+                isFirst = eI[0] === dataIndex;
+            }
             return (
                 <ViewRenderer key={key} data={data}
                     dataHasChanged={this._dataHasChanged}
@@ -505,6 +513,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     y={itemRect.y}
                     layoutType={type}
                     index={dataIndex}
+                    useAbsolutes={shouldBeAbsolute}
+                    isFirst={isFirst}
                     styleOverrides={styleOverrides}
                     layoutProvider={this.props.layoutProvider}
                     forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
@@ -553,12 +563,12 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _generateRenderStack(): Array<JSX.Element | null> {
-        const renderedItems = [];
-        for (const key in this.state.renderStack) {
-            if (this.state.renderStack.hasOwnProperty(key)) {
-                renderedItems.push(this._renderRowUsingMeta(this.state.renderStack[key]));
-            }
-        }
+        const renderStack = Object.keys(this.state.renderStack).map((key) => this.state.renderStack[key]).sort((a, b) => a.dataIndex! - b.dataIndex!);
+        const renderedItems: any[] = [];
+        renderStack.map((item) => {
+            renderedItems.push(this._renderRowUsingMeta(item));
+
+        });
         return renderedItems;
     }
 
@@ -689,7 +699,7 @@ RecyclerListView.propTypes = {
     style: PropTypes.oneOfType([
         PropTypes.object,
         PropTypes.number,
-      ]),
+    ]),
     //For TS use case, not necessary with JS use.
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down.
