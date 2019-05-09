@@ -70,7 +70,7 @@ export default class DataProvider {
         } else {
             dp._firstIndexToProcess = Math.max(Math.min(firstModifiedIndex, this._data.length), 0);
         }
-        if (dp._firstIndexToProcess !== this._data.length) {
+        if (this._data.length === 0 || dp._firstIndexToProcess !== this._data.length) {
             dp._requiresDataChangeHandling = true;
         }
         dp._data = newData;
