@@ -152,11 +152,14 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     constructor(props: P, context?: any) {
         super(props, context);
-        this._virtualRenderer = new VirtualRenderer(this._renderStackWhenReady, (offset) => {
-            this._pendingScrollToOffset = offset;
-        }, (index) => {
-            return this.props.dataProvider.getStableId(index);
-        }, !props.disableRecycling);
+        this._virtualRenderer = new VirtualRenderer(
+            this._renderStackWhenReady,
+            (offset) => {
+                this._pendingScrollToOffset = offset;
+            },
+            this.props.dataProvider.getStableId,
+            !props.disableRecycling,
+        );
 
         this.state = {
             renderStack: {},
@@ -367,9 +370,19 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this._params.itemCount = newProps.dataProvider.getSize();
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
         this._virtualRenderer.setLayoutProvider(newProps.layoutProvider);
-        if (newProps.dataProvider.hasStableIds() && this.props.dataProvider !== newProps.dataProvider && newProps.dataProvider.requiresDataChangeHandling()) {
+
+        const hasStableIds = newProps.dataProvider.hasStableIds();
+        const isNewDataProvider = this.props.dataProvider !== newProps.dataProvider;
+        const requiresDataChangeHandling = newProps.dataProvider.requiresDataChangeHandling();
+        if (hasStableIds && isNewDataProvider && requiresDataChangeHandling) {
             this._virtualRenderer.handleDataSetChange(newProps.dataProvider, this.props.optimizeForInsertDeleteAnimations);
         }
+
+        if (hasStableIds && isNewDataProvider) {
+            // Future calls to get stable IDs must use the function provided by the new data provider.
+            this._virtualRenderer.setStableIdProvider(newProps.dataProvider.getStableId);
+        }
+
         if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
             this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout, newProps.isHorizontal));

@@ -316,6 +316,10 @@ export default class VirtualRenderer {
         }
     }
 
+    public setStableIdProvider(getStableId: StableIdProvider): void {
+        this._fetchStableId = getStableId;
+    }
+
     private _getCollisionAvoidingKey(): string {
         return "#" + this._startKey++ + "_rlv_c";
     }
