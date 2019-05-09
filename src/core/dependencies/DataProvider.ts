@@ -24,6 +24,11 @@ export default class DataProvider {
             this.getStableId = (index) => index.toString();
         }
     }
+
+    public clone(): DataProvider {
+        return new DataProvider(this.rowHasChanged, this.getStableId);
+    }
+
     public getDataForIndex(index: number): any {
         return this._data[index];
     }
@@ -51,7 +56,7 @@ export default class DataProvider {
     //No need to override this one
     //If you already know the first row where rowHasChanged will be false pass it upfront to avoid loop
     public cloneWithRows(newData: any[], firstModifiedIndex?: number): DataProvider {
-        const dp = new DataProvider(this.rowHasChanged, this.getStableId);
+        const dp = this.clone();
         const newSize = newData.length;
         const iterCount = Math.min(this._size, newSize);
         if (ObjectUtil.isNullOrUndefined(firstModifiedIndex)) {
@@ -65,7 +70,7 @@ export default class DataProvider {
         } else {
             dp._firstIndexToProcess = Math.max(Math.min(firstModifiedIndex, this._data.length), 0);
         }
-        if (dp._firstIndexToProcess !== this._data.length) {
+        if (this._data.length === 0 || dp._firstIndexToProcess !== this._data.length) {
             dp._requiresDataChangeHandling = true;
         }
         dp._data = newData;
