@@ -109,7 +109,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Rea
     }
 
     private _getStickyHeaderRef = (stickyHeaderRef: any) => {
-        if (!this._stickyHeaderRef) {
+        if (this._stickyHeaderRef !== stickyHeaderRef) {
             this._stickyHeaderRef = stickyHeaderRef as (StickyHeader<StickyObjectProps, StickyObjectState> | null);
             // TODO: Resetting state once ref is initialized. Can look for better solution.
             this._callStickyObjectsOnVisibleIndicesChanged(this._visibleIndicesAll);
@@ -117,7 +117,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Rea
     }
 
     private _getStickyFooterRef = (stickyFooterRef: any) => {
-        if (!this._stickyFooterRef) {
+        if (this._stickyFooterRef !== stickyFooterRef) {
             this._stickyFooterRef = stickyFooterRef as (StickyFooter<StickyObjectProps, StickyObjectState> | null);
             // TODO: Resetting state once ref is initialized. Can look for better solution.
             this._callStickyObjectsOnVisibleIndicesChanged(this._visibleIndicesAll);
