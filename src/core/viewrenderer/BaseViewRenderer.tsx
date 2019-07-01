@@ -25,6 +25,7 @@ export interface ViewRendererProps<T> {
     forceNonDeterministicRendering?: boolean;
     isHorizontal?: boolean;
     extendedState?: object;
+    internalSnapshot?: object;
     layoutProvider?: BaseLayoutProvider;
 }
 export default abstract class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {
@@ -38,9 +39,9 @@ export default abstract class BaseViewRenderer<T> extends React.Component<ViewRe
             this.props.layoutProvider !== newProps.layoutProvider;
 
         const hasExtendedStateChanged = this.props.extendedState !== newProps.extendedState;
+        const hasInternalSnapshotChanged = this.props.internalSnapshot !== newProps.internalSnapshot;
         const hasDataChanged = (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data));
-        let shouldUpdate = hasSizeChanged || hasDataChanged || hasExtendedStateChanged;
-
+        let shouldUpdate = hasSizeChanged || hasDataChanged || hasExtendedStateChanged || hasInternalSnapshotChanged;
         if (shouldUpdate) {
             newProps.itemAnimator.animateWillUpdate(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
         } else if (hasMoved) {
