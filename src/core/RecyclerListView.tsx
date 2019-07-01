@@ -183,8 +183,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             this._pendingScrollToOffset = null;
             if (this.props.isHorizontal) {
                 offset.y = 0;
+                offset.x += this.props.distanceFromWindow;
             } else {
                 offset.x = 0;
+                offset.y += this.props.distanceFromWindow;
             }
             setTimeout(() => {
                 this.scrollToOffset(offset.x, offset.y, false);
