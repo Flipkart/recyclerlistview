@@ -115,6 +115,7 @@ export interface RecyclerListViewProps {
 
 export interface RecyclerListViewState {
     renderStack: RenderStack;
+    internalSnapshot: Record<string, object>;
 }
 
 export default class RecyclerListView<P extends RecyclerListViewProps, S extends RecyclerListViewState> extends React.Component<P, S> {
@@ -159,6 +160,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }, !props.disableRecycling);
 
         this.state = {
+            internalSnapshot: {},
             renderStack: {},
         } as S;
     }
@@ -322,6 +324,13 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     public getContentDimension(): Dimension {
         return this._virtualRenderer.getLayoutDimension();
+    }
+
+    // Force Rerender forcefully to update view renderer. Use this in rare circumstances
+    public forceRerender(): void {
+        this.setState({
+            internalSnapshot: {},
+        });
     }
 
     public render(): JSX.Element {
@@ -515,7 +524,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     height={itemRect.height}
                     width={itemRect.width}
                     itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
-                    extendedState={this.props.extendedState} />
+                    extendedState={this.props.extendedState}
+                    internalSnapshot={this.state.internalSnapshot} />
             );
         }
         return null;
