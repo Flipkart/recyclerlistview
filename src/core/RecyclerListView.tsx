@@ -310,7 +310,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     public getCurrentScrollOffset(): number {
         const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
-        return viewabilityTracker ? viewabilityTracker.getLastActualOffset() + this.props.distanceFromWindow! : 0;
+        let currentOffset = (viewabilityTracker ? viewabilityTracker.getLastActualOffset() : 0);
+        if (currentOffset > this.props.distanceFromWindow) {
+            currentOffset += this.props.distanceFromWindow!;
+        }
+        return currentOffset;
     }
 
     public findApproxFirstVisibleIndex(): number {
