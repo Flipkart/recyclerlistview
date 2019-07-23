@@ -55,10 +55,6 @@ const IS_WEB = !Platform || Platform.OS === "web";
 //const IS_WEB = true;
 //#endif
 
-const refreshRequestDebouncer = debounce((executable: () => void) => {
-    executable();
-});
-
 /***
  * This is the main component, please refer to samples to understand how to use.
  * For advanced usage check out prop descriptions below.
@@ -131,6 +127,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     };
 
     public static propTypes = {};
+
+    private refreshRequestDebouncer = debounce((executable: () => void) => {
+        executable();
+    });
+
     private _virtualRenderer: VirtualRenderer;
     private _onEndReachedCalled = false;
     private _initComplete = false;
@@ -412,7 +413,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _queueStateRefresh(): void {
-        refreshRequestDebouncer(() => {
+        this.refreshRequestDebouncer(() => {
             this.setState((prevState) => {
                 return prevState;
             });
