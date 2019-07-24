@@ -8,6 +8,7 @@ import { AutoScroll } from "./utils/AutoScroll";
 import { Layout, LayoutManager, Point, WrapGridLayoutManager } from "./core/layoutmanager/LayoutManager";
 import ProgressiveListView from "./core/ProgressiveListView";
 import { DebugHandlers } from "./core/devutils/debughandlers/DebugHandlers";
+import StickyContainer from "./core/StickyContainer";
 
 export {
     ContextProvider,
@@ -26,4 +27,5 @@ export {
     Layout,
     OnRecreateParams,
     DebugHandlers,
+    StickyContainer,
 };
