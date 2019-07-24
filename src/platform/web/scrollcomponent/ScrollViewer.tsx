@@ -2,9 +2,6 @@ import * as React from "react";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "../../../core/scrollcomponent/BaseScrollView";
 import debounce = require("lodash.debounce");
 import { ScrollEventNormalizer } from "./ScrollEventNormalizer";
-const scrollEndEventSimulator = debounce((executable: () => void) => {
-    executable();
-}, 1200);
 
 /***
  * A scrollviewer that mimics react native scrollview. Additionally on web it can start listening to window scroll events optionally.
@@ -17,6 +14,10 @@ export default class ScrollViewer extends BaseScrollView {
         style: null,
         useWindowScroll: false,
     };
+
+    private scrollEndEventSimulator = debounce((executable: () => void) => {
+        executable();
+    }, 1200);
 
     private _mainDivRef: HTMLDivElement | null = null;
     private _isScrolling: boolean = false;
@@ -133,7 +134,7 @@ export default class ScrollViewer extends BaseScrollView {
             }
             this._isScrolling = true;
         }
-        scrollEndEventSimulator(this._isScrollEnd);
+        this.scrollEndEventSimulator(this._isScrollEnd);
     }
 
     private _doAnimatedScroll(offset: number): void {
