@@ -53,7 +53,7 @@ export default class VirtualRenderer {
     private _dimensions: Dimension | null;
 
     constructor(renderStackChanged: (renderStack: RenderStack) => void,
-                scrollOnNextUpdate: (point: Point) => void,
+                scrollOnNextUpdate: (point: Point, handleDFW: boolean) => void,
                 fetchStableId: StableIdProvider,
                 isRecyclingEnabled: boolean) {
         //Keeps track of items that need to be rendered in the next render cycle
