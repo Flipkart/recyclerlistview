@@ -14,7 +14,7 @@ import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
 import {Layout} from "./layoutmanager/LayoutManager";
 import {BaseLayoutProvider, Dimension} from "./dependencies/LayoutProvider";
-import DataProvider from "./dependencies/DataProvider";
+import { BaseDataProvider } from "./dependencies/DataProvider";
 import {ReactElement} from "react";
 
 export interface StickyContainerProps {
@@ -31,7 +31,7 @@ export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps>
 export default class StickyContainer<P extends StickyContainerProps> extends React.Component<P> {
     public static propTypes = {};
     private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | undefined = undefined;
-    private _dataProvider: DataProvider;
+    private _dataProvider: BaseDataProvider;
     private _layoutProvider: BaseLayoutProvider;
     private _extendedState: object | undefined;
     private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
