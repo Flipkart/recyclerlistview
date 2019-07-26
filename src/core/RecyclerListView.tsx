@@ -145,6 +145,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     };
     private _layout: Dimension = { height: 0, width: 0 };
     private _pendingScrollToOffset: Point | null = null;
+    private _handleDistanceFromWindowOnNextUpdate: boolean = false;
     private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
     private _cachedLayouts?: Layout[];
@@ -154,8 +155,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     constructor(props: P, context?: any) {
         super(props, context);
-        this._virtualRenderer = new VirtualRenderer(this._renderStackWhenReady, (offset) => {
+        this._virtualRenderer = new VirtualRenderer(this._renderStackWhenReady, (offset, handleDFW) => {
             this._pendingScrollToOffset = offset;
+            this._handleDistanceFromWindowOnNextUpdate = handleDFW;
         }, (index) => {
             return this.props.dataProvider.getStableId(index);
         }, !props.disableRecycling);
@@ -183,11 +185,15 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     public componentDidUpdate(): void {
         if (this._pendingScrollToOffset) {
             const offset = this._pendingScrollToOffset;
+            const correction = this._handleDistanceFromWindowOnNextUpdate ? this.props.distanceFromWindow! : 0;
+            this._handleDistanceFromWindowOnNextUpdate = false;
             this._pendingScrollToOffset = null;
             if (this.props.isHorizontal) {
                 offset.y = 0;
+                offset.x += correction;
             } else {
                 offset.x = 0;
+                offset.y += correction;
             }
             setTimeout(() => {
                 this.scrollToOffset(offset.x, offset.y, false);
