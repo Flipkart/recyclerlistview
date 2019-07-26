@@ -34,7 +34,7 @@ export default class VirtualRenderer {
 
     private onVisibleItemsChanged: TOnItemStatusChanged | null;
 
-    private _scrollOnNextUpdate: (point: Point) => void;
+    private _scrollOnNextUpdate: (point: Point, handleDFW: boolean) => void;
     private _stableIdToRenderKeyMap: { [key: string]: StableIdMapItem | undefined };
     private _engagedIndexes: { [key: number]: number | undefined };
     private _renderStack: RenderStack;
@@ -142,7 +142,7 @@ export default class VirtualRenderer {
             let offset = 0;
             if (this._layoutManager && this._params) {
                 const point = this._layoutManager.getOffsetForIndex(firstVisibleIndex);
-                this._scrollOnNextUpdate(point);
+                this._scrollOnNextUpdate(point, false);
                 offset = this._params.isHorizontal ? point.x : point.y;
             }
             this._viewabilityTracker.forceRefreshWithOffset(offset);
@@ -154,9 +154,9 @@ export default class VirtualRenderer {
             this._prepareViewabilityTracker();
             if (this._viewabilityTracker.forceRefresh()) {
                 if (this._params && this._params.isHorizontal) {
-                    this._scrollOnNextUpdate({ x: this._viewabilityTracker.getLastOffset(), y: 0 });
+                    this._scrollOnNextUpdate({ x: this._viewabilityTracker.getLastOffset(), y: 0 }, true);
                 } else {
-                    this._scrollOnNextUpdate({ x: 0, y: this._viewabilityTracker.getLastOffset() });
+                    this._scrollOnNextUpdate({ x: 0, y: this._viewabilityTracker.getLastOffset() }, true);
                 }
             }
         }
