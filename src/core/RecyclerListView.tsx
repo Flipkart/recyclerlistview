@@ -145,7 +145,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     };
     private _layout: Dimension = { height: 0, width: 0 };
     private _pendingScrollToOffset: Point | null = null;
-    private _handleDistanceFromWindowOnNextUpdate: boolean = false;
     private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
     private _cachedLayouts?: Layout[];
@@ -155,9 +154,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     constructor(props: P, context?: any) {
         super(props, context);
-        this._virtualRenderer = new VirtualRenderer(this._renderStackWhenReady, (offset, handleDFW) => {
+        this._virtualRenderer = new VirtualRenderer(this._renderStackWhenReady, (offset) => {
             this._pendingScrollToOffset = offset;
-            this._handleDistanceFromWindowOnNextUpdate = handleDFW;
         }, (index) => {
             return this.props.dataProvider.getStableId(index);
         }, !props.disableRecycling);
@@ -185,15 +183,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     public componentDidUpdate(): void {
         if (this._pendingScrollToOffset) {
             const offset = this._pendingScrollToOffset;
-            const correction = this._handleDistanceFromWindowOnNextUpdate ? this.props.distanceFromWindow! : 0;
-            this._handleDistanceFromWindowOnNextUpdate = false;
             this._pendingScrollToOffset = null;
             if (this.props.isHorizontal) {
                 offset.y = 0;
-                offset.x += correction;
             } else {
                 offset.x = 0;
-                offset.y += correction;
             }
             setTimeout(() => {
                 this.scrollToOffset(offset.x, offset.y, false);
@@ -317,11 +311,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     public getCurrentScrollOffset(): number {
         const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
-        if (viewabilityTracker) {
-            const actualOffset = viewabilityTracker.getLastActualOffset();
-            return actualOffset === undefined ? 0 : actualOffset + this.props.distanceFromWindow!;
-        }
-        return 0;
+        return viewabilityTracker ? viewabilityTracker.getLastActualOffset() : 0;
     }
 
     public findApproxFirstVisibleIndex(): number {
@@ -586,7 +576,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _onScroll = (offsetX: number, offsetY: number, rawEvent: ScrollEvent): void => {
         //Adjusting offsets using distanceFromWindow
-        this._virtualRenderer.updateOffset(offsetX - this.props.distanceFromWindow!, offsetY - this.props.distanceFromWindow!, true);
+        this._virtualRenderer.updateOffset(offsetX, offsetY, -this.props.distanceFromWindow!, true);
 
         if (this.props.onScroll) {
             this.props.onScroll(rawEvent, offsetX, offsetY);
@@ -677,7 +667,8 @@ RecyclerListView.propTypes = {
     //Specify how far away the first list item is from start of the RecyclerListView. e.g, if you have content padding on top or left.
     //This is an adjustment for optimization and to make sure onVisibileIndexesChanged callback is correct.
     //Ideally try to avoid setting large padding values on RLV content. If you have to please correct offsets reported, handle
-    //them in a custom ScrollView and pass it as an externalScrollView.
+    //them in a custom ScrollView and pass it as an externalScrollView. If you want this to be accounted in scrollToOffset please
+    //override the method and handle manually.
     distanceFromWindow: PropTypes.number,
 
     //Web only. Layout elements in window instead of a scrollable div.

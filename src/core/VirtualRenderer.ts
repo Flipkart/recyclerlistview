@@ -34,7 +34,7 @@ export default class VirtualRenderer {
 
     private onVisibleItemsChanged: TOnItemStatusChanged | null;
 
-    private _scrollOnNextUpdate: (point: Point, handleDFW: boolean) => void;
+    private _scrollOnNextUpdate: (point: Point) => void;
     private _stableIdToRenderKeyMap: { [key: string]: StableIdMapItem | undefined };
     private _engagedIndexes: { [key: number]: number | undefined };
     private _renderStack: RenderStack;
@@ -53,7 +53,7 @@ export default class VirtualRenderer {
     private _dimensions: Dimension | null;
 
     constructor(renderStackChanged: (renderStack: RenderStack) => void,
-                scrollOnNextUpdate: (point: Point, handleDFW: boolean) => void,
+                scrollOnNextUpdate: (point: Point) => void,
                 fetchStableId: StableIdProvider,
                 isRecyclingEnabled: boolean) {
         //Keeps track of items that need to be rendered in the next render cycle
@@ -86,15 +86,15 @@ export default class VirtualRenderer {
         return { height: 0, width: 0 };
     }
 
-    public updateOffset(offsetX: number, offsetY: number, sourceIsOnScroll?: boolean): void {
+    public updateOffset(offsetX: number, offsetY: number, correction: number, isActual: boolean): void {
         if (this._viewabilityTracker) {
             if (!this._isViewTrackerRunning) {
                 this.startViewabilityTracker();
             }
             if (this._params && this._params.isHorizontal) {
-                this._viewabilityTracker.updateOffset(offsetX, sourceIsOnScroll);
+                this._viewabilityTracker.updateOffset(offsetX, correction, isActual);
             } else {
-                this._viewabilityTracker.updateOffset(offsetY, sourceIsOnScroll);
+                this._viewabilityTracker.updateOffset(offsetY, correction, isActual);
             }
         }
     }
@@ -142,7 +142,7 @@ export default class VirtualRenderer {
             let offset = 0;
             if (this._layoutManager && this._params) {
                 const point = this._layoutManager.getOffsetForIndex(firstVisibleIndex);
-                this._scrollOnNextUpdate(point, false);
+                this._scrollOnNextUpdate(point);
                 offset = this._params.isHorizontal ? point.x : point.y;
             }
             this._viewabilityTracker.forceRefreshWithOffset(offset);
@@ -154,9 +154,9 @@ export default class VirtualRenderer {
             this._prepareViewabilityTracker();
             if (this._viewabilityTracker.forceRefresh()) {
                 if (this._params && this._params.isHorizontal) {
-                    this._scrollOnNextUpdate({ x: this._viewabilityTracker.getLastOffset(), y: 0 }, true);
+                    this._scrollOnNextUpdate({ x: this._viewabilityTracker.getLastActualOffset(), y: 0 });
                 } else {
-                    this._scrollOnNextUpdate({ x: 0, y: this._viewabilityTracker.getLastOffset() }, true);
+                    this._scrollOnNextUpdate({ x: 0, y: this._viewabilityTracker.getLastActualOffset() });
                 }
             }
         }
