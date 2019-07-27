@@ -96,7 +96,7 @@ export default class ViewabilityTracker {
         return this._currentOffset;
     }
 
-    public getLastActualOffset(): number | undefined {
+    public getLastActualOffset(): number {
         return this._actualOffset;
     }
 
