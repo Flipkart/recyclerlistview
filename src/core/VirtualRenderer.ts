@@ -86,15 +86,15 @@ export default class VirtualRenderer {
         return { height: 0, width: 0 };
     }
 
-    public updateOffset(offsetX: number, offsetY: number): void {
+    public updateOffset(offsetX: number, offsetY: number, sourceIsOnScroll?: boolean): void {
         if (this._viewabilityTracker) {
             if (!this._isViewTrackerRunning) {
                 this.startViewabilityTracker();
             }
             if (this._params && this._params.isHorizontal) {
-                this._viewabilityTracker.updateOffset(offsetX);
+                this._viewabilityTracker.updateOffset(offsetX, sourceIsOnScroll);
             } else {
-                this._viewabilityTracker.updateOffset(offsetY);
+                this._viewabilityTracker.updateOffset(offsetY, sourceIsOnScroll);
             }
         }
     }

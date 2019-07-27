@@ -586,7 +586,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _onScroll = (offsetX: number, offsetY: number, rawEvent: ScrollEvent): void => {
         //Adjusting offsets using distanceFromWindow
-        this._virtualRenderer.updateOffset(offsetX - this.props.distanceFromWindow!, offsetY - this.props.distanceFromWindow!);
+        this._virtualRenderer.updateOffset(offsetX - this.props.distanceFromWindow!, offsetY - this.props.distanceFromWindow!, true);
 
         if (this.props.onScroll) {
             this.props.onScroll(rawEvent, offsetX, offsetY);

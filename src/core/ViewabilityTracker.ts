@@ -75,8 +75,10 @@ export default class ViewabilityTracker {
         this.updateOffset(offset);
     }
 
-    public updateOffset(offset: number): void {
-        this._actualOffset = offset;
+    public updateOffset(offset: number, sourceIsOnScroll?: boolean): void {
+        if (sourceIsOnScroll) {
+            this._actualOffset = offset;
+        }
         offset = Math.min(this._maxOffset, Math.max(0, offset));
         if (this._currentOffset !== offset) {
             this._currentOffset = offset;
