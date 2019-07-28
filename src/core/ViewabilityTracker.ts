@@ -29,11 +29,12 @@ export default class ViewabilityTracker {
     private _visibleIndexes: number[];
     private _engagedIndexes: number[];
     private _layouts: Layout[] = [];
-    private _actualOffset?: number;
+    private _actualOffset: number;
 
     constructor(renderAheadOffset: number, initialOffset: number) {
         this._currentOffset = Math.max(0, initialOffset);
         this._maxOffset = 0;
+        this._actualOffset = 0;
         this._renderAheadOffset = renderAheadOffset;
         this._visibleWindow = { start: 0, end: 0 };
         this._engagedWindow = { start: 0, end: 0 };
@@ -72,14 +73,14 @@ export default class ViewabilityTracker {
 
     public forceRefreshWithOffset(offset: number): void {
         this._currentOffset = -1;
-        this.updateOffset(offset);
+        this.updateOffset(offset, 0, false);
     }
 
-    public updateOffset(offset: number, sourceIsOnScroll?: boolean): void {
-        if (sourceIsOnScroll) {
+    public updateOffset(offset: number, correction: number, isActual: boolean): void {
+        if (isActual) {
             this._actualOffset = offset;
         }
-        offset = Math.min(this._maxOffset, Math.max(0, offset));
+        offset = Math.min(this._maxOffset, Math.max(0, offset + correction));
         if (this._currentOffset !== offset) {
             this._currentOffset = offset;
             this._updateTrackingWindows(offset);
@@ -95,7 +96,7 @@ export default class ViewabilityTracker {
         return this._currentOffset;
     }
 
-    public getLastActualOffset(): number | undefined {
+    public getLastActualOffset(): number {
         return this._actualOffset;
     }
 
