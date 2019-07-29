@@ -23,7 +23,7 @@ import * as PropTypes from "prop-types";
 import * as React from "react";
 import { ObjectUtil, Default } from "ts-object-utils";
 import ContextProvider from "./dependencies/ContextProvider";
-import DataProvider from "./dependencies/DataProvider";
+import { BaseDataProvider } from "./dependencies/DataProvider";
 import { Dimension, BaseLayoutProvider } from "./dependencies/LayoutProvider";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
@@ -55,10 +55,6 @@ const IS_WEB = !Platform || Platform.OS === "web";
 //const IS_WEB = true;
 //#endif
 
-const refreshRequestDebouncer = debounce((executable: () => void) => {
-    executable();
-});
-
 /***
  * This is the main component, please refer to samples to understand how to use.
  * For advanced usage check out prop descriptions below.
@@ -81,7 +77,7 @@ export interface OnRecreateParams {
 
 export interface RecyclerListViewProps {
     layoutProvider: BaseLayoutProvider;
-    dataProvider: DataProvider;
+    dataProvider: BaseDataProvider;
     rowRenderer: (type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
     contextProvider?: ContextProvider;
     renderAheadOffset?: number;
@@ -105,7 +101,7 @@ export interface RecyclerListViewProps {
     extendedState?: object;
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
-    style?: object|number;
+    style?: object | number;
     debugHandlers?: DebugHandlers;
 
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
@@ -131,6 +127,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     };
 
     public static propTypes = {};
+
+    private refreshRequestDebouncer = debounce((executable: () => void) => {
+        executable();
+    });
+
     private _virtualRenderer: VirtualRenderer;
     private _onEndReachedCalled = false;
     private _initComplete = false;
@@ -310,7 +311,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     public getCurrentScrollOffset(): number {
         const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
-        return viewabilityTracker ? viewabilityTracker.getLastActualOffset() + this.props.distanceFromWindow! : 0;
+        return viewabilityTracker ? viewabilityTracker.getLastActualOffset() : 0;
     }
 
     public findApproxFirstVisibleIndex(): number {
@@ -412,7 +413,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _queueStateRefresh(): void {
-        refreshRequestDebouncer(() => {
+        this.refreshRequestDebouncer(() => {
             this.setState((prevState) => {
                 return prevState;
             });
@@ -575,7 +576,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _onScroll = (offsetX: number, offsetY: number, rawEvent: ScrollEvent): void => {
         //Adjusting offsets using distanceFromWindow
-        this._virtualRenderer.updateOffset(offsetX - this.props.distanceFromWindow!, offsetY - this.props.distanceFromWindow!);
+        this._virtualRenderer.updateOffset(offsetX, offsetY, -this.props.distanceFromWindow!, true);
 
         if (this.props.onScroll) {
             this.props.onScroll(rawEvent, offsetX, offsetY);
@@ -609,7 +610,7 @@ RecyclerListView.propTypes = {
     layoutProvider: PropTypes.instanceOf(BaseLayoutProvider).isRequired,
 
     //Refer the sample
-    dataProvider: PropTypes.instanceOf(DataProvider).isRequired,
+    dataProvider: PropTypes.instanceOf(BaseDataProvider).isRequired,
 
     //Used to maintain scroll position in case view gets destroyed e.g, cases of back navigation
     contextProvider: PropTypes.instanceOf(ContextProvider),
@@ -666,7 +667,8 @@ RecyclerListView.propTypes = {
     //Specify how far away the first list item is from start of the RecyclerListView. e.g, if you have content padding on top or left.
     //This is an adjustment for optimization and to make sure onVisibileIndexesChanged callback is correct.
     //Ideally try to avoid setting large padding values on RLV content. If you have to please correct offsets reported, handle
-    //them in a custom ScrollView and pass it as an externalScrollView.
+    //them in a custom ScrollView and pass it as an externalScrollView. If you want this to be accounted in scrollToOffset please
+    //override the method and handle manually.
     distanceFromWindow: PropTypes.number,
 
     //Web only. Layout elements in window instead of a scrollable div.
@@ -700,7 +702,7 @@ RecyclerListView.propTypes = {
     style: PropTypes.oneOfType([
         PropTypes.object,
         PropTypes.number,
-      ]),
+    ]),
     //For TS use case, not necessary with JS use.
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down.

@@ -2,7 +2,7 @@
 import React from 'react';
 import {View} from 'react-native';
 import {RecyclerListView, DataProvider, LayoutProvider} from 'recyclerlistview';
-import StickyContainer from 'recyclerlistview/dist/reactnative/core/StickyContainer';
+import StickyContainer from 'recyclerlistview/sticky';
 export default class StickySample extends React.Component {
 
     constructor(props) {

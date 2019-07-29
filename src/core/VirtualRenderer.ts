@@ -6,7 +6,7 @@ import { Point, LayoutManager } from "./layoutmanager/LayoutManager";
 import ViewabilityTracker, { TOnItemStatusChanged } from "./ViewabilityTracker";
 import { ObjectUtil, Default } from "ts-object-utils";
 import TSCast from "../utils/TSCast";
-import DataProvider from "./dependencies/DataProvider";
+import { BaseDataProvider } from "./dependencies/DataProvider";
 
 /***
  * Renderer which keeps track of recyclable items and the currently rendered items. Notifies list view to re render if something changes, like scroll offset
@@ -86,15 +86,15 @@ export default class VirtualRenderer {
         return { height: 0, width: 0 };
     }
 
-    public updateOffset(offsetX: number, offsetY: number): void {
+    public updateOffset(offsetX: number, offsetY: number, correction: number, isActual: boolean): void {
         if (this._viewabilityTracker) {
             if (!this._isViewTrackerRunning) {
                 this.startViewabilityTracker();
             }
             if (this._params && this._params.isHorizontal) {
-                this._viewabilityTracker.updateOffset(offsetX);
+                this._viewabilityTracker.updateOffset(offsetX, correction, isActual);
             } else {
-                this._viewabilityTracker.updateOffset(offsetY);
+                this._viewabilityTracker.updateOffset(offsetY, correction, isActual);
             }
         }
     }
@@ -154,9 +154,9 @@ export default class VirtualRenderer {
             this._prepareViewabilityTracker();
             if (this._viewabilityTracker.forceRefresh()) {
                 if (this._params && this._params.isHorizontal) {
-                    this._scrollOnNextUpdate({ x: this._viewabilityTracker.getLastOffset(), y: 0 });
+                    this._scrollOnNextUpdate({ x: this._viewabilityTracker.getLastActualOffset(), y: 0 });
                 } else {
-                    this._scrollOnNextUpdate({ x: 0, y: this._viewabilityTracker.getLastOffset() });
+                    this._scrollOnNextUpdate({ x: 0, y: this._viewabilityTracker.getLastActualOffset() });
                 }
             }
         }
@@ -247,7 +247,7 @@ export default class VirtualRenderer {
     }
 
     //Further optimize in later revision, pretty fast for now considering this is a low frequency event
-    public handleDataSetChange(newDataProvider: DataProvider, shouldOptimizeForAnimations?: boolean): void {
+    public handleDataSetChange(newDataProvider: BaseDataProvider, shouldOptimizeForAnimations?: boolean): void {
         const getStableId = newDataProvider.getStableId;
         const maxIndex = newDataProvider.getSize() - 1;
         const activeStableIds: { [key: string]: number } = {};

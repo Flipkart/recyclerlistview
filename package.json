@@ -1,6 +1,6 @@
 {
   "name": "recyclerlistview",
-  "version": "2.0.3",
+  "version": "2.0.8",
   "description": "The listview that you need and deserve. It was built for performance, uses cell recycling to achieve smooth scrolling.",
   "main": "dist/reactnative/index.js",
   "types": "dist/reactnative/index.d.ts",
