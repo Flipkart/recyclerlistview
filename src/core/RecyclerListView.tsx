@@ -399,7 +399,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         } else if (this._relayoutReqIndex >= 0) {
             const layoutManager = this._virtualRenderer.getLayoutManager();
             if (layoutManager) {
-                layoutManager.relayoutFromIndex(this._relayoutReqIndex, newProps.dataProvider.getSize());
+                const dataProviderSize = newProps.dataProvider.getSize();
+                layoutManager.relayoutFromIndex(Math.min(Math.max(dataProviderSize - 1, 0), this._relayoutReqIndex), dataProviderSize);
                 this._relayoutReqIndex = -1;
                 this._refreshViewability();
             }
