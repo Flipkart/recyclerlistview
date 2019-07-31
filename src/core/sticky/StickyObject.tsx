@@ -72,7 +72,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         this.stickyViewVisible(this.stickyVisiblity);
     }
 
-    public render(): JSX.Element | null {
+    public renderCompat(): JSX.Element | null {
         return (
             <Animated.View style={[
                 {position: "absolute", width: this._scrollableWidth, transform: [{translateY: this._stickyViewOffset}]},

@@ -57,7 +57,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
         this._initParams(newProps);
     }
 
-    public render(): JSX.Element {
+    public renderCompat(): JSX.Element {
         this._assertChildType();
         const recycler: ReactElement<RecyclerListViewProps> = React.cloneElement(this.props.children, {
             ...this.props.children.props,

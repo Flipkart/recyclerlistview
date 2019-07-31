@@ -335,7 +335,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         });
     }
 
-    public render(): JSX.Element {
+    public renderCompat(): JSX.Element {
         //TODO:Talha
         // const {
         //     layoutProvider,

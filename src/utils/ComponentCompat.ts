@@ -1,6 +1,6 @@
 import * as React from "react";
 
-export class ComponentCompat<T1 = {}, T2 = {}, SS = any> extends React.Component<T1, T2, SS> {
+export abstract class ComponentCompat<T1 = {}, T2 = {}, SS = any> extends React.Component<T1, T2, SS> {
     private _hasRenderedOnce: boolean = false;
     private _didPropsChange: boolean = false;
 
@@ -28,6 +28,8 @@ export class ComponentCompat<T1 = {}, T2 = {}, SS = any> extends React.Component
             this._hasRenderedOnce = true;
             this.componentWillMountCompat();
         }
-        return undefined;
+        return this.renderCompat();
     }
+
+    public abstract renderCompat(): React.ReactNode;
 }
