@@ -8,6 +8,7 @@ import {Layout} from "../layoutmanager/LayoutManager";
 import {Dimension} from "../dependencies/LayoutProvider";
 import RecyclerListViewExceptions from "../exceptions/RecyclerListViewExceptions";
 import CustomError from "../exceptions/CustomError";
+import { ComponentCompat } from "../../utils/ComponentCompat";
 
 export enum StickyType {
     HEADER,
@@ -25,10 +26,7 @@ export interface StickyObjectProps {
     getDistanceFromWindow: () => number;
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
 }
-export interface StickyObjectState {
-    visible: boolean;
-}
-export default abstract class StickyObject<P extends StickyObjectProps, S extends StickyObjectState> extends React.Component<P, S> {
+export default abstract class StickyObject<P extends StickyObjectProps> extends ComponentCompat<P> {
     protected stickyType: StickyType = StickyType.HEADER;
     protected stickyTypeMultiplier: number = 1;
     protected stickyVisiblity: boolean = false;
@@ -60,15 +58,13 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     private _smallestVisibleIndex: number = 0;
     private _largestVisibleIndex: number = 0;
     private _offsetY: number = 0;
+    private _isStickyVisible: boolean = false;
 
     constructor(props: P, context?: any) {
         super(props, context);
-        this.state = {
-            visible: this.stickyVisiblity,
-        } as S;
     }
 
-    public componentWillReceiveProps(newProps: StickyObjectProps): void {
+    public componentWillReceivePropsCompat(newProps: StickyObjectProps): void {
         this._initParams();
         this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
             this._offsetY, newProps.getDistanceFromWindow(), this._windowBound);
@@ -82,7 +78,7 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
                 {position: "absolute", width: this._scrollableWidth, transform: [{translateY: this._stickyViewOffset}]},
                 this.containerPosition,
             ]}>
-                {this.state.visible ?
+                {this._isStickyVisible ?
                     this._renderSticky()
                 : null}
             </Animated.View>
@@ -155,9 +151,8 @@ export default abstract class StickyObject<P extends StickyObjectProps, S extend
     protected abstract getScrollY(offsetY: number, scrollableHeight?: number): number | undefined;
 
     protected stickyViewVisible(_visible: boolean): void {
-        this.setState({
-            visible: _visible,
-        });
+        this._isStickyVisible = _visible;
+        this.setState({});
     }
 
     protected boundaryProcessing(offsetY: number, distanceFromWindow: number, windowBound?: number): void {

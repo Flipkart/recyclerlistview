@@ -36,6 +36,7 @@ import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 import { DebugHandlers } from "..";
+import { ComponentCompat } from "../utils/ComponentCompat";
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
@@ -114,7 +115,7 @@ export interface RecyclerListViewState {
     internalSnapshot: Record<string, object>;
 }
 
-export default class RecyclerListView<P extends RecyclerListViewProps, S extends RecyclerListViewState> extends React.Component<P, S> {
+export default class RecyclerListView<P extends RecyclerListViewProps, S extends RecyclerListViewState> extends ComponentCompat<P, S> {
     public static defaultProps = {
         canChangeSize: false,
         disableRecycling: false,
@@ -166,7 +167,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         } as S;
     }
 
-    public componentWillReceiveProps(newProps: RecyclerListViewProps): void {
+    public componentWillReceivePropsCompat(newProps: RecyclerListViewProps): void {
         this._assertDependencyPresence(newProps);
         this._checkAndChangeLayouts(newProps);
         if (!this.props.onVisibleIndicesChanged) {
@@ -219,7 +220,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
     }
 
-    public componentWillMount(): void {
+    public componentWillMountCompat(): void {
         if (this.props.contextProvider) {
             const uniqueKey = this.props.contextProvider.getUniqueKey();
             if (uniqueKey) {

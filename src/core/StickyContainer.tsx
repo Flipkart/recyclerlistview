@@ -4,18 +4,19 @@
 
 import * as React from "react";
 import * as PropTypes from "prop-types";
-import {StyleProp, View, ViewStyle} from "react-native";
-import RecyclerListView, {RecyclerListViewState, RecyclerListViewProps} from "./RecyclerListView";
-import {ScrollEvent} from "./scrollcomponent/BaseScrollView";
-import StickyObject, {StickyObjectProps, StickyObjectState} from "./sticky/StickyObject";
+import { StyleProp, View, ViewStyle } from "react-native";
+import RecyclerListView, { RecyclerListViewState, RecyclerListViewProps } from "./RecyclerListView";
+import { ScrollEvent } from "./scrollcomponent/BaseScrollView";
+import StickyObject, { StickyObjectProps } from "./sticky/StickyObject";
 import StickyHeader from "./sticky/StickyHeader";
 import StickyFooter from "./sticky/StickyFooter";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
-import {Layout} from "./layoutmanager/LayoutManager";
-import {BaseLayoutProvider, Dimension} from "./dependencies/LayoutProvider";
+import { Layout } from "./layoutmanager/LayoutManager";
+import { BaseLayoutProvider, Dimension } from "./dependencies/LayoutProvider";
 import { BaseDataProvider } from "./dependencies/DataProvider";
-import {ReactElement} from "react";
+import { ReactElement } from "react";
+import { ComponentCompat } from "../utils/ComponentCompat";
 
 export interface StickyContainerProps {
     children: RecyclerChild;
@@ -28,7 +29,7 @@ export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps>
     ref: (recyclerRef: any) => {};
     props: RecyclerListViewProps;
 }
-export default class StickyContainer<P extends StickyContainerProps> extends React.Component<P> {
+export default class StickyContainer<P extends StickyContainerProps> extends ComponentCompat<P> {
     public static propTypes = {};
     private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | undefined = undefined;
     private _dataProvider: BaseDataProvider;
@@ -37,8 +38,8 @@ export default class StickyContainer<P extends StickyContainerProps> extends Rea
     private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
     private _distanceFromWindow: number;
 
-    private _stickyHeaderRef: StickyHeader<StickyObjectProps, StickyObjectState> | null = null;
-    private _stickyFooterRef: StickyFooter<StickyObjectProps, StickyObjectState> | null = null;
+    private _stickyHeaderRef: StickyHeader<StickyObjectProps> | null = null;
+    private _stickyFooterRef: StickyFooter<StickyObjectProps> | null = null;
     private _visibleIndicesAll: number[] = [];
 
     constructor(props: P, context?: any) {
@@ -52,7 +53,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Rea
         this._distanceFromWindow = childProps.distanceFromWindow ? childProps.distanceFromWindow : 0;
     }
 
-    public componentWillReceiveProps(newProps: P): void {
+    public componentWillReceivePropsCompat(newProps: P): void {
         this._initParams(newProps);
     }
 
@@ -65,33 +66,33 @@ export default class StickyContainer<P extends StickyContainerProps> extends Rea
             onScroll: this._onScroll,
         });
         return (
-            <View style={this.props.style ? this.props.style : {flex: 1}}>
+            <View style={this.props.style ? this.props.style : { flex: 1 }}>
                 {recycler}
                 {this.props.stickyHeaderIndices ? (
                     <StickyHeader ref={(stickyHeaderRef: any) => this._getStickyHeaderRef(stickyHeaderRef)}
-                                  stickyIndices={this.props.stickyHeaderIndices}
-                                  getLayoutForIndex={this._getLayoutForIndex}
-                                  getDataForIndex={this._getDataForIndex}
-                                  getLayoutTypeForIndex={this._getLayoutTypeForIndex}
-                                  getExtendedState={this._getExtendedState}
-                                  getRLVRenderedSize={this._getRLVRenderedSize}
-                                  getContentDimension={this._getContentDimension}
-                                  getRowRenderer={this._getRowRenderer}
-                                  getDistanceFromWindow={this._getDistanceFromWindow}
-                                  overrideRowRenderer={this.props.overrideRowRenderer}/>
+                        stickyIndices={this.props.stickyHeaderIndices}
+                        getLayoutForIndex={this._getLayoutForIndex}
+                        getDataForIndex={this._getDataForIndex}
+                        getLayoutTypeForIndex={this._getLayoutTypeForIndex}
+                        getExtendedState={this._getExtendedState}
+                        getRLVRenderedSize={this._getRLVRenderedSize}
+                        getContentDimension={this._getContentDimension}
+                        getRowRenderer={this._getRowRenderer}
+                        getDistanceFromWindow={this._getDistanceFromWindow}
+                        overrideRowRenderer={this.props.overrideRowRenderer} />
                 ) : null}
                 {this.props.stickyFooterIndices ? (
                     <StickyFooter ref={(stickyFooterRef: any) => this._getStickyFooterRef(stickyFooterRef)}
-                                  stickyIndices={this.props.stickyFooterIndices}
-                                  getLayoutForIndex={this._getLayoutForIndex}
-                                  getDataForIndex={this._getDataForIndex}
-                                  getLayoutTypeForIndex={this._getLayoutTypeForIndex}
-                                  getExtendedState={this._getExtendedState}
-                                  getRLVRenderedSize={this._getRLVRenderedSize}
-                                  getContentDimension={this._getContentDimension}
-                                  getRowRenderer={this._getRowRenderer}
-                                  getDistanceFromWindow={this._getDistanceFromWindow}
-                                  overrideRowRenderer={this.props.overrideRowRenderer}/>
+                        stickyIndices={this.props.stickyFooterIndices}
+                        getLayoutForIndex={this._getLayoutForIndex}
+                        getDataForIndex={this._getDataForIndex}
+                        getLayoutTypeForIndex={this._getLayoutTypeForIndex}
+                        getExtendedState={this._getExtendedState}
+                        getRLVRenderedSize={this._getRLVRenderedSize}
+                        getContentDimension={this._getContentDimension}
+                        getRowRenderer={this._getRowRenderer}
+                        getDistanceFromWindow={this._getDistanceFromWindow}
+                        overrideRowRenderer={this.props.overrideRowRenderer} />
                 ) : null}
             </View>
         );
@@ -110,7 +111,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Rea
 
     private _getStickyHeaderRef = (stickyHeaderRef: any) => {
         if (this._stickyHeaderRef !== stickyHeaderRef) {
-            this._stickyHeaderRef = stickyHeaderRef as (StickyHeader<StickyObjectProps, StickyObjectState> | null);
+            this._stickyHeaderRef = stickyHeaderRef as (StickyHeader<StickyObjectProps> | null);
             // TODO: Resetting state once ref is initialized. Can look for better solution.
             this._callStickyObjectsOnVisibleIndicesChanged(this._visibleIndicesAll);
         }
@@ -118,7 +119,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Rea
 
     private _getStickyFooterRef = (stickyFooterRef: any) => {
         if (this._stickyFooterRef !== stickyFooterRef) {
-            this._stickyFooterRef = stickyFooterRef as (StickyFooter<StickyObjectProps, StickyObjectState> | null);
+            this._stickyFooterRef = stickyFooterRef as (StickyFooter<StickyObjectProps> | null);
             // TODO: Resetting state once ref is initialized. Can look for better solution.
             this._callStickyObjectsOnVisibleIndicesChanged(this._visibleIndicesAll);
         }
