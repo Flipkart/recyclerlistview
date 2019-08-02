@@ -58,7 +58,6 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     private _smallestVisibleIndex: number = 0;
     private _largestVisibleIndex: number = 0;
     private _offsetY: number = 0;
-    private _isStickyVisible: boolean = false;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -78,7 +77,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
                 {position: "absolute", width: this._scrollableWidth, transform: [{translateY: this._stickyViewOffset}]},
                 this.containerPosition,
             ]}>
-                {this._isStickyVisible ?
+                {this.stickyVisiblity ?
                     this._renderSticky()
                 : null}
             </Animated.View>
@@ -151,7 +150,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     protected abstract getScrollY(offsetY: number, scrollableHeight?: number): number | undefined;
 
     protected stickyViewVisible(_visible: boolean): void {
-        this._isStickyVisible = _visible;
+        this.stickyVisiblity = _visible;
         this.setState({});
     }
 
