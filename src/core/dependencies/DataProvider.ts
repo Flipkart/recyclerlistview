@@ -4,7 +4,7 @@ import { ObjectUtil } from "ts-object-utils";
  * You can create a new instance or inherit and override default methods
  * Allows access to data and size. Clone with rows creates a new data provider and let listview know where to calculate row layout from.
  */
-export default class DataProvider {
+export abstract class BaseDataProvider {
     public rowHasChanged: (r1: any, r2: any) => boolean;
 
     // In JS context make sure stable id is a string
@@ -24,6 +24,9 @@ export default class DataProvider {
             this.getStableId = (index) => index.toString();
         }
     }
+
+    public abstract newInstance(rowHasChanged: (r1: any, r2: any) => boolean, getStableId?: (index: number) => string): BaseDataProvider;
+
     public getDataForIndex(index: number): any {
         return this._data[index];
     }
@@ -51,7 +54,7 @@ export default class DataProvider {
     //No need to override this one
     //If you already know the first row where rowHasChanged will be false pass it upfront to avoid loop
     public cloneWithRows(newData: any[], firstModifiedIndex?: number): DataProvider {
-        const dp = new DataProvider(this.rowHasChanged, this.getStableId);
+        const dp = this.newInstance(this.rowHasChanged, this.getStableId);
         const newSize = newData.length;
         const iterCount = Math.min(this._size, newSize);
         if (ObjectUtil.isNullOrUndefined(firstModifiedIndex)) {
@@ -71,5 +74,11 @@ export default class DataProvider {
         dp._data = newData;
         dp._size = newSize;
         return dp;
+    }
+}
+
+export default class DataProvider extends BaseDataProvider {
+    public newInstance(rowHasChanged: (r1: any, r2: any) => boolean, getStableId?: ((index: number) => string) | undefined): BaseDataProvider {
+        return new DataProvider(rowHasChanged, getStableId);
     }
 }

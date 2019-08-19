@@ -14,7 +14,7 @@ import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
 import {Layout} from "./layoutmanager/LayoutManager";
 import {BaseLayoutProvider, Dimension} from "./dependencies/LayoutProvider";
-import DataProvider from "./dependencies/DataProvider";
+import { BaseDataProvider } from "./dependencies/DataProvider";
 import {ReactElement} from "react";
 
 export interface StickyContainerProps {
@@ -31,7 +31,7 @@ export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps>
 export default class StickyContainer<P extends StickyContainerProps> extends React.Component<P> {
     public static propTypes = {};
     private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | undefined = undefined;
-    private _dataProvider: DataProvider;
+    private _dataProvider: BaseDataProvider;
     private _layoutProvider: BaseLayoutProvider;
     private _extendedState: object | undefined;
     private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
@@ -109,7 +109,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Rea
     }
 
     private _getStickyHeaderRef = (stickyHeaderRef: any) => {
-        if (!this._stickyHeaderRef) {
+        if (this._stickyHeaderRef !== stickyHeaderRef) {
             this._stickyHeaderRef = stickyHeaderRef as (StickyHeader<StickyObjectProps, StickyObjectState> | null);
             // TODO: Resetting state once ref is initialized. Can look for better solution.
             this._callStickyObjectsOnVisibleIndicesChanged(this._visibleIndicesAll);
@@ -117,7 +117,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Rea
     }
 
     private _getStickyFooterRef = (stickyFooterRef: any) => {
-        if (!this._stickyFooterRef) {
+        if (this._stickyFooterRef !== stickyFooterRef) {
             this._stickyFooterRef = stickyFooterRef as (StickyFooter<StickyObjectProps, StickyObjectState> | null);
             // TODO: Resetting state once ref is initialized. Can look for better solution.
             this._callStickyObjectsOnVisibleIndicesChanged(this._visibleIndicesAll);

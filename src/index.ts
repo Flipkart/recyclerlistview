@@ -1,5 +1,5 @@
 import ContextProvider from "./core/dependencies/ContextProvider";
-import DataProvider from "./core/dependencies/DataProvider";
+import DataProvider, { BaseDataProvider } from "./core/dependencies/DataProvider";
 import { BaseLayoutProvider, Dimension, LayoutProvider } from "./core/dependencies/LayoutProvider";
 import RecyclerListView, { OnRecreateParams } from "./core/RecyclerListView";
 import BaseScrollView from "./core/scrollcomponent/BaseScrollView";
@@ -26,4 +26,5 @@ export {
     Layout,
     OnRecreateParams,
     DebugHandlers,
+    BaseDataProvider,
 };
