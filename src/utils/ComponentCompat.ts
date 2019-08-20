@@ -23,10 +23,16 @@ export abstract class ComponentCompat<T1 = {}, T2 = {}, SS = any> extends React.
         //no op
     }
 
+    public componentWillUpdateCompat(): void {
+        //no op
+    }
+
     public render(): React.ReactNode {
         if (!this._hasRenderedOnce) {
             this._hasRenderedOnce = true;
             this.componentWillMountCompat();
+        } else {
+            this.componentWillUpdateCompat();
         }
         return this.renderCompat();
     }
