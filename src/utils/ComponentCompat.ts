@@ -1,5 +1,6 @@
 import * as React from "react";
 
+//Interim solve given we want to be active on old react as well for now.
 export abstract class ComponentCompat<T1 = {}, T2 = {}, SS = any> extends React.Component<T1, T2, SS> {
     private _hasRenderedOnce: boolean = false;
     private _didPropsChange: boolean = false;
@@ -15,6 +16,7 @@ export abstract class ComponentCompat<T1 = {}, T2 = {}, SS = any> extends React.
         return true;
     }
 
+    //setState inside will not update the existing cycle, not a true replacement for componentWillReceiveProps
     public componentWillReceivePropsCompat(newProps: T1): void {
         //no op
     }
