@@ -8,6 +8,7 @@ import { AutoScroll } from "./utils/AutoScroll";
 import { Layout, LayoutManager, Point, WrapGridLayoutManager } from "./core/layoutmanager/LayoutManager";
 import ProgressiveListView from "./core/ProgressiveListView";
 import { DebugHandlers } from "./core/devutils/debughandlers/DebugHandlers";
+import { ComponentCompat } from "./utils/ComponentCompat";
 
 export {
     ContextProvider,
@@ -27,4 +28,5 @@ export {
     OnRecreateParams,
     DebugHandlers,
     BaseDataProvider,
+    ComponentCompat,
 };

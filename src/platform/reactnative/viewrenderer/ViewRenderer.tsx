@@ -12,7 +12,7 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
-    public render(): JSX.Element {
+    public renderCompat(): JSX.Element {
         return this.props.forceNonDeterministicRendering ? (
             <View ref={this._setRef}
             onLayout={this._onLayout}

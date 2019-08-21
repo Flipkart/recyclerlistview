@@ -2,10 +2,10 @@
  * Created by ananya.chandra on 20/09/18.
  */
 
-import StickyObject, {StickyObjectProps, StickyObjectState, StickyType} from "./StickyObject";
+import StickyObject, {StickyObjectProps, StickyType} from "./StickyObject";
 import BinarySearch, {ValueAndIndex} from "../../utils/BinarySearch";
 
-export default class StickyFooter<P extends StickyObjectProps, S extends StickyObjectState> extends StickyObject<P, S> {
+export default class StickyFooter<P extends StickyObjectProps> extends StickyObject<P> {
     constructor(props: P, context?: any) {
         super(props, context);
     }
