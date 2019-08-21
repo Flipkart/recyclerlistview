@@ -270,10 +270,15 @@ export default class ViewabilityTracker {
         return (window.start >= startBound && window.end <= endBound);
     }
 
+    private _isZeroHeightEdgeElement(window: Range, startBound: number, endBound: number): boolean {
+        return startBound - endBound === 0 && (window.start === startBound || window.end === endBound);
+    }
+
     private _itemIntersectsWindow(window: Range, startBound: number, endBound: number): boolean {
         return this._isItemInBounds(window, startBound) ||
             this._isItemInBounds(window, endBound) ||
-            this._isItemBoundsBeyondWindow(window, startBound, endBound);
+            this._isItemBoundsBeyondWindow(window, startBound, endBound) ||
+            this._isZeroHeightEdgeElement(window, startBound, endBound);
     }
 
     private _itemIntersectsEngagedWindow(startBound: number, endBound: number): boolean {
