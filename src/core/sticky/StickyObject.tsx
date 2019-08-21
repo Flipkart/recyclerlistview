@@ -68,7 +68,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
             this._offsetY, newProps.getDistanceFromWindow(), this._windowBound);
         this._computeLayouts(newProps.stickyIndices);
-        this.stickyViewVisible(this.stickyVisiblity);
+        this.stickyViewVisible(this.stickyVisiblity, false);
     }
 
     public renderCompat(): JSX.Element | null {
@@ -149,9 +149,11 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
     protected abstract getScrollY(offsetY: number, scrollableHeight?: number): number | undefined;
 
-    protected stickyViewVisible(_visible: boolean): void {
+    protected stickyViewVisible(_visible: boolean, shouldTriggerRender: boolean = true): void {
         this.stickyVisiblity = _visible;
-        this.setState({});
+        if (shouldTriggerRender) {
+            this.setState({});
+        }
     }
 
     protected boundaryProcessing(offsetY: number, distanceFromWindow: number, windowBound?: number): void {
