@@ -88,14 +88,14 @@ export default class VirtualRenderer {
 
     public updateOffset(offsetX: number, offsetY: number, correction: number, isActual: boolean): void {
         if (this._viewabilityTracker) {
+            const offset = this._params && this._params.isHorizontal ? offsetX : offsetY;
             if (!this._isViewTrackerRunning) {
+                if (isActual) {
+                    this._viewabilityTracker.setActualOffset(offset);
+                }
                 this.startViewabilityTracker();
             }
-            if (this._params && this._params.isHorizontal) {
-                this._viewabilityTracker.updateOffset(offsetX, correction, isActual);
-            } else {
-                this._viewabilityTracker.updateOffset(offsetY, correction, isActual);
-            }
+            this._viewabilityTracker.updateOffset(offset, correction, isActual);
         }
     }
 

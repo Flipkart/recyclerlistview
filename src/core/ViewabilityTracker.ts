@@ -133,6 +133,9 @@ export default class ViewabilityTracker {
     public getCurrentRenderAheadOffset(): number {
         return this._renderAheadOffset;
     }
+    public setActualOffset(actualOffset: number): void {
+       this._actualOffset = actualOffset;
+    }
 
     private _findFirstVisibleIndexOptimally(): number {
         let firstVisibleIndex = 0;
