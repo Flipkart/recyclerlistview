@@ -88,14 +88,14 @@ export default class VirtualRenderer {
 
     public updateOffset(offsetX: number, offsetY: number, correction: number, isActual: boolean): void {
         if (this._viewabilityTracker) {
+            const offset = this._params && this._params.isHorizontal ? offsetX : offsetY;
             if (!this._isViewTrackerRunning) {
+                if (isActual) {
+                    this._viewabilityTracker.setActualOffset(offset);
+                }
                 this.startViewabilityTracker();
             }
-            if (this._params && this._params.isHorizontal) {
-                this._viewabilityTracker.updateOffset(offsetX, correction, isActual);
-            } else {
-                this._viewabilityTracker.updateOffset(offsetY, correction, isActual);
-            }
+            this._viewabilityTracker.updateOffset(offset, correction, isActual);
         }
     }
 
@@ -137,10 +137,11 @@ export default class VirtualRenderer {
 
     public refreshWithAnchor(): void {
         if (this._viewabilityTracker) {
-            const firstVisibleIndex = this._viewabilityTracker.findFirstLogicallyVisibleIndex();
+            let firstVisibleIndex = this._viewabilityTracker.findFirstLogicallyVisibleIndex();
             this._prepareViewabilityTracker();
             let offset = 0;
             if (this._layoutManager && this._params) {
+                firstVisibleIndex = Math.min(this._params.itemCount - 1, firstVisibleIndex);
                 const point = this._layoutManager.getOffsetForIndex(firstVisibleIndex);
                 this._scrollOnNextUpdate(point);
                 offset = this._params.isHorizontal ? point.x : point.y;
