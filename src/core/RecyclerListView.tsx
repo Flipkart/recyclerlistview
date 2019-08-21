@@ -391,7 +391,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             }
             this._refreshViewability();
         } else if (this.props.dataProvider !== newProps.dataProvider) {
-            this._onEndReachedCalled = false;
+            if (newProps.dataProvider.getSize() > this.props.dataProvider.getSize()) {
+                this._onEndReachedCalled = false;
+            }
             const layoutManager = this._virtualRenderer.getLayoutManager();
             if (layoutManager) {
                 layoutManager.relayoutFromIndex(newProps.dataProvider.getFirstIndexToProcessInternal(), newProps.dataProvider.getSize());
