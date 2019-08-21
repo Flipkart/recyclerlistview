@@ -137,10 +137,11 @@ export default class VirtualRenderer {
 
     public refreshWithAnchor(): void {
         if (this._viewabilityTracker) {
-            const firstVisibleIndex = this._viewabilityTracker.findFirstLogicallyVisibleIndex();
+            let firstVisibleIndex = this._viewabilityTracker.findFirstLogicallyVisibleIndex();
             this._prepareViewabilityTracker();
             let offset = 0;
             if (this._layoutManager && this._params) {
+                firstVisibleIndex = Math.min(this._params.itemCount - 1, firstVisibleIndex);
                 const point = this._layoutManager.getOffsetForIndex(firstVisibleIndex);
                 this._scrollOnNextUpdate(point);
                 offset = this._params.isHorizontal ? point.x : point.y;
