@@ -75,7 +75,7 @@ export default class BinarySearch {
     public static findValueSmallerThanTarget(values: number[], target: number): ValueAndIndex | undefined {
         const low = 0;
         const high = values.length - 1;
-        if (target > values[high]) {
+        if (target >= values[high]) {
             return {
                 value: values[high],
                 index: high,

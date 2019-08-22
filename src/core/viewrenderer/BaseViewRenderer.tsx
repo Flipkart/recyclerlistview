@@ -2,6 +2,7 @@ import * as React from "react";
 import { Dimension, BaseLayoutProvider } from "../dependencies/LayoutProvider";
 import ItemAnimator from "../ItemAnimator";
 import { LayoutManager } from "../layoutmanager/LayoutManager";
+import { ComponentCompat } from "../../utils/ComponentCompat";
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
@@ -25,9 +26,10 @@ export interface ViewRendererProps<T> {
     forceNonDeterministicRendering?: boolean;
     isHorizontal?: boolean;
     extendedState?: object;
+    internalSnapshot?: object;
     layoutProvider?: BaseLayoutProvider;
 }
-export default abstract class BaseViewRenderer<T> extends React.Component<ViewRendererProps<T>, {}> {
+export default abstract class BaseViewRenderer<T> extends ComponentCompat<ViewRendererProps<T>, {}> {
     protected animatorStyleOverrides: object | undefined;
 
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
@@ -38,9 +40,9 @@ export default abstract class BaseViewRenderer<T> extends React.Component<ViewRe
             this.props.layoutProvider !== newProps.layoutProvider;
 
         const hasExtendedStateChanged = this.props.extendedState !== newProps.extendedState;
+        const hasInternalSnapshotChanged = this.props.internalSnapshot !== newProps.internalSnapshot;
         const hasDataChanged = (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data));
-        let shouldUpdate = hasSizeChanged || hasDataChanged || hasExtendedStateChanged;
-
+        let shouldUpdate = hasSizeChanged || hasDataChanged || hasExtendedStateChanged || hasInternalSnapshotChanged;
         if (shouldUpdate) {
             newProps.itemAnimator.animateWillUpdate(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
         } else if (hasMoved) {
@@ -52,7 +54,7 @@ export default abstract class BaseViewRenderer<T> extends React.Component<ViewRe
         this.animatorStyleOverrides = undefined;
         this.props.itemAnimator.animateDidMount(this.props.x, this.props.y, this.getRef() as object, this.props.index);
     }
-    public componentWillMount(): void {
+    public componentWillMountCompat(): void {
         this.animatorStyleOverrides = this.props.itemAnimator.animateWillMount(this.props.x, this.props.y, this.props.index);
     }
     public componentWillUnmount(): void {
