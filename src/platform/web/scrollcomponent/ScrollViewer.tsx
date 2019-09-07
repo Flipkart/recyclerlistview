@@ -144,17 +144,26 @@ export default class ScrollViewer extends BaseScrollView {
             start = Math.min(offset + 800, start);
         }
         const change = offset - start;
-        const increment = 20;
         const duration = 200;
-        const animateScroll = (elapsedTime: number) => {
-            elapsedTime += increment;
+        let elapsedTime = 0;
+        let lastRenderTimestamp: number = -1;
+        const animateScroll = (timestamp: number) => {
+
+            if ( lastRenderTimestamp === -1 ) {
+                lastRenderTimestamp = timestamp - 20;
+            }
+
+            const deltaTime = timestamp - lastRenderTimestamp;
+            lastRenderTimestamp = timestamp;
+            elapsedTime = Math.min ( elapsedTime + deltaTime, duration );
+
             const position = this._easeInOut(elapsedTime, start, change, duration);
             this._setRelevantOffset(position);
             if (elapsedTime < duration) {
-                window.setTimeout(() => animateScroll(elapsedTime), increment);
+                window.requestAnimationFrame(animateScroll);
             }
         };
-        animateScroll(0);
+        window.requestAnimationFrame(animateScroll);
     }
 
     private _startListeningToDivEvents(): void {

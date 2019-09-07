@@ -36,6 +36,7 @@
   "dependencies": {
     "lodash.debounce": "4.0.8",
     "prop-types": "15.5.8",
+    "react-alert": "^4.0.2",
     "ts-object-utils": "0.0.5"
   },
   "peerDependencies": {

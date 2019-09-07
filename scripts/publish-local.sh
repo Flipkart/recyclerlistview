@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -e
 
-TARGET=$"/Users/talha.naqvi/Documents/Work/RLV-Demo/node_modules/recyclerlistview/dist" #target-path
+#TARGET=$"/Users/talha.naqvi/Documents/Work/RLV-Demo/node_modules/recyclerlistview/dist" #target-path
+TARGET=$"/Users/edup/develop/Biti/biti.tv/biti-tv-react/node_modules/recyclerlistview/dist" #target-path
 
 npm run build
 
