@@ -66,6 +66,7 @@ not be as fast.
 **Production Flipkart Grocery Demo Video (or try the app):** https://youtu.be/6YqEqP3MmoU  
 **Infinite Loading/View Change (Expo):** https://snack.expo.io/@naqvitalha/rlv-demo  
 **Mixed ViewTypes:** https://snack.expo.io/B1GYad52b  
+**extendedState,stableIDs and ItemAnimator (Expo):** https://snack.expo.io/@arunreddy10/19bb8e
 **Sample project:** https://github.com/naqvitalha/travelMate  
 **Web Sample (Using RNW):** https://codesandbox.io/s/k54j2zx977, https://jolly-engelbart-8ff0d0.netlify.com/  
 **Context Preservation Sample:** https://github.com/naqvitalha/recyclerlistview-context-preservation-demo
