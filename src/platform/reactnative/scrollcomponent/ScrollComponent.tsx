@@ -42,7 +42,7 @@ export default class ScrollComponent extends BaseScrollComponent {
     }
 
     public render(): JSX.Element {
-        const Scroller = TSCast.cast<ScrollView>(this.props.externalScrollView); //TSI
+        const Scroller = TSCast.cast<ScrollView>(this.props.externalScrollView) as any; //TSI
         //TODO:Talha
         // const {
         //     useWindowScroll,
