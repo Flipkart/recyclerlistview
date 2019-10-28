@@ -28,6 +28,8 @@ export default class ViewabilityTracker {
     private _windowBound: number;
     private _visibleIndexes: number[];
     private _engagedIndexes: number[];
+    private _layoutedIndexes: { [key: number]: boolean };
+    private _visibleLayoutedCount: number;
     private _layouts: Layout[] = [];
     private _actualOffset: number;
 
@@ -41,9 +43,11 @@ export default class ViewabilityTracker {
 
         this._isHorizontal = false;
         this._windowBound = 0;
+        this._visibleLayoutedCount = 0;
 
         this._visibleIndexes = [];  //needs to be sorted
         this._engagedIndexes = [];  //needs to be sorted
+        this._layoutedIndexes = {};
 
         this.onVisibleRowsChanged = null;
         this.onEngagedRowsChanged = null;
@@ -102,6 +106,21 @@ export default class ViewabilityTracker {
 
     public getEngagedIndexes(): number[] {
         return this._engagedIndexes;
+    }
+
+    public getVisibleIndexes(): number[] {
+        return this._visibleIndexes;
+    }
+
+    public addLayoutedIndex(index: number): void {
+        this._layoutedIndexes[index] = true;
+        if (index in this._visibleIndexes) {
+            this._visibleLayoutedCount += 1;
+        }
+    }
+
+    public haveVisibleIndexesLayouted(): boolean {
+        return this._visibleLayoutedCount === this._visibleIndexes.length;
     }
 
     public findFirstLogicallyVisibleIndex(): number {
@@ -301,6 +320,7 @@ export default class ViewabilityTracker {
     private _diffUpdateOriginalIndexesAndRaiseEvents(newVisibleItems: number[], newEngagedItems: number[]): void {
         this._diffArraysAndCallFunc(newVisibleItems, this._visibleIndexes, this.onVisibleRowsChanged);
         this._diffArraysAndCallFunc(newEngagedItems, this._engagedIndexes, this.onEngagedRowsChanged);
+        this._updateVisibleLayoutedCount(newVisibleItems, this._visibleIndexes);
         this._visibleIndexes = newVisibleItems;
         this._engagedIndexes = newEngagedItems;
     }
@@ -325,5 +345,20 @@ export default class ViewabilityTracker {
             }
         }
         return diffArr;
+    }
+
+    private _updateVisibleLayoutedCount(arr1: number[], arr2: number[]): void {
+        const len1 = arr1.length;
+        for (let i = 0; i < len1; i++) {
+            if (BinarySearch.findIndexOf(arr2, arr1[i]) === -1 && (arr1[i] in this._layoutedIndexes)) {
+                this._visibleLayoutedCount += 1;
+            }
+        }
+        const len2 = arr2.length;
+        for (let i = 0; i < len2; i++) {
+            if (BinarySearch.findIndexOf(arr1, arr2[i]) === -1 && (arr2[i] in this._layoutedIndexes)) {
+                this._visibleLayoutedCount -= 1;
+            }
+        }
     }
 }

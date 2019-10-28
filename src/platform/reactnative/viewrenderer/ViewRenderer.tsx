@@ -12,6 +12,18 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
+    //private _viewRef: React.RefObject<React.ClassicComponent<ViewProperties, React.ComponentState> > = React.createRef();
+    private _hasLayouted: boolean = false;
+    private _renderAfterLayouting: boolean = false;
+    public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
+        const shouldUpdate = super.shouldComponentUpdate(newProps);
+        if (newProps.forceNonDeterministicRendering && this._hasLayouted && !this._renderAfterLayouting) {
+            this._renderAfterLayouting = true;
+            return true;
+        }
+        return shouldUpdate;
+    }
+
     public renderCompat(): JSX.Element {
         return this.props.forceNonDeterministicRendering ? (
             <View ref={this._setRef}
@@ -20,6 +32,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                     flexDirection: this.props.isHorizontal ? "column" : "row",
                     left: this.props.x,
                     position: "absolute",
+                    opacity: this._hasLayouted ? 1 : 0,
                     top: this.props.y,
                     ...this.props.styleOverrides,
                     ...this.animatorStyleOverrides,
@@ -60,6 +73,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             this._dim.height = event.nativeEvent.layout.height;
             this._dim.width = event.nativeEvent.layout.width;
             if (this.props.onSizeChanged) {
+                this._hasLayouted = true;
                 this.props.onSizeChanged(this._dim, this.props.index);
             }
         }
