@@ -114,7 +114,7 @@ export default class ViewabilityTracker {
 
     public addLayoutedIndex(index: number): void {
         this._layoutedIndexes[index] = true;
-        if (index in this._visibleIndexes) {
+        if (BinarySearch.findIndexOf(this._visibleIndexes, index) !== -1) {
             this._visibleLayoutedCount += 1;
         }
     }

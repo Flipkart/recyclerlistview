@@ -14,12 +14,23 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
     //private _viewRef: React.RefObject<React.ClassicComponent<ViewProperties, React.ComponentState> > = React.createRef();
     private _hasLayouted: boolean = false;
-    private _renderAfterLayouting: boolean = false;
+    private _firstUpdateAfterLayouting: boolean = false;
+    private _secondUpdateAfterLayouting: boolean = false;
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
         const shouldUpdate = super.shouldComponentUpdate(newProps);
-        if (newProps.forceNonDeterministicRendering && this._hasLayouted && !this._renderAfterLayouting) {
-            this._renderAfterLayouting = true;
-            return true;
+        if (newProps.forceNonDeterministicRendering && this._hasLayouted) {
+            if (!this._firstUpdateAfterLayouting) {
+                this._firstUpdateAfterLayouting = true;
+                return shouldUpdate;
+            }
+            if (this._firstUpdateAfterLayouting && !this._secondUpdateAfterLayouting) {
+                if (shouldUpdate) {
+                    this._secondUpdateAfterLayouting = true;
+                } else {
+                    this._secondUpdateAfterLayouting = true;
+                    return true;
+                }
+            }
         }
         return shouldUpdate;
     }
