@@ -16,6 +16,13 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     private _hasLayouted: boolean = false;
     private _firstUpdateAfterLayouting: boolean = false;
     private _secondUpdateAfterLayouting: boolean = false;
+
+    public componentWillReceivePropsCompat(newProps: ViewRendererProps<any>): void {
+        if (newProps.key !== this.props.key) {
+            this._resetOnRecycling();
+        }
+    }
+
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
         const shouldUpdate = super.shouldComponentUpdate(newProps);
         if (newProps.forceNonDeterministicRendering && this._hasLayouted) {
@@ -24,11 +31,12 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 return shouldUpdate;
             }
             if (this._firstUpdateAfterLayouting && !this._secondUpdateAfterLayouting) {
-                if (shouldUpdate) {
-                    this._secondUpdateAfterLayouting = true;
-                } else {
-                    this._secondUpdateAfterLayouting = true;
-                    return true;
+                this._secondUpdateAfterLayouting = true;
+                if (!shouldUpdate) {
+                    const ref = (this._viewRef as object) as View;
+                    ref.setNativeProps({
+                        opacity: 1,
+                    });
                 }
             }
         }
@@ -88,5 +96,11 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 this.props.onSizeChanged(this._dim, this.props.index);
             }
         }
+    }
+
+    private _resetOnRecycling(): void {
+        this._hasLayouted = false;
+        this._firstUpdateAfterLayouting = false;
+        this._secondUpdateAfterLayouting = false;
     }
 }

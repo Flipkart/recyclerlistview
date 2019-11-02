@@ -19,6 +19,7 @@ export interface ViewRendererProps<T> {
     layoutType: string | number;
     dataHasChanged: (r1: T, r2: T) => boolean;
     onSizeChanged: (dim: Dimension, index: number) => void;
+    key: string;
     data: any;
     index: number;
     itemAnimator: ItemAnimator;
