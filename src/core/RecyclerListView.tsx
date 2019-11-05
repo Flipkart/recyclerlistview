@@ -195,7 +195,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             }, 0);
         }
         this._processOnEndReached();
-        this._checkAndChangeLayouts(this.props);
+        //this._checkAndChangeLayouts(this.props);
         if (this.props.dataProvider.getSize() === 0) {
             console.warn(Messages.WARN_NO_DATA); //tslint:disable-line
         }
@@ -554,7 +554,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             } else {
                 this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
             }
-            this._queueStateRefresh();
+            this._checkAndChangeLayouts(this.props);
+            //this._queueStateRefresh();
         }
     }
 

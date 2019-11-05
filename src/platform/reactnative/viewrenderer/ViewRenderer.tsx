@@ -12,6 +12,7 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
+    private _firstRender: boolean = true;
     public renderCompat(): JSX.Element {
         return this.props.forceNonDeterministicRendering ? (
             <View ref={this._setRef}
@@ -21,6 +22,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                     left: this.props.x,
                     position: "absolute",
                     top: this.props.y,
+                    opacity: this._firstRender ? 0 : 1,
                     ...this.props.styleOverrides,
                     ...this.animatorStyleOverrides,
                 }}>
@@ -54,6 +56,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         //Preventing layout thrashing in super fast scrolls where RN messes up onLayout event
         const xDiff = Math.abs(this.props.x - event.nativeEvent.layout.x);
         const yDiff = Math.abs(this.props.y - event.nativeEvent.layout.y);
+        this._firstRender = false;
         if (xDiff < 1 && yDiff < 1 &&
             (this.props.height !== event.nativeEvent.layout.height ||
                 this.props.width !== event.nativeEvent.layout.width)) {
