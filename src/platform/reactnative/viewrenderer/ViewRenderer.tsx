@@ -15,7 +15,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     private _hasLayouted: boolean = false;
     private _isVisible: boolean = false;
     public componentWillReceivePropsCompat(newProps: ViewRendererProps<any>): void {
-        if (newProps.key !== this.props.key) {
+        if (newProps.index !== this.props.index) {
             this._hasLayouted = false;
             this._isVisible = false;
         }
