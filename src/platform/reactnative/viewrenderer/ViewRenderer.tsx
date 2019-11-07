@@ -85,7 +85,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             const ref = (this._viewRef as object) as View;
             this._isVisible = true;
             ref.setNativeProps({
-                opacity: 1
+                opacity: 1,
             });
         }
     }
