@@ -12,24 +12,24 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
-    private _firstRender: boolean = true;
+    private _hasLayouted: boolean = false;
     private _isVisible: boolean = false;
     public componentWillReceivePropsCompat(newProps: ViewRendererProps<any>): void {
         if (newProps.index !== this.props.index) {
-            this._firstRender = true;
+            this._hasLayouted = false;
             this._isVisible = false;
         }
     }
 
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
         const shouldUpdate = super.shouldComponentUpdate(newProps);
-        if (!shouldUpdate && !this._firstRender && !this._isVisible) {
+        if (!shouldUpdate && this._hasLayouted && !this._isVisible) {
             return true;
         }
         return shouldUpdate;
     }
     public renderCompat(): JSX.Element {
-        this._isVisible = this._firstRender ? false : true;
+        this._isVisible = this._hasLayouted ? true : false;
         return this.props.forceNonDeterministicRendering ? (
             <View ref={this._setRef}
             onLayout={this._onLayout}
@@ -72,7 +72,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         //Preventing layout thrashing in super fast scrolls where RN messes up onLayout event
         const xDiff = Math.abs(this.props.x - event.nativeEvent.layout.x);
         const yDiff = Math.abs(this.props.y - event.nativeEvent.layout.y);
-        this._firstRender = false;
+        this._hasLayouted = true;
         if (xDiff < 1 && yDiff < 1 &&
             (this.props.height !== event.nativeEvent.layout.height ||
                 this.props.width !== event.nativeEvent.layout.width)) {
@@ -81,6 +81,12 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             if (this.props.onSizeChanged) {
                 this.props.onSizeChanged(this._dim, this.props.index);
             }
+        } else {
+            const ref = (this._viewRef as object) as View;
+            this._isVisible = true;
+            ref.setNativeProps({
+                opacity: 1
+            });
         }
     }
 }
