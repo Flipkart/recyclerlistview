@@ -151,7 +151,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
 
-    private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
+    private _defaultItemAnimator: ItemAnimator = new BaseItemAnimator();
 
     constructor(props: P, context?: any) {
         super(props, context);

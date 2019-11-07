@@ -13,7 +13,23 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
     private _firstRender: boolean = true;
+    private _isVisible: boolean = false;
+    public componentWillReceivePropsCompat(newProps: ViewRendererProps<any>): void {
+        if (newProps.index !== this.props.index) {
+            this._firstRender = true;
+            this._isVisible = false;
+        }
+    }
+
+    public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
+        const shouldUpdate = super.shouldComponentUpdate(newProps);
+        if (!shouldUpdate && !this._firstRender && !this._isVisible) {
+            return true;
+        }
+        return shouldUpdate;
+    }
     public renderCompat(): JSX.Element {
+        this._isVisible = this._firstRender ? false : true;
         return this.props.forceNonDeterministicRendering ? (
             <View ref={this._setRef}
             onLayout={this._onLayout}
@@ -22,7 +38,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                     left: this.props.x,
                     position: "absolute",
                     top: this.props.y,
-                    opacity: this._firstRender ? 0 : 1,
+                    opacity: this._isVisible ? 1 : 0,
                     ...this.props.styleOverrides,
                     ...this.animatorStyleOverrides,
                 }}>
