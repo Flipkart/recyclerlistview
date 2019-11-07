@@ -12,38 +12,25 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
-    //private _viewRef: React.RefObject<React.ClassicComponent<ViewProperties, React.ComponentState> > = React.createRef();
     private _hasLayouted: boolean = false;
-    private _firstUpdateAfterLayouting: boolean = false;
-    private _secondUpdateAfterLayouting: boolean = false;
-
+    private _isVisible: boolean = false;
     public componentWillReceivePropsCompat(newProps: ViewRendererProps<any>): void {
         if (newProps.key !== this.props.key) {
-            this._resetOnRecycling();
+            this._hasLayouted = false;
+            this._isVisible = false;
         }
     }
 
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
         const shouldUpdate = super.shouldComponentUpdate(newProps);
-        if (newProps.forceNonDeterministicRendering && this._hasLayouted) {
-            if (!this._firstUpdateAfterLayouting) {
-                this._firstUpdateAfterLayouting = true;
-                return shouldUpdate;
-            }
-            if (this._firstUpdateAfterLayouting && !this._secondUpdateAfterLayouting) {
-                this._secondUpdateAfterLayouting = true;
-                if (!shouldUpdate) {
-                    const ref = (this._viewRef as object) as View;
-                    ref.setNativeProps({
-                        opacity: 1,
-                    });
-                }
-            }
+        if (!shouldUpdate && this._hasLayouted && !this._isVisible) {
+            return true;
         }
         return shouldUpdate;
     }
 
     public renderCompat(): JSX.Element {
+        this._isVisible = this._hasLayouted ? true : false;
         return this.props.forceNonDeterministicRendering ? (
             <View ref={this._setRef}
             onLayout={this._onLayout}
@@ -51,7 +38,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                     flexDirection: this.props.isHorizontal ? "column" : "row",
                     left: this.props.x,
                     position: "absolute",
-                    opacity: this._hasLayouted ? 1 : 0,
+                    opacity: this._isVisible ? 1 : 0,
                     top: this.props.y,
                     ...this.props.styleOverrides,
                     ...this.animatorStyleOverrides,
@@ -86,21 +73,15 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         //Preventing layout thrashing in super fast scrolls where RN messes up onLayout event
         const xDiff = Math.abs(this.props.x - event.nativeEvent.layout.x);
         const yDiff = Math.abs(this.props.y - event.nativeEvent.layout.y);
+        this._hasLayouted = true;
         if (xDiff < 1 && yDiff < 1 &&
             (this.props.height !== event.nativeEvent.layout.height ||
                 this.props.width !== event.nativeEvent.layout.width)) {
             this._dim.height = event.nativeEvent.layout.height;
             this._dim.width = event.nativeEvent.layout.width;
             if (this.props.onSizeChanged) {
-                this._hasLayouted = true;
                 this.props.onSizeChanged(this._dim, this.props.index);
             }
         }
-    }
-
-    private _resetOnRecycling(): void {
-        this._hasLayouted = false;
-        this._firstUpdateAfterLayouting = false;
-        this._secondUpdateAfterLayouting = false;
     }
 }
