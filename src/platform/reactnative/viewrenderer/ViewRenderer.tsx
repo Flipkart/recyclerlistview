@@ -83,11 +83,13 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 this.props.onSizeChanged(this._dim, this.props.index);
             }
         } else {
-            const ref = (this._viewRef as object) as View;
-            this._isVisible = true;
-            ref.setNativeProps({
-                opacity: 1,
-            });
+            if (!this._isVisible) {
+                const ref = (this._viewRef as object) as View;
+                this._isVisible = true;
+                ref.setNativeProps({
+                    opacity: 1,
+                });
+            }
         }
     }
 }
