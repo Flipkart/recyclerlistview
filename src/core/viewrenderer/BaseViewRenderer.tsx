@@ -33,6 +33,9 @@ export default abstract class BaseViewRenderer<T> extends ComponentCompat<ViewRe
     protected animatorStyleOverrides: object | undefined;
 
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
+        if (this.props !== newProps) {
+            this.componentWillReceivePropsCompat(newProps);
+        }
         const hasMoved = this.props.x !== newProps.x || this.props.y !== newProps.y;
 
         const hasSizeChanged = !newProps.forceNonDeterministicRendering &&
