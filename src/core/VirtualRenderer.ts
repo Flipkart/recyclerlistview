@@ -135,6 +135,16 @@ export default class VirtualRenderer {
         return this._viewabilityTracker;
     }
 
+    public addLayoutedIndex(index: number): void {
+        if (this._viewabilityTracker) {
+            this._viewabilityTracker.addLayoutedIndex(index);
+        }
+    }
+
+    public haveVisibleIndexesLayouted(): boolean {
+        return this._viewabilityTracker ? this._viewabilityTracker.haveVisibleIndexesLayouted() : true;
+    }
+
     public refreshWithAnchor(): void {
         if (this._viewabilityTracker) {
             let firstVisibleIndex = this._viewabilityTracker.findFirstLogicallyVisibleIndex();
@@ -219,6 +229,10 @@ export default class VirtualRenderer {
                     itemMeta.dataIndex = index;
                     if (!ObjectUtil.isNullOrUndefined(oldIndex) && oldIndex !== index) {
                         delete this._stableIdToRenderKeyMap[getStableId(oldIndex)];
+                        if (this._viewabilityTracker) {
+                            const layoutedIndexes = this._viewabilityTracker.getLayoutedIndexes();
+                            delete layoutedIndexes[oldIndex];
+                        }
                     }
                 } else {
                     renderStack[key] = { dataIndex: index };

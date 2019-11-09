@@ -112,6 +112,10 @@ export default class ViewabilityTracker {
         return this._visibleIndexes;
     }
 
+    public getLayoutedIndexes(): { [key: number]: boolean } {
+        return this._layoutedIndexes;
+    }
+
     public addLayoutedIndex(index: number): void {
         this._layoutedIndexes[index] = true;
         if (BinarySearch.findIndexOf(this._visibleIndexes, index) !== -1) {
@@ -173,6 +177,7 @@ export default class ViewabilityTracker {
         const newEngagedItems: number[] = [];
         this._fitIndexes(newVisibleItems, newEngagedItems, startIndex, true);
         this._fitIndexes(newVisibleItems, newEngagedItems, startIndex + 1, false);
+        this._updateVisibleLayoutedCount(newVisibleItems);
         this._diffUpdateOriginalIndexesAndRaiseEvents(newVisibleItems, newEngagedItems);
     }
 
@@ -320,8 +325,6 @@ export default class ViewabilityTracker {
     private _diffUpdateOriginalIndexesAndRaiseEvents(newVisibleItems: number[], newEngagedItems: number[]): void {
         this._diffArraysAndCallFunc(newVisibleItems, this._visibleIndexes, this.onVisibleRowsChanged);
         this._diffArraysAndCallFunc(newEngagedItems, this._engagedIndexes, this.onEngagedRowsChanged);
-        this._diffArraysAndCallFunc(newVisibleItems, this._visibleIndexes, this._updateVisibleLayoutedCount);
-        this._diffArraysAndCallFunc(newEngagedItems, this._engagedIndexes, this._updateLayoutedIndexes);
         this._visibleIndexes = newVisibleItems;
         this._engagedIndexes = newEngagedItems;
     }
@@ -348,27 +351,13 @@ export default class ViewabilityTracker {
         return diffArr;
     }
 
-    private _updateVisibleLayoutedCount = (all: number[], now: number[], notNow: number[]): void => {
-        const len1 = now.length;
-        for (let i = 0; i < len1; i++) {
-            if (now[i] in this._layoutedIndexes) {
+    private _updateVisibleLayoutedCount(newItems: number[]): void {
+        this._visibleLayoutedCount = 0;
+        const count = newItems.length;
+        for (let i = 0; i < count; i++) {
+            if (newItems[i] in this._layoutedIndexes) {
                 this._visibleLayoutedCount += 1;
             }
-        }
-        const len2 = notNow.length;
-        for (let i = 0; i < len2; i++) {
-            if (notNow[i] in this._layoutedIndexes) {
-                this._visibleLayoutedCount -= 1;
-            }
-        }
-    }
-
-    private _updateLayoutedIndexes = (all: number[], now: number[], notNow: number[]): void => {
-        const count = notNow.length;
-        let disengagedIndex = 0;
-        for (let i = 0; i < count; i++) {
-            disengagedIndex = notNow[i];
-            delete this._layoutedIndexes[disengagedIndex];
         }
     }
 }

@@ -554,12 +554,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             } else {
                 this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
             }
-            const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
-            if (viewabilityTracker) {
-                viewabilityTracker.addLayoutedIndex(index);
-                if (viewabilityTracker.haveVisibleIndexesLayouted()) {
-                    this._queueStateRefresh();
-                }
+            this._virtualRenderer.addLayoutedIndex(index);
+            if (this._virtualRenderer.haveVisibleIndexesLayouted()) {
+                this._queueStateRefresh();
             }
         }
     }
