@@ -525,6 +525,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
                     isHorizontal={this.props.isHorizontal}
                     onSizeChanged={this._onViewContainerSizeChange}
+                    onLayout={this._onViewContainerOnLayout}
                     childRenderer={this.props.rowRenderer}
                     height={itemRect.height}
                     width={itemRect.width}
@@ -554,10 +555,13 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             } else {
                 this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
             }
-            this._virtualRenderer.addLayoutedIndex(index);
-            if (this._virtualRenderer.haveVisibleIndexesLayouted()) {
-                this._queueStateRefresh();
-            }
+        }
+    }
+
+    private _onViewContainerOnLayout = (index: number): void => {
+        this._virtualRenderer.addLayoutedIndex(index);
+        if (this._virtualRenderer.haveVisibleIndexesLayouted()) {
+            this._queueStateRefresh();
         }
     }
 

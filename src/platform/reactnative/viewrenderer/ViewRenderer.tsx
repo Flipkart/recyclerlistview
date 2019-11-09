@@ -91,5 +91,8 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 });
             }
         }
+        if (this.props.onLayout) {
+            this.props.onLayout(this.props.index);
+        }
     }
 }
