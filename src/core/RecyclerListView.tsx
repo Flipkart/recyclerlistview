@@ -99,6 +99,7 @@ export interface RecyclerListViewProps {
     useWindowScroll?: boolean;
     disableRecycling?: boolean;
     forceNonDeterministicRendering?: boolean;
+    removeNonDeterministicShifting?: boolean;
     extendedState?: object;
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
@@ -151,7 +152,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
 
-    private _defaultItemAnimator: ItemAnimator = new BaseItemAnimator();
+    private _defaultItemAnimator: ItemAnimator = this.props.removeNonDeterministicShifting ? new BaseItemAnimator() : new DefaultItemAnimator();
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -523,6 +524,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     styleOverrides={styleOverrides}
                     layoutProvider={this.props.layoutProvider}
                     forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
+                    removeNonDeterministicShifting={this.props.removeNonDeterministicShifting}
                     isHorizontal={this.props.isHorizontal}
                     onSizeChanged={this._onViewContainerSizeChange}
                     onLayout={this._onViewContainerOnLayout}
@@ -559,8 +561,12 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _onViewContainerOnLayout = (index: number): void => {
-        this._virtualRenderer.addLayoutedIndex(index);
-        if (this._virtualRenderer.haveVisibleIndexesLayouted()) {
+        if (this.props.removeNonDeterministicShifting) {
+            this._virtualRenderer.addLayoutedIndex(index);
+            if (this._virtualRenderer.haveVisibleIndexesLayouted()) {
+                this._queueStateRefresh();
+            }
+        } else {
             this._queueStateRefresh();
         }
     }
