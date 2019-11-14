@@ -81,7 +81,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 this.props.onLayout(this.props.index);
             }
         } else {
-            if (this.props.removeNonDeterministicShifting) {
+            if (this.props.removeNonDeterministicShifting && !this.props.hasLayouted) {
                 if (this.props.onLayout) {
                     this.props.onLayout(this.props.index);
                 }
