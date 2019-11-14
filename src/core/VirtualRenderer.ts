@@ -135,6 +135,23 @@ export default class VirtualRenderer {
         return this._viewabilityTracker;
     }
 
+    public addLayoutedIndex(index: number): void {
+        if (this._viewabilityTracker) {
+            this._viewabilityTracker.addLayoutedIndex(index);
+        }
+    }
+
+    public hasLayoutedIndex(index: number): boolean {
+        if (this._viewabilityTracker) {
+            return this._viewabilityTracker.hasLayoutedIndex(index);
+        }
+        return true;
+    }
+
+    public haveVisibleIndexesLayouted(): boolean {
+        return this._viewabilityTracker ? this._viewabilityTracker.haveVisibleIndexesLayouted() : true;
+    }
+
     public refreshWithAnchor(): void {
         if (this._viewabilityTracker) {
             let firstVisibleIndex = this._viewabilityTracker.findFirstLogicallyVisibleIndex();

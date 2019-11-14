@@ -28,6 +28,8 @@ export default class ViewabilityTracker {
     private _windowBound: number;
     private _visibleIndexes: number[];
     private _engagedIndexes: number[];
+    private _layoutedIndexes: { [key: number]: boolean };
+    private _visibleLayoutedCount: number;
     private _layouts: Layout[] = [];
     private _actualOffset: number;
 
@@ -41,9 +43,11 @@ export default class ViewabilityTracker {
 
         this._isHorizontal = false;
         this._windowBound = 0;
+        this._visibleLayoutedCount = 0;
 
         this._visibleIndexes = [];  //needs to be sorted
         this._engagedIndexes = [];  //needs to be sorted
+        this._layoutedIndexes = {};
 
         this.onVisibleRowsChanged = null;
         this.onEngagedRowsChanged = null;
@@ -104,6 +108,29 @@ export default class ViewabilityTracker {
         return this._engagedIndexes;
     }
 
+    public getVisibleIndexes(): number[] {
+        return this._visibleIndexes;
+    }
+
+    public getLayoutedIndexes(): { [key: number]: boolean } {
+        return this._layoutedIndexes;
+    }
+
+    public addLayoutedIndex(index: number): void {
+        this._layoutedIndexes[index] = true;
+        if (BinarySearch.findIndexOf(this._visibleIndexes, index) !== -1) {
+            this._visibleLayoutedCount += 1;
+        }
+    }
+
+    public hasLayoutedIndex(index: number): boolean {
+        return this._layoutedIndexes[index] ? true : false;
+    }
+
+    public haveVisibleIndexesLayouted(): boolean {
+        return this._visibleLayoutedCount === this._visibleIndexes.length;
+    }
+
     public findFirstLogicallyVisibleIndex(): number {
         const relevantIndex = this._findFirstVisibleIndexUsingBS(0.001);
         let result = relevantIndex;
@@ -154,6 +181,7 @@ export default class ViewabilityTracker {
         const newEngagedItems: number[] = [];
         this._fitIndexes(newVisibleItems, newEngagedItems, startIndex, true);
         this._fitIndexes(newVisibleItems, newEngagedItems, startIndex + 1, false);
+        this._updateVisibleLayoutedCount(newVisibleItems);
         this._diffUpdateOriginalIndexesAndRaiseEvents(newVisibleItems, newEngagedItems);
     }
 
@@ -325,5 +353,15 @@ export default class ViewabilityTracker {
             }
         }
         return diffArr;
+    }
+
+    private _updateVisibleLayoutedCount(newItems: number[]): void {
+        this._visibleLayoutedCount = 0;
+        const count = newItems.length;
+        for (let i = 0; i < count; i++) {
+            if (newItems[i] in this._layoutedIndexes) {
+                this._visibleLayoutedCount += 1;
+            }
+        }
     }
 }

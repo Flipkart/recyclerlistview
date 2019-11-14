@@ -19,11 +19,14 @@ export interface ViewRendererProps<T> {
     layoutType: string | number;
     dataHasChanged: (r1: T, r2: T) => boolean;
     onSizeChanged: (dim: Dimension, index: number) => void;
+    onLayout: (index: number) => void;
     data: any;
     index: number;
     itemAnimator: ItemAnimator;
     styleOverrides?: object;
     forceNonDeterministicRendering?: boolean;
+    removeNonDeterministicShifting?: boolean;
+    hasLayouted?: boolean;
     isHorizontal?: boolean;
     extendedState?: object;
     internalSnapshot?: object;

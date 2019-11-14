@@ -12,7 +12,16 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
+    public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
+        const shouldUpdate = super.shouldComponentUpdate(newProps);
+        if (this.props.removeNonDeterministicShifting && !this.props.hasLayouted && newProps.hasLayouted) {
+            return true;
+        }
+        return shouldUpdate;
+    }
+
     public renderCompat(): JSX.Element {
+        const opacity = this.props.removeNonDeterministicShifting ? this.props.hasLayouted ? 1 : 0 : 1;
         return this.props.forceNonDeterministicRendering ? (
             <View ref={this._setRef}
             onLayout={this._onLayout}
@@ -20,6 +29,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                     flexDirection: this.props.isHorizontal ? "column" : "row",
                     left: this.props.x,
                     position: "absolute",
+                    opacity,
                     top: this.props.y,
                     ...this.props.styleOverrides,
                     ...this.animatorStyleOverrides,
@@ -50,6 +60,11 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         this._viewRef = view;
     }
 
+    private _setNativeProps(nativeProps: object): void {
+        const ref = (this._viewRef as object) as View;
+        ref.setNativeProps(nativeProps);
+    }
+
     private _onLayout = (event: LayoutChangeEvent): void => {
         //Preventing layout thrashing in super fast scrolls where RN messes up onLayout event
         const xDiff = Math.abs(this.props.x - event.nativeEvent.layout.x);
@@ -61,6 +76,15 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             this._dim.width = event.nativeEvent.layout.width;
             if (this.props.onSizeChanged) {
                 this.props.onSizeChanged(this._dim, this.props.index);
+            }
+            if (this.props.onLayout) {
+                this.props.onLayout(this.props.index);
+            }
+        } else {
+            if (this.props.removeNonDeterministicShifting) {
+                if (this.props.onLayout) {
+                    this.props.onLayout(this.props.index);
+                }
             }
         }
     }

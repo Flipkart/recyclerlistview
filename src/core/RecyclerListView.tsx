@@ -99,6 +99,7 @@ export interface RecyclerListViewProps {
     useWindowScroll?: boolean;
     disableRecycling?: boolean;
     forceNonDeterministicRendering?: boolean;
+    removeNonDeterministicShifting?: boolean;
     extendedState?: object;
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
@@ -151,7 +152,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
 
-    private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
+    private _defaultItemAnimator: ItemAnimator = this.props.removeNonDeterministicShifting ? new BaseItemAnimator() : new DefaultItemAnimator();
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -195,7 +196,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             }, 0);
         }
         this._processOnEndReached();
-        this._checkAndChangeLayouts(this.props);
         if (this.props.dataProvider.getSize() === 0) {
             console.warn(Messages.WARN_NO_DATA); //tslint:disable-line
         }
@@ -405,7 +405,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 const dataProviderSize = newProps.dataProvider.getSize();
                 layoutManager.relayoutFromIndex(Math.min(Math.max(dataProviderSize - 1, 0), this._relayoutReqIndex), dataProviderSize);
                 this._relayoutReqIndex = -1;
-                this._refreshViewability();
+                this._virtualRenderer.refresh();
             }
         }
     }
@@ -418,6 +418,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _queueStateRefresh(): void {
         this.refreshRequestDebouncer(() => {
+            this._checkAndChangeLayouts(this.props);
             this.setState((prevState) => {
                 return prevState;
             });
@@ -509,6 +510,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             const type = this.props.layoutProvider.getLayoutTypeForIndex(dataIndex);
             const key = this._virtualRenderer.syncAndGetKey(dataIndex);
             const styleOverrides = (this._virtualRenderer.getLayoutManager() as LayoutManager).getStyleOverridesForIndex(dataIndex);
+            const hasLayouted = this._virtualRenderer.hasLayoutedIndex(dataIndex);
             this._assertType(type);
             if (!this.props.forceNonDeterministicRendering) {
                 this._checkExpectedDimensionDiscrepancy(itemRect, type, dataIndex);
@@ -523,8 +525,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     styleOverrides={styleOverrides}
                     layoutProvider={this.props.layoutProvider}
                     forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
+                    removeNonDeterministicShifting={this.props.removeNonDeterministicShifting}
                     isHorizontal={this.props.isHorizontal}
                     onSizeChanged={this._onViewContainerSizeChange}
+                    onLayout={this._onViewContainerOnLayout}
+                    hasLayouted={hasLayouted}
                     childRenderer={this.props.rowRenderer}
                     height={itemRect.height}
                     width={itemRect.width}
@@ -554,6 +559,16 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             } else {
                 this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
             }
+        }
+    }
+
+    private _onViewContainerOnLayout = (index: number): void => {
+        if (this.props.removeNonDeterministicShifting) {
+            this._virtualRenderer.addLayoutedIndex(index);
+            if (this._virtualRenderer.haveVisibleIndexesLayouted()) {
+                this._queueStateRefresh();
+            }
+        } else {
             this._queueStateRefresh();
         }
     }
