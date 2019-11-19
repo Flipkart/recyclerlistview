@@ -28,6 +28,7 @@ export default class ViewabilityTracker {
     private _windowBound: number;
     private _visibleIndexes: number[];
     private _engagedIndexes: number[];
+    private _layoutedIndexes: { [key: number]: boolean };
     private _layouts: Layout[] = [];
     private _actualOffset: number;
 
@@ -44,6 +45,7 @@ export default class ViewabilityTracker {
 
         this._visibleIndexes = [];  //needs to be sorted
         this._engagedIndexes = [];  //needs to be sorted
+        this._layoutedIndexes = {};
 
         this.onVisibleRowsChanged = null;
         this.onEngagedRowsChanged = null;
@@ -102,6 +104,14 @@ export default class ViewabilityTracker {
 
     public getEngagedIndexes(): number[] {
         return this._engagedIndexes;
+    }
+
+    public addLayoutedIndex(index: number): void {
+        this._layoutedIndexes[index] = true;
+    }
+
+    public hasLayoutedIndex(index: number): boolean {
+        return this._layoutedIndexes[index] ? true : false;
     }
 
     public findFirstLogicallyVisibleIndex(): number {
