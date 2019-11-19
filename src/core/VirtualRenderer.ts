@@ -141,9 +141,22 @@ export default class VirtualRenderer {
         }
     }
 
+    public addVisibleLayoutedIndex(index: number): void {
+        if (this._viewabilityTracker) {
+            this._viewabilityTracker.addVisibleLayoutedIndex(index);
+        }
+    }
+
     public hasLayoutedIndex(index: number): boolean {
         if (this._viewabilityTracker) {
             return this._viewabilityTracker.hasLayoutedIndex(index);
+        }
+        return true;
+    }
+
+    public hasVisibleLayoutedIndex(index: number): boolean {
+        if (this._viewabilityTracker) {
+            return this._viewabilityTracker.hasVisibleLayoutedIndex(index);
         }
         return true;
     }

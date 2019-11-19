@@ -151,7 +151,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _initialOffset = 0;
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
-
+    private _indexesToBeMadeVisible: number[];
     private _defaultItemAnimator: ItemAnimator = this.props.removeNonDeterministicShifting ? new BaseItemAnimator() : new DefaultItemAnimator();
 
     constructor(props: P, context?: any) {
@@ -161,7 +161,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }, (index) => {
             return this.props.dataProvider.getStableId(index);
         }, !props.disableRecycling);
-
+        this._indexesToBeMadeVisible = [];
         this.state = {
             internalSnapshot: {},
             renderStack: {},
@@ -419,6 +419,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _queueStateRefresh(): void {
         this.refreshRequestDebouncer(() => {
             this._checkAndChangeLayouts(this.props);
+            this._makeIndexesVisible();
             this.setState((prevState) => {
                 return prevState;
             });
@@ -511,6 +512,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             const key = this._virtualRenderer.syncAndGetKey(dataIndex);
             const styleOverrides = (this._virtualRenderer.getLayoutManager() as LayoutManager).getStyleOverridesForIndex(dataIndex);
             const hasLayouted = this._virtualRenderer.hasLayoutedIndex(dataIndex);
+            const isVisible = this._virtualRenderer.hasVisibleLayoutedIndex(dataIndex);
             this._assertType(type);
             if (!this.props.forceNonDeterministicRendering) {
                 this._checkExpectedDimensionDiscrepancy(itemRect, type, dataIndex);
@@ -530,6 +532,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     onSizeChanged={this._onViewContainerSizeChange}
                     onLayout={this._onViewContainerOnLayout}
                     hasLayouted={hasLayouted}
+                    isVisible={isVisible}
                     childRenderer={this.props.rowRenderer}
                     height={itemRect.height}
                     width={itemRect.width}
@@ -565,12 +568,20 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _onViewContainerOnLayout = (index: number): void => {
         if (this.props.removeNonDeterministicShifting) {
             this._virtualRenderer.addLayoutedIndex(index);
+            this._indexesToBeMadeVisible.push(index);
             if (this._virtualRenderer.haveVisibleIndexesLayouted()) {
                 this._queueStateRefresh();
             }
         } else {
             this._queueStateRefresh();
         }
+    }
+
+    private _makeIndexesVisible(): void {
+        for (const index of this._indexesToBeMadeVisible) {
+            this._virtualRenderer.addVisibleLayoutedIndex(index);
+        }
+        this._indexesToBeMadeVisible = [];
     }
 
     private _checkExpectedDimensionDiscrepancy(itemRect: Dimension, type: string | number, index: number): void {

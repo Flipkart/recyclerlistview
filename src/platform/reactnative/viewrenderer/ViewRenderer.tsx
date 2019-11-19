@@ -12,16 +12,27 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
+    private _onLayoutToIndexMap: { [key: number]: { index: number, dimension: Dimension }} = {};
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
         const shouldUpdate = super.shouldComponentUpdate(newProps);
-        if (this.props.removeNonDeterministicShifting && !this.props.hasLayouted && newProps.hasLayouted) {
-            return true;
+        const hasMoved = this.props.x !== newProps.x || this.props.y !== newProps.y;
+        if (this.props.removeNonDeterministicShifting && !shouldUpdate) {
+            if (newProps.isVisible && (!this.props.isVisible || hasMoved)) {
+                return true;
+            }
         }
         return shouldUpdate;
     }
 
     public renderCompat(): JSX.Element {
-        const opacity = this.props.removeNonDeterministicShifting ? this.props.hasLayouted ? 1 : 0 : 1;
+        const opacity = this.props.removeNonDeterministicShifting ? this.props.isVisible ? 1 : 0 : 1;
+        if (this.props.removeNonDeterministicShifting) {
+            const key = this.props.isHorizontal ? Math.round(this.props.x) : Math.round(this.props.y);
+            this._onLayoutToIndexMap[key] = {
+                index: this.props.index,
+                dimension: { width: this.props.width, height: this.props.height },
+            };
+        }
         return this.props.forceNonDeterministicRendering ? (
             <View ref={this._setRef}
             onLayout={this._onLayout}
@@ -60,32 +71,41 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         this._viewRef = view;
     }
 
-    private _setNativeProps(nativeProps: object): void {
-        const ref = (this._viewRef as object) as View;
-        ref.setNativeProps(nativeProps);
-    }
-
     private _onLayout = (event: LayoutChangeEvent): void => {
-        //Preventing layout thrashing in super fast scrolls where RN messes up onLayout event
-        const xDiff = Math.abs(this.props.x - event.nativeEvent.layout.x);
-        const yDiff = Math.abs(this.props.y - event.nativeEvent.layout.y);
-        if (xDiff < 1 && yDiff < 1 &&
-            (this.props.height !== event.nativeEvent.layout.height ||
-                this.props.width !== event.nativeEvent.layout.width)) {
-            this._dim.height = event.nativeEvent.layout.height;
-            this._dim.width = event.nativeEvent.layout.width;
-            if (this.props.onSizeChanged) {
-                this.props.onSizeChanged(this._dim, this.props.index);
-            }
-            if (this.props.onLayout) {
-                this.props.onLayout(this.props.index);
-            }
-        } else {
-            if (this.props.removeNonDeterministicShifting && !this.props.hasLayouted) {
+        if (this.props.removeNonDeterministicShifting) {
+            const key = this.props.isHorizontal ? Math.round(event.nativeEvent.layout.x) : Math.round(event.nativeEvent.layout.y);
+            const layout = this._onLayoutToIndexMap[key];
+            const index = layout ? layout.index : this.props.index;
+            const dimension = layout ? layout.dimension : { width: this.props.width, height: this.props.height };
+            if (!this.props.hasLayouted &&
+                (dimension.height !== event.nativeEvent.layout.height ||
+                    dimension.width !== event.nativeEvent.layout.width)) {
+                this._onSizeChanged(event, index);
+            } else if (!this.props.hasLayouted) {
                 if (this.props.onLayout) {
-                    this.props.onLayout(this.props.index);
+                    this.props.onLayout(index);
                 }
             }
+        } else {
+            //Preventing layout thrashing in super fast scrolls where RN messes up onLayout event
+            const xDiff = Math.abs(this.props.x - event.nativeEvent.layout.x);
+            const yDiff = Math.abs(this.props.y - event.nativeEvent.layout.y);
+            if (xDiff < 1 && yDiff < 1 &&
+                (this.props.height !== event.nativeEvent.layout.height ||
+                    this.props.width !== event.nativeEvent.layout.width)) {
+                this._onSizeChanged(event, this.props.index);
+            }
+        }
+    }
+
+    private _onSizeChanged(event: LayoutChangeEvent, index: number): void {
+        this._dim.height = event.nativeEvent.layout.height;
+        this._dim.width = event.nativeEvent.layout.width;
+        if (this.props.onSizeChanged) {
+            this.props.onSizeChanged(this._dim, index);
+        }
+        if (this.props.onLayout) {
+            this.props.onLayout(index);
         }
     }
 }

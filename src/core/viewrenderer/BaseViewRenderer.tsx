@@ -27,6 +27,7 @@ export interface ViewRendererProps<T> {
     forceNonDeterministicRendering?: boolean;
     removeNonDeterministicShifting?: boolean;
     hasLayouted?: boolean;
+    isVisible?: boolean;
     isHorizontal?: boolean;
     extendedState?: object;
     internalSnapshot?: object;
@@ -49,6 +50,9 @@ export default abstract class BaseViewRenderer<T> extends ComponentCompat<ViewRe
         if (shouldUpdate) {
             newProps.itemAnimator.animateWillUpdate(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
         } else if (hasMoved) {
+            if (newProps.removeNonDeterministicShifting) {
+                return false;
+            }
             shouldUpdate = !newProps.itemAnimator.animateShift(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
         }
         return shouldUpdate;
