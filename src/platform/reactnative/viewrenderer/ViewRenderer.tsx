@@ -13,6 +13,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
     public renderCompat(): JSX.Element {
+        const opacity = this.props.isVisible ? 1 : 0;
         return this.props.forceNonDeterministicRendering ? (
             <View ref={this._setRef}
             onLayout={this._onLayout}
@@ -21,6 +22,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                     left: this.props.x,
                     position: "absolute",
                     top: this.props.y,
+                    opacity,
                     ...this.props.styleOverrides,
                     ...this.animatorStyleOverrides,
                 }}>
@@ -62,6 +64,11 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             if (this.props.onSizeChanged) {
                 this.props.onSizeChanged(this._dim, this.props.index);
             }
+            if (!this.props.isVisible) {
+                this.props.makeItemsVisible(true);
+            }
+        } else if (!this.props.isVisible) {
+            this.props.makeItemsVisible(false);
         }
     }
 }

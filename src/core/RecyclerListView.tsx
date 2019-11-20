@@ -99,6 +99,7 @@ export interface RecyclerListViewProps {
     useWindowScroll?: boolean;
     disableRecycling?: boolean;
     forceNonDeterministicRendering?: boolean;
+    removeNonDeterministicShifting?: boolean;
     extendedState?: object;
     itemAnimator?: ItemAnimator;
     optimizeForInsertDeleteAnimations?: boolean;
@@ -151,7 +152,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
 
-    private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
+    private _defaultItemAnimator: ItemAnimator;
+    private _itemsVisibility: boolean;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -161,6 +163,13 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             return this.props.dataProvider.getStableId(index);
         }, !props.disableRecycling);
 
+        if (this.props.forceNonDeterministicRendering && this.props.removeNonDeterministicShifting && !this.props.itemAnimator) {
+            this._defaultItemAnimator = new BaseItemAnimator();
+            this._itemsVisibility = false;
+        } else {
+            this._defaultItemAnimator = new DefaultItemAnimator();
+            this._itemsVisibility = true;
+        }
         this.state = {
             internalSnapshot: {},
             renderStack: {},
@@ -525,6 +534,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
                     isHorizontal={this.props.isHorizontal}
                     onSizeChanged={this._onViewContainerSizeChange}
+                    makeItemsVisible={this._makeItemsVisible}
+                    isVisible={this._itemsVisibility}
                     childRenderer={this.props.rowRenderer}
                     height={itemRect.height}
                     width={itemRect.width}
@@ -554,6 +565,15 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             } else {
                 this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
             }
+            this._queueStateRefresh();
+        }
+    }
+
+    private _makeItemsVisible = (hasSizeChanged: boolean): void => {
+        if (!this._itemsVisibility) {
+            this._itemsVisibility = true;
+        }
+        if (!hasSizeChanged) {
             this._queueStateRefresh();
         }
     }
