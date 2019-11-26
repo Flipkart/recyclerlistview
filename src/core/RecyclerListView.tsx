@@ -204,7 +204,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             }, 0);
         }
         this._processOnEndReached();
-        this._checkAndChangeLayouts(this.props);
         if (this.props.dataProvider.getSize() === 0) {
             console.warn(Messages.WARN_NO_DATA); //tslint:disable-line
         }
@@ -414,7 +413,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 const dataProviderSize = newProps.dataProvider.getSize();
                 layoutManager.relayoutFromIndex(Math.min(Math.max(dataProviderSize - 1, 0), this._relayoutReqIndex), dataProviderSize);
                 this._relayoutReqIndex = -1;
-                this._refreshViewability();
+                this._virtualRenderer.refresh();
             }
         }
     }
@@ -427,6 +426,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _queueStateRefresh(): void {
         this.refreshRequestDebouncer(() => {
+            this._checkAndChangeLayouts(this.props);
             this.setState((prevState) => {
                 return prevState;
             });
