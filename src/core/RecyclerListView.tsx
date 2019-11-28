@@ -91,6 +91,7 @@ export interface RecyclerListViewProps {
     onVisibleIndicesChanged?: TOnItemStatusChanged;
     renderFooter?: () => JSX.Element | JSX.Element[] | null;
     externalScrollView?: { new(props: ScrollViewDefaultProps): BaseScrollView };
+    layoutSize?: Dimension;
     initialOffset?: number;
     initialRenderIndex?: number;
     scrollThrottle?: number;
@@ -152,6 +153,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _scrollComponent: BaseScrollComponent | null = null;
 
     private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
+    private _itemsVisible: boolean = true;
+    private _isSizeChangedCalledOnce: boolean = false;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -161,6 +164,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             return this.props.dataProvider.getStableId(index);
         }, !props.disableRecycling);
 
+        if (props.layoutSize) {
+            this._layout.height = props.layoutSize.height;
+            this._layout.width = props.layoutSize.width;
+            this._itemsVisible = props.forceNonDeterministicRendering ? false : true;
+        }
         this.state = {
             internalSnapshot: {},
             renderStack: {},
@@ -198,6 +206,14 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this._checkAndChangeLayouts(this.props);
         if (this.props.dataProvider.getSize() === 0) {
             console.warn(Messages.WARN_NO_DATA); //tslint:disable-line
+        }
+    }
+
+    public componentDidMount(): void {
+        if (this.props.layoutSize) {
+            this._initComplete = true;
+            this._initTrackers();
+            this._processOnEndReached();
         }
     }
 
@@ -429,6 +445,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         const hasWidthChanged = this._layout.width !== layout.width;
         this._layout.height = layout.height;
         this._layout.width = layout.width;
+        this._itemsVisible = true;
         if (layout.height === 0 || layout.width === 0) {
             throw new CustomError(RecyclerListViewExceptions.layoutException);
         }
@@ -440,10 +457,14 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             if ((hasHeightChanged && hasWidthChanged) ||
                 (hasHeightChanged && this.props.isHorizontal) ||
                 (hasWidthChanged && !this.props.isHorizontal)) {
-                this._checkAndChangeLayouts(this.props, true);
+                const forceFullRender = this._isSizeChangedCalledOnce ? true : false;
+                this._checkAndChangeLayouts(this.props, forceFullRender);
             } else {
                 this._refreshViewability();
             }
+        }
+        if (!this._isSizeChangedCalledOnce) {
+            this._isSizeChangedCalledOnce = true;
         }
     }
 
@@ -523,6 +544,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     styleOverrides={styleOverrides}
                     layoutProvider={this.props.layoutProvider}
                     forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
+                    isVisible={this._itemsVisible}
                     isHorizontal={this.props.isHorizontal}
                     onSizeChanged={this._onViewContainerSizeChange}
                     childRenderer={this.props.rowRenderer}
@@ -554,6 +576,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             } else {
                 this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
             }
+            this._itemsVisible = true;
             this._queueStateRefresh();
         }
     }
