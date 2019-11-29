@@ -154,6 +154,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
     private _isSizeChangedCalledOnce: boolean = false;
+    private _hasMounted: boolean = false;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -166,11 +167,15 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (props.layoutSize) {
             this._layout.height = props.layoutSize.height;
             this._layout.width = props.layoutSize.width;
+            this._initComplete = true;
+            this._initTrackers();
+            this._processOnEndReached();
+        } else {
+            this.state = {
+                internalSnapshot: {},
+                renderStack: {},
+            } as S;
         }
-        this.state = {
-            internalSnapshot: {},
-            renderStack: {},
-        } as S;
     }
 
     public componentWillReceivePropsCompat(newProps: RecyclerListViewProps): void {
@@ -208,11 +213,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     public componentDidMount(): void {
-        if (this.props.layoutSize) {
-            this._initComplete = true;
-            this._initTrackers();
-            this._processOnEndReached();
-        }
+        this._hasMounted = true;
     }
 
     public componentWillUnmount(): void {
@@ -466,9 +467,16 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _renderStackWhenReady = (stack: RenderStack): void => {
-        this.setState(() => {
-            return { renderStack: stack };
-        });
+        if (!this._hasMounted) {
+            this.state = {
+                internalSnapshot: {},
+                renderStack: stack,
+            } as S;
+        } else {
+            this.setState(() => {
+                return { renderStack: stack };
+            });
+        }
     }
 
     private _initTrackers(): void {
