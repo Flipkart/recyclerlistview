@@ -1,6 +1,6 @@
 {
   "name": "recyclerlistview",
-  "version": "2.0.13",
+  "version": "2.1.0-alpha.2",
   "description": "The listview that you need and deserve. It was built for performance, uses cell recycling to achieve smooth scrolling.",
   "main": "dist/reactnative/index.js",
   "types": "dist/reactnative/index.d.ts",
@@ -9,7 +9,8 @@
     "clean": "sh scripts/clean.sh",
     "release": "sh scripts/publish-latest.sh",
     "release-beta": "sh scripts/publish-beta.sh",
-    "release-local": "sh scripts/publish-local.sh"
+    "release-local": "sh scripts/publish-local.sh",
+    "watch-web": "node scripts/watch-web.js"
   },
   "keywords": [
     "react-native",
@@ -43,12 +44,16 @@
     "react-native": ">= 0.30.0"
   },
   "devDependencies": {
-    "@types/lodash.debounce": "4.0.3",
+    "@types/lodash.debounce": "4.0.6",
     "@types/prop-types": "15.5.2",
-    "@types/react-native": "0.49.5",
     "@types/react": "16.4.7",
+    "@types/react-native": "^0.49.0",
+    "chalk": "^2.4.2",
+    "fb-watchman": "2.0.0",
     "file-directives": "1.4.6",
+    "mkdirp": "0.5.1",
     "tslint": "5.11.0",
-    "typescript": "3.3.1"
+    "typescript": "3.3.1",
+    "yargs": "12.0.5"
   }
 }

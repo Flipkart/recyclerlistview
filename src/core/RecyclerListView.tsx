@@ -93,6 +93,7 @@ export interface RecyclerListViewProps {
     externalScrollView?: { new(props: ScrollViewDefaultProps): BaseScrollView };
     initialOffset?: number;
     initialRenderIndex?: number;
+    initialDimension?: Dimension;
     scrollThrottle?: number;
     canChangeSize?: boolean;
     distanceFromWindow?: number;
@@ -152,6 +153,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _scrollComponent: BaseScrollComponent | null = null;
 
     private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
+    private _stateRenderStack: RenderStack = {};
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -240,6 +242,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     }
                 }
             }
+        }
+
+        if (this.props.initialDimension) {
+            this._onSizeChanged(this.props.initialDimension!);
         }
     }
 
@@ -451,6 +457,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this.setState(() => {
             return { renderStack: stack };
         });
+        this._stateRenderStack = stack;
     }
 
     private _initTrackers(): void {
@@ -570,9 +577,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _generateRenderStack(): Array<JSX.Element | null> {
         const renderedItems = [];
-        for (const key in this.state.renderStack) {
-            if (this.state.renderStack.hasOwnProperty(key)) {
-                renderedItems.push(this._renderRowUsingMeta(this.state.renderStack[key]));
+        for (const key in this._stateRenderStack) {
+            if (this._stateRenderStack.hasOwnProperty(key)) {
+                renderedItems.push(this._renderRowUsingMeta(this._stateRenderStack[key]));
             }
         }
         return renderedItems;
