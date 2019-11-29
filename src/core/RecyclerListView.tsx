@@ -153,7 +153,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _scrollComponent: BaseScrollComponent | null = null;
 
     private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
-    private _itemsVisible: boolean = true;
     private _isSizeChangedCalledOnce: boolean = false;
 
     constructor(props: P, context?: any) {
@@ -167,7 +166,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (props.layoutSize) {
             this._layout.height = props.layoutSize.height;
             this._layout.width = props.layoutSize.width;
-            this._itemsVisible = props.forceNonDeterministicRendering ? false : true;
         }
         this.state = {
             internalSnapshot: {},
@@ -445,7 +443,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         const hasWidthChanged = this._layout.width !== layout.width;
         this._layout.height = layout.height;
         this._layout.width = layout.width;
-        this._itemsVisible = true;
         if (layout.height === 0 || layout.width === 0) {
             throw new CustomError(RecyclerListViewExceptions.layoutException);
         }
@@ -544,7 +541,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     styleOverrides={styleOverrides}
                     layoutProvider={this.props.layoutProvider}
                     forceNonDeterministicRendering={this.props.forceNonDeterministicRendering}
-                    isVisible={this._itemsVisible}
                     isHorizontal={this.props.isHorizontal}
                     onSizeChanged={this._onViewContainerSizeChange}
                     childRenderer={this.props.rowRenderer}
@@ -576,7 +572,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             } else {
                 this._relayoutReqIndex = Math.min(this._relayoutReqIndex, index);
             }
-            this._itemsVisible = true;
             this._queueStateRefresh();
         }
     }

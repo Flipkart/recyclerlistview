@@ -24,7 +24,6 @@ export interface ViewRendererProps<T> {
     itemAnimator: ItemAnimator;
     styleOverrides?: object;
     forceNonDeterministicRendering?: boolean;
-    isVisible?: boolean;
     isHorizontal?: boolean;
     extendedState?: object;
     internalSnapshot?: object;
@@ -35,7 +34,6 @@ export default abstract class BaseViewRenderer<T> extends ComponentCompat<ViewRe
 
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
         const hasMoved = this.props.x !== newProps.x || this.props.y !== newProps.y;
-        const hasVisibilityChanged = this.props.isVisible !== newProps.isVisible;
 
         const hasSizeChanged = !newProps.forceNonDeterministicRendering &&
             (this.props.width !== newProps.width || this.props.height !== newProps.height) ||
@@ -44,7 +42,7 @@ export default abstract class BaseViewRenderer<T> extends ComponentCompat<ViewRe
         const hasExtendedStateChanged = this.props.extendedState !== newProps.extendedState;
         const hasInternalSnapshotChanged = this.props.internalSnapshot !== newProps.internalSnapshot;
         const hasDataChanged = (this.props.dataHasChanged && this.props.dataHasChanged(this.props.data, newProps.data));
-        let shouldUpdate = hasSizeChanged || hasDataChanged || hasExtendedStateChanged || hasInternalSnapshotChanged || hasVisibilityChanged;
+        let shouldUpdate = hasSizeChanged || hasDataChanged || hasExtendedStateChanged || hasInternalSnapshotChanged;
         if (shouldUpdate) {
             newProps.itemAnimator.animateWillUpdate(this.props.x, this.props.y, newProps.x, newProps.y, this.getRef() as object, newProps.index);
         } else if (hasMoved) {
