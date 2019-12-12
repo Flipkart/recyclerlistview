@@ -43,6 +43,7 @@ export default class ScrollComponent extends BaseScrollComponent {
 
     public render(): JSX.Element {
         const Scroller = TSCast.cast<ScrollView>(this.props.externalScrollView); //TSI
+        const ItemContainer = TSCast.cast<View>(this.props.itemContainer);
         //TODO:Talha
         // const {
         //     useWindowScroll,
@@ -64,12 +65,24 @@ export default class ScrollComponent extends BaseScrollComponent {
                 onScroll={this._onScroll}
                 onLayout={(!this._isSizeChangedCalledOnce || this.props.canChangeSize) ? this._onLayout : this.props.onLayout}>
                 <View style={{ flexDirection: this.props.isHorizontal ? "row" : "column" }}>
-                    <View style={{
-                        height: this.props.contentHeight,
-                        width: this.props.contentWidth,
-                    }}>
-                        {this.props.children}
-                    </View>
+                    {
+                        this.props.itemContainer ? (
+                            <ItemContainer style={{
+                                height: this.props.contentHeight,
+                                width: this.props.contentWidth,
+                            }}
+                            {...this.props.itemContainerProps}>
+                                {this.props.children}
+                            </ItemContainer>
+                        ) : (
+                            <View style={{
+                                height: this.props.contentHeight,
+                                width: this.props.contentWidth,
+                            }}>
+                                {this.props.children}
+                            </View>
+                        )
+                    }
                     {this.props.renderFooter ? this.props.renderFooter() : null}
                 </View>
             </Scroller>

@@ -104,10 +104,11 @@ export interface RecyclerListViewProps {
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object | number;
     debugHandlers?: DebugHandlers;
-
+    itemContainer?: JSX.Element | null;
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
+    itemContainerProps?: object;
 }
 
 export interface RecyclerListViewState {
@@ -151,7 +152,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
 
-    private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
+    private _defaultItemAnimator: ItemAnimator = this.props.itemContainer ? new BaseItemAnimator() : new DefaultItemAnimator();
 
     constructor(props: P, context?: any) {
         super(props, context);
