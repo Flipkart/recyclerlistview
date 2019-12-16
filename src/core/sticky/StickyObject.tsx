@@ -76,6 +76,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     }
 
     public renderCompat(): JSX.Element | null {
+        
         return (
             <Animated.View style={[
                 { position: "absolute", width: this._scrollableWidth, transform: [{ translateY: this._stickyViewOffset }] },
@@ -91,10 +92,6 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         const { x, y, height, width } = event.nativeEvent.layout;
         this._containerHeight = height;
         this._containerWidth = width;
-    }
-
-    public setTopOffset(topOffset: number): void {
-        this._stickyViewOffset.setValue(topOffset);
     }
 
     public onVisibleIndicesChanged(all: number[]): void {

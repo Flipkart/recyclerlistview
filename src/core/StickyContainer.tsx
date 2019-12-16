@@ -31,6 +31,8 @@ export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps>
 }
 export default class StickyContainer<P extends StickyContainerProps> extends ComponentCompat<P> {
     public static propTypes = {};
+    public _stickyHeaderRef: StickyHeader<StickyObjectProps> | null = null;
+    public _stickyFooterRef: StickyFooter<StickyObjectProps> | null = null;
     private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | undefined = undefined;
     private _dataProvider: BaseDataProvider;
     private _layoutProvider: BaseLayoutProvider;
@@ -38,8 +40,6 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
     private _distanceFromWindow: number;
 
-    private _stickyHeaderRef: StickyHeader<StickyObjectProps> | null = null;
-    private _stickyFooterRef: StickyFooter<StickyObjectProps> | null = null;
     private _visibleIndicesAll: number[] = [];
 
     constructor(props: P, context?: any) {
@@ -57,12 +57,6 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
         this._initParams(newProps);
     }
 
-    public setStickyHeaderTopOffset(topOffset: number): void {
-        if (this._stickyHeaderRef) {
-            this._stickyHeaderRef.setTopOffset(topOffset);
-        }
-    }
-
     public renderCompat(): JSX.Element {
         this._assertChildType();
         const recycler: ReactElement<RecyclerListViewProps> = React.cloneElement(this.props.children, {
@@ -70,7 +64,6 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
             ref: this._getRecyclerRef,
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,
-            stickyHeaderRef: this._stickyHeaderRef,
         });
         return (
             <View style={this.props.style ? this.props.style : { flex: 1 }}>
