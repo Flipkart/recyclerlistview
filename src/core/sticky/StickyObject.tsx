@@ -26,10 +26,8 @@ export interface StickyObjectProps {
     getDistanceFromWindow: () => number;
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
 }
-export default abstract class StickyObject<P extends StickyObjectProps> extends ComponentCompat<P> {
-    public _containerHeight: number = 0;
-    public _containerWidth: number = 0;
 
+export default abstract class StickyObject<P extends StickyObjectProps> extends ComponentCompat<P> {
     protected stickyType: StickyType = StickyType.HEADER;
     protected stickyTypeMultiplier: number = 1;
     protected stickyVisiblity: boolean = false;
@@ -61,7 +59,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     private _smallestVisibleIndex: number = 0;
     private _largestVisibleIndex: number = 0;
     private _offsetY: number = 0;
-    
+
     constructor(props: P, context?: any) {
         super(props, context);
     }
@@ -78,8 +76,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         return (
             <Animated.View style={[
                 { position: "absolute", width: this._scrollableWidth, transform: [{ translateY: this._stickyViewOffset }] },
-                this.containerPosition,
-            ]} onLayout={(event: any) => this.onLayout(event)} >
+                this.containerPosition,]} >
                 {this.stickyVisiblity ?
                     this._renderSticky()
                     : null}
@@ -87,10 +84,8 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         );
     }
 
-    public onLayout = (event: LayoutChangeEvent): void => {
-        const { x, y, height, width } = event.nativeEvent.layout;
-        this._containerHeight = height;
-        this._containerWidth = width;
+    public setTopOffset(topOffset: number): void {
+        this._stickyViewOffset.setValue(topOffset);
     }
 
     public onVisibleIndicesChanged(all: number[]): void {
@@ -146,22 +141,21 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
                 this._stickyViewOffset.setValue(0);
             }
         }
-
         if (this.stickyVisiblity) {
+            let stickyIndexUpdated = false;
             for (let i = 0; i < this.visibleIndices.length; i++) {
                 const layoutForIndex = this.props.getLayoutForIndex(this.visibleIndices[i]);
                 if (layoutForIndex) {
+
                     const bottomYOffset = layoutForIndex.y + layoutForIndex.height;
-                    if (bottomYOffset < this._offsetY + this._containerHeight) {
+                    if (bottomYOffset < this._offsetY) {
+                        stickyIndexUpdated = true;
                         this._smallestVisibleIndex = this.visibleIndices[i + 1];
-                        this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
-                            this._offsetY, this.props.getDistanceFromWindow(), this._windowBound);
-                        this._computeLayouts();
-                        this.stickyViewVisible(this.stickyVisiblity);
-                        break;
-                    }
-                    if (layoutForIndex.y + this._containerHeight < this._offsetY) {
+                    } else if (layoutForIndex.y < this._offsetY) {
+                        stickyIndexUpdated = true;
                         this._smallestVisibleIndex = this.visibleIndices[i];
+                    }
+                    if (stickyIndexUpdated) {
                         this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
                             this._offsetY, this.props.getDistanceFromWindow(), this._windowBound);
                         this._computeLayouts();
