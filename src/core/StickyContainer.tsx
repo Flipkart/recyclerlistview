@@ -4,7 +4,7 @@
 
 import * as React from "react";
 import * as PropTypes from "prop-types";
-import { StyleProp, View, ViewStyle } from "react-native";
+import { StyleProp, View, ViewStyle, Animated } from "react-native";
 import RecyclerListView, { RecyclerListViewState, RecyclerListViewProps } from "./RecyclerListView";
 import { ScrollEvent } from "./scrollcomponent/BaseScrollView";
 import StickyObject, { StickyObjectProps } from "./sticky/StickyObject";
@@ -55,6 +55,12 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
 
     public componentWillReceivePropsCompat(newProps: P): void {
         this._initParams(newProps);
+    }
+
+    public setStickyHeaderTopOffset(topOffset: number): void {
+        if (this._stickyHeaderRef) {
+            this._stickyHeaderRef.setTopOffset(topOffset);
+        }
     }
 
     public renderCompat(): JSX.Element {
