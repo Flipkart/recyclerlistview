@@ -70,7 +70,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
             ref: this._getRecyclerRef,
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,
-            stickyHeaderRef: this._stickyHeaderRef
+            stickyHeaderRef: this._stickyHeaderRef,
         });
         return (
             <View style={this.props.style ? this.props.style : { flex: 1 }}>
