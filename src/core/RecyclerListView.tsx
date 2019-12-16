@@ -42,8 +42,6 @@ import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollCompo
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
 import { Platform } from "react-native";
-import StickyHeader from "./sticky/StickyHeader";
-import { StickyObjectProps } from "./sticky/StickyObject";
 const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
 
@@ -110,7 +108,6 @@ export interface RecyclerListViewProps {
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
-    stickyHeaderRef?: StickyHeader<StickyObjectProps> | null;
 }
 
 export interface RecyclerListViewState {
@@ -250,15 +247,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         const layoutManager = this._virtualRenderer.getLayoutManager();
         if (layoutManager) {
             const offsets = layoutManager.getOffsetForIndex(index);
-            if (this.findApproxFirstVisibleIndex() > index) {
-                let topOffset = 0;
-                if (this.props.stickyHeaderRef) {
-                    topOffset = this.props.stickyHeaderRef._containerHeight;
-                }
-                this.scrollToOffset(offsets.x, offsets.y - topOffset, animate);
-            } else {
-                this.scrollToOffset(offsets.x, offsets.y, animate);
-            }
+            this.scrollToOffset(offsets.x, offsets.y, animate);
         } else {
             console.warn(Messages.WARN_SCROLL_TO_INDEX); //tslint:disable-line
         }
