@@ -24,6 +24,8 @@ export interface StickyContainerProps {
     stickyFooterIndices?: number[];
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
     style?: StyleProp<ViewStyle>;
+    stickyHeaderStyle?: StyleProp<ViewStyle>;
+    stickyFooterStyle?: StyleProp<ViewStyle>;
 }
 export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps> {
     ref: (recyclerRef: any) => {};
@@ -39,7 +41,6 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     private _extendedState: object | undefined;
     private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
     private _distanceFromWindow: number;
-
     private _visibleIndicesAll: number[] = [];
 
     constructor(props: P, context?: any) {
@@ -79,7 +80,8 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getContentDimension={this._getContentDimension}
                         getRowRenderer={this._getRowRenderer}
                         getDistanceFromWindow={this._getDistanceFromWindow}
-                        overrideRowRenderer={this.props.overrideRowRenderer} />
+                        overrideRowRenderer={this.props.overrideRowRenderer}
+                        containerStyle={this.props.stickyHeaderStyle} />
                 ) : null}
                 {this.props.stickyFooterIndices ? (
                     <StickyFooter ref={(stickyFooterRef: any) => this._getStickyFooterRef(stickyFooterRef)}
@@ -92,7 +94,8 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getContentDimension={this._getContentDimension}
                         getRowRenderer={this._getRowRenderer}
                         getDistanceFromWindow={this._getDistanceFromWindow}
-                        overrideRowRenderer={this.props.overrideRowRenderer} />
+                        overrideRowRenderer={this.props.overrideRowRenderer}
+                        containerStyle={this.props.stickyFooterStyle} />
                 ) : null}
             </View>
         );

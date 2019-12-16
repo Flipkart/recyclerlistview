@@ -3,7 +3,7 @@
  */
 
 import * as React from "react";
-import { Animated, StyleProp, ViewStyle, LayoutChangeEvent } from "react-native";
+import { Animated, StyleProp, ViewStyle, LayoutChangeEvent, View } from "react-native";
 import { Layout } from "../layoutmanager/LayoutManager";
 import { Dimension } from "../dependencies/LayoutProvider";
 import RecyclerListViewExceptions from "../exceptions/RecyclerListViewExceptions";
@@ -25,6 +25,7 @@ export interface StickyObjectProps {
     getRowRenderer: () => ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
     getDistanceFromWindow: () => number;
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
+    containerStyle?: StyleProp<ViewStyle> | undefined;
 }
 
 export default abstract class StickyObject<P extends StickyObjectProps> extends ComponentCompat<P> {
@@ -76,8 +77,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     }
 
     public renderCompat(): JSX.Element | null {
-        
-        return (
+        const content = (
             <Animated.View style={[
                 { position: "absolute", width: this._scrollableWidth, transform: [{ translateY: this._stickyViewOffset }] },
                 this.containerPosition]} onLayout={(event: any) => this.onLayout(event)} >
@@ -86,6 +86,16 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
                     : null}
             </Animated.View>
         );
+
+        if (this.props.containerStyle) {
+            return (
+                <Animated.View style={[this.props.containerStyle, { width: this._scrollableWidth, position: "absolute", height: 50 }]}>
+                    {content}
+                </Animated.View>
+            );
+        } else {
+            return (content);
+        }
     }
 
     public onLayout = (event: LayoutChangeEvent): void => {
