@@ -14,7 +14,7 @@ export interface ScrollComponentProps {
     scrollThrottle?: number;
     useWindowScroll?: boolean;
     onLayout?: any;
-    itemContainer?: JSX.Element | null;
+    itemContainer?: JSX.Element;
     itemContainerProps?: object;
 }
 export default abstract class BaseScrollComponent extends React.Component<ScrollComponentProps, {}> {
