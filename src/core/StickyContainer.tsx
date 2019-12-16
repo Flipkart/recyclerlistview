@@ -4,7 +4,7 @@
 
 import * as React from "react";
 import * as PropTypes from "prop-types";
-import { StyleProp, View, ViewStyle, Animated } from "react-native";
+import { StyleProp, View, ViewStyle } from "react-native";
 import RecyclerListView, { RecyclerListViewState, RecyclerListViewProps } from "./RecyclerListView";
 import { ScrollEvent } from "./scrollcomponent/BaseScrollView";
 import StickyObject, { StickyObjectProps } from "./sticky/StickyObject";
@@ -70,6 +70,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
             ref: this._getRecyclerRef,
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,
+            stickyHeaderRef: this._stickyHeaderRef
         });
         return (
             <View style={this.props.style ? this.props.style : { flex: 1 }}>

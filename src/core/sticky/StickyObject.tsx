@@ -3,7 +3,7 @@
  */
 
 import * as React from "react";
-import { Animated, StyleProp, ViewStyle } from "react-native";
+import { Animated, StyleProp, ViewStyle, LayoutChangeEvent } from "react-native";
 import { Layout } from "../layoutmanager/LayoutManager";
 import { Dimension } from "../dependencies/LayoutProvider";
 import RecyclerListViewExceptions from "../exceptions/RecyclerListViewExceptions";
@@ -28,6 +28,9 @@ export interface StickyObjectProps {
 }
 
 export default abstract class StickyObject<P extends StickyObjectProps> extends ComponentCompat<P> {
+    public _containerHeight: number = 0;
+    public _containerWidth: number = 0;
+
     protected stickyType: StickyType = StickyType.HEADER;
     protected stickyTypeMultiplier: number = 1;
     protected stickyVisiblity: boolean = false;
@@ -76,12 +79,18 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         return (
             <Animated.View style={[
                 { position: "absolute", width: this._scrollableWidth, transform: [{ translateY: this._stickyViewOffset }] },
-                this.containerPosition ]} >
+                this.containerPosition]} onLayout={(event: any) => this.onLayout(event)} >
                 {this.stickyVisiblity ?
                     this._renderSticky()
                     : null}
             </Animated.View>
         );
+    }
+
+    public onLayout = (event: LayoutChangeEvent): void => {
+        const { x, y, height, width } = event.nativeEvent.layout;
+        this._containerHeight = height;
+        this._containerWidth = width;
     }
 
     public setTopOffset(topOffset: number): void {
@@ -147,7 +156,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
                 const layoutForIndex = this.props.getLayoutForIndex(this.visibleIndices[i]);
                 if (layoutForIndex) {
 
-                    const bottomYOffset = layoutForIndex.y + layoutForIndex.height;
+                    const bottomYOffset = layoutForIndex.y + layoutForIndex.height - 12;
                     if (bottomYOffset < this._offsetY) {
                         stickyIndexUpdated = true;
                         this._smallestVisibleIndex = this.visibleIndices[i + 1];
