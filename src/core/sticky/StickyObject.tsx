@@ -25,13 +25,10 @@ export interface StickyObjectProps {
     getRowRenderer: () => ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
     getDistanceFromWindow: () => number;
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
-    containerStyle?: StyleProp<ViewStyle> | undefined;
+    overrideContainerRenderer?: ((rowContent: JSX.Element, data: any, index: number) => JSX.Element | null);
 }
 
 export default abstract class StickyObject<P extends StickyObjectProps> extends ComponentCompat<P> {
-    public _containerHeight: number = 0;
-    public _containerWidth: number = 0;
-
     protected stickyType: StickyType = StickyType.HEADER;
     protected stickyTypeMultiplier: number = 1;
     protected stickyVisiblity: boolean = false;
@@ -63,6 +60,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     private _smallestVisibleIndex: number = 0;
     private _largestVisibleIndex: number = 0;
     private _offsetY: number = 0;
+    private containerStyle: StyleProp<ViewStyle> = [{ position: "absolute", width: this._scrollableWidth }, this.containerPosition];
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -77,31 +75,19 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     }
 
     public renderCompat(): JSX.Element | null {
+        // Add the container style if overriderContainerRenderer not
         const content = (
-            <Animated.View style={[
-                { position: "absolute", width: this._scrollableWidth, transform: [{ translateY: this._stickyViewOffset }] },
-                this.containerPosition]} onLayout={(event: any) => this.onLayout(event)} >
-                {this.stickyVisiblity ?
-                    this._renderSticky()
-                    : null}
+            <Animated.View style={[{ transform: [{ translateY: this._stickyViewOffset }] }, (!this.props.overrideContainerRenderer && this.containerStyle)]} >
+                {this.stickyVisiblity ? this._renderSticky() : null}
             </Animated.View>
         );
 
-        if (this.props.containerStyle) {
-            return (
-                <Animated.View style={[this.props.containerStyle, { width: this._scrollableWidth, position: "absolute", height: 50 }]}>
-                    {content}
-                </Animated.View>
-            );
+        if (this.props.overrideContainerRenderer) {
+            const _stickyData: any = this.props.getDataForIndex(this.currentStickyIndex);
+            return this.props.overrideContainerRenderer(content, _stickyData, this.currentStickyIndex);
         } else {
             return (content);
         }
-    }
-
-    public onLayout = (event: LayoutChangeEvent): void => {
-        const { x, y, height, width } = event.nativeEvent.layout;
-        this._containerHeight = height;
-        this._containerWidth = width;
     }
 
     public onVisibleIndicesChanged(all: number[]): void {

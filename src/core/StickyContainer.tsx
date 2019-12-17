@@ -23,9 +23,8 @@ export interface StickyContainerProps {
     stickyHeaderIndices?: number[];
     stickyFooterIndices?: number[];
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
+    stickyContainerRenderer?: (stickyContent: JSX.Element, data: any, index: number, extendedState?: object) => JSX.Element | null;
     style?: StyleProp<ViewStyle>;
-    stickyHeaderStyle?: StyleProp<ViewStyle>;
-    stickyFooterStyle?: StyleProp<ViewStyle>;
 }
 export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps> {
     ref: (recyclerRef: any) => {};
@@ -81,7 +80,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getRowRenderer={this._getRowRenderer}
                         getDistanceFromWindow={this._getDistanceFromWindow}
                         overrideRowRenderer={this.props.overrideRowRenderer}
-                        containerStyle={this.props.stickyHeaderStyle} />
+                        overrideContainerRenderer={this.props.stickyContainerRenderer} />
                 ) : null}
                 {this.props.stickyFooterIndices ? (
                     <StickyFooter ref={(stickyFooterRef: any) => this._getStickyFooterRef(stickyFooterRef)}
@@ -95,7 +94,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getRowRenderer={this._getRowRenderer}
                         getDistanceFromWindow={this._getDistanceFromWindow}
                         overrideRowRenderer={this.props.overrideRowRenderer}
-                        containerStyle={this.props.stickyFooterStyle} />
+                        overrideContainerRenderer={this.props.stickyContainerRenderer} />
                 ) : null}
             </View>
         );
