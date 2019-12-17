@@ -32,8 +32,6 @@ export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps>
 }
 export default class StickyContainer<P extends StickyContainerProps> extends ComponentCompat<P> {
     public static propTypes = {};
-    public _stickyHeaderRef: StickyHeader<StickyObjectProps> | null = null;
-    public _stickyFooterRef: StickyFooter<StickyObjectProps> | null = null;
     private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | undefined = undefined;
     private _dataProvider: BaseDataProvider;
     private _layoutProvider: BaseLayoutProvider;
@@ -41,6 +39,9 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
     private _distanceFromWindow: number;
     private _visibleIndicesAll: number[] = [];
+    private _stickyHeaderRef: StickyHeader<StickyObjectProps> | null = null;
+    private _stickyFooterRef: StickyFooter<StickyObjectProps> | null = null;
+    
 
     constructor(props: P, context?: any) {
         super(props, context);
