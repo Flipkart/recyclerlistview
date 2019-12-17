@@ -3,7 +3,7 @@
  */
 
 import * as React from "react";
-import { Animated, StyleProp, ViewStyle, LayoutChangeEvent, View } from "react-native";
+import { Animated, StyleProp, ViewStyle } from "react-native";
 import { Layout } from "../layoutmanager/LayoutManager";
 import { Dimension } from "../dependencies/LayoutProvider";
 import RecyclerListViewExceptions from "../exceptions/RecyclerListViewExceptions";
@@ -75,7 +75,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     }
 
     public renderCompat(): JSX.Element | null {
-        // Add the container style if overriderContainerRenderer not
+        // Add the container style if overriderContainerRenderer is undefined
         const content = (
             <Animated.View style={[{ transform: [{ translateY: this._stickyViewOffset }] }, (!this.props.overrideContainerRenderer && this.containerStyle)]} >
                 {this.stickyVisiblity ? this._renderSticky() : null}

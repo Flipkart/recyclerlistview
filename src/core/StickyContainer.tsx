@@ -41,7 +41,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     private _stickyHeaderRef: StickyHeader<StickyObjectProps> | null = null;
     private _stickyFooterRef: StickyFooter<StickyObjectProps> | null = null;
     private _visibleIndicesAll: number[] = [];
-    
+
     constructor(props: P, context?: any) {
         super(props, context);
         this._assertChildType();
