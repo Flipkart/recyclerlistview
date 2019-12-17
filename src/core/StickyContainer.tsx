@@ -38,11 +38,10 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     private _extendedState: object | undefined;
     private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
     private _distanceFromWindow: number;
-    private _visibleIndicesAll: number[] = [];
     private _stickyHeaderRef: StickyHeader<StickyObjectProps> | null = null;
     private _stickyFooterRef: StickyFooter<StickyObjectProps> | null = null;
+    private _visibleIndicesAll: number[] = [];
     
-
     constructor(props: P, context?: any) {
         super(props, context);
         this._assertChildType();
