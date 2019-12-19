@@ -144,18 +144,11 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
             }
         }
         if (this.stickyVisiblity) {
-            let stickyIndexUpdated = false;
             const layoutForIndex = this.props.getLayoutForIndex(this.visibleIndices[0]);
             if (layoutForIndex) {
                 const bottomYOffset = layoutForIndex.y + layoutForIndex.height - 1;
                 if (bottomYOffset < this._offsetY) {
-                    stickyIndexUpdated = true;
                     this._smallestVisibleIndex = this.visibleIndices[1];
-                } else if (layoutForIndex.y < this._offsetY && this._smallestVisibleIndex !== this.visibleIndices[0]) {
-                    stickyIndexUpdated = true;
-                    this._smallestVisibleIndex = this.visibleIndices[0];
-                }
-                if (stickyIndexUpdated) {
                     this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
                         this._offsetY, this.props.getDistanceFromWindow(), this._windowBound);
                     this._computeLayouts();
