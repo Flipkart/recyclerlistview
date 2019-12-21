@@ -699,6 +699,12 @@ RecyclerListView.propTypes = {
     //animations are JS driven to avoid workflow interference. Also, please note LayoutAnimation is buggy on Android.
     itemAnimator: PropTypes.instanceOf(BaseItemAnimator),
 
+    //The Recyclerlistview item cells are enclosed inside this item container. The idea is pass a native UI component which implements a
+    //view shifting algorithm to remove the overlaps between the neighbouring views. This is achieved by shifting them by the appropriate
+    //amount in the right direction if the estimated sizes of the item cells are not accurate. If this props is passed, it will be used to
+    //enclose the list items and otherwise a default react native View will be used for the same.
+    itemContainer: PropTypes.element,
+
     //Enables you to utilize layout animations better by unmounting removed items. Please note, this might increase unmounts
     //on large data changes.
     optimizeForInsertDeleteAnimations: PropTypes.bool,
@@ -712,4 +718,7 @@ RecyclerListView.propTypes = {
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down.
     scrollViewProps: PropTypes.object,
+    //For all the props that need to be passed to the inner itemContainer which has been provided. Put them in an object and they'll
+    //be spread and passed down
+    itemContainerProps: PropTypes.object,
 };
