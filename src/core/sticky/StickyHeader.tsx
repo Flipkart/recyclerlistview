@@ -21,10 +21,10 @@ export default class StickyHeader<P extends StickyObjectProps> extends StickyObj
     }
 
     protected calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, distanceFromWindow: number,
+        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, correctionOffset: number,
     ): void {
         if (stickyIndices && smallestVisibleIndex !== undefined) {
-            this.bounceScrolling = this.hasReachedBoundary(offsetY, distanceFromWindow);
+            this.bounceScrolling = this.hasReachedBoundary(offsetY, correctionOffset);
             if (smallestVisibleIndex < stickyIndices[0] || this.bounceScrolling) {
                 this.stickyVisiblity = false;
             } else {
@@ -52,7 +52,7 @@ export default class StickyHeader<P extends StickyObjectProps> extends StickyObj
         return offsetY;
     }
 
-    protected hasReachedBoundary(offsetY: number, distanceFromWindow: number, _windowBound?: number): boolean {
-        return offsetY <= distanceFromWindow;
+    protected hasReachedBoundary(offsetY: number, correctionOffset: number, _windowBound?: number): boolean {
+        return offsetY <= correctionOffset;
     }
 }

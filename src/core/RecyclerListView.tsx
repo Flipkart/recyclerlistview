@@ -95,7 +95,6 @@ export interface RecyclerListViewProps {
     initialRenderIndex?: number;
     scrollThrottle?: number;
     canChangeSize?: boolean;
-    distanceFromWindow?: number;
     useWindowScroll?: boolean;
     disableRecycling?: boolean;
     forceNonDeterministicRendering?: boolean;
@@ -108,6 +107,7 @@ export interface RecyclerListViewProps {
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
+    correctedScrollOffset?: () => number;
 }
 
 export interface RecyclerListViewState {
@@ -123,7 +123,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         initialRenderIndex: 0,
         isHorizontal: false,
         onEndReachedThreshold: 0,
-        distanceFromWindow: 0,
         renderAheadOffset: IS_WEB ? 1000 : 250,
     };
 
@@ -580,7 +579,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _onScroll = (offsetX: number, offsetY: number, rawEvent: ScrollEvent): void => {
         //Adjusting offsets using distanceFromWindow
-        this._virtualRenderer.updateOffset(offsetX, offsetY, -this.props.distanceFromWindow!, true);
+        let scrollCorrection = 0;
+        if (this.props.correctedScrollOffset) {
+            scrollCorrection = this.props.correctedScrollOffset();
+        }
+        this._virtualRenderer.updateOffset(offsetX, offsetY, -scrollCorrection, true);
 
         if (this.props.onScroll) {
             this.props.onScroll(rawEvent, offsetX, offsetY);
@@ -667,13 +670,6 @@ RecyclerListView.propTypes = {
 
     //Specify if size can change, listview will automatically relayout items. For web, works only with useWindowScroll = true
     canChangeSize: PropTypes.bool,
-
-    //Specify how far away the first list item is from start of the RecyclerListView. e.g, if you have content padding on top or left.
-    //This is an adjustment for optimization and to make sure onVisibileIndexesChanged callback is correct.
-    //Ideally try to avoid setting large padding values on RLV content. If you have to please correct offsets reported, handle
-    //them in a custom ScrollView and pass it as an externalScrollView. If you want this to be accounted in scrollToOffset please
-    //override the method and handle manually.
-    distanceFromWindow: PropTypes.number,
 
     //Web only. Layout elements in window instead of a scrollable div.
     useWindowScroll: PropTypes.bool,

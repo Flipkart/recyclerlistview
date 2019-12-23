@@ -25,6 +25,7 @@ export interface StickyContainerProps {
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
     stickyContainerRenderer?: (stickyContent: JSX.Element, index: number, extendedState?: object) => JSX.Element | null;
     style?: StyleProp<ViewStyle>;
+    correctedScrollOffset: () => number;
 }
 export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps> {
     ref: (recyclerRef: any) => {};
@@ -37,7 +38,6 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     private _layoutProvider: BaseLayoutProvider;
     private _extendedState: object | undefined;
     private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
-    private _distanceFromWindow: number;
     private _stickyHeaderRef: StickyHeader<StickyObjectProps> | null = null;
     private _stickyFooterRef: StickyFooter<StickyObjectProps> | null = null;
     private _visibleIndicesAll: number[] = [];
@@ -50,7 +50,6 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
         this._layoutProvider = childProps.layoutProvider;
         this._extendedState = childProps.extendedState;
         this._rowRenderer = childProps.rowRenderer;
-        this._distanceFromWindow = childProps.distanceFromWindow ? childProps.distanceFromWindow : 0;
     }
 
     public componentWillReceivePropsCompat(newProps: P): void {
@@ -64,6 +63,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
             ref: this._getRecyclerRef,
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,
+            correctedScrollOffset: this.props.correctedScrollOffset,
         });
         return (
             <View style={this.props.style ? this.props.style : { flex: 1 }}>
@@ -78,7 +78,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getRLVRenderedSize={this._getRLVRenderedSize}
                         getContentDimension={this._getContentDimension}
                         getRowRenderer={this._getRowRenderer}
-                        getDistanceFromWindow={this._getDistanceFromWindow}
+                        getCorrectedScrollOffset={this.props.correctedScrollOffset}
                         overrideRowRenderer={this.props.overrideRowRenderer}
                         overrideContainerRenderer={this.props.stickyContainerRenderer} />
                 ) : null}
@@ -92,7 +92,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getRLVRenderedSize={this._getRLVRenderedSize}
                         getContentDimension={this._getContentDimension}
                         getRowRenderer={this._getRowRenderer}
-                        getDistanceFromWindow={this._getDistanceFromWindow}
+                        getCorrectedScrollOffset={this.props.correctedScrollOffset}
                         overrideRowRenderer={this.props.overrideRowRenderer}
                         overrideContainerRenderer={this.props.stickyContainerRenderer} />
                 ) : null}
@@ -145,14 +145,18 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     }
 
     private _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
+        let correctedScroll = 0;
+        if (this.props.correctedScrollOffset) {
+            correctedScroll = this.props.correctedScrollOffset();
+        }
         if (this._stickyHeaderRef) {
-            this._stickyHeaderRef.onScroll(offsetY);
+            this._stickyHeaderRef.onScroll(offsetY); //  - correctedScroll
         }
         if (this._stickyFooterRef) {
             this._stickyFooterRef.onScroll(offsetY);
         }
         if (this.props.children && this.props.children.props.onScroll) {
-            this.props.children.props.onScroll(rawEvent, offsetX, offsetY);
+            this.props.children.props.onScroll(rawEvent, offsetX, offsetY - correctedScroll);
         }
     }
 
@@ -208,17 +212,12 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
         return undefined;
     }
 
-    private _getDistanceFromWindow = (): number => {
-        return this._distanceFromWindow;
-    }
-
     private _initParams = (props: P) => {
         const childProps: RecyclerListViewProps = props.children.props;
         this._dataProvider = childProps.dataProvider;
         this._layoutProvider = childProps.layoutProvider;
         this._extendedState = childProps.extendedState;
         this._rowRenderer = childProps.rowRenderer;
-        this._distanceFromWindow = childProps.distanceFromWindow ? childProps.distanceFromWindow : 0;
     }
 }
 
