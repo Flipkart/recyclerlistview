@@ -4,4 +4,6 @@ export const Messages: {[key: string]: string} = {
     WARN_NO_DATA: "You have mounted RecyclerListView with an empty data provider (Size in 0). Please mount only if there is atleast one item " +
                   "to ensure optimal performance and to avoid unexpected behavior",
     VISIBLE_INDEXES_CHANGED_DEPRECATED: "onVisibleIndexesChanged deprecated. Please use onVisibleIndicesChanged instead.",
+    WARN_BOTH_ITEMANIMATOR_AND_ITEMCONTAINER: "Both itemAnimator and itemContainer props have been provided, " +
+                  "Therefore the itemContainer will not be used to prevent inconsistency",
 };

@@ -200,6 +200,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (this.props.dataProvider.getSize() === 0) {
             console.warn(Messages.WARN_NO_DATA); //tslint:disable-line
         }
+        if (this.props.itemContainer && this.props.itemAnimator) {
+            console.warn(Messages.WARN_BOTH_ITEMANIMATOR_AND_ITEMCONTAINER); //tslint:disable-line
+        }
     }
 
     public componentWillUnmount(): void {

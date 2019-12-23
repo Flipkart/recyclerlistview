@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Dimension } from "../dependencies/LayoutProvider";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./BaseScrollView";
+import ItemAnimator from "../ItemAnimator";
 
 export interface ScrollComponentProps {
     onSizeChanged: (dimensions: Dimension) => void;
@@ -14,6 +15,7 @@ export interface ScrollComponentProps {
     scrollThrottle?: number;
     useWindowScroll?: boolean;
     onLayout?: any;
+    itemAnimator?: ItemAnimator;
     itemContainer?: JSX.Element;
     itemContainerProps?: object;
 }
