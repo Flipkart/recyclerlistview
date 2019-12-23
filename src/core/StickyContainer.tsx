@@ -23,7 +23,7 @@ export interface StickyContainerProps {
     stickyHeaderIndices?: number[];
     stickyFooterIndices?: number[];
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
-    stickyContainerRenderer?: (stickyContent: JSX.Element, data: any, index: number, extendedState?: object) => JSX.Element | null;
+    stickyContainerRenderer?: (stickyContent: JSX.Element, index: number, extendedState?: object) => JSX.Element | null;
     style?: StyleProp<ViewStyle>;
 }
 export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps> {

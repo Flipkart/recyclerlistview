@@ -25,7 +25,7 @@ export interface StickyObjectProps {
     getRowRenderer: () => ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
     getDistanceFromWindow: () => number;
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
-    overrideContainerRenderer?: ((rowContent: JSX.Element, data: any, index: number) => JSX.Element | null);
+    overrideContainerRenderer?: ((rowContent: JSX.Element, index: number, extendState?: object) => JSX.Element | null);
 }
 
 export default abstract class StickyObject<P extends StickyObjectProps> extends ComponentCompat<P> {
@@ -84,7 +84,8 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
 
         if (this.props.overrideContainerRenderer) {
             const _stickyData: any = this.props.getDataForIndex(this.currentStickyIndex);
-            return this.props.overrideContainerRenderer(content, _stickyData, this.currentStickyIndex);
+            const _extendedState: any = this.props.getExtendedState();
+            return this.props.overrideContainerRenderer(content, this.currentStickyIndex, _extendedState);
         } else {
             return (content);
         }
