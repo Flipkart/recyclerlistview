@@ -25,7 +25,7 @@ export interface StickyContainerProps {
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
     stickyContainerRenderer?: (stickyContent: JSX.Element, index: number, extendedState?: object) => JSX.Element | null;
     style?: StyleProp<ViewStyle>;
-    correctedScrollOffset: () => number;
+    scrollOffsetCorrectionDelta: () => number;
 }
 export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps> {
     ref: (recyclerRef: any) => {};
@@ -63,7 +63,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
             ref: this._getRecyclerRef,
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,
-            correctedScrollOffset: this.props.correctedScrollOffset,
+            scrollOffsetCorrectionDelta: this.props.scrollOffsetCorrectionDelta,
         });
         return (
             <View style={this.props.style ? this.props.style : { flex: 1 }}>
@@ -78,7 +78,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getRLVRenderedSize={this._getRLVRenderedSize}
                         getContentDimension={this._getContentDimension}
                         getRowRenderer={this._getRowRenderer}
-                        getCorrectedScrollOffset={this.props.correctedScrollOffset}
+                        getCorrectedScrollOffset={this.props.scrollOffsetCorrectionDelta}
                         overrideRowRenderer={this.props.overrideRowRenderer}
                         overrideContainerRenderer={this.props.stickyContainerRenderer} />
                 ) : null}
@@ -92,7 +92,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getRLVRenderedSize={this._getRLVRenderedSize}
                         getContentDimension={this._getContentDimension}
                         getRowRenderer={this._getRowRenderer}
-                        getCorrectedScrollOffset={this.props.correctedScrollOffset}
+                        getCorrectedScrollOffset={this.props.scrollOffsetCorrectionDelta}
                         overrideRowRenderer={this.props.overrideRowRenderer}
                         overrideContainerRenderer={this.props.stickyContainerRenderer} />
                 ) : null}
@@ -145,18 +145,19 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     }
 
     private _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
-        let correctedScroll = 0;
-        if (this.props.correctedScrollOffset) {
-            correctedScroll = this.props.correctedScrollOffset();
-        }
+
         if (this._stickyHeaderRef) {
-            this._stickyHeaderRef.onScroll(offsetY); //  - correctedScroll
+            let correctedScroll = 0;
+            if (this.props.scrollOffsetCorrectionDelta) {
+                correctedScroll = this.props.scrollOffsetCorrectionDelta();
+            }
+            this._stickyHeaderRef.onScroll(offsetY + correctedScroll);
         }
         if (this._stickyFooterRef) {
             this._stickyFooterRef.onScroll(offsetY);
         }
         if (this.props.children && this.props.children.props.onScroll) {
-            this.props.children.props.onScroll(rawEvent, offsetX, offsetY - correctedScroll);
+            this.props.children.props.onScroll(rawEvent, offsetX, offsetY);
         }
     }
 

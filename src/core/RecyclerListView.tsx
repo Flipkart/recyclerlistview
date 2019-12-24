@@ -107,7 +107,7 @@ export interface RecyclerListViewProps {
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
-    correctedScrollOffset?: () => number;
+    scrollOffsetCorrectionDelta?: () => number;
 }
 
 export interface RecyclerListViewState {
@@ -579,11 +579,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _onScroll = (offsetX: number, offsetY: number, rawEvent: ScrollEvent): void => {
         //Adjusting offsets using distanceFromWindow
-        let scrollCorrection = 0;
-        if (this.props.correctedScrollOffset) {
-            scrollCorrection = this.props.correctedScrollOffset();
+        let correctionDelta = 0;
+        if (this.props.scrollOffsetCorrectionDelta) {
+            correctionDelta = this.props.scrollOffsetCorrectionDelta();
         }
-        this._virtualRenderer.updateOffset(offsetX, offsetY, -scrollCorrection, true);
+        this._virtualRenderer.updateOffset(offsetX, offsetY, correctionDelta, true);
 
         if (this.props.onScroll) {
             this.props.onScroll(rawEvent, offsetX, offsetY);

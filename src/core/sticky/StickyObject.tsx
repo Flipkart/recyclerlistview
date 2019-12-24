@@ -23,7 +23,6 @@ export interface StickyObjectProps {
     getRLVRenderedSize: () => Dimension | undefined;
     getContentDimension: () => Dimension | undefined;
     getRowRenderer: () => ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
-    getCorrectedScrollOffset: () => number;
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
     overrideContainerRenderer?: ((rowContent: JSX.Element, index: number, extendState?: object) => JSX.Element | null);
 }
@@ -69,7 +68,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     public componentWillReceivePropsCompat(newProps: StickyObjectProps): void {
         this._initParams();
         this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
-            this._offsetY, newProps.getCorrectedScrollOffset(), this._windowBound);
+            this._offsetY, this._windowBound);
         this._computeLayouts(newProps.stickyIndices);
         this.stickyViewVisible(this.stickyVisiblity, false);
     }
@@ -99,7 +98,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         this._initParams();
         this._setSmallestAndLargestVisibleIndices(all);
         this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
-            this._offsetY, this.props.getCorrectedScrollOffset(), this._windowBound);
+            this._offsetY, this._windowBound);
         this._computeLayouts();
         this.stickyViewVisible(this.stickyVisiblity);
     }
@@ -107,7 +106,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     public onScroll(offsetY: number): void {
         this._initParams();
         this._offsetY = offsetY;
-        this.boundaryProcessing(offsetY, this.props.getCorrectedScrollOffset(), this._windowBound);
+        this.boundaryProcessing(offsetY, this._windowBound);
         if (this._previousStickyIndex !== undefined) {
             if (this._previousStickyIndex * this.stickyTypeMultiplier >= this.currentStickyIndex * this.stickyTypeMultiplier) {
                 throw new CustomError(RecyclerListViewExceptions.stickyIndicesArraySortError);
@@ -151,7 +150,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
                 if (bottomYOffset < this._offsetY && this.visibleIndices[1] !== undefined) {
                     this._smallestVisibleIndex = this.visibleIndices[1];
                     this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
-                        this._offsetY, this.props.getCorrectedScrollOffset(), this._windowBound);
+                        this._offsetY, this._windowBound);
                     this._computeLayouts();
                     this.stickyViewVisible(this.stickyVisiblity);
                 }
@@ -159,11 +158,11 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         }
     }
 
-    protected abstract hasReachedBoundary(offsetY: number, correctionOffset: number, windowBound?: number): boolean;
+    protected abstract hasReachedBoundary(offsetY: number, windowBound?: number): boolean;
     protected abstract initStickyParams(): void;
     protected abstract calculateVisibleStickyIndex(
         stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
-        offsetY: number, correctionOffset: number, windowBound?: number,
+        offsetY: number, windowBound?: number,
     ): void;
     protected abstract getNextYd(_nextY: number, nextHeight: number): number;
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
@@ -176,8 +175,8 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         }
     }
 
-    protected boundaryProcessing(offsetY: number, correctionOffset: number, windowBound?: number): void {
-        const hasReachedBoundary: boolean = this.hasReachedBoundary(offsetY, correctionOffset, windowBound);
+    protected boundaryProcessing(offsetY: number, windowBound?: number): void {
+        const hasReachedBoundary: boolean = this.hasReachedBoundary(offsetY, windowBound);
         if (this.bounceScrolling !== hasReachedBoundary) {
             this.bounceScrolling = hasReachedBoundary;
             if (this.bounceScrolling) {
