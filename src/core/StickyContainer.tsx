@@ -78,7 +78,6 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getRLVRenderedSize={this._getRLVRenderedSize}
                         getContentDimension={this._getContentDimension}
                         getRowRenderer={this._getRowRenderer}
-                        getCorrectedScrollOffset={this.props.scrollOffsetCorrectionDelta}
                         overrideRowRenderer={this.props.overrideRowRenderer}
                         overrideContainerRenderer={this.props.stickyContainerRenderer} />
                 ) : null}
@@ -92,7 +91,6 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getRLVRenderedSize={this._getRLVRenderedSize}
                         getContentDimension={this._getContentDimension}
                         getRowRenderer={this._getRowRenderer}
-                        getCorrectedScrollOffset={this.props.scrollOffsetCorrectionDelta}
                         overrideRowRenderer={this.props.overrideRowRenderer}
                         overrideContainerRenderer={this.props.stickyContainerRenderer} />
                 ) : null}
