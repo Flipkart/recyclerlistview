@@ -52,6 +52,6 @@ export default class StickyHeader<P extends StickyObjectProps> extends StickyObj
     }
 
     protected hasReachedBoundary(offsetY: number, _windowBound?: number): boolean {
-        return _windowBound !== undefined && offsetY >= _windowBound;
+        return false;
     }
 }

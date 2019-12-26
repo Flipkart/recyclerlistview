@@ -145,11 +145,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     private _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
 
         if (this._stickyHeaderRef) {
-            let correctedScroll = 0;
-            if (this.props.scrollOffsetCorrectionDelta) {
-                correctedScroll = this.props.scrollOffsetCorrectionDelta();
-            }
-            this._stickyHeaderRef.onScroll(offsetY + correctedScroll);
+            this._stickyHeaderRef.onScroll(offsetY);
         }
         if (this._stickyFooterRef) {
             this._stickyFooterRef.onScroll(offsetY);
