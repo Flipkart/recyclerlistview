@@ -143,19 +143,6 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
                 this._stickyViewOffset.setValue(0);
             }
         }
-        if (this.stickyVisiblity) {
-            const layoutForIndex = this.props.getLayoutForIndex(this.visibleIndices[0]);
-            if (layoutForIndex) {
-                const bottomYOffset = layoutForIndex.y + layoutForIndex.height - 1;
-                if (bottomYOffset < this._offsetY && this.visibleIndices[1] !== undefined) {
-                    this._smallestVisibleIndex = this.visibleIndices[1];
-                    this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
-                        this._offsetY, this._windowBound);
-                    this._computeLayouts();
-                    this.stickyViewVisible(this.stickyVisiblity);
-                }
-            }
-        }
     }
 
     protected abstract hasReachedBoundary(offsetY: number, windowBound?: number): boolean;
