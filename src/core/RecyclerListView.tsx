@@ -707,4 +707,7 @@ RecyclerListView.propTypes = {
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down.
     scrollViewProps: PropTypes.object,
+
+    // Allows user to add correctional delta for Y offset to accomodate for the height of external items overlaying recyclerlistview.
+    scrollOffsetCorrectioDelta: PropTypes.func,
 };
