@@ -82,7 +82,6 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         );
 
         if (this.props.overrideContainerRenderer) {
-            const _stickyData: any = this.props.getDataForIndex(this.currentStickyIndex);
             const _extendedState: any = this.props.getExtendedState();
             return this.props.overrideContainerRenderer(content, this.currentStickyIndex, _extendedState);
         } else {
