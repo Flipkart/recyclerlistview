@@ -23,9 +23,9 @@ export interface StickyContainerProps {
     stickyHeaderIndices?: number[];
     stickyFooterIndices?: number[];
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
+    scrollOffsetCorrection?: () => number;
     stickyContainerRenderer?: (stickyContent: JSX.Element, index: number, extendedState?: object) => JSX.Element | null;
     style?: StyleProp<ViewStyle>;
-    scrollOffsetCorrectionDelta: () => number;
 }
 export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps> {
     ref: (recyclerRef: any) => {};
@@ -63,7 +63,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
             ref: this._getRecyclerRef,
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,
-            scrollOffsetCorrectionDelta: this.props.scrollOffsetCorrectionDelta,
+            scrollOffsetCorrection: this.props.scrollOffsetCorrection,
         });
         return (
             <View style={this.props.style ? this.props.style : { flex: 1 }}>
@@ -235,4 +235,7 @@ StickyContainer.propTypes = {
 
     // For all practical purposes, pass the style that is applied to the RecyclerListView component here.
     style: PropTypes.object,
+
+    // For providing custom container to StickyHeader and StickyFooter allowing user extensibility to stylize these items accordingly.
+    stickyContainerRenderer: PropTypes.func,
 };
