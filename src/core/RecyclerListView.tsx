@@ -35,6 +35,7 @@ import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcom
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
+import ItemContainer, { ItemContainerProps } from "./ItemContainer";
 import { DebugHandlers } from "..";
 import { ComponentCompat } from "../utils/ComponentCompat";
 //#if [REACT-NATIVE]
@@ -104,7 +105,7 @@ export interface RecyclerListViewProps {
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object | number;
     debugHandlers?: DebugHandlers;
-    itemContainer?: JSX.Element;
+    itemContainer?: { new(props: object): ItemContainer };
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
@@ -367,7 +368,12 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 onScroll={this._onScroll}
                 onSizeChanged={this._onSizeChanged}
                 contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
-                contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}>
+                contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}
+                itemContainerProps={this.props.itemContainer ? {
+                    horizontal : this.props.isHorizontal,
+                    layoutOffset : this.getCurrentScrollOffset(),
+                    ...this.props.itemContainerProps,
+                } : null }>
                 {this._generateRenderStack()}
             </ScrollComponent>
         );
@@ -706,7 +712,7 @@ RecyclerListView.propTypes = {
     //view shifting algorithm to remove the overlaps between the neighbouring views. This is achieved by shifting them by the appropriate
     //amount in the right direction if the estimated sizes of the item cells are not accurate. If this props is passed, it will be used to
     //enclose the list items and otherwise a default react native View will be used for the same.
-    itemContainer: PropTypes.element,
+    itemContainer: PropTypes.func,
 
     //Enables you to utilize layout animations better by unmounting removed items. Please note, this might increase unmounts
     //on large data changes.
