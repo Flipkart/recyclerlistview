@@ -708,5 +708,5 @@ RecyclerListView.propTypes = {
     scrollViewProps: PropTypes.object,
 
     // Allows user to add correctional delta for Y offset to accomodate for the height of external items overlaying recyclerlistview.
-    scrollOffsetCorrectioDelta: PropTypes.func,
+    scrollOffsetCorrection: PropTypes.func,
 };
