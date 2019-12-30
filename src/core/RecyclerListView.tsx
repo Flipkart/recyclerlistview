@@ -341,6 +341,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     public renderCompat(): JSX.Element {
+        const windowBound = this.props.isHorizontal ? this.getRenderedSize().width : this.getRenderedSize().height;
         //TODO:Talha
         // const {
         //     layoutProvider,
@@ -372,6 +373,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 itemContainerProps={this.props.itemContainer ? {
                     horizontal : this.props.isHorizontal,
                     layoutOffset : this.getCurrentScrollOffset(),
+                    layoutInterval: windowBound + this.getCurrentRenderAheadOffset(),
                     ...this.props.itemContainerProps,
                 } : null }>
                 {this._generateRenderStack()}
