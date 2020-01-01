@@ -7,4 +7,4 @@ export interface ItemContainerProps {
     layoutInterval: number;
 }
 
-export default abstract class ItemContainer extends ComponentCompat<{}, {}> {}
+export default abstract class ItemContainer<P, S> extends React.Component<P, S> {}

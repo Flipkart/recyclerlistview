@@ -105,7 +105,7 @@ export interface RecyclerListViewProps {
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object | number;
     debugHandlers?: DebugHandlers;
-    itemContainer?: { new(props: object): ItemContainer };
+    itemContainer?: { new(props: object): ItemContainer<object, object> };
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;

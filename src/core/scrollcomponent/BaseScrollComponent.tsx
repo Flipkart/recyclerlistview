@@ -17,7 +17,7 @@ export interface ScrollComponentProps {
     useWindowScroll?: boolean;
     onLayout?: any;
     itemAnimator?: ItemAnimator;
-    itemContainer?: { new(props: object): ItemContainer };
+    itemContainer?: { new(props: object): ItemContainer<object, object> };
     itemContainerProps?: object;
 }
 export default abstract class BaseScrollComponent extends React.Component<ScrollComponentProps, {}> {
