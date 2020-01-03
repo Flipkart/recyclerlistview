@@ -238,4 +238,7 @@ StickyContainer.propTypes = {
 
     // For providing custom container to StickyHeader and StickyFooter allowing user extensibility to stylize these items accordingly.
     stickyContainerRenderer: PropTypes.func,
+
+    // Allows user to add correctional delta for Y offset to accomodate for the height of external items overlaying recyclerlistview.
+    scrollOffsetCorrection: PropTypes.func,
 };
