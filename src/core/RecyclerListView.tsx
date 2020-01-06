@@ -578,6 +578,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _onScroll = (offsetX: number, offsetY: number, rawEvent: ScrollEvent): void => {
+        /**
+         * correctionDelta to be positive to shift offset upwards; negative to push offset downwards.
+         */
         let correctionDelta = 0;
         if (this.props.scrollOffsetCorrection) {
             correctionDelta = this.props.scrollOffsetCorrection();
