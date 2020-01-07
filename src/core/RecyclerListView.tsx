@@ -91,7 +91,7 @@ export interface RecyclerListViewProps {
     onVisibleIndicesChanged?: TOnItemStatusChanged;
     renderFooter?: () => JSX.Element | JSX.Element[] | null;
     externalScrollView?: { new(props: ScrollViewDefaultProps): BaseScrollView };
-    layoutSize?: Dimension;
+    scrollViewSize?: Dimension;
     initialOffset?: number;
     initialRenderIndex?: number;
     scrollThrottle?: number;
@@ -164,9 +164,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             return this.props.dataProvider.getStableId(index);
         }, !props.disableRecycling);
 
-        if (props.layoutSize) {
-            this._layout.height = props.layoutSize.height;
-            this._layout.width = props.layoutSize.width;
+        if (props.scrollViewSize) {
+            this._layout.height = props.scrollViewSize.height;
+            this._layout.width = props.scrollViewSize.width;
             this._initComplete = true;
             this._initTrackers();
             this._processOnEndReached();
