@@ -104,7 +104,7 @@ export interface RecyclerListViewProps {
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object | number;
     debugHandlers?: DebugHandlers;
-    contentContainer?: (props?: object, children?: React.ReactNode) => JSX.Element | null;
+    renderContentContainer?: (props?: object, children?: React.ReactNode) => React.ReactNode | null;
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
@@ -154,7 +154,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     //If the native content container is used, then positions of the list items are changed on the native side. The animated library used
     //by the default item animator also changes the same positions which could lead to inconsistency. Hence, the base item animator which
     //does not perform any such animations will be used.
-    private _defaultItemAnimator: ItemAnimator = this.props.contentContainer ? new BaseItemAnimator() : new DefaultItemAnimator();
+    private _defaultItemAnimator: ItemAnimator = new BaseItemAnimator();
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -373,7 +373,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 onSizeChanged={this._onSizeChanged}
                 contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
                 contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}
-                contentContainerProps={this.props.contentContainer ? contentContainerProps : null }>
+                renderAheadOffset={this.getCurrentRenderAheadOffset()}>
                 {this._generateRenderStack()}
             </ScrollComponent>
         );
