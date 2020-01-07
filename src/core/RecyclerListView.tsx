@@ -339,12 +339,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     public renderCompat(): JSX.Element {
-        const windowBound = this.props.isHorizontal ? this.getRenderedSize().width : this.getRenderedSize().height;
-        const contentContainerProps = {
-            horizontal : this.props.isHorizontal,
-            scrollOffset : this.getCurrentScrollOffset(),
-            windowSize: windowBound + this.getCurrentRenderAheadOffset(),
-        };
         //TODO:Talha
         // const {
         //     layoutProvider,
@@ -712,7 +706,7 @@ RecyclerListView.propTypes = {
     //view shifting algorithm to remove the overlaps between the neighbouring views. This is achieved by shifting them by the appropriate
     //amount in the correct direction if the estimated sizes of the item cells are not accurate. If this props is passed, it will be used to
     //enclose the list items and otherwise a default react native View will be used for the same.
-    contentContainer: PropTypes.func,
+    renderContentContainer: PropTypes.func,
 
     //Enables you to utilize layout animations better by unmounting removed items. Please note, this might increase unmounts
     //on large data changes.
