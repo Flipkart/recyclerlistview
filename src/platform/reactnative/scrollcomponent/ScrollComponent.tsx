@@ -43,7 +43,14 @@ export default class ScrollComponent extends BaseScrollComponent {
 
     public render(): JSX.Element {
         const Scroller = TSCast.cast<ScrollView>(this.props.externalScrollView); //TSI
-        const ItemContainer = TSCast.cast<View>(this.props.itemContainer);
+        const contentContainer = this.props.contentContainer ? this.props.contentContainer : this._defaultContainer;
+        const contentContainerProps = {
+            style: {
+                height: this.props.contentHeight,
+                width: this.props.contentWidth,
+            },
+            ...this.props.contentContainerProps,
+        };
         //TODO:Talha
         // const {
         //     useWindowScroll,
@@ -65,27 +72,18 @@ export default class ScrollComponent extends BaseScrollComponent {
                 onScroll={this._onScroll}
                 onLayout={(!this._isSizeChangedCalledOnce || this.props.canChangeSize) ? this._onLayout : this.props.onLayout}>
                 <View style={{ flexDirection: this.props.isHorizontal ? "row" : "column" }}>
-                    {
-                        (!this.props.itemAnimator && this.props.itemContainer) ? (
-                            <ItemContainer style={{
-                                height: this.props.contentHeight,
-                                width: this.props.contentWidth,
-                            }}
-                            {...this.props.itemContainerProps}>
-                                {this.props.children}
-                            </ItemContainer>
-                        ) : (
-                            <View style={{
-                                height: this.props.contentHeight,
-                                width: this.props.contentWidth,
-                            }}>
-                                {this.props.children}
-                            </View>
-                        )
-                    }
+                    {contentContainer(contentContainerProps, this.props.children)}
                     {this.props.renderFooter ? this.props.renderFooter() : null}
                 </View>
             </Scroller>
+        );
+    }
+
+    private _defaultContainer(props: object, children: React.ReactNode): JSX.Element | null {
+        return (
+            <View {...props}>
+                {children}
+            </View>
         );
     }
 

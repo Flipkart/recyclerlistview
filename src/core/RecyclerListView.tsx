@@ -35,7 +35,6 @@ import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcom
 import { TOnItemStatusChanged } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
-import ItemContainer, { ItemContainerProps } from "./ItemContainer";
 import { DebugHandlers } from "..";
 import { ComponentCompat } from "../utils/ComponentCompat";
 //#if [REACT-NATIVE]
@@ -105,11 +104,10 @@ export interface RecyclerListViewProps {
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object | number;
     debugHandlers?: DebugHandlers;
-    itemContainer?: { new(props: object): ItemContainer<object, object> };
+    contentContainer?: (props?: object, children?: React.ReactNode) => JSX.Element | null;
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
-    itemContainerProps?: object;
 }
 
 export interface RecyclerListViewState {
@@ -153,7 +151,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
 
-    private _defaultItemAnimator: ItemAnimator = this.props.itemContainer ? new BaseItemAnimator() : new DefaultItemAnimator();
+    //If the native content container is used, then positions of the list items will get changed on the native side. The animated library used
+    //by the default item animator also changes the same positions using Animated Library which could lead to inconsistency.
+    //Hence, the base item animator which does not perform any such animations will be used.
+    private _defaultItemAnimator: ItemAnimator = this.props.contentContainer ? new BaseItemAnimator() : new DefaultItemAnimator();
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -200,9 +201,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this._checkAndChangeLayouts(this.props);
         if (this.props.dataProvider.getSize() === 0) {
             console.warn(Messages.WARN_NO_DATA); //tslint:disable-line
-        }
-        if (this.props.itemContainer && this.props.itemAnimator) {
-            console.warn(Messages.WARN_BOTH_ITEMANIMATOR_AND_ITEMCONTAINER); //tslint:disable-line
         }
     }
 
@@ -342,6 +340,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     public renderCompat(): JSX.Element {
         const windowBound = this.props.isHorizontal ? this.getRenderedSize().width : this.getRenderedSize().height;
+        const contentContainerProps = {
+            horizontal : this.props.isHorizontal,
+            scrollOffset : this.getCurrentScrollOffset(),
+            windowSize: windowBound + this.getCurrentRenderAheadOffset(),
+        };
         //TODO:Talha
         // const {
         //     layoutProvider,
@@ -370,12 +373,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 onSizeChanged={this._onSizeChanged}
                 contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
                 contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}
-                itemContainerProps={this.props.itemContainer ? {
-                    horizontal : this.props.isHorizontal,
-                    layoutOffset : this.getCurrentScrollOffset(),
-                    layoutInterval: windowBound + this.getCurrentRenderAheadOffset(),
-                    ...this.props.itemContainerProps,
-                } : null }>
+                contentContainerProps={this.props.contentContainer ? contentContainerProps : null }>
                 {this._generateRenderStack()}
             </ScrollComponent>
         );
@@ -712,9 +710,9 @@ RecyclerListView.propTypes = {
 
     //The Recyclerlistview item cells are enclosed inside this item container. The idea is pass a native UI component which implements a
     //view shifting algorithm to remove the overlaps between the neighbouring views. This is achieved by shifting them by the appropriate
-    //amount in the right direction if the estimated sizes of the item cells are not accurate. If this props is passed, it will be used to
+    //amount in the correct direction if the estimated sizes of the item cells are not accurate. If this props is passed, it will be used to
     //enclose the list items and otherwise a default react native View will be used for the same.
-    itemContainer: PropTypes.func,
+    contentContainer: PropTypes.func,
 
     //Enables you to utilize layout animations better by unmounting removed items. Please note, this might increase unmounts
     //on large data changes.
@@ -729,7 +727,4 @@ RecyclerListView.propTypes = {
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down.
     scrollViewProps: PropTypes.object,
-    //For all the props that need to be passed to the inner itemContainer which has been provided. Put them in an object and they'll
-    //be spread and passed down
-    itemContainerProps: PropTypes.object,
 };

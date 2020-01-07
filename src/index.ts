@@ -9,7 +9,6 @@ import { Layout, LayoutManager, Point, WrapGridLayoutManager } from "./core/layo
 import ProgressiveListView from "./core/ProgressiveListView";
 import { DebugHandlers } from "./core/devutils/debughandlers/DebugHandlers";
 import { ComponentCompat } from "./utils/ComponentCompat";
-import ItemContainer from "./core/ItemContainer";
 
 export {
     ContextProvider,
@@ -30,5 +29,4 @@ export {
     DebugHandlers,
     BaseDataProvider,
     ComponentCompat,
-    ItemContainer,
 };
