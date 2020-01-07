@@ -151,9 +151,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
 
-    //If the native content container is used, then positions of the list items will get changed on the native side. The animated library used
-    //by the default item animator also changes the same positions using Animated Library which could lead to inconsistency.
-    //Hence, the base item animator which does not perform any such animations will be used.
+    //If the native content container is used, then positions of the list items are changed on the native side. The animated library used
+    //by the default item animator also changes the same positions which could lead to inconsistency. Hence, the base item animator which
+    //does not perform any such animations will be used.
     private _defaultItemAnimator: ItemAnimator = this.props.contentContainer ? new BaseItemAnimator() : new DefaultItemAnimator();
 
     constructor(props: P, context?: any) {
