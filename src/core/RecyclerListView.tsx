@@ -107,7 +107,7 @@ export interface RecyclerListViewProps {
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
-    scrollOffsetCorrection?: () => number;
+    updateLogicalOffset?: (offsetY: number) => number;
 }
 
 export interface RecyclerListViewState {
@@ -578,14 +578,13 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _onScroll = (offsetX: number, offsetY: number, rawEvent: ScrollEvent): void => {
-        /**
-         * correctionDelta to be positive to shift offset upwards; negative to push offset downwards.
-         */
-        let correctionDelta = 0;
-        if (this.props.scrollOffsetCorrection) {
-            correctionDelta = this.props.scrollOffsetCorrection();
+        // correction to be positive to shift offset upwards; negative to push offset downwards.
+        let correction = 0;
+        if (this.props.updateLogicalOffset) {
+            // extracting the correction value from logical offset and updating offset of virtual renderer.
+            correction =  this.props.updateLogicalOffset(offsetY) - offsetY;
         }
-        this._virtualRenderer.updateOffset(offsetX, offsetY, correctionDelta, true);
+        this._virtualRenderer.updateOffset(offsetX, offsetY, correction, true);
 
         if (this.props.onScroll) {
             this.props.onScroll(rawEvent, offsetX, offsetY);
@@ -710,6 +709,8 @@ RecyclerListView.propTypes = {
     //and passed down.
     scrollViewProps: PropTypes.object,
 
-    // Allows user to add correctional delta for Y offset to accomodate for the height of external items overlaying recyclerlistview.
-    scrollOffsetCorrection: PropTypes.func,
+    // Used when the logical offsetY differs from actual offsetY of recyclerlistview, could be because some other component is overlaying the recyclerlistview.
+    // For e.x. toolbar within CoordinatorLayout are overlapping the recyclerlistview.
+    // This method accepts the actual offsetY as the param, and the morphed offsetY is to be returned.
+    updateLogicalOffset: PropTypes.func,
 };

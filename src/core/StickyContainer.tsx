@@ -23,7 +23,7 @@ export interface StickyContainerProps {
     stickyHeaderIndices?: number[];
     stickyFooterIndices?: number[];
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
-    scrollOffsetCorrection?: () => number;
+    updateLogicalOffset?: (offsetY: number) => number;
     renderStickyContainer?: (stickyContent: JSX.Element, index: number, extendedState?: object) => JSX.Element | null;
     style?: StyleProp<ViewStyle>;
 }
@@ -63,7 +63,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
             ref: this._getRecyclerRef,
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,
-            scrollOffsetCorrection: this.props.scrollOffsetCorrection,
+            updateLogicalOffset: this.props.updateLogicalOffset,
         });
         return (
             <View style={this.props.style ? this.props.style : { flex: 1 }}>
@@ -240,5 +240,5 @@ StickyContainer.propTypes = {
     renderStickyContainer: PropTypes.func,
 
     // Allows user to add correctional delta for Y offset to accomodate for the height of external items overlaying recyclerlistview.
-    scrollOffsetCorrection: PropTypes.func,
+    updateLogicalOffset: PropTypes.func,
 };
