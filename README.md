@@ -97,7 +97,8 @@ not be as fast.
 | initialRenderIndex | No | number | Specify the initial item index you want rendering to start from. Preferred over initialOffset if both specified |
 | scrollThrottle | No | number |iOS only; Scroll throttle duration |
 | canChangeSize | No | boolean | Specify if size can change |
-| scrollOffsetCorrection | No | () => number | Specify additional correctional delta for offset of the recyclerview |
+| updateLogicalOffset | No | (offsetY: number) => number | Allows updation of the offset value of RecyclerListView based on the actual offset value.
+![sample](/images/updatedLogicalOffset.png) |
 | useWindowScroll | No | boolean | Web only; Layout Elements in window instead of a scrollable div |
 | disableRecycling | No | boolean | Turns off recycling |
 | forceNonDeterministicRendering | No | boolean | Default is false; if enabled dimensions provided in layout provider will not be strictly enforced. Use this if item dimensions cannot be accurately determined |
