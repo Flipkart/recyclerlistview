@@ -24,7 +24,7 @@ export interface StickyContainerProps {
     stickyFooterIndices?: number[];
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
     scrollOffsetCorrection?: () => number;
-    stickyContainerRenderer?: (stickyContent: JSX.Element, index: number, extendedState?: object) => JSX.Element | null;
+    renderStickyContainer?: (stickyContent: JSX.Element, index: number, extendedState?: object) => JSX.Element | null;
     style?: StyleProp<ViewStyle>;
 }
 export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps> {
@@ -79,7 +79,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getContentDimension={this._getContentDimension}
                         getRowRenderer={this._getRowRenderer}
                         overrideRowRenderer={this.props.overrideRowRenderer}
-                        overrideContainerRenderer={this.props.stickyContainerRenderer} />
+                        renderContainer={this.props.renderStickyContainer} />
                 ) : null}
                 {this.props.stickyFooterIndices ? (
                     <StickyFooter ref={(stickyFooterRef: any) => this._getStickyFooterRef(stickyFooterRef)}
@@ -92,7 +92,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getContentDimension={this._getContentDimension}
                         getRowRenderer={this._getRowRenderer}
                         overrideRowRenderer={this.props.overrideRowRenderer}
-                        overrideContainerRenderer={this.props.stickyContainerRenderer} />
+                        renderContainer={this.props.renderStickyContainer} />
                 ) : null}
             </View>
         );
@@ -237,7 +237,7 @@ StickyContainer.propTypes = {
     style: PropTypes.object,
 
     // For providing custom container to StickyHeader and StickyFooter allowing user extensibility to stylize these items accordingly.
-    stickyContainerRenderer: PropTypes.func,
+    renderStickyContainer: PropTypes.func,
 
     // Allows user to add correctional delta for Y offset to accomodate for the height of external items overlaying recyclerlistview.
     scrollOffsetCorrection: PropTypes.func,

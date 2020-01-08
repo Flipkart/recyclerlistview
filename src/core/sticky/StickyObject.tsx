@@ -24,7 +24,7 @@ export interface StickyObjectProps {
     getContentDimension: () => Dimension | undefined;
     getRowRenderer: () => ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
-    overrideContainerRenderer?: ((rowContent: JSX.Element, index: number, extendState?: object) => JSX.Element | null);
+    renderContainer?: ((rowContent: JSX.Element, index: number, extendState?: object) => JSX.Element | null);
 }
 
 export default abstract class StickyObject<P extends StickyObjectProps> extends ComponentCompat<P> {
@@ -76,14 +76,14 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     public renderCompat(): JSX.Element | null {
         // Add the container style if overriderContainerRenderer is undefined
         const content = (
-            <Animated.View style={[{ transform: [{ translateY: this._stickyViewOffset }] }, (!this.props.overrideContainerRenderer && this.containerStyle)]} >
+            <Animated.View style={[{ transform: [{ translateY: this._stickyViewOffset }] }, (!this.props.renderContainer && this.containerStyle)]} >
                 {this.stickyVisiblity ? this._renderSticky() : null}
             </Animated.View>
         );
 
-        if (this.props.overrideContainerRenderer) {
+        if (this.props.renderContainer) {
             const _extendedState: any = this.props.getExtendedState();
-            return this.props.overrideContainerRenderer(content, this.currentStickyIndex, _extendedState);
+            return this.props.renderContainer(content, this.currentStickyIndex, _extendedState);
         } else {
             return (content);
         }
