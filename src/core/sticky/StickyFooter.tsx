@@ -18,9 +18,7 @@ export default class StickyFooter<P extends StickyObjectProps> extends StickyObj
     }
 
     protected calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, _smallestVisibleIndex: number, largestVisibleIndex: number,
-        offsetY: number, windowBound?: number,
-    ): void {
+        stickyIndices: number[] | undefined, _smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, windowBound?: number): void {
         if (stickyIndices && largestVisibleIndex) {
             this.bounceScrolling = this.hasReachedBoundary(offsetY, windowBound);
             if (largestVisibleIndex > stickyIndices[stickyIndices.length - 1] || this.bounceScrolling) {

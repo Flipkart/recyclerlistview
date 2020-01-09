@@ -73,17 +73,17 @@ export default class ViewabilityTracker {
 
     public forceRefreshWithOffset(offset: number): void {
         this._currentOffset = -1;
-        this.updateOffset(offset, 0, false);
+        this.updateOffset(offset, false);
     }
 
-    public updateOffset(offset: number, correction: number, isActual: boolean): void {
+    public updateOffset(offset: number, isActual: boolean, correction?: Range): void {
         if (isActual) {
             this._actualOffset = offset;
         }
-        offset = Math.min(this._maxOffset, Math.max(0, offset + correction));
+        offset = Math.min(this._maxOffset, Math.max(0, offset + (correction ? correction.start : 0)));
         if (this._currentOffset !== offset) {
             this._currentOffset = offset;
-            this._updateTrackingWindows(offset);
+            this._updateTrackingWindows(offset, correction);
             let startIndex = 0;
             if (this._visibleIndexes.length > 0) {
                 startIndex = this._visibleIndexes[0];
@@ -289,12 +289,12 @@ export default class ViewabilityTracker {
         return this._itemIntersectsWindow(this._visibleWindow, startBound, endBound);
     }
 
-    private _updateTrackingWindows(newOffset: number): void {
+    private _updateTrackingWindows(newOffset: number, correction?: Range): void {
         this._engagedWindow.start = Math.max(0, newOffset - this._renderAheadOffset);
-        this._engagedWindow.end = newOffset + this._windowBound + this._renderAheadOffset;
+        this._engagedWindow.end = newOffset + this._windowBound + this._renderAheadOffset + (correction ? correction.end : 0);
 
         this._visibleWindow.start = newOffset;
-        this._visibleWindow.end = newOffset + this._windowBound;
+        this._visibleWindow.end = newOffset + this._windowBound + (correction ? correction.end : 0);
     }
 
     //TODO:Talha optimize this

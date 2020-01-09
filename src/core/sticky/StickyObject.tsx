@@ -147,9 +147,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     protected abstract hasReachedBoundary(offsetY: number, windowBound?: number): boolean;
     protected abstract initStickyParams(): void;
     protected abstract calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
-        offsetY: number, windowBound?: number,
-    ): void;
+        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, windowBound?: number): void;
     protected abstract getNextYd(_nextY: number, nextHeight: number): number;
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
     protected abstract getScrollY(offsetY: number, scrollableHeight?: number): number | undefined;

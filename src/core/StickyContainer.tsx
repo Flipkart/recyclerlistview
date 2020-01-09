@@ -17,13 +17,14 @@ import { BaseLayoutProvider, Dimension } from "./dependencies/LayoutProvider";
 import { BaseDataProvider } from "./dependencies/DataProvider";
 import { ReactElement } from "react";
 import { ComponentCompat } from "../utils/ComponentCompat";
+import { Range } from "./ViewabilityTracker";
 
 export interface StickyContainerProps {
     children: RecyclerChild;
     stickyHeaderIndices?: number[];
     stickyFooterIndices?: number[];
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
-    updateLogicalOffset?: (offsetY: number) => number;
+    getStartEndCorrection?: () => Range;
     renderStickyContainer?: (stickyContent: JSX.Element, index: number, extendedState?: object) => JSX.Element | null;
     style?: StyleProp<ViewStyle>;
 }
@@ -63,7 +64,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
             ref: this._getRecyclerRef,
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,
-            updateLogicalOffset: this.props.updateLogicalOffset,
+            getStartEndCorrection: this.props.getStartEndCorrection,
         });
         return (
             <View style={this.props.style ? this.props.style : { flex: 1 }}>
