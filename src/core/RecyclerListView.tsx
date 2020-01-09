@@ -105,7 +105,7 @@ export interface RecyclerListViewProps {
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object | number;
     debugHandlers?: DebugHandlers;
-
+    renderContentContainer?: (props?: object, children?: React.ReactNode) => React.ReactNode | null;
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
@@ -152,9 +152,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
 
-    private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
-    private _isSizeChangedCalledOnce: boolean = false;
-    private _hasMounted: boolean = false;
+    //If the native content container is used, then positions of the list items are changed on the native side. The animated library used
+    //by the default item animator also changes the same positions which could lead to inconsistency. Hence, the base item animator which
+    //does not perform any such animations will be used.
+    private _defaultItemAnimator: ItemAnimator = new BaseItemAnimator();
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -213,7 +214,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     public componentDidMount(): void {
-        this._hasMounted = true;
+        
     }
 
     public componentWillUnmount(): void {
@@ -236,6 +237,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     public componentWillMountCompat(): void {
+
         if (this.props.contextProvider) {
             const uniqueKey = this.props.contextProvider.getUniqueKey();
             if (uniqueKey) {
@@ -378,7 +380,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 onScroll={this._onScroll}
                 onSizeChanged={this._onSizeChanged}
                 contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
-                contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}>
+                contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}
+                renderAheadOffset={this.getCurrentRenderAheadOffset()}>
                 {this._generateRenderStack()}
             </ScrollComponent>
         );
@@ -455,19 +458,15 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             if ((hasHeightChanged && hasWidthChanged) ||
                 (hasHeightChanged && this.props.isHorizontal) ||
                 (hasWidthChanged && !this.props.isHorizontal)) {
-                const forceFullRender = this._isSizeChangedCalledOnce ? true : false;
-                this._checkAndChangeLayouts(this.props, forceFullRender);
+                this._checkAndChangeLayouts(this.props, true);
             } else {
                 this._refreshViewability();
             }
         }
-        if (!this._isSizeChangedCalledOnce) {
-            this._isSizeChangedCalledOnce = true;
-        }
     }
 
     private _renderStackWhenReady = (stack: RenderStack): void => {
-        if (!this._hasMounted) {
+        if (!this.state) {
             this.state = {
                 internalSnapshot: {},
                 renderStack: stack,
@@ -723,6 +722,12 @@ RecyclerListView.propTypes = {
     //Note: You might want to look into DefaultNativeItemAnimator to check an implementation based on LayoutAnimation. By default,
     //animations are JS driven to avoid workflow interference. Also, please note LayoutAnimation is buggy on Android.
     itemAnimator: PropTypes.instanceOf(BaseItemAnimator),
+
+    //The Recyclerlistview item cells are enclosed inside this item container. The idea is pass a native UI component which implements a
+    //view shifting algorithm to remove the overlaps between the neighbouring views. This is achieved by shifting them by the appropriate
+    //amount in the correct direction if the estimated sizes of the item cells are not accurate. If this props is passed, it will be used to
+    //enclose the list items and otherwise a default react native View will be used for the same.
+    renderContentContainer: PropTypes.func,
 
     //Enables you to utilize layout animations better by unmounting removed items. Please note, this might increase unmounts
     //on large data changes.
