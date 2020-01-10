@@ -145,11 +145,16 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
 
     private _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
 
+        let correction;
+        if (this.props.getStartEndCorrection) {
+            correction = this.props.getStartEndCorrection();
+        }
+
         if (this._stickyHeaderRef) {
-            this._stickyHeaderRef.onScroll(offsetY);
+            this._stickyHeaderRef.onScroll(offsetY - (correction ? correction.start : 0));
         }
         if (this._stickyFooterRef) {
-            this._stickyFooterRef.onScroll(offsetY);
+            this._stickyFooterRef.onScroll(offsetY - (correction ? correction.end : 0));
         }
         if (this.props.children && this.props.children.props.onScroll) {
             this.props.children.props.onScroll(rawEvent, offsetX, offsetY);

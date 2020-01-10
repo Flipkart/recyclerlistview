@@ -3,7 +3,7 @@ import { Dimension, BaseLayoutProvider } from "./dependencies/LayoutProvider";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
 import { Point, LayoutManager } from "./layoutmanager/LayoutManager";
-import ViewabilityTracker, {Range, TOnItemStatusChanged } from "./ViewabilityTracker";
+import ViewabilityTracker, { Range, TOnItemStatusChanged } from "./ViewabilityTracker";
 import { ObjectUtil, Default } from "ts-object-utils";
 import TSCast from "../utils/TSCast";
 import { BaseDataProvider } from "./dependencies/DataProvider";
