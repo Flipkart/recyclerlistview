@@ -258,5 +258,5 @@ StickyContainer.propTypes = {
     renderStickyContainer: PropTypes.func,
 
     // Allows user to add correctional delta for Y offset to accomodate for the height of external items overlaying recyclerlistview.
-    updateLogicalOffset: PropTypes.func,
+    getWindowCorrection: PropTypes.func,
 };

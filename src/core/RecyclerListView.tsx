@@ -712,5 +712,5 @@ RecyclerListView.propTypes = {
     // Used when the logical offsetY differs from actual offsetY of recyclerlistview, could be because some other component is overlaying the recyclerlistview.
     // For e.x. toolbar within CoordinatorLayout are overlapping the recyclerlistview.
     // This method accepts the actual offsetY as the param, and the morphed offsetY is to be returned.
-    updateLogicalOffset: PropTypes.func,
+    getWindowCorrection: PropTypes.func,
 };
