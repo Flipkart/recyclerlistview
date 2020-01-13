@@ -32,7 +32,7 @@ import { Constants } from "./constants/Constants";
 import { Messages } from "./constants/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
-import { TOnItemStatusChanged, Range } from "./ViewabilityTracker";
+import { TOnItemStatusChanged, WindowCorrection } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 import { DebugHandlers } from "..";
@@ -107,7 +107,7 @@ export interface RecyclerListViewProps {
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
-    getStartEndCorrection?: () => Range;
+    getWindowCorrection?: () => WindowCorrection | undefined;
 }
 
 export interface RecyclerListViewState {
@@ -579,10 +579,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _onScroll = (offsetX: number, offsetY: number, rawEvent: ScrollEvent): void => {
         // correction to be positive to shift offset upwards; negative to push offset downwards.
-        let correction: Range = {start: 0, end: 0};
-        if (this.props.getStartEndCorrection) {
+        let correction;
+        if (this.props.getWindowCorrection) {
             // extracting the correction value from logical offset and updating offset of virtual renderer.
-            correction =  this.props.getStartEndCorrection();
+            correction =  this.props.getWindowCorrection();
         }
         this._virtualRenderer.updateOffset(offsetX, offsetY, true, correction);
 
