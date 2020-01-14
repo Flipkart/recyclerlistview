@@ -22,14 +22,13 @@ _setRef(recycler) {
 * `overrideRowRenderer`     - Optional. Will be called instead of rowRenderer for all sticky items. Any changes to the item for when they are stuck can be done here. Refer to sample code for usage.
 * `renderStickyContainer`   - Optional. Pass a stylized container for StickyHeader and StickyFooter, providing user extensibility to customize the look and feel of these items.
 * `getWindowCorrection`     - Optional. Used when window bound of visible view port needs to be altered. Should be used when visible window bound need to be updated for e.g. Other components overlaying on the RecyclerListView. **[Usage?](#getwindowcorrection-usage)**
- User can  Used when the logical offsetY differs from actual offsetY of recyclerlistview. When some other component is overlaying the recyclerlistview, due to which all callbacks should respect the 
 * `style`                   - Optional. Pass the same style that is applied to the RecyclerListView component here.
 
 
 ### getWindowCorrection usage
 
 `getWindowCorrection` is used to alter the visible window bounds of the RecyclerListView dynamically. User needs to pass WindowCorrection object from the getWindowCorrection function. This object consists of 3 numeric values:
- - `windowShift`        - Window shift is the offset value by which the RecyclerListView as a whole is displaced within the StickyContainer. This value corrects the scroll offsets for StickyObjects as well as RecyclerListView.
+ - `windowShift`        - Direct replacement of `distanceFromWindow` parameter. Window shift is the offset value by which the RecyclerListView as a whole is displaced within the StickyContainer, use this param to specify how far away the first list item is from window top. This value corrects the scroll offsets for StickyObjects as well as RecyclerListView.
  - `startCorrection`    - startCorrection is used to specify the shift in the top visible window bound, with which user can receive the correct Sticky header instance even when an external factor like CoordinatorLayout toolbar. 
  - `endCorrection`      - endCorrection is used to specify the shift in the bottom visible window bound, with which user can receive correct Sticky Footer instance when an external factor like bottom app bar is changing the visible view bound.
 
