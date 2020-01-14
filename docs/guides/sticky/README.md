@@ -28,7 +28,7 @@ _setRef(recycler) {
 ### getWindowCorrection usage
 
 `getWindowCorrection` is used to alter the visible window bounds of the RecyclerListView dynamically. User needs to pass WindowCorrection object from the getWindowCorrection function. This object consists of 3 numeric values:
- - `windowShift`        - Window shift is the offset value by which the RecyclerListView as a whole is displaced within the StickyContainer, use this param to specify how far away the first list item is from window top. This value corrects the scroll offsets for StickyObjects as well as RecyclerListView.
+ - `windowShift`        - Direct replacement to `distanceFromWindow` API. Window shift is the offset value by which the RecyclerListView as a whole is displaced within the StickyContainer, use this param to specify how far away the first list item is from window top. This value corrects the scroll offsets for StickyObjects as well as RecyclerListView.
  - `startCorrection`    - startCorrection is used to specify the shift in the top visible window bound, with which user can receive the correct Sticky header instance even when an external factor like CoordinatorLayout toolbar. 
  - `endCorrection`      - endCorrection is used to specify the shift in the bottom visible window bound, with which user can receive correct Sticky Footer instance when an external factor like bottom app bar is changing the visible view bound.
 
