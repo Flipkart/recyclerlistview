@@ -86,7 +86,7 @@ export default class VirtualRenderer {
         return { height: 0, width: 0 };
     }
 
-    public updateOffset(offsetX: number, offsetY: number, isActual: boolean, correction?: WindowCorrection): void {
+    public updateOffset(offsetX: number, offsetY: number, isActual: boolean, correction: WindowCorrection): void {
         if (this._viewabilityTracker) {
             const offset = this._params && this._params.isHorizontal ? offsetX : offsetY;
             if (!this._isViewTrackerRunning) {

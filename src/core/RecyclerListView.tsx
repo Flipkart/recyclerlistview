@@ -107,7 +107,7 @@ export interface RecyclerListViewProps {
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
-    getWindowCorrection?: () => WindowCorrection | undefined;
+    getWindowCorrection?: () => WindowCorrection;
 }
 
 export interface RecyclerListViewState {
@@ -149,6 +149,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _initialOffset = 0;
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
+    private _windowCorrection: WindowCorrection;
 
     private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
 
@@ -164,6 +165,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             internalSnapshot: {},
             renderStack: {},
         } as S;
+
+        this._windowCorrection = {
+            startCorrection: 0, endCorrection: 0, windowShift: 0,
+        };
     }
 
     public componentWillReceivePropsCompat(newProps: RecyclerListViewProps): void {
@@ -579,12 +584,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _onScroll = (offsetX: number, offsetY: number, rawEvent: ScrollEvent): void => {
         // correction to be positive to shift offset upwards; negative to push offset downwards.
-        let correction;
+        // extracting the correction value from logical offset and updating offset of virtual renderer.
         if (this.props.getWindowCorrection) {
-            // extracting the correction value from logical offset and updating offset of virtual renderer.
-            correction =  this.props.getWindowCorrection();
+            this._windowCorrection =  this.props.getWindowCorrection();
         }
-        this._virtualRenderer.updateOffset(offsetX, offsetY, true, correction);
+        this._virtualRenderer.updateOffset(offsetX, offsetY, true, this._windowCorrection);
 
         if (this.props.onScroll) {
             this.props.onScroll(rawEvent, offsetX, offsetY);

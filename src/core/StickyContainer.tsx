@@ -42,6 +42,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     private _stickyHeaderRef: StickyHeader<StickyObjectProps> | null = null;
     private _stickyFooterRef: StickyFooter<StickyObjectProps> | null = null;
     private _visibleIndicesAll: number[] = [];
+    private _windowCorrection: WindowCorrection;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -51,6 +52,9 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
         this._layoutProvider = childProps.layoutProvider;
         this._extendedState = childProps.extendedState;
         this._rowRenderer = childProps.rowRenderer;
+        this._windowCorrection = {
+            startCorrection: 0, endCorrection: 0, windowShift: 0,
+        };
     }
 
     public componentWillReceivePropsCompat(newProps: P): void {
@@ -146,8 +150,8 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     private _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
         let correctedOffset = offsetY;
         if (this.props.getWindowCorrection) {
-            const windowCorrection = this.props.getWindowCorrection();
-            correctedOffset = offsetY - (windowCorrection ? (windowCorrection.windowShift) : 0);
+            this._windowCorrection = this.props.getWindowCorrection();
+            correctedOffset -= this._windowCorrection.windowShift;
         }
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onScroll(correctedOffset);
@@ -212,17 +216,16 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
         return undefined;
     }
 
-    private _getWindowCorrection = (): WindowCorrection | undefined => {
-        let correction;
+    private _getWindowCorrection = (): WindowCorrection => {
         if (this.props.getWindowCorrection) {
-            correction = this.props.getWindowCorrection();
+            this._windowCorrection = this.props.getWindowCorrection();
         }
-        if (correction) {
+        if (this._windowCorrection) {
             if (this._stickyHeaderRef && this._stickyHeaderRef.layoutRect) {
-                correction.startCorrection += Math.ceil(this._stickyHeaderRef.layoutRect.height);
+                this._windowCorrection.startCorrection += Math.ceil(this._stickyHeaderRef.layoutRect.height);
             }
         }
-        return correction;
+        return this._windowCorrection;
     }
 
     private _initParams = (props: P) => {
