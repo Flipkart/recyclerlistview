@@ -82,18 +82,22 @@ export default class ViewabilityTracker {
 
     public forceRefreshWithOffset(offset: number): void {
         this._currentOffset = -1;
-        this.updateOffset(offset, false, this._windowCorrection);
+        this.updateOffset(offset, false);
     }
 
-    public updateOffset(offset: number, isActual: boolean, correction: WindowCorrection): void {
-        this._windowCorrection = correction;
+    public updateOffset(offset: number, isActual: boolean, correction?: WindowCorrection): void {
+        let correctedOffset = offset;
         if (isActual) {
             this._actualOffset = offset;
+            if (correction) {
+                this._windowCorrection = correction;
+                correctedOffset = Math.min(this._maxOffset, Math.max(0,
+                    offset + (this._windowCorrection.windowShift + this._windowCorrection.startCorrection)));
+            }
         }
-        const calculatedOffset = Math.min(this._maxOffset, Math.max(0,
-            offset + (this._windowCorrection.windowShift + this._windowCorrection.startCorrection)));
-        if (this._currentOffset !== calculatedOffset) {
-            this._updateTrackingWindows(offset, this._windowCorrection);
+        if (this._currentOffset !== correctedOffset) {
+            this._currentOffset = correctedOffset;
+            this._updateTrackingWindows(offset, correctedOffset, this._windowCorrection);
             let startIndex = 0;
             if (this._visibleIndexes.length > 0) {
                 startIndex = this._visibleIndexes[0];
@@ -169,7 +173,7 @@ export default class ViewabilityTracker {
 
     private _doInitialFit(offset: number): void {
         offset = Math.min(this._maxOffset, Math.max(0, offset));
-        this._updateTrackingWindows(offset, this._windowCorrection);
+        this._updateTrackingWindows(offset);
         const firstVisibleIndex = this._findFirstVisibleIndexOptimally();
         this._fitAndUpdate(firstVisibleIndex);
     }
@@ -299,16 +303,17 @@ export default class ViewabilityTracker {
         return this._itemIntersectsWindow(this._visibleWindow, startBound, endBound);
     }
 
-    private _updateTrackingWindows(offset: number, correction: WindowCorrection): void {
-        const newOffset = Math.min(this._maxOffset, Math.max(0, offset + (correction.windowShift + correction.startCorrection)));
-        this._currentOffset = newOffset;
+    private _updateTrackingWindows(offset: number, correctedOffset?: number, correction?: WindowCorrection): void {
 
-        this._engagedWindow.start = Math.max(0, newOffset - this._renderAheadOffset);
-        this._engagedWindow.end = offset + this._windowBound + this._renderAheadOffset
-                + (correction.windowShift + correction.endCorrection);
+        const bottomCorrection = (correction ? correction.windowShift + correction.endCorrection : 0);
+        const startOffset = correctedOffset ? correctedOffset : offset;
+        const endOffset = offset + this._windowBound + bottomCorrection;
 
-        this._visibleWindow.start = newOffset;
-        this._visibleWindow.end = offset + this._windowBound + (correction.windowShift + correction.endCorrection);
+        this._engagedWindow.start = Math.max(0, startOffset - this._renderAheadOffset);
+        this._engagedWindow.end = endOffset + this._renderAheadOffset;
+
+        this._visibleWindow.start = startOffset;
+        this._visibleWindow.end = endOffset;
     }
 
     //TODO:Talha optimize this
