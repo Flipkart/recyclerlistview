@@ -24,7 +24,7 @@ export interface StickyContainerProps {
     stickyHeaderIndices?: number[];
     stickyFooterIndices?: number[];
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
-    getWindowCorrection?: () => WindowCorrection;
+    applyWindowCorrection?: (offset: number, winowCorrection: WindowCorrection) => void;
     renderStickyContainer?: (stickyContent: JSX.Element, index: number, extendedState?: object) => JSX.Element | null;
     style?: StyleProp<ViewStyle>;
 }
@@ -148,11 +148,8 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     }
 
     private _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
-        let correctedOffset = offsetY;
-        if (this.props.getWindowCorrection) {
-            this._windowCorrection = this.props.getWindowCorrection();
-            correctedOffset -= this._windowCorrection.windowShift;
-        }
+        const correctedOffset = offsetY - this._windowCorrection.windowShift;
+
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onScroll(correctedOffset);
         }
@@ -217,13 +214,11 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     }
 
     private _getWindowCorrection = (): WindowCorrection => {
-        if (this.props.getWindowCorrection) {
-            this._windowCorrection = this.props.getWindowCorrection();
+        if (this.props.applyWindowCorrection && this._recyclerRef) {
+            this.props.applyWindowCorrection(this._recyclerRef.getCurrentScrollOffset(), this._windowCorrection);
         }
-        if (this._windowCorrection) {
-            if (this._stickyHeaderRef && this._stickyHeaderRef.layoutRect) {
-                this._windowCorrection.startCorrection += Math.ceil(this._stickyHeaderRef.layoutRect.height);
-            }
+        if (this._stickyHeaderRef && this._stickyHeaderRef.layoutRect) {
+            this._windowCorrection.startCorrection += Math.ceil(this._stickyHeaderRef.layoutRect.height);
         }
         return this._windowCorrection;
     }

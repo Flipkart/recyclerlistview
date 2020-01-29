@@ -37,7 +37,7 @@ export default class ViewabilityTracker {
     private _engagedIndexes: number[];
     private _layouts: Layout[] = [];
     private _actualOffset: number;
-    private _windowCorrection: WindowCorrection;
+    private _defaultCorrection: WindowCorrection;
 
     constructor(renderAheadOffset: number, initialOffset: number) {
         this._currentOffset = Math.max(0, initialOffset);
@@ -57,7 +57,7 @@ export default class ViewabilityTracker {
         this.onEngagedRowsChanged = null;
 
         this._relevantDim = { start: 0, end: 0 };
-        this._windowCorrection = { startCorrection: 0, endCorrection: 0, windowShift: 0};
+        this._defaultCorrection = { startCorrection: 0, endCorrection: 0, windowShift: 0 };
     }
 
     public init(): void {
@@ -82,22 +82,20 @@ export default class ViewabilityTracker {
 
     public forceRefreshWithOffset(offset: number): void {
         this._currentOffset = -1;
-        this.updateOffset(offset, false);
+        this.updateOffset(offset, false, this._defaultCorrection);
     }
 
-    public updateOffset(offset: number, isActual: boolean, correction?: WindowCorrection): void {
+    public updateOffset(offset: number, isActual: boolean, windowCorrection: WindowCorrection): void {
         let correctedOffset = offset;
         if (isActual) {
             this._actualOffset = offset;
-            if (correction) {
-                this._windowCorrection = correction;
-                correctedOffset = Math.min(this._maxOffset, Math.max(0,
-                    offset + (this._windowCorrection.windowShift + this._windowCorrection.startCorrection)));
-            }
+            correctedOffset = Math.min(this._maxOffset, Math.max(0,
+                offset + (windowCorrection.windowShift + windowCorrection.startCorrection)));
         }
+
         if (this._currentOffset !== correctedOffset) {
             this._currentOffset = correctedOffset;
-            this._updateTrackingWindows(offset, correctedOffset, this._windowCorrection);
+            this._updateTrackingWindows(offset, correctedOffset, windowCorrection);
             let startIndex = 0;
             if (this._visibleIndexes.length > 0) {
                 startIndex = this._visibleIndexes[0];
@@ -173,7 +171,7 @@ export default class ViewabilityTracker {
 
     private _doInitialFit(offset: number): void {
         offset = Math.min(this._maxOffset, Math.max(0, offset));
-        this._updateTrackingWindows(offset);
+        this._updateTrackingWindows(offset, 0, this._defaultCorrection);
         const firstVisibleIndex = this._findFirstVisibleIndexOptimally();
         this._fitAndUpdate(firstVisibleIndex);
     }
@@ -303,10 +301,9 @@ export default class ViewabilityTracker {
         return this._itemIntersectsWindow(this._visibleWindow, startBound, endBound);
     }
 
-    private _updateTrackingWindows(offset: number, correctedOffset?: number, correction?: WindowCorrection): void {
-
-        const bottomCorrection = (correction ? correction.windowShift + correction.endCorrection : 0);
-        const startOffset = correctedOffset ? correctedOffset : offset;
+    private _updateTrackingWindows(offset: number, correctedOffset: number, correction: WindowCorrection): void {
+        const bottomCorrection = correction.windowShift + correction.endCorrection;
+        const startOffset = (correctedOffset !== 0) ? correctedOffset : offset;
         const endOffset = offset + this._windowBound + bottomCorrection;
 
         this._engagedWindow.start = Math.max(0, startOffset - this._renderAheadOffset);
