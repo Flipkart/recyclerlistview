@@ -107,7 +107,7 @@ export interface RecyclerListViewProps {
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
-    getWindowCorrection?: () => WindowCorrection;
+    applyWindowCorrection?: (offset: number, windowCorrection: WindowCorrection) => void;
 }
 
 export interface RecyclerListViewState {
@@ -589,8 +589,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _onScroll = (offsetX: number, offsetY: number, rawEvent: ScrollEvent): void => {
         // correction to be positive to shift offset upwards; negative to push offset downwards.
         // extracting the correction value from logical offset and updating offset of virtual renderer.
-        if (this.props.getWindowCorrection) {
-            this._windowCorrection =  this.props.getWindowCorrection();
+        if (this.props.applyWindowCorrection) {
+            this.props.applyWindowCorrection(this.props.isHorizontal ? offsetX : offsetY, this._windowCorrection);
         }
         this._virtualRenderer.updateOffset(offsetX, offsetY, true, this._windowCorrection);
 
@@ -725,6 +725,6 @@ RecyclerListView.propTypes = {
 
     // Used when the logical offsetY differs from actual offsetY of recyclerlistview, could be because some other component is overlaying the recyclerlistview.
     // For e.x. toolbar within CoordinatorLayout are overlapping the recyclerlistview.
-    // This method accepts the actual offsetY as the param, and the morphed offsetY is to be returned.
-    getWindowCorrection: PropTypes.func,
+    // This method exposes the windowCorrection object of RecyclerListView, user can modify the values in realtime.
+    applyWindowCorrection: PropTypes.func,
 };

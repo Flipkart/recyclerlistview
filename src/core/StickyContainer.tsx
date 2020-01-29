@@ -68,7 +68,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
             ref: this._getRecyclerRef,
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,
-            getWindowCorrection: this._getWindowCorrection,
+            applyWindowCorrection: this._applyWindowCorrection,
         });
         return (
             <View style={this.props.style ? this.props.style : { flex: 1 }}>
@@ -213,14 +213,14 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
         return undefined;
     }
 
-    private _getWindowCorrection = (): WindowCorrection => {
-        if (this.props.applyWindowCorrection && this._recyclerRef) {
-            this.props.applyWindowCorrection(this._recyclerRef.getCurrentScrollOffset(), this._windowCorrection);
+    private _applyWindowCorrection = (offset: number, windowCorrection: WindowCorrection): void => {
+        if (this.props.applyWindowCorrection) {
+            this.props.applyWindowCorrection(offset, windowCorrection);
+            this._windowCorrection = windowCorrection;
         }
         if (this._stickyHeaderRef && this._stickyHeaderRef.layoutRect) {
             this._windowCorrection.startCorrection += Math.ceil(this._stickyHeaderRef.layoutRect.height);
         }
-        return this._windowCorrection;
     }
 
     private _initParams = (props: P) => {
@@ -255,6 +255,8 @@ StickyContainer.propTypes = {
     // For providing custom container to StickyHeader and StickyFooter allowing user extensibility to stylize these items accordingly.
     renderStickyContainer: PropTypes.func,
 
-    // Allows user to add correctional delta for Y offset to accomodate for the height of external items overlaying recyclerlistview.
-    getWindowCorrection: PropTypes.func,
+    // Used when the logical offsetY differs from actual offsetY of recyclerlistview, could be because some other component is overlaying the recyclerlistview.
+    // For e.x. toolbar within CoordinatorLayout are overlapping the recyclerlistview.
+    // This method exposes the windowCorrection object of RecyclerListView, user can modify the values in realtime.
+    applyWindowCorrection: PropTypes.func,
 };
