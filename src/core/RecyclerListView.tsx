@@ -488,7 +488,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             this._pendingScrollToOffset = offset;
             this.setState({});
         } else {
-            this._virtualRenderer.startViewabilityTracker();
+            this._virtualRenderer.startViewabilityTracker(this._windowCorrection);
         }
     }
 

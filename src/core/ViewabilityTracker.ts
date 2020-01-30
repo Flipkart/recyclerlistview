@@ -60,8 +60,8 @@ export default class ViewabilityTracker {
         this._defaultCorrection = { startCorrection: 0, endCorrection: 0, windowShift: 0 };
     }
 
-    public init(): void {
-        this._doInitialFit(this._currentOffset);
+    public init(windowCorrection: WindowCorrection): void {
+        this._doInitialFit(this._currentOffset, windowCorrection);
     }
 
     public setLayouts(layouts: Layout[], maxOffset: number): void {
@@ -169,9 +169,9 @@ export default class ViewabilityTracker {
         this._diffUpdateOriginalIndexesAndRaiseEvents(newVisibleItems, newEngagedItems);
     }
 
-    private _doInitialFit(offset: number): void {
+    private _doInitialFit(offset: number, windowCorrection: WindowCorrection): void {
         offset = Math.min(this._maxOffset, Math.max(0, offset));
-        this._updateTrackingWindows(offset, 0, this._defaultCorrection);
+        this._updateTrackingWindows(offset, 0, windowCorrection);
         const firstVisibleIndex = this._findFirstVisibleIndexOptimally();
         this._fitAndUpdate(firstVisibleIndex);
     }

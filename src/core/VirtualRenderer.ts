@@ -93,7 +93,7 @@ export default class VirtualRenderer {
                 if (isActual) {
                     this._viewabilityTracker.setActualOffset(offset);
                 }
-                this.startViewabilityTracker();
+                this.startViewabilityTracker(correction);
             }
             this._viewabilityTracker.updateOffset(offset, isActual, correction);
         }
@@ -196,10 +196,10 @@ export default class VirtualRenderer {
         this._prepareViewabilityTracker();
     }
 
-    public startViewabilityTracker(): void {
+    public startViewabilityTracker(windowCorrection: WindowCorrection): void {
         if (this._viewabilityTracker) {
             this._isViewTrackerRunning = true;
-            this._viewabilityTracker.init();
+            this._viewabilityTracker.init(windowCorrection);
         }
     }
 
