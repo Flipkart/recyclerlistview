@@ -3,7 +3,7 @@
  */
 
 import * as React from "react";
-import { Animated, StyleProp, ViewStyle, LayoutChangeEvent, LayoutRectangle } from "react-native";
+import { Animated, StyleProp, ViewStyle } from "react-native";
 import { Layout } from "../layoutmanager/LayoutManager";
 import { Dimension } from "../dependencies/LayoutProvider";
 import RecyclerListViewExceptions from "../exceptions/RecyclerListViewExceptions";
@@ -28,8 +28,6 @@ export interface StickyObjectProps {
 }
 
 export default abstract class StickyObject<P extends StickyObjectProps> extends ComponentCompat<P> {
-
-    public layoutRect: LayoutRectangle | undefined;
 
     protected stickyType: StickyType = StickyType.HEADER;
     protected stickyTypeMultiplier: number = 1;
@@ -79,7 +77,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     public renderCompat(): JSX.Element | null {
         // Add the container style if renderContainer is undefined
         const content =  (
-            <Animated.View onLayout={this._onLayout}
+            <Animated.View
                 style={[{transform : [{translateY: this._stickyViewOffset}]}, (this.props.renderContainer === undefined ? this._containerStyle : null)]}>
                     {this.stickyVisiblity ? this._renderSticky() : null}
             </Animated.View>
@@ -230,9 +228,5 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         } else {
             return _rowRenderer(_stickyLayoutType, _stickyData, this.currentStickyIndex, _extendedState);
         }
-    }
-
-    private _onLayout = (event: LayoutChangeEvent): void => {
-        this.layoutRect = event.nativeEvent.layout;
     }
 }
