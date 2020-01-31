@@ -78,7 +78,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         // Add the container style if renderContainer is undefined
         const content =  (
             <Animated.View
-                style={[{transform : [{translateY: this._stickyViewOffset}]}, (this.props.renderContainer === undefined ? this._containerStyle : null)]}>
+                style={[{transform : [{translateY: this._stickyViewOffset}]}, (!this.props.renderContainer && this._containerStyle)]}>
                     {this.stickyVisiblity ? this._renderSticky() : null}
             </Animated.View>
         );

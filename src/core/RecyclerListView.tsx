@@ -488,8 +488,12 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             this._pendingScrollToOffset = offset;
             this.setState({});
         } else {
-            this._virtualRenderer.startViewabilityTracker(this._windowCorrection);
+            this._virtualRenderer.startViewabilityTracker(this._getWindowCorrection(offset.x, offset.y, this.props));
         }
+    }
+
+    private _getWindowCorrection(offsetX: number, offsetY: number, props: RecyclerListViewProps): WindowCorrection {
+        return (props.applyWindowCorrection && props.applyWindowCorrection(offsetX, offsetY, this._windowCorrection)) || this._windowCorrection;
     }
 
     private _assertDependencyPresence(props: RecyclerListViewProps): void {
@@ -589,10 +593,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _onScroll = (offsetX: number, offsetY: number, rawEvent: ScrollEvent): void => {
         // correction to be positive to shift offset upwards; negative to push offset downwards.
         // extracting the correction value from logical offset and updating offset of virtual renderer.
-        if (this.props.applyWindowCorrection) {
-            this.props.applyWindowCorrection(offsetX, offsetY, this._windowCorrection);
-        }
-        this._virtualRenderer.updateOffset(offsetX, offsetY, true, this._windowCorrection);
+        this._virtualRenderer.updateOffset(offsetX, offsetY, true, this._getWindowCorrection(offsetX, offsetY, this.props));
 
         if (this.props.onScroll) {
             this.props.onScroll(rawEvent, offsetX, offsetY);
