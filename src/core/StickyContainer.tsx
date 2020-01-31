@@ -24,7 +24,7 @@ export interface StickyContainerProps {
     stickyHeaderIndices?: number[];
     stickyFooterIndices?: number[];
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
-    applyWindowCorrection?: (offset: number, winowCorrection: WindowCorrection) => void;
+    applyWindowCorrection?: (offsetX: number, offsetY: number, winowCorrection: WindowCorrection) => void;
     renderStickyContainer?: (stickyContent: JSX.Element, index: number, extendedState?: object) => JSX.Element | null;
     style?: StyleProp<ViewStyle>;
 }
@@ -42,6 +42,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     private _stickyHeaderRef: StickyHeader<StickyObjectProps> | null = null;
     private _stickyFooterRef: StickyFooter<StickyObjectProps> | null = null;
     private _visibleIndicesAll: number[] = [];
+    private _windowCorrection: WindowCorrection;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -51,6 +52,9 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
         this._layoutProvider = childProps.layoutProvider;
         this._extendedState = childProps.extendedState;
         this._rowRenderer = childProps.rowRenderer;
+        this._windowCorrection = {
+            startCorrection: 0, endCorrection: 0, windowShift: 0,
+        };
     }
 
     public componentWillReceivePropsCompat(newProps: P): void {
@@ -144,7 +148,11 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     }
 
     private _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
-        const correctedOffset = offsetY - this._windowCorrection.windowShift;
+        let correctedOffset = offsetY;
+        if (this.props.applyWindowCorrection) {
+            this.props.applyWindowCorrection(offsetY, offsetY, this._windowCorrection);
+            correctedOffset += this._windowCorrection.windowShift;
+        }
 
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onScroll(correctedOffset);
@@ -209,9 +217,9 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
         return undefined;
     }
 
-    private _applyWindowCorrection = (offset: number, windowCorrection: WindowCorrection): void => {
+    private _applyWindowCorrection = (offsetX: number, offsetY: number, windowCorrection: WindowCorrection): void => {
         if (this.props.applyWindowCorrection) {
-            this.props.applyWindowCorrection(offset, windowCorrection);
+            this.props.applyWindowCorrection(offsetX, offsetY, windowCorrection);
         }
     }
 

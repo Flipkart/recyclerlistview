@@ -94,9 +94,9 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     public onVisibleIndicesChanged(all: number[]): void {
         if (this._firstCompute) {
             this.initStickyParams();
+            this._containerStyle = [{ position: "absolute", width: this._scrollableWidth }, this.containerPosition];
             this._firstCompute = false;
         }
-        this._containerStyle = [{ position: "absolute", width: this._scrollableWidth }, this.containerPosition];
         this._initParams();
         this._setSmallestAndLargestVisibleIndices(all);
         this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
