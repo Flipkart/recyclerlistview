@@ -60,7 +60,6 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     private _smallestVisibleIndex: number = 0;
     private _largestVisibleIndex: number = 0;
     private _offsetY: number = 0;
-    private _containerStyle: StyleProp<ViewStyle> | undefined;
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -76,10 +75,13 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
 
     public renderCompat(): JSX.Element | null {
         // Add the container style if renderContainer is undefined
-        const content =  (
-            <Animated.View
-                style={[{transform : [{translateY: this._stickyViewOffset}]}, (!this.props.renderContainer && this._containerStyle)]}>
-                    {this.stickyVisiblity ? this._renderSticky() : null}
+
+        const containerStyle = [{ transform: [{ translateY: this._stickyViewOffset }] },
+            (!this.props.renderContainer && [{ position: "absolute", width: this._scrollableWidth }, this.containerPosition])];
+
+        const content = (
+            <Animated.View style={containerStyle}>
+                {this.stickyVisiblity ? this._renderSticky() : null}
             </Animated.View>
         );
 
@@ -94,7 +96,6 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     public onVisibleIndicesChanged(all: number[]): void {
         if (this._firstCompute) {
             this.initStickyParams();
-            this._containerStyle = [{ position: "absolute", width: this._scrollableWidth }, this.containerPosition];
             this._firstCompute = false;
         }
         this._initParams();
