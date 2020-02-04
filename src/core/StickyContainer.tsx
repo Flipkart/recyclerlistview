@@ -42,7 +42,9 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     private _stickyHeaderRef: StickyHeader<StickyObjectProps> | null = null;
     private _stickyFooterRef: StickyFooter<StickyObjectProps> | null = null;
     private _visibleIndicesAll: number[] = [];
-    private _windowCorrection: WindowCorrection;
+    private _windowCorrection: WindowCorrection = {
+        startCorrection: 0, endCorrection: 0, windowShift: 0,
+    };
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -52,9 +54,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
         this._layoutProvider = childProps.layoutProvider;
         this._extendedState = childProps.extendedState;
         this._rowRenderer = childProps.rowRenderer;
-        this._windowCorrection = {
-            startCorrection: 0, endCorrection: 0, windowShift: 0,
-        };
+        this._getWindowCorrection(0, 0, props);
     }
 
     public componentWillReceivePropsCompat(newProps: P): void {
@@ -84,7 +84,8 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getContentDimension={this._getContentDimension}
                         getRowRenderer={this._getRowRenderer}
                         overrideRowRenderer={this.props.overrideRowRenderer}
-                        renderContainer={this.props.renderStickyContainer} />
+                        renderContainer={this.props.renderStickyContainer}
+                        getWindowCorrection={this._getCurrentWindowCorrection} />
                 ) : null}
                 {this.props.stickyFooterIndices ? (
                     <StickyFooter ref={(stickyFooterRef: any) => this._getStickyFooterRef(stickyFooterRef)}
@@ -97,7 +98,8 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getContentDimension={this._getContentDimension}
                         getRowRenderer={this._getRowRenderer}
                         overrideRowRenderer={this.props.overrideRowRenderer}
-                        renderContainer={this.props.renderStickyContainer} />
+                        renderContainer={this.props.renderStickyContainer}
+                        getWindowCorrection={this._getCurrentWindowCorrection} />
                 ) : null}
             </View>
         );
@@ -112,6 +114,10 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                 throw new CustomError(RecyclerListViewExceptions.refNotAsFunctionException);
             }
         }
+    }
+
+    private _getCurrentWindowCorrection = (): WindowCorrection => {
+        return this._windowCorrection;
     }
 
     private _getStickyHeaderRef = (stickyHeaderRef: any) => {
@@ -148,12 +154,12 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     }
 
     private _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
-
+        this._getWindowCorrection(offsetX, offsetY, this.props);
         if (this._stickyHeaderRef) {
-            this._stickyHeaderRef.onScroll(offsetY, this._getWindowCorrection(offsetX, offsetY, this.props));
+            this._stickyHeaderRef.onScroll(offsetY);
         }
         if (this._stickyFooterRef) {
-            this._stickyFooterRef.onScroll(offsetY, this._getWindowCorrection(offsetX, offsetY, this.props));
+            this._stickyFooterRef.onScroll(offsetY);
         }
         if (this.props.children && this.props.children.props.onScroll) {
             this.props.children.props.onScroll(rawEvent, offsetX, offsetY);

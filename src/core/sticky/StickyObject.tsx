@@ -26,6 +26,7 @@ export interface StickyObjectProps {
     getRowRenderer: () => ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
     renderContainer?: ((rowContent: JSX.Element, index: number, extendState?: object) => JSX.Element | null);
+    getWindowCorrection?: () => WindowCorrection;
 }
 
 export default abstract class StickyObject<P extends StickyObjectProps> extends ComponentCompat<P> {
@@ -61,6 +62,9 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     private _smallestVisibleIndex: number = 0;
     private _largestVisibleIndex: number = 0;
     private _offsetY: number = 0;
+    private _windowCorrection: WindowCorrection = {
+        startCorrection: 0, endCorrection: 0, windowShift: 0,
+    };
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -107,8 +111,8 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         this.stickyViewVisible(this.stickyVisiblity);
     }
 
-    public onScroll(offsetY: number, correction: WindowCorrection): void {
-        offsetY += correction.windowShift;
+    public onScroll(offsetY: number): void {
+        offsetY += this.getWindowCorrection(this.props).windowShift;
         this._initParams();
         this._offsetY = offsetY;
         this.boundaryProcessing(offsetY, this._windowBound);
@@ -165,6 +169,10 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         }
     }
 
+    protected getWindowCorrection(props: StickyObjectProps): WindowCorrection {
+        return (props.getWindowCorrection && props.getWindowCorrection()) || this._windowCorrection;
+    }
+
     protected boundaryProcessing(offsetY: number, windowBound?: number): void {
         const hasReachedBoundary: boolean = this.hasReachedBoundary(offsetY, windowBound);
         if (this.bounceScrolling !== hasReachedBoundary) {
@@ -178,6 +186,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     }
 
     private _initParams(): void {
+        this.getWindowCorrection(this.props);
         const rlvDimension: Dimension | undefined = this.props.getRLVRenderedSize();
         if (rlvDimension) {
             this._scrollableHeight = rlvDimension.height;

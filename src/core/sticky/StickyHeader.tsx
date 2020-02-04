@@ -11,15 +11,19 @@ export default class StickyHeader<P extends StickyObjectProps> extends StickyObj
         super(props, context);
     }
 
-    public onScroll(offsetY: number, correction: WindowCorrection): void {
-        this.containerPosition = { top: correction.startCorrection };
-        super.onScroll(offsetY + correction.startCorrection, correction);
+    public onScroll(offsetY: number): void {
+        const startCorrection = this.getWindowCorrection(this.props).startCorrection;
+        if (startCorrection) {
+            this.containerPosition = { top: startCorrection };
+            offsetY += startCorrection;
+        }
+        super.onScroll(offsetY);
     }
 
     protected initStickyParams(): void {
         this.stickyType = StickyType.HEADER;
         this.stickyTypeMultiplier = 1;
-        this.containerPosition = { top: 0 };
+        this.containerPosition = { top: this.getWindowCorrection(this.props).startCorrection };
 
         // Kept as true contrary to as in StickyFooter because in case of initialOffset not given, onScroll isn't called and boundaryProcessing isn't done.
         // Default behaviour in that case will be sticky header hidden.

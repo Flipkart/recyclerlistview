@@ -2,8 +2,8 @@
  * Created by ananya.chandra on 20/09/18.
  */
 
-import StickyObject, {StickyObjectProps, StickyType} from "./StickyObject";
-import BinarySearch, {ValueAndIndex} from "../../utils/BinarySearch";
+import StickyObject, { StickyObjectProps, StickyType } from "./StickyObject";
+import BinarySearch, { ValueAndIndex } from "../../utils/BinarySearch";
 import { WindowCorrection } from "../ViewabilityTracker";
 
 export default class StickyFooter<P extends StickyObjectProps> extends StickyObject<P> {
@@ -11,15 +11,19 @@ export default class StickyFooter<P extends StickyObjectProps> extends StickyObj
         super(props, context);
     }
 
-    public onScroll(offsetY: number, correction: WindowCorrection): void {
-        this.containerPosition = { bottom: correction.endCorrection };
-        super.onScroll(offsetY - correction.endCorrection, correction);
+    public onScroll(offsetY: number): void {
+        const endCorrection = this.getWindowCorrection(this.props).endCorrection;
+        if (endCorrection) {
+            this.containerPosition = { bottom: endCorrection };
+            offsetY -= endCorrection;
+        }
+        super.onScroll(offsetY);
     }
 
     protected initStickyParams(): void {
         this.stickyType = StickyType.FOOTER;
         this.stickyTypeMultiplier = -1;
-        this.containerPosition = {bottom: 0};
+        this.containerPosition = { bottom: this.getWindowCorrection(this.props).endCorrection };
         this.bounceScrolling = false;
     }
 
