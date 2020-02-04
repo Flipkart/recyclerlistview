@@ -12,6 +12,13 @@ export interface Range {
     start: number;
     end: number;
 }
+
+export interface WindowCorrection {
+    windowShift: number;
+    startCorrection: number;
+    endCorrection: number;
+}
+
 export type TOnItemStatusChanged = ((all: number[], now: number[], notNow: number[]) => void);
 
 export default class ViewabilityTracker {
@@ -30,6 +37,7 @@ export default class ViewabilityTracker {
     private _engagedIndexes: number[];
     private _layouts: Layout[] = [];
     private _actualOffset: number;
+    private _defaultCorrection: WindowCorrection;
 
     constructor(renderAheadOffset: number, initialOffset: number) {
         this._currentOffset = Math.max(0, initialOffset);
@@ -49,10 +57,11 @@ export default class ViewabilityTracker {
         this.onEngagedRowsChanged = null;
 
         this._relevantDim = { start: 0, end: 0 };
+        this._defaultCorrection = { startCorrection: 0, endCorrection: 0, windowShift: 0 };
     }
 
-    public init(): void {
-        this._doInitialFit(this._currentOffset);
+    public init(windowCorrection: WindowCorrection): void {
+        this._doInitialFit(this._currentOffset, windowCorrection);
     }
 
     public setLayouts(layouts: Layout[], maxOffset: number): void {
@@ -73,17 +82,20 @@ export default class ViewabilityTracker {
 
     public forceRefreshWithOffset(offset: number): void {
         this._currentOffset = -1;
-        this.updateOffset(offset, 0, false);
+        this.updateOffset(offset, false, this._defaultCorrection);
     }
 
-    public updateOffset(offset: number, correction: number, isActual: boolean): void {
+    public updateOffset(offset: number, isActual: boolean, windowCorrection: WindowCorrection): void {
+        let correctedOffset = offset;
         if (isActual) {
             this._actualOffset = offset;
+            correctedOffset = Math.min(this._maxOffset, Math.max(0,
+                offset + (windowCorrection.windowShift + windowCorrection.startCorrection)));
         }
-        offset = Math.min(this._maxOffset, Math.max(0, offset + correction));
-        if (this._currentOffset !== offset) {
-            this._currentOffset = offset;
-            this._updateTrackingWindows(offset);
+
+        if (this._currentOffset !== correctedOffset) {
+            this._currentOffset = correctedOffset;
+            this._updateTrackingWindows(offset, windowCorrection);
             let startIndex = 0;
             if (this._visibleIndexes.length > 0) {
                 startIndex = this._visibleIndexes[0];
@@ -157,9 +169,9 @@ export default class ViewabilityTracker {
         this._diffUpdateOriginalIndexesAndRaiseEvents(newVisibleItems, newEngagedItems);
     }
 
-    private _doInitialFit(offset: number): void {
+    private _doInitialFit(offset: number, windowCorrection: WindowCorrection): void {
         offset = Math.min(this._maxOffset, Math.max(0, offset));
-        this._updateTrackingWindows(offset);
+        this._updateTrackingWindows(offset, windowCorrection);
         const firstVisibleIndex = this._findFirstVisibleIndexOptimally();
         this._fitAndUpdate(firstVisibleIndex);
     }
@@ -289,12 +301,18 @@ export default class ViewabilityTracker {
         return this._itemIntersectsWindow(this._visibleWindow, startBound, endBound);
     }
 
-    private _updateTrackingWindows(newOffset: number): void {
-        this._engagedWindow.start = Math.max(0, newOffset - this._renderAheadOffset);
-        this._engagedWindow.end = newOffset + this._windowBound + this._renderAheadOffset;
+    private _updateTrackingWindows(offset: number, correction: WindowCorrection): void {
+        const startCorrection = correction.windowShift + correction.startCorrection;
+        const bottomCorrection = correction.windowShift + correction.endCorrection;
 
-        this._visibleWindow.start = newOffset;
-        this._visibleWindow.end = newOffset + this._windowBound;
+        const startOffset = offset + startCorrection;
+        const endOffset = (offset + this._windowBound) + bottomCorrection;
+
+        this._engagedWindow.start = Math.max(0, startOffset - this._renderAheadOffset);
+        this._engagedWindow.end = endOffset + this._renderAheadOffset;
+
+        this._visibleWindow.start = startOffset;
+        this._visibleWindow.end = endOffset;
     }
 
     //TODO:Talha optimize this

@@ -17,12 +17,15 @@ import { BaseLayoutProvider, Dimension } from "./dependencies/LayoutProvider";
 import { BaseDataProvider } from "./dependencies/DataProvider";
 import { ReactElement } from "react";
 import { ComponentCompat } from "../utils/ComponentCompat";
+import { WindowCorrection } from "./ViewabilityTracker";
 
 export interface StickyContainerProps {
     children: RecyclerChild;
     stickyHeaderIndices?: number[];
     stickyFooterIndices?: number[];
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
+    applyWindowCorrection?: (offsetX: number, offsetY: number, winowCorrection: WindowCorrection) => void;
+    renderStickyContainer?: (stickyContent: JSX.Element, index: number, extendedState?: object) => JSX.Element | null;
     style?: StyleProp<ViewStyle>;
 }
 export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps> {
@@ -36,11 +39,12 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     private _layoutProvider: BaseLayoutProvider;
     private _extendedState: object | undefined;
     private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
-    private _distanceFromWindow: number;
-
     private _stickyHeaderRef: StickyHeader<StickyObjectProps> | null = null;
     private _stickyFooterRef: StickyFooter<StickyObjectProps> | null = null;
     private _visibleIndicesAll: number[] = [];
+    private _windowCorrection: WindowCorrection = {
+        startCorrection: 0, endCorrection: 0, windowShift: 0,
+    };
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -50,7 +54,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
         this._layoutProvider = childProps.layoutProvider;
         this._extendedState = childProps.extendedState;
         this._rowRenderer = childProps.rowRenderer;
-        this._distanceFromWindow = childProps.distanceFromWindow ? childProps.distanceFromWindow : 0;
+        this._getWindowCorrection(0, 0, props);
     }
 
     public componentWillReceivePropsCompat(newProps: P): void {
@@ -64,6 +68,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
             ref: this._getRecyclerRef,
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,
+            applyWindowCorrection: this._applyWindowCorrection,
         });
         return (
             <View style={this.props.style ? this.props.style : { flex: 1 }}>
@@ -78,8 +83,9 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getRLVRenderedSize={this._getRLVRenderedSize}
                         getContentDimension={this._getContentDimension}
                         getRowRenderer={this._getRowRenderer}
-                        getDistanceFromWindow={this._getDistanceFromWindow}
-                        overrideRowRenderer={this.props.overrideRowRenderer} />
+                        overrideRowRenderer={this.props.overrideRowRenderer}
+                        renderContainer={this.props.renderStickyContainer}
+                        getWindowCorrection={this._getCurrentWindowCorrection} />
                 ) : null}
                 {this.props.stickyFooterIndices ? (
                     <StickyFooter ref={(stickyFooterRef: any) => this._getStickyFooterRef(stickyFooterRef)}
@@ -91,8 +97,9 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getRLVRenderedSize={this._getRLVRenderedSize}
                         getContentDimension={this._getContentDimension}
                         getRowRenderer={this._getRowRenderer}
-                        getDistanceFromWindow={this._getDistanceFromWindow}
-                        overrideRowRenderer={this.props.overrideRowRenderer} />
+                        overrideRowRenderer={this.props.overrideRowRenderer}
+                        renderContainer={this.props.renderStickyContainer}
+                        getWindowCorrection={this._getCurrentWindowCorrection} />
                 ) : null}
             </View>
         );
@@ -107,6 +114,10 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                 throw new CustomError(RecyclerListViewExceptions.refNotAsFunctionException);
             }
         }
+    }
+
+    private _getCurrentWindowCorrection = (): WindowCorrection => {
+        return this._windowCorrection;
     }
 
     private _getStickyHeaderRef = (stickyHeaderRef: any) => {
@@ -143,6 +154,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     }
 
     private _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
+        this._getWindowCorrection(offsetX, offsetY, this.props);
         if (this._stickyHeaderRef) {
             this._stickyHeaderRef.onScroll(offsetY);
         }
@@ -152,6 +164,10 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
         if (this.props.children && this.props.children.props.onScroll) {
             this.props.children.props.onScroll(rawEvent, offsetX, offsetY);
         }
+    }
+
+    private _getWindowCorrection(offsetX: number, offsetY: number, props: StickyContainerProps): WindowCorrection {
+        return (props.applyWindowCorrection && props.applyWindowCorrection(offsetX, offsetY, this._windowCorrection)) || this._windowCorrection;
     }
 
     private _assertChildType = (): void => {
@@ -206,8 +222,10 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
         return undefined;
     }
 
-    private _getDistanceFromWindow = (): number => {
-        return this._distanceFromWindow;
+    private _applyWindowCorrection = (offsetX: number, offsetY: number, windowCorrection: WindowCorrection): void => {
+        if (this.props.applyWindowCorrection) {
+            this.props.applyWindowCorrection(offsetX, offsetY, windowCorrection);
+        }
     }
 
     private _initParams = (props: P) => {
@@ -216,7 +234,6 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
         this._layoutProvider = childProps.layoutProvider;
         this._extendedState = childProps.extendedState;
         this._rowRenderer = childProps.rowRenderer;
-        this._distanceFromWindow = childProps.distanceFromWindow ? childProps.distanceFromWindow : 0;
     }
 }
 
@@ -239,4 +256,12 @@ StickyContainer.propTypes = {
 
     // For all practical purposes, pass the style that is applied to the RecyclerListView component here.
     style: PropTypes.object,
+
+    // For providing custom container to StickyHeader and StickyFooter allowing user extensibility to stylize these items accordingly.
+    renderStickyContainer: PropTypes.func,
+
+    // Used when the logical offsetY differs from actual offsetY of recyclerlistview, could be because some other component is overlaying the recyclerlistview.
+    // For e.x. toolbar within CoordinatorLayout are overlapping the recyclerlistview.
+    // This method exposes the windowCorrection object of RecyclerListView, user can modify the values in realtime.
+    applyWindowCorrection: PropTypes.func,
 };
