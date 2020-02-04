@@ -9,6 +9,7 @@ import { Dimension } from "../dependencies/LayoutProvider";
 import RecyclerListViewExceptions from "../exceptions/RecyclerListViewExceptions";
 import CustomError from "../exceptions/CustomError";
 import { ComponentCompat } from "../../utils/ComponentCompat";
+import { WindowCorrection } from "../ViewabilityTracker";
 
 export enum StickyType {
     HEADER,
@@ -106,7 +107,8 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         this.stickyViewVisible(this.stickyVisiblity);
     }
 
-    public onScroll(offsetY: number): void {
+    public onScroll(offsetY: number, correction: WindowCorrection): void {
+        offsetY += correction.windowShift;
         this._initParams();
         this._offsetY = offsetY;
         this.boundaryProcessing(offsetY, this._windowBound);

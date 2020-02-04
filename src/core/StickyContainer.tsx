@@ -148,21 +148,20 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     }
 
     private _onScroll = (rawEvent: ScrollEvent, offsetX: number, offsetY: number) => {
-        let correctedOffset = offsetY;
-        if (this.props.applyWindowCorrection) {
-            this.props.applyWindowCorrection(offsetY, offsetY, this._windowCorrection);
-            correctedOffset += this._windowCorrection.windowShift;
-        }
 
         if (this._stickyHeaderRef) {
-            this._stickyHeaderRef.onScroll(correctedOffset);
+            this._stickyHeaderRef.onScroll(offsetY, this._getWindowCorrection(offsetX, offsetY, this.props));
         }
         if (this._stickyFooterRef) {
-            this._stickyFooterRef.onScroll(correctedOffset);
+            this._stickyFooterRef.onScroll(offsetY, this._getWindowCorrection(offsetX, offsetY, this.props));
         }
         if (this.props.children && this.props.children.props.onScroll) {
             this.props.children.props.onScroll(rawEvent, offsetX, offsetY);
         }
+    }
+
+    private _getWindowCorrection(offsetX: number, offsetY: number, props: StickyContainerProps): WindowCorrection {
+        return (props.applyWindowCorrection && props.applyWindowCorrection(offsetX, offsetY, this._windowCorrection)) || this._windowCorrection;
     }
 
     private _assertChildType = (): void => {

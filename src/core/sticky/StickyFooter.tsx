@@ -4,10 +4,16 @@
 
 import StickyObject, {StickyObjectProps, StickyType} from "./StickyObject";
 import BinarySearch, {ValueAndIndex} from "../../utils/BinarySearch";
+import { WindowCorrection } from "../ViewabilityTracker";
 
 export default class StickyFooter<P extends StickyObjectProps> extends StickyObject<P> {
     constructor(props: P, context?: any) {
         super(props, context);
+    }
+
+    public onScroll(offsetY: number, correction: WindowCorrection): void {
+        this.containerPosition = { bottom: correction.endCorrection };
+        super.onScroll(offsetY - correction.endCorrection, correction);
     }
 
     protected initStickyParams(): void {
