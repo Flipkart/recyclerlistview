@@ -3,7 +3,7 @@ Please go through DataProvider, LayoutProvider and rowRenderer in detail. Those 
 
 You can also refer to expo: https://snack.expo.io/@naqvitalha/rlv-demo
 
-Please note that we recommend using [gridlayoutprovider](https://github.com/muskeinsingh/recyclerlistview-gridlayoutprovider) with RLV starting with v3.0. It is one of the exports of RLV. Docs will be updated soon.
+Please note that we recommend using [gridlayoutprovider](https://github.com/muskeinsingh/recyclerlistview-gridlayoutprovider) with RLV starting v3.0. It is one of the exports of RLV. Docs will be updated soon.
 
 ```js
 /***
