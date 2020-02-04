@@ -1,6 +1,7 @@
 import ContextProvider from "./core/dependencies/ContextProvider";
 import DataProvider, { BaseDataProvider } from "./core/dependencies/DataProvider";
 import { BaseLayoutProvider, Dimension, LayoutProvider } from "./core/dependencies/LayoutProvider";
+import { GridLayoutProvider, GridLayoutManager } from "recyclerlistview-gridlayoutprovider";
 import RecyclerListView, { OnRecreateParams } from "./core/RecyclerListView";
 import BaseScrollView from "./core/scrollcomponent/BaseScrollView";
 import { BaseItemAnimator } from "./core/ItemAnimator";
@@ -17,6 +18,8 @@ export {
     BaseLayoutProvider,
     LayoutManager,
     WrapGridLayoutManager,
+    GridLayoutProvider,
+    GridLayoutManager,
     RecyclerListView,
     ProgressiveListView,
     BaseItemAnimator,
