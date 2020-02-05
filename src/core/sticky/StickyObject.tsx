@@ -3,12 +3,13 @@
  */
 
 import * as React from "react";
-import {Animated, StyleProp, ViewStyle} from "react-native";
-import {Layout} from "../layoutmanager/LayoutManager";
-import {Dimension} from "../dependencies/LayoutProvider";
+import { Animated, StyleProp, ViewStyle } from "react-native";
+import { Layout } from "../layoutmanager/LayoutManager";
+import { Dimension } from "../dependencies/LayoutProvider";
 import RecyclerListViewExceptions from "../exceptions/RecyclerListViewExceptions";
 import CustomError from "../exceptions/CustomError";
 import { ComponentCompat } from "../../utils/ComponentCompat";
+import { WindowCorrection } from "../ViewabilityTracker";
 
 export enum StickyType {
     HEADER,
@@ -23,10 +24,13 @@ export interface StickyObjectProps {
     getRLVRenderedSize: () => Dimension | undefined;
     getContentDimension: () => Dimension | undefined;
     getRowRenderer: () => ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
-    getDistanceFromWindow: () => number;
     overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
+    renderContainer?: ((rowContent: JSX.Element, index: number, extendState?: object) => JSX.Element | null);
+    getWindowCorrection?: () => WindowCorrection;
 }
+
 export default abstract class StickyObject<P extends StickyObjectProps> extends ComponentCompat<P> {
+
     protected stickyType: StickyType = StickyType.HEADER;
     protected stickyTypeMultiplier: number = 1;
     protected stickyVisiblity: boolean = false;
@@ -58,6 +62,9 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     private _smallestVisibleIndex: number = 0;
     private _largestVisibleIndex: number = 0;
     private _offsetY: number = 0;
+    private _windowCorrection: WindowCorrection = {
+        startCorrection: 0, endCorrection: 0, windowShift: 0,
+    };
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -66,22 +73,29 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     public componentWillReceivePropsCompat(newProps: StickyObjectProps): void {
         this._initParams();
         this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
-            this._offsetY, newProps.getDistanceFromWindow(), this._windowBound);
+            this._offsetY, this._windowBound);
         this._computeLayouts(newProps.stickyIndices);
         this.stickyViewVisible(this.stickyVisiblity, false);
     }
 
     public renderCompat(): JSX.Element | null {
-        return (
-            <Animated.View style={[
-                {position: "absolute", width: this._scrollableWidth, transform: [{translateY: this._stickyViewOffset}]},
-                this.containerPosition,
-            ]}>
-                {this.stickyVisiblity ?
-                    this._renderSticky()
-                : null}
+        // Add the container style if renderContainer is undefined
+
+        const containerStyle = [{ transform: [{ translateY: this._stickyViewOffset }] },
+            (!this.props.renderContainer && [{ position: "absolute", width: this._scrollableWidth }, this.containerPosition])];
+
+        const content = (
+            <Animated.View style={containerStyle}>
+                {this.stickyVisiblity ? this._renderSticky() : null}
             </Animated.View>
         );
+
+        if (this.props.renderContainer) {
+            const _extendedState: any = this.props.getExtendedState();
+            return this.props.renderContainer(content, this.currentStickyIndex, _extendedState);
+        } else {
+            return (content);
+        }
     }
 
     public onVisibleIndicesChanged(all: number[]): void {
@@ -92,15 +106,16 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         this._initParams();
         this._setSmallestAndLargestVisibleIndices(all);
         this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
-            this._offsetY, this.props.getDistanceFromWindow(), this._windowBound);
+            this._offsetY, this._windowBound);
         this._computeLayouts();
         this.stickyViewVisible(this.stickyVisiblity);
     }
 
     public onScroll(offsetY: number): void {
+        offsetY += this.getWindowCorrection(this.props).windowShift;
         this._initParams();
         this._offsetY = offsetY;
-        this.boundaryProcessing(offsetY, this.props.getDistanceFromWindow(), this._windowBound);
+        this.boundaryProcessing(offsetY, this._windowBound);
         if (this._previousStickyIndex !== undefined) {
             if (this._previousStickyIndex * this.stickyTypeMultiplier >= this.currentStickyIndex * this.stickyTypeMultiplier) {
                 throw new CustomError(RecyclerListViewExceptions.stickyIndicesArraySortError);
@@ -139,12 +154,10 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         }
     }
 
-    protected abstract hasReachedBoundary(offsetY: number, distanceFromWindow: number, windowBound?: number): boolean;
+    protected abstract hasReachedBoundary(offsetY: number, windowBound?: number): boolean;
     protected abstract initStickyParams(): void;
     protected abstract calculateVisibleStickyIndex(
-        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number,
-        offsetY: number, distanceFromWindow: number, windowBound ?: number,
-    ): void;
+        stickyIndices: number[] | undefined, smallestVisibleIndex: number, largestVisibleIndex: number, offsetY: number, windowBound?: number): void;
     protected abstract getNextYd(_nextY: number, nextHeight: number): number;
     protected abstract getCurrentYd(currentY: number, currentHeight: number): number;
     protected abstract getScrollY(offsetY: number, scrollableHeight?: number): number | undefined;
@@ -156,8 +169,12 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         }
     }
 
-    protected boundaryProcessing(offsetY: number, distanceFromWindow: number, windowBound?: number): void {
-        const hasReachedBoundary: boolean = this.hasReachedBoundary(offsetY, distanceFromWindow, windowBound);
+    protected getWindowCorrection(props: StickyObjectProps): WindowCorrection {
+        return (props.getWindowCorrection && props.getWindowCorrection()) || this._windowCorrection;
+    }
+
+    protected boundaryProcessing(offsetY: number, windowBound?: number): void {
+        const hasReachedBoundary: boolean = this.hasReachedBoundary(offsetY, windowBound);
         if (this.bounceScrolling !== hasReachedBoundary) {
             this.bounceScrolling = hasReachedBoundary;
             if (this.bounceScrolling) {
@@ -169,6 +186,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     }
 
     private _initParams(): void {
+        this.getWindowCorrection(this.props);
         const rlvDimension: Dimension | undefined = this.props.getRLVRenderedSize();
         if (rlvDimension) {
             this._scrollableHeight = rlvDimension.height;

@@ -25,6 +25,7 @@ export default class ScrollComponent extends BaseScrollComponent {
 
     private _height: number;
     private _width: number;
+    private _offset: number;
     private _isSizeChangedCalledOnce: boolean;
     private _scrollViewRef: ScrollView | null = null;
 
@@ -32,6 +33,7 @@ export default class ScrollComponent extends BaseScrollComponent {
         super(args);
         this._height = 0;
         this._width = 0;
+        this._offset = 0;
         this._isSizeChangedCalledOnce = false;
     }
 
@@ -43,6 +45,16 @@ export default class ScrollComponent extends BaseScrollComponent {
 
     public render(): JSX.Element {
         const Scroller = TSCast.cast<ScrollView>(this.props.externalScrollView); //TSI
+        const renderContentContainer = this.props.renderContentContainer ? this.props.renderContentContainer : this._defaultContainer;
+        const contentContainerProps = {
+            style: {
+                height: this.props.contentHeight,
+                width: this.props.contentWidth,
+            },
+            horizontal : this.props.isHorizontal,
+            scrollOffset : this._offset,
+            windowSize: (this.props.isHorizontal ? this._width : this._height) + this.props.renderAheadOffset,
+        };
         //TODO:Talha
         // const {
         //     useWindowScroll,
@@ -64,15 +76,18 @@ export default class ScrollComponent extends BaseScrollComponent {
                 onScroll={this._onScroll}
                 onLayout={(!this._isSizeChangedCalledOnce || this.props.canChangeSize) ? this._onLayout : this.props.onLayout}>
                 <View style={{ flexDirection: this.props.isHorizontal ? "row" : "column" }}>
-                    <View style={{
-                        height: this.props.contentHeight,
-                        width: this.props.contentWidth,
-                    }}>
-                        {this.props.children}
-                    </View>
+                    {renderContentContainer(contentContainerProps, this.props.children)}
                     {this.props.renderFooter ? this.props.renderFooter() : null}
                 </View>
             </Scroller>
+        );
+    }
+
+    private _defaultContainer(props: object, children: React.ReactNode): React.ReactNode | null {
+        return (
+            <View {...props}>
+                {children}
+            </View>
         );
     }
 
@@ -80,7 +95,9 @@ export default class ScrollComponent extends BaseScrollComponent {
 
     private _onScroll = (event?: NativeSyntheticEvent<NativeScrollEvent>): void => {
         if (event) {
-            this.props.onScroll(event.nativeEvent.contentOffset.x, event.nativeEvent.contentOffset.y, event);
+            const contentOffset = event.nativeEvent.contentOffset;
+            this._offset = this.props.isHorizontal ? contentOffset.x : contentOffset.y;
+            this.props.onScroll(contentOffset.x, contentOffset.y, event);
         }
     }
 
