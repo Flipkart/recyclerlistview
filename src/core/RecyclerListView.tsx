@@ -170,7 +170,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             this._layout.width = props.scrollViewSize.width;
             this._initComplete = true;
             this._initTrackers();
-            this._processOnEndReached();
         } else {
             this.state = {
                 internalSnapshot: {},
@@ -197,18 +196,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     public componentDidUpdate(): void {
-        if (this._pendingScrollToOffset) {
-            const offset = this._pendingScrollToOffset;
-            this._pendingScrollToOffset = null;
-            if (this.props.isHorizontal) {
-                offset.y = 0;
-            } else {
-                offset.x = 0;
-            }
-            setTimeout(() => {
-                this.scrollToOffset(offset.x, offset.y, false);
-            }, 0);
-        }
+        this._processInitialOffset();
         this._processOnEndReached();
         this._checkAndChangeLayouts(this.props);
         if (this.props.dataProvider.getSize() === 0) {
@@ -217,7 +205,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     public componentDidMount(): void {
-        
+        if (this._initComplete) {
+            this._processOnEndReached();
+            this._processInitialOffset();
+        }
     }
 
     public componentWillUnmount(): void {
@@ -240,7 +231,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     public componentWillMountCompat(): void {
-
         if (this.props.contextProvider) {
             const uniqueKey = this.props.contextProvider.getUniqueKey();
             if (uniqueKey) {
@@ -394,6 +384,21 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         return this._virtualRenderer;
     }
 
+    private _processInitialOffset(): void {
+        if (this._pendingScrollToOffset) {
+            const offset = this._pendingScrollToOffset;
+            this._pendingScrollToOffset = null;
+            if (this.props.isHorizontal) {
+                offset.y = 0;
+            } else {
+                offset.x = 0;
+            }
+            setTimeout(() => {
+                this.scrollToOffset(offset.x, offset.y, false);
+            }, 0);
+        }
+    }
+
     private _checkAndChangeLayouts(newProps: RecyclerListViewProps, forceFullRender?: boolean): void {
         this._params.isHorizontal = newProps.isHorizontal;
         this._params.itemCount = newProps.dataProvider.getSize();
@@ -468,13 +473,19 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
     }
 
-    private _renderStackWhenReady = (stack: RenderStack): void => {
+    private _initStateIfRequired(stack: RenderStack): boolean {
         if (!this.state) {
             this.state = {
                 internalSnapshot: {},
                 renderStack: stack,
             } as S;
-        } else {
+            return true;
+        }
+        return false;
+    }
+
+    private _renderStackWhenReady = (stack: RenderStack): void => {
+        if (!this._initStateIfRequired(stack)) {
             this.setState(() => {
                 return { renderStack: stack };
             });
