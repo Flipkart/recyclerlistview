@@ -66,6 +66,7 @@ not be as fast.
 **Production Flipkart Grocery Demo Video (or try the app):** https://youtu.be/6YqEqP3MmoU  
 **Infinite Loading/View Change (Expo):** https://snack.expo.io/@naqvitalha/rlv-demo  
 **Mixed ViewTypes:** https://snack.expo.io/B1GYad52b  
+**extendedState,stableIDs and ItemAnimator (Expo):** https://snack.expo.io/@arunreddy10/19bb8e  
 **Sample project:** https://github.com/naqvitalha/travelMate  
 **Web Sample (Using RNW):** https://codesandbox.io/s/k54j2zx977, https://jolly-engelbart-8ff0d0.netlify.com/  
 **Context Preservation Sample:** https://github.com/naqvitalha/recyclerlistview-context-preservation-demo
@@ -96,7 +97,8 @@ not be as fast.
 | initialRenderIndex | No | number | Specify the initial item index you want rendering to start from. Preferred over initialOffset if both specified |
 | scrollThrottle | No | number |iOS only; Scroll throttle duration |
 | canChangeSize | No | boolean | Specify if size can change |
-| distanceFromWindow | No | number | Web only; Specify how far away the first list item is from window top |
+| distanceFromWindow | No | number | **(Depricated)** Use `applyWindowCorrection()` API with `windowShift`. **[Usage?](#applywindowcorrection-usage)** |
+| applyWindowCorrection | No | (offset: number, windowCorrection: WindowCorrection) => void | (Enhancement/replacement to `distanceFromWindow` API) Allows updation of the visible windowBounds to based on correctional values passed. User can specify **windowShift**; in case entire RecyclerListWindow needs to shift down/up, **startCorrection**; in case when top window bound needs to be shifted for e.x. top window bound to be shifted down is a content overlapping the top edge of RecyclerListView, **endCorrection**: to alter bottom window bound for a similar use-case. **[Usage?](#applywindowcorrection-usage)** |
 | useWindowScroll | No | boolean | Web only; Layout Elements in window instead of a scrollable div |
 | disableRecycling | No | boolean | Turns off recycling |
 | forceNonDeterministicRendering | No | boolean | Default is false; if enabled dimensions provided in layout provider will not be strictly enforced. Use this if item dimensions cannot be accurately determined |
@@ -108,6 +110,17 @@ not be as fast.
 
 For full feature set have a look at prop definitions of [RecyclerListView](https://github.com/Flipkart/recyclerlistview/blob/21049cc89ad606ec9fe8ea045dc73732ff29eac9/src/core/RecyclerListView.tsx#L540-L634)
 (bottom of the file). All `ScrollView` features like `RefreshControl` also work out of the box.
+
+### applyWindowCorrection usage
+
+`applyWindowCorrection` is used to alter the visible window bounds of the RecyclerListView dynamically. The windowCorrection of RecyclerListView along with the current scroll offset are exposed to the user. The `windowCorrection` object consists of 3 numeric values:
+ - `windowShift`        - Direct replacement of `distanceFromWindow` parameter. Window shift is the offset value by which the RecyclerListView as a whole is displaced within the StickyContainer, use this param to specify how far away the first list item is from window top. This value corrects the scroll offsets for StickyObjects as well as RecyclerListView.
+ - `startCorrection`    - startCorrection is used to specify the shift in the top visible window bound, with which user can receive the correct Sticky header instance even when an external factor like CoordinatorLayout toolbar. 
+ - `endCorrection`      - endCorrection is used to specify the shift in the bottom visible window bound, with which user can receive correct Sticky Footer instance when an external factor like bottom app bar is changing the visible view bound.
+
+As seen in the example below
+
+![Alt Text](/docs/images/getWindowCorrection_demo.gif)
 
 ## Typescript
 

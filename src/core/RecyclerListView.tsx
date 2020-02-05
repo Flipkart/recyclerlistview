@@ -32,7 +32,7 @@ import { Constants } from "./constants/Constants";
 import { Messages } from "./constants/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
-import { TOnItemStatusChanged } from "./ViewabilityTracker";
+import { TOnItemStatusChanged, WindowCorrection } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 import { DebugHandlers } from "..";
@@ -95,7 +95,6 @@ export interface RecyclerListViewProps {
     initialRenderIndex?: number;
     scrollThrottle?: number;
     canChangeSize?: boolean;
-    distanceFromWindow?: number;
     useWindowScroll?: boolean;
     disableRecycling?: boolean;
     forceNonDeterministicRendering?: boolean;
@@ -104,10 +103,11 @@ export interface RecyclerListViewProps {
     optimizeForInsertDeleteAnimations?: boolean;
     style?: object | number;
     debugHandlers?: DebugHandlers;
-
+    renderContentContainer?: (props?: object, children?: React.ReactNode) => React.ReactNode | null;
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
+    applyWindowCorrection?: (offsetX: number, offsetY: number, windowCorrection: WindowCorrection) => void;
 }
 
 export interface RecyclerListViewState {
@@ -123,7 +123,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         initialRenderIndex: 0,
         isHorizontal: false,
         onEndReachedThreshold: 0,
-        distanceFromWindow: 0,
         renderAheadOffset: IS_WEB ? 1000 : 250,
     };
 
@@ -150,8 +149,12 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _initialOffset = 0;
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
+    private _windowCorrection: WindowCorrection;
 
-    private _defaultItemAnimator: ItemAnimator = new DefaultItemAnimator();
+    //If the native content container is used, then positions of the list items are changed on the native side. The animated library used
+    //by the default item animator also changes the same positions which could lead to inconsistency. Hence, the base item animator which
+    //does not perform any such animations will be used.
+    private _defaultItemAnimator: ItemAnimator = new BaseItemAnimator();
 
     constructor(props: P, context?: any) {
         super(props, context);
@@ -165,6 +168,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             internalSnapshot: {},
             renderStack: {},
         } as S;
+
+        this._windowCorrection = {
+            startCorrection: 0, endCorrection: 0, windowShift: 0,
+        };
     }
 
     public componentWillReceivePropsCompat(newProps: RecyclerListViewProps): void {
@@ -363,7 +370,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 onScroll={this._onScroll}
                 onSizeChanged={this._onSizeChanged}
                 contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
-                contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}>
+                contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}
+                renderAheadOffset={this.getCurrentRenderAheadOffset()}>
                 {this._generateRenderStack()}
             </ScrollComponent>
         );
@@ -480,8 +488,12 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             this._pendingScrollToOffset = offset;
             this.setState({});
         } else {
-            this._virtualRenderer.startViewabilityTracker();
+            this._virtualRenderer.startViewabilityTracker(this._getWindowCorrection(offset.x, offset.y, this.props));
         }
+    }
+
+    private _getWindowCorrection(offsetX: number, offsetY: number, props: RecyclerListViewProps): WindowCorrection {
+        return (props.applyWindowCorrection && props.applyWindowCorrection(offsetX, offsetY, this._windowCorrection)) || this._windowCorrection;
     }
 
     private _assertDependencyPresence(props: RecyclerListViewProps): void {
@@ -579,8 +591,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _onScroll = (offsetX: number, offsetY: number, rawEvent: ScrollEvent): void => {
-        //Adjusting offsets using distanceFromWindow
-        this._virtualRenderer.updateOffset(offsetX, offsetY, -this.props.distanceFromWindow!, true);
+        // correction to be positive to shift offset upwards; negative to push offset downwards.
+        // extracting the correction value from logical offset and updating offset of virtual renderer.
+        this._virtualRenderer.updateOffset(offsetX, offsetY, true, this._getWindowCorrection(offsetX, offsetY, this.props));
 
         if (this.props.onScroll) {
             this.props.onScroll(rawEvent, offsetX, offsetY);
@@ -668,13 +681,6 @@ RecyclerListView.propTypes = {
     //Specify if size can change, listview will automatically relayout items. For web, works only with useWindowScroll = true
     canChangeSize: PropTypes.bool,
 
-    //Specify how far away the first list item is from start of the RecyclerListView. e.g, if you have content padding on top or left.
-    //This is an adjustment for optimization and to make sure onVisibileIndexesChanged callback is correct.
-    //Ideally try to avoid setting large padding values on RLV content. If you have to please correct offsets reported, handle
-    //them in a custom ScrollView and pass it as an externalScrollView. If you want this to be accounted in scrollToOffset please
-    //override the method and handle manually.
-    distanceFromWindow: PropTypes.number,
-
     //Web only. Layout elements in window instead of a scrollable div.
     useWindowScroll: PropTypes.bool,
 
@@ -698,6 +704,12 @@ RecyclerListView.propTypes = {
     //animations are JS driven to avoid workflow interference. Also, please note LayoutAnimation is buggy on Android.
     itemAnimator: PropTypes.instanceOf(BaseItemAnimator),
 
+    //The Recyclerlistview item cells are enclosed inside this item container. The idea is pass a native UI component which implements a
+    //view shifting algorithm to remove the overlaps between the neighbouring views. This is achieved by shifting them by the appropriate
+    //amount in the correct direction if the estimated sizes of the item cells are not accurate. If this props is passed, it will be used to
+    //enclose the list items and otherwise a default react native View will be used for the same.
+    renderContentContainer: PropTypes.func,
+
     //Enables you to utilize layout animations better by unmounting removed items. Please note, this might increase unmounts
     //on large data changes.
     optimizeForInsertDeleteAnimations: PropTypes.bool,
@@ -711,4 +723,9 @@ RecyclerListView.propTypes = {
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down.
     scrollViewProps: PropTypes.object,
+
+    // Used when the logical offsetY differs from actual offsetY of recyclerlistview, could be because some other component is overlaying the recyclerlistview.
+    // For e.x. toolbar within CoordinatorLayout are overlapping the recyclerlistview.
+    // This method exposes the windowCorrection object of RecyclerListView, user can modify the values in realtime.
+    applyWindowCorrection: PropTypes.func,
 };
