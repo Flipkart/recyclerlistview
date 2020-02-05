@@ -1,5 +1,4 @@
-import { Dimension } from "./../../../dist/reactnative/core/dependencies/LayoutProvider.d";
-import { LayoutProvider } from "./LayoutProvider";
+import { LayoutProvider, Dimension } from "./LayoutProvider";
 import { Layout, LayoutManager } from "../layoutmanager/LayoutManager";
 import { GridLayoutManager } from "../layoutmanager/GridLayoutManager";
 
