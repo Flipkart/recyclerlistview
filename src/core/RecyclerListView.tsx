@@ -91,7 +91,7 @@ export interface RecyclerListViewProps {
     onVisibleIndicesChanged?: TOnItemStatusChanged;
     renderFooter?: () => JSX.Element | JSX.Element[] | null;
     externalScrollView?: { new(props: ScrollViewDefaultProps): BaseScrollView };
-    scrollViewSize?: Dimension;
+    initialEstimatedSize?: Dimension;
     initialOffset?: number;
     initialRenderIndex?: number;
     scrollThrottle?: number;
@@ -151,6 +151,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
     private _windowCorrection: WindowCorrection;
+    private _isSizeChangedCalledOnce = false;
 
     //If the native content container is used, then positions of the list items are changed on the native side. The animated library used
     //by the default item animator also changes the same positions which could lead to inconsistency. Hence, the base item animator which
@@ -165,20 +166,20 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             return this.props.dataProvider.getStableId(index);
         }, !props.disableRecycling);
 
-        if (props.scrollViewSize) {
-            this._layout.height = props.scrollViewSize.height;
-            this._layout.width = props.scrollViewSize.width;
+        this._windowCorrection = {
+            startCorrection: 0, endCorrection: 0, windowShift: 0,
+        };
+        if (props.initialEstimatedSize) {
+            this._layout.height = props.initialEstimatedSize.height;
+            this._layout.width = props.initialEstimatedSize.width;
             this._initComplete = true;
-            this._initTrackers();
+            this._initTrackers(props);
         } else {
             this.state = {
                 internalSnapshot: {},
                 renderStack: {},
             } as S;
         }
-        this._windowCorrection = {
-            startCorrection: 0, endCorrection: 0, windowShift: 0,
-        };
     }
 
     public componentWillReceivePropsCompat(newProps: RecyclerListViewProps): void {
@@ -206,8 +207,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     public componentDidMount(): void {
         if (this._initComplete) {
-            this._processOnEndReached();
             this._processInitialOffset();
+            this._processOnEndReached();
         }
     }
 
@@ -460,20 +461,22 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
         if (!this._initComplete) {
             this._initComplete = true;
-            this._initTrackers();
+            this._initTrackers(this.props);
             this._processOnEndReached();
         } else {
             if ((hasHeightChanged && hasWidthChanged) ||
                 (hasHeightChanged && this.props.isHorizontal) ||
                 (hasWidthChanged && !this.props.isHorizontal)) {
-                this._checkAndChangeLayouts(this.props, true);
+                const forceFullRender = this._isSizeChangedCalledOnce ? true : false;
+                this._checkAndChangeLayouts(this.props, forceFullRender);
             } else {
                 this._refreshViewability();
             }
         }
+        this._isSizeChangedCalledOnce = true;
     }
 
-    private _initStateIfRequired(stack: RenderStack): boolean {
+    private _initStateIfRequired(stack?: RenderStack): boolean {
         if (!this.state) {
             this.state = {
                 internalSnapshot: {},
@@ -492,34 +495,36 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
     }
 
-    private _initTrackers(): void {
-        this._assertDependencyPresence(this.props);
-        if (this.props.onVisibleIndexesChanged) {
+    private _initTrackers(props: RecyclerListViewProps): void {
+        this._assertDependencyPresence(props);
+        if (props.onVisibleIndexesChanged) {
             throw new CustomError(RecyclerListViewExceptions.usingOldVisibleIndexesChangedParam);
         }
-        if (this.props.onVisibleIndicesChanged) {
-            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndicesChanged!);
+        if (props.onVisibleIndicesChanged) {
+            this._virtualRenderer.attachVisibleItemsListener(props.onVisibleIndicesChanged!);
         }
         this._params = {
-            initialOffset: this._initialOffset ? this._initialOffset : this.props.initialOffset,
-            initialRenderIndex: this.props.initialRenderIndex,
-            isHorizontal: this.props.isHorizontal,
-            itemCount: this.props.dataProvider.getSize(),
-            renderAheadOffset: this.props.renderAheadOffset,
+            initialOffset: this._initialOffset ? this._initialOffset : props.initialOffset,
+            initialRenderIndex: props.initialRenderIndex,
+            isHorizontal: props.isHorizontal,
+            itemCount: props.dataProvider.getSize(),
+            renderAheadOffset: props.renderAheadOffset,
         };
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
-        const layoutManager = this.props.layoutProvider.newLayoutManager(this._layout, this.props.isHorizontal, this._cachedLayouts);
+        const layoutManager = props.layoutProvider.newLayoutManager(this._layout, props.isHorizontal, this._cachedLayouts);
         this._virtualRenderer.setLayoutManager(layoutManager);
-        this._virtualRenderer.setLayoutProvider(this.props.layoutProvider);
+        this._virtualRenderer.setLayoutProvider(props.layoutProvider);
         this._virtualRenderer.init();
         const offset = this._virtualRenderer.getInitialOffset();
         const contentDimension = layoutManager.getContentDimension();
         if ((offset.y > 0 && contentDimension.height > this._layout.height) ||
             (offset.x > 0 && contentDimension.width > this._layout.width)) {
             this._pendingScrollToOffset = offset;
-            this.setState({});
+            if (!this._initStateIfRequired()) {
+                this.setState({});
+            }
         } else {
-            this._virtualRenderer.startViewabilityTracker(this._getWindowCorrection(offset.x, offset.y, this.props));
+            this._virtualRenderer.startViewabilityTracker(this._getWindowCorrection(offset.x, offset.y, props));
         }
     }
 

@@ -31,8 +31,8 @@ export default class ScrollComponent extends BaseScrollComponent {
 
     constructor(args: ScrollComponentProps) {
         super(args);
-        this._height = 0;
-        this._width = 0;
+        this._height = args.initialEstimatedSize ? args.initialEstimatedSize.height : 0;
+        this._width = args.initialEstimatedSize ? args.initialEstimatedSize.width : 0;
         this._offset = 0;
         this._isSizeChangedCalledOnce = false;
     }
