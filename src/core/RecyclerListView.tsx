@@ -711,6 +711,11 @@ RecyclerListView.propTypes = {
     //Specify the initial item index you want rendering to start from. Preferred over initialOffset if both are specified.
     initialRenderIndex: PropTypes.number,
 
+    //Specify the estimated size of the recyclerlistview to render the list items in the first pass. If not provided, the recyclerlistview
+    //will first render with no items and then fill in the items based on the size given by its onLayout event. When provided, the items are
+    //rendered in the first pass according to the estimated size and then adjusted according to the actual size when the onLayout event arrives.
+    initialEstimatedSize: PropTypes.object,
+
     //iOS only. Scroll throttle duration.
     scrollThrottle: PropTypes.number,
 
