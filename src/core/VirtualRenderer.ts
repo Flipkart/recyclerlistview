@@ -227,7 +227,7 @@ export default class VirtualRenderer {
                 }
             } else {
                 key = getStableId(index);
-                if(this._cachedRenderStack[key]) {
+                if (this._cachedRenderStack[key]) {
                     delete this._cachedRenderStack[key];
                     key = this._getCollisionAvoidingKey();
                 }
