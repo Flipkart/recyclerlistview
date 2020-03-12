@@ -282,7 +282,9 @@ export default class VirtualRenderer {
                 delete this._stableIdToRenderKeyMap[key];
             }
         }
-
+        if(shouldOptimizeForAnimations && this._isRecyclingEnabled) {
+            this._recyclePool.clearAll();
+        }
         for (const key in this._renderStack) {
             if (this._renderStack.hasOwnProperty(key)) {
                 const index = this._renderStack[key].dataIndex;
@@ -305,13 +307,14 @@ export default class VirtualRenderer {
             }
         }
         Object.assign(this._renderStack, newRenderStack);
-
-        for (const key in this._renderStack) {
-            if (this._renderStack.hasOwnProperty(key)) {
-                const index = this._renderStack[key].dataIndex;
-                if (!ObjectUtil.isNullOrUndefined(index) && ObjectUtil.isNullOrUndefined(this._engagedIndexes[index])) {
-                    const type = this._layoutProvider.getLayoutTypeForIndex(index);
-                    this._recyclePool.putRecycledObject(type, key);
+        if(!shouldOptimizeForAnimations && this._isRecyclingEnabled) {
+            for (const key in this._renderStack) {
+                if (this._renderStack.hasOwnProperty(key)) {
+                    const index = this._renderStack[key].dataIndex;
+                    if (!ObjectUtil.isNullOrUndefined(index) && ObjectUtil.isNullOrUndefined(this._engagedIndexes[index])) {
+                        const type = this._layoutProvider.getLayoutTypeForIndex(index);
+                        this._recyclePool.putRecycledObject(type, key);
+                    }
                 }
             }
         }
