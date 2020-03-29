@@ -288,7 +288,7 @@ export default class VirtualRenderer {
                 delete this._stableIdToRenderKeyMap[key];
             }
         }
-        if (shouldOptimizeForAnimations && this._isRecyclingEnabled) {
+        if (shouldOptimizeForAnimations && this._isRecyclingEnabled && this._recyclePool) {
             this._recyclePool.clearAll();
         }
         this._cachedRenderStack = Object.assign({}, this._renderStack);
