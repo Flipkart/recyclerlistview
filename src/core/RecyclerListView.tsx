@@ -169,6 +169,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this._windowCorrection = {
             startCorrection: 0, endCorrection: 0, windowShift: 0,
         };
+        this._getContextFromProvider(props);
         if (props.initialEstimatedSize) {
             this._layout.height = props.initialEstimatedSize.height;
             this._layout.width = props.initialEstimatedSize.width;
@@ -225,29 +226,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                             this.props.contextProvider.save(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX,
                                 JSON.stringify({ layoutArray: layoutsToCache }));
                         }
-                    }
-                }
-            }
-        }
-    }
-
-    public componentWillMountCompat(): void {
-        if (this.props.contextProvider) {
-            const uniqueKey = this.props.contextProvider.getUniqueKey();
-            if (uniqueKey) {
-                const offset = this.props.contextProvider.get(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX);
-                if (typeof offset === "number" && offset > 0) {
-                    this._initialOffset = offset;
-                    if (this.props.onRecreate) {
-                        this.props.onRecreate({ lastOffset: this._initialOffset });
-                    }
-                    this.props.contextProvider.remove(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX);
-                }
-                if (this.props.forceNonDeterministicRendering) {
-                    const cachedLayouts = this.props.contextProvider.get(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX) as string;
-                    if (cachedLayouts && typeof cachedLayouts === "string") {
-                        this._cachedLayouts = JSON.parse(cachedLayouts).layoutArray;
-                        this.props.contextProvider.remove(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX);
                     }
                 }
             }
@@ -400,6 +378,29 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
     }
 
+    private _getContextFromProvider(props: RecyclerListViewProps): void {
+        if (props.contextProvider) {
+            const uniqueKey = props.contextProvider.getUniqueKey();
+            if (uniqueKey) {
+                const offset = props.contextProvider.get(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX);
+                if (typeof offset === "number" && offset > 0) {
+                    this._initialOffset = offset;
+                    if (props.onRecreate) {
+                        props.onRecreate({ lastOffset: this._initialOffset });
+                    }
+                    props.contextProvider.remove(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX);
+                }
+                if (props.forceNonDeterministicRendering) {
+                    const cachedLayouts = props.contextProvider.get(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX) as string;
+                    if (cachedLayouts && typeof cachedLayouts === "string") {
+                        this._cachedLayouts = JSON.parse(cachedLayouts).layoutArray;
+                        props.contextProvider.remove(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX);
+                    }
+                }
+            }
+        }
+    }
+
     private _checkAndChangeLayouts(newProps: RecyclerListViewProps, forceFullRender?: boolean): void {
         this._params.isHorizontal = newProps.isHorizontal;
         this._params.itemCount = newProps.dataProvider.getSize();
@@ -467,8 +468,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             if ((hasHeightChanged && hasWidthChanged) ||
                 (hasHeightChanged && this.props.isHorizontal) ||
                 (hasWidthChanged && !this.props.isHorizontal)) {
-                const forceFullRender = this._isSizeChangedCalledOnce ? true : false;
-                this._checkAndChangeLayouts(this.props, forceFullRender);
+                this._checkAndChangeLayouts(this.props, this._isSizeChangedCalledOnce);
             } else {
                 this._refreshViewability();
             }
