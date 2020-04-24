@@ -44,12 +44,18 @@ export class GridLayoutManager extends WrapGridLayoutManager {
       const widthDiff = Math.abs(dim.width - layout.width);
       if (layout) {
         if (this._isGridHorizontal) {
-          if (widthDiff === 0) {
-            return false;
+          if (heightDiff < this._acceptableRelayoutDelta) {
+            if (widthDiff === 0) {
+              return false;
+            }
+            dim.height = layout.height;
           }
         } else {
-          if (heightDiff === 0) {
-            return false;
+          if (widthDiff < this._acceptableRelayoutDelta) {
+            if (heightDiff === 0) {
+              return false;
+            }
+            dim.width = layout.width;
           }
         }
       }
