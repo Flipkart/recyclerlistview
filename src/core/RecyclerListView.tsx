@@ -169,7 +169,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this._windowCorrection = {
             startCorrection: 0, endCorrection: 0, windowShift: 0,
         };
-        this._getContextFromProvider(props);
+        this._getContextFromContextProvider(props);
         if (props.initialEstimatedSize) {
             this._layout.height = props.initialEstimatedSize.height;
             this._layout.width = props.initialEstimatedSize.width;
@@ -378,7 +378,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
     }
 
-    private _getContextFromProvider(props: RecyclerListViewProps): void {
+    private _getContextFromContextProvider(props: RecyclerListViewProps): void {
         if (props.contextProvider) {
             const uniqueKey = props.contextProvider.getUniqueKey();
             if (uniqueKey) {
