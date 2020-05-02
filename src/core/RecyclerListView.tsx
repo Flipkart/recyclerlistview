@@ -91,7 +91,7 @@ export interface RecyclerListViewProps {
     onVisibleIndicesChanged?: TOnItemStatusChanged;
     renderFooter?: () => JSX.Element | JSX.Element[] | null;
     externalScrollView?: { new(props: ScrollViewDefaultProps): BaseScrollView };
-    initialEstimatedSize?: Dimension;
+    scrollViewSize?: Dimension;
     initialOffset?: number;
     initialRenderIndex?: number;
     scrollThrottle?: number;
@@ -151,7 +151,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
     private _windowCorrection: WindowCorrection;
-    private _isSizeChangedCalledOnce = false;
 
     //If the native content container is used, then positions of the list items are changed on the native side. The animated library used
     //by the default item animator also changes the same positions which could lead to inconsistency. Hence, the base item animator which
@@ -170,9 +169,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             startCorrection: 0, endCorrection: 0, windowShift: 0,
         };
         this._getContextFromContextProvider(props);
-        if (props.initialEstimatedSize) {
-            this._layout.height = props.initialEstimatedSize.height;
-            this._layout.width = props.initialEstimatedSize.width;
+        if (props.scrollViewSize) {
+            this._layout.height = props.scrollViewSize.height;
+            this._layout.width = props.scrollViewSize.width;
             this._initComplete = true;
             this._initTrackers(props);
         } else {
@@ -411,7 +410,15 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
         if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
-            this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout, newProps.isHorizontal));
+            if (forceFullRender) {
+                const layoutManager = this._virtualRenderer.getLayoutManager();
+                if (layoutManager) {
+                    const cachedLayouts = layoutManager.getLayouts();
+                    this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout, newProps.isHorizontal, cachedLayouts));
+                }
+            } else {
+                this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout, newProps.isHorizontal));
+            }
             if (newProps.layoutProvider.shouldRefreshWithAnchoring) {
                 this._virtualRenderer.refreshWithAnchor();
             } else {
@@ -468,12 +475,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             if ((hasHeightChanged && hasWidthChanged) ||
                 (hasHeightChanged && this.props.isHorizontal) ||
                 (hasWidthChanged && !this.props.isHorizontal)) {
-                this._checkAndChangeLayouts(this.props, this._isSizeChangedCalledOnce);
+                this._checkAndChangeLayouts(this.props, true);
             } else {
                 this._refreshViewability();
             }
         }
-        this._isSizeChangedCalledOnce = true;
     }
 
     private _initStateIfRequired(stack?: RenderStack): boolean {
@@ -714,7 +720,7 @@ RecyclerListView.propTypes = {
     //Specify the estimated size of the recyclerlistview to render the list items in the first pass. If not provided, the recyclerlistview
     //will first render with no items and then fill in the items based on the size given by its onLayout event. When provided, the items are
     //rendered in the first pass according to the estimated size and then adjusted according to the actual size when the onLayout event arrives.
-    initialEstimatedSize: PropTypes.object,
+    scrollViewSize: PropTypes.object,
 
     //iOS only. Scroll throttle duration.
     scrollThrottle: PropTypes.number,
