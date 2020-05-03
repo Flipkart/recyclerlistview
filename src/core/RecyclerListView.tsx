@@ -91,7 +91,7 @@ export interface RecyclerListViewProps {
     onVisibleIndicesChanged?: TOnItemStatusChanged;
     renderFooter?: () => JSX.Element | JSX.Element[] | null;
     externalScrollView?: { new(props: ScrollViewDefaultProps): BaseScrollView };
-    scrollViewSize?: Dimension;
+    layoutSize?: Dimension;
     initialOffset?: number;
     initialRenderIndex?: number;
     scrollThrottle?: number;
@@ -169,9 +169,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             startCorrection: 0, endCorrection: 0, windowShift: 0,
         };
         this._getContextFromContextProvider(props);
-        if (props.scrollViewSize) {
-            this._layout.height = props.scrollViewSize.height;
-            this._layout.width = props.scrollViewSize.width;
+        if (props.layoutSize) {
+            this._layout.height = props.layoutSize.height;
+            this._layout.width = props.layoutSize.width;
             this._initComplete = true;
             this._initTrackers(props);
         } else {
@@ -408,17 +408,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (newProps.dataProvider.hasStableIds() && this.props.dataProvider !== newProps.dataProvider && newProps.dataProvider.requiresDataChangeHandling()) {
             this._virtualRenderer.handleDataSetChange(newProps.dataProvider, this.props.optimizeForInsertDeleteAnimations);
         }
-        if (forceFullRender || this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
+        if (this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
-            if (forceFullRender) {
-                const layoutManager = this._virtualRenderer.getLayoutManager();
-                if (layoutManager) {
-                    const cachedLayouts = layoutManager.getLayouts();
-                    this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout, newProps.isHorizontal, cachedLayouts));
-                }
-            } else {
-                this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout, newProps.isHorizontal));
-            }
+            this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout, newProps.isHorizontal));
             if (newProps.layoutProvider.shouldRefreshWithAnchoring) {
                 this._virtualRenderer.refreshWithAnchor();
             } else {
@@ -433,6 +425,13 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             if (layoutManager) {
                 layoutManager.relayoutFromIndex(newProps.dataProvider.getFirstIndexToProcessInternal(), newProps.dataProvider.getSize());
                 this._virtualRenderer.refresh();
+            }
+        } else if (forceFullRender) {
+            const layoutManager = this._virtualRenderer.getLayoutManager();
+            if (layoutManager) {
+                const cachedLayouts = layoutManager.getLayouts();
+                this._virtualRenderer.setLayoutManager(newProps.layoutProvider.newLayoutManager(this._layout, newProps.isHorizontal, cachedLayouts));
+                this._refreshViewability();
             }
         } else if (this._relayoutReqIndex >= 0) {
             const layoutManager = this._virtualRenderer.getLayoutManager();
@@ -460,6 +459,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _onSizeChanged = (layout: Dimension): void => {
+        if (!this.props.canChangeSize && this.props.layoutSize) {
+            return;
+        }
         const hasHeightChanged = this._layout.height !== layout.height;
         const hasWidthChanged = this._layout.width !== layout.width;
         this._layout.height = layout.height;
@@ -717,10 +719,11 @@ RecyclerListView.propTypes = {
     //Specify the initial item index you want rendering to start from. Preferred over initialOffset if both are specified.
     initialRenderIndex: PropTypes.number,
 
-    //Specify the estimated size of the recyclerlistview to render the list items in the first pass. If not provided, the recyclerlistview
-    //will first render with no items and then fill in the items based on the size given by its onLayout event. When provided, the items are
-    //rendered in the first pass according to the estimated size and then adjusted according to the actual size when the onLayout event arrives.
-    scrollViewSize: PropTypes.object,
+    //Specify the estimated size of the recyclerlistview to render the list items in the first pass. If provided, recyclerlistview will
+    //use these dimensions to fill in the items in the first render. If not provided, recyclerlistview will first render with no items
+    //and then fill in the items based on the size given by its onLayout event. canChangeSize can be set to true to relayout items when
+    //the size changes.
+    layoutSize: PropTypes.object,
 
     //iOS only. Scroll throttle duration.
     scrollThrottle: PropTypes.number,
