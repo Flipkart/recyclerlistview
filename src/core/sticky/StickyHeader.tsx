@@ -62,7 +62,6 @@ export default class StickyHeader<P extends StickyObjectProps> extends StickyObj
     }
 
     protected hasReachedBoundary(offsetY: number, _windowBound?: number): boolean {
-        //TODO (Swapnil) Refer to talha and understand what needs to be done.
-        return false;
+        return offsetY <= 0;
     }
 }
