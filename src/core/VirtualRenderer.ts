@@ -6,7 +6,7 @@ import { Point, LayoutManager } from "./layoutmanager/LayoutManager";
 import ViewabilityTracker, { TOnItemStatusChanged, WindowCorrection } from "./ViewabilityTracker";
 import { ObjectUtil, Default } from "ts-object-utils";
 import TSCast from "../utils/TSCast";
-import { BaseDataProvider } from "./dependencies/DataProvider";
+import { BaseDataProvider, ListBaseDataProvider } from "./dependencies/DataProvider";
 
 /***
  * Renderer which keeps track of recyclable items and the currently rendered items. Notifies list view to re render if something changes, like scroll offset
@@ -248,7 +248,7 @@ export default class VirtualRenderer {
     }
 
     //Further optimize in later revision, pretty fast for now considering this is a low frequency event
-    public handleDataSetChange(newDataProvider: BaseDataProvider, shouldOptimizeForAnimations?: boolean): void {
+    public handleDataSetChange(newDataProvider: BaseDataProvider | ListBaseDataProvider, shouldOptimizeForAnimations?: boolean): void {
         const getStableId = newDataProvider.getStableId;
         const maxIndex = newDataProvider.getSize() - 1;
         const activeStableIds: { [key: string]: number } = {};

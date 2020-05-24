@@ -21,9 +21,10 @@
 import debounce = require("lodash.debounce");
 import * as PropTypes from "prop-types";
 import * as React from "react";
+import { List } from 'immutable';
 import { ObjectUtil, Default } from "ts-object-utils";
 import ContextProvider from "./dependencies/ContextProvider";
-import { BaseDataProvider } from "./dependencies/DataProvider";
+import { BaseDataProvider, ListBaseDataProvider } from "./dependencies/DataProvider";
 import { Dimension, BaseLayoutProvider } from "./dependencies/LayoutProvider";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
@@ -78,8 +79,8 @@ export interface OnRecreateParams {
 
 export interface RecyclerListViewProps {
     layoutProvider: BaseLayoutProvider;
-    dataProvider: BaseDataProvider;
-    rowRenderer: (type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
+    dataProvider: BaseDataProvider | ListBaseDataProvider;
+    rowRenderer: (type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | List<JSX.Element> | null;
     contextProvider?: ContextProvider;
     renderAheadOffset?: number;
     isHorizontal?: boolean;
@@ -671,7 +672,7 @@ RecyclerListView.propTypes = {
     layoutProvider: PropTypes.instanceOf(BaseLayoutProvider).isRequired,
 
     //Refer the sample
-    dataProvider: PropTypes.instanceOf(BaseDataProvider).isRequired,
+    dataProvider: PropTypes.oneOf([PropTypes.instanceOf(BaseDataProvider).isRequired, PropTypes.instanceOf(ListBaseDataProvider).isRequired]),
 
     //Used to maintain scroll position in case view gets destroyed e.g, cases of back navigation
     contextProvider: PropTypes.instanceOf(ContextProvider),

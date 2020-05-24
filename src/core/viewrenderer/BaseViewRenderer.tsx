@@ -1,4 +1,5 @@
 import * as React from "react";
+import { List } from 'immutable';
 import { Dimension, BaseLayoutProvider } from "../dependencies/LayoutProvider";
 import ItemAnimator from "../ItemAnimator";
 import { LayoutManager } from "../layoutmanager/LayoutManager";
@@ -15,7 +16,7 @@ export interface ViewRendererProps<T> {
     y: number;
     height: number;
     width: number;
-    childRenderer: (type: string | number, data: T, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
+    childRenderer: (type: string | number, data: T, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | List<JSX.Element> | null;
     layoutType: string | number;
     dataHasChanged: (r1: T, r2: T) => boolean;
     onSizeChanged: (dim: Dimension, index: number) => void;
@@ -61,7 +62,7 @@ export default abstract class BaseViewRenderer<T> extends ComponentCompat<ViewRe
         this.props.itemAnimator.animateWillUnmount(this.props.x, this.props.y, this.getRef() as object, this.props.index);
     }
     protected abstract getRef(): object | null;
-    protected renderChild(): JSX.Element | JSX.Element[] | null {
+    protected renderChild(): JSX.Element | JSX.Element[] | List<JSX.Element> | null {
         return this.props.childRenderer(this.props.layoutType, this.props.data, this.props.index, this.props.extendedState);
     }
 }
