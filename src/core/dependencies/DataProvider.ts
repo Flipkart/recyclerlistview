@@ -30,7 +30,7 @@ export abstract class GenericDataProvider<T, K = keyof T> {
 
     public abstract newInstance(
         rowHasChanged: (r1: T, r2: T) => boolean,
-        getStableId?: (index: number) => string    ): GenericDataProvider<T, K>;
+        getStableId?: (index: number) => string  ): GenericDataProvider<T, K>;
     public abstract getDataForIndex(index: number): T | undefined;
     public abstract cloneWithRows(newData: K,
                                   firstModifiedIndex?: number): DataProvider | ListDataProvider;
@@ -58,13 +58,13 @@ export abstract class GenericDataProvider<T, K = keyof T> {
 
 export abstract class BaseDataProvider extends GenericDataProvider<any, any[]> {
     constructor(rowHasChanged: (r1: any, r2: any) => boolean,
-                getStableId?: (index: number)     => string) {
+                getStableId?: (index: number)     => string ) {
         super([], rowHasChanged, getStableId);
     }
 
     public abstract newInstance(
         rowHasChanged: (r1: any, r2: any) => boolean,
-        getStableId?: (index: number) => string): BaseDataProvider;
+        getStableId?: (index: number)     => string ): BaseDataProvider;
 
     public getDataForIndex(index: number): any | undefined {
         return this._data[index];
@@ -102,13 +102,13 @@ export abstract class BaseDataProvider extends GenericDataProvider<any, any[]> {
 
 export abstract class ListBaseDataProvider extends GenericDataProvider<any, List<any>> {
     constructor(rowHasChanged: (r1: any, r2: any ) => boolean,
-                getStableId?: (index: number)      => string) {
+                getStableId?: (index: number)      => string ) {
         super(List<any>([]), rowHasChanged, getStableId);
     }
 
     public abstract newInstance(
       rowHasChanged: (r1: any, r2: any)  => boolean,
-      getStableId?: (index: number)      => string): ListBaseDataProvider;
+      getStableId?: (index: number)      => string ): ListBaseDataProvider;
 
     public getDataForIndex(index: number): any | undefined {
       return this._data.get(index);
@@ -151,14 +151,14 @@ export abstract class ListBaseDataProvider extends GenericDataProvider<any, List
 
 export default class DataProvider extends BaseDataProvider {
     public newInstance(rowHasChanged: (r1: any, r2: any) => boolean,
-                       getStableId?: ((index: number)    => string) | undefined): BaseDataProvider {
+                       getStableId?: ((index: number)    => string ) | undefined): BaseDataProvider {
                            return new DataProvider(rowHasChanged, getStableId);
                        }
 }
 
 export class ListDataProvider extends ListBaseDataProvider {
     public newInstance(rowHasChanged: (r1: any, r2: any)  => boolean,
-                       getStableId?: ((index: number) => string) | undefined): ListBaseDataProvider {
+                       getStableId?: ((index: number)     => string ) | undefined): ListBaseDataProvider {
                            return new ListDataProvider(rowHasChanged, getStableId);
                        }
 }
