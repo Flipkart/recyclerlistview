@@ -1,4 +1,4 @@
-import { List } from 'immutable';
+import { List } from "immutable";
 import { ObjectUtil } from "ts-object-utils";
 
 /***
@@ -6,9 +6,9 @@ import { ObjectUtil } from "ts-object-utils";
  * Allows access to data and size. Clone with rows creates a new data provider and let listview know where to calculate row layout from.
  */
 export abstract class GenericDataProvider<T, K = keyof T> {
-    protected _data: K;                             // Require Init Data
     public rowHasChanged: (r1: T, r2: T) => boolean;
-    public getStableId: (index: number) => string;  // In JS context make sure stable id is a string
+    public getStableId: (index: number)  => string;  // In JS context make sure stable id is a string
+    protected _data: K;                              // Require Init Data
 
     protected _firstIndexToProcess: number = 0;
     protected _size: number = 0;
@@ -16,8 +16,8 @@ export abstract class GenericDataProvider<T, K = keyof T> {
     protected _requiresDataChangeHandling = false;
 
     constructor(initData: K,
-                rowHasChanged: (r1: T, r2: T  ) => boolean,
-                getStableId?:  (index: number ) => string ) {
+                rowHasChanged: (r1: T, r2: T) => boolean,
+                getStableId?: (index: number) => string ) {
         this._data         = initData;
         this.rowHasChanged = rowHasChanged;
         if (getStableId) {
@@ -56,30 +56,18 @@ export abstract class GenericDataProvider<T, K = keyof T> {
     }
 }
 
-
 export abstract class BaseDataProvider extends GenericDataProvider<any, any[]> {
-    constructor(rowHasChanged: (r1: any, r2: any ) => boolean,
-                getStableId?:  (index: number)     => string) {
+    constructor(rowHasChanged: (r1: any, r2: any) => boolean,
+                getStableId?: (index: number)     => string) {
         super([], rowHasChanged, getStableId);
     }
 
     public abstract newInstance(
-        rowHasChanged: (r1: any, r2: any ) => boolean,
-        getStableId?:  (index: number) => string ): BaseDataProvider;
+        rowHasChanged: (r1: any, r2: any) => boolean,
+        getStableId?: (index: number) => string): BaseDataProvider;
 
     public getDataForIndex(index: number): any | undefined {
         return this._data[index];
-    }
-
-    private getFirstIndexChange(newData: any[], newSize: number): number {
-        const iterCount = Math.min(this._size, newSize);
-        let i = 0;
-        for (i = 0; i < iterCount; i++) {
-            if (this.rowHasChanged(this._data[i], newData[i])) {
-                break;
-            }
-        }
-        return i;
     }
 
     //No need to override this one
@@ -99,36 +87,31 @@ export abstract class BaseDataProvider extends GenericDataProvider<any, any[]> {
         dp._size = newSize;
         return dp;
     }
+
+    private getFirstIndexChange(newData: any[], newSize: number): number {
+        const iterCount = Math.min(this._size, newSize);
+        let i = 0;
+        for (i = 0; i < iterCount; i++) {
+            if (this.rowHasChanged(this._data[i], newData[i])) {
+                break;
+            }
+        }
+        return i;
+    }
 }
 
 export abstract class ListBaseDataProvider extends GenericDataProvider<any, List<any>> {
     constructor(rowHasChanged: (r1: any, r2: any ) => boolean,
-                getStableId?:  (index: number) => string) {
+                getStableId?: (index: number)      => string) {
         super(List<any>([]), rowHasChanged, getStableId);
     }
 
     public abstract newInstance(
       rowHasChanged: (r1: any, r2: any)  => boolean,
-      getStableId?:  (index: number) => string  ): ListBaseDataProvider;
+      getStableId?: (index: number)      => string): ListBaseDataProvider;
 
     public getDataForIndex(index: number): any | undefined {
       return this._data.get(index);
-    }
-
-    private getFirstIndexChange(newData: List<any>, newSize: number): number {
-      if(this._data.equals(newData)) {
-        return this._size;
-      }
-
-      if(this._size > newSize) {
-        const sizeData = newData.setSize(this._size);
-        return (this._data as List<any>)
-          .findIndex((value, index) => this.rowHasChanged(value, sizeData.get(index)!));
-      } else {
-        const sizeData = this._data.setSize(newSize);
-        return (sizeData as List<any>)
-          .findIndex((value, index) => this.rowHasChanged(value, newData.get(index )!));
-      }
     }
 
     //No need to override this one
@@ -147,6 +130,22 @@ export abstract class ListBaseDataProvider extends GenericDataProvider<any, List
       dp._data = newData;
       dp._size = newSize;
       return dp;
+    }
+
+    private getFirstIndexChange(newData: List<any>, newSize: number): number {
+        if (this._data.equals(newData)) {
+            return this._size;
+        }
+
+        if (this._size > newSize) {
+            const sizeData = newData.setSize(this._size);
+            return (this._data as List<any>)
+                .findIndex((value, index) => this.rowHasChanged(value, sizeData.get(index)!));
+        } else {
+            const sizeData = this._data.setSize(newSize);
+            return (sizeData as List<any>)
+                .findIndex((value, index) => this.rowHasChanged(value, newData.get(index )!));
+        }
     }
   }
 

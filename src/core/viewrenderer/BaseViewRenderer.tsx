@@ -1,5 +1,5 @@
 import * as React from "react";
-import { List } from 'immutable';
+import { List } from "immutable";
 import { Dimension, BaseLayoutProvider } from "../dependencies/LayoutProvider";
 import ItemAnimator from "../ItemAnimator";
 import { LayoutManager } from "../layoutmanager/LayoutManager";
