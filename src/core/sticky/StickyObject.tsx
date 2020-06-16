@@ -102,6 +102,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         if (this._firstCompute) {
             this.initStickyParams();
             this._firstCompute = false;
+            this._offsetY = this._getAdjustedOffsetY(this._offsetY);
         }
         this._initParams();
         this._setSmallestAndLargestVisibleIndices(all);
@@ -112,9 +113,9 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     }
 
     public onScroll(offsetY: number): void {
-        offsetY += this.getWindowCorrection(this.props).windowShift;
-        this._initParams();
+        offsetY = this._getAdjustedOffsetY(offsetY);
         this._offsetY = offsetY;
+        this._initParams();
         this.boundaryProcessing(offsetY, this._windowBound);
         if (this._previousStickyIndex !== undefined) {
             if (this._previousStickyIndex * this.stickyTypeMultiplier >= this.currentStickyIndex * this.stickyTypeMultiplier) {
@@ -186,7 +187,6 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     }
 
     private _initParams(): void {
-        this.getWindowCorrection(this.props);
         const rlvDimension: Dimension | undefined = this.props.getRLVRenderedSize();
         if (rlvDimension) {
             this._scrollableHeight = rlvDimension.height;
@@ -240,5 +240,9 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         } else {
             return _rowRenderer(_stickyLayoutType, _stickyData, this.currentStickyIndex, _extendedState);
         }
+    }
+
+    private _getAdjustedOffsetY(offsetY: number): number {
+        return offsetY + this.getWindowCorrection(this.props).windowShift;
     }
 }
