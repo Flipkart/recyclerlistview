@@ -71,7 +71,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     }
 
     public componentWillReceivePropsCompat(newProps: StickyObjectProps): void {
-        this._initParams();
+        this._updateDimensionParams();
         this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
             this._offsetY, this._windowBound);
         this._computeLayouts(newProps.stickyIndices);
@@ -101,10 +101,10 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     public onVisibleIndicesChanged(all: number[]): void {
         if (this._firstCompute) {
             this.initStickyParams();
-            this._firstCompute = false;
             this._offsetY = this._getAdjustedOffsetY(this._offsetY);
+            this._firstCompute = false;
         }
-        this._initParams();
+        this._updateDimensionParams();
         this._setSmallestAndLargestVisibleIndices(all);
         this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
             this._offsetY, this._windowBound);
@@ -115,7 +115,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     public onScroll(offsetY: number): void {
         offsetY = this._getAdjustedOffsetY(offsetY);
         this._offsetY = offsetY;
-        this._initParams();
+        this._updateDimensionParams();
         this.boundaryProcessing(offsetY, this._windowBound);
         if (this._previousStickyIndex !== undefined) {
             if (this._previousStickyIndex * this.stickyTypeMultiplier >= this.currentStickyIndex * this.stickyTypeMultiplier) {
@@ -186,7 +186,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         }
     }
 
-    private _initParams(): void {
+    private _updateDimensionParams(): void {
         const rlvDimension: Dimension | undefined = this.props.getRLVRenderedSize();
         if (rlvDimension) {
             this._scrollableHeight = rlvDimension.height;
