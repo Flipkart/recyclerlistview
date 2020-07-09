@@ -3,6 +3,7 @@ import { Dimension, BaseLayoutProvider } from "../dependencies/LayoutProvider";
 import ItemAnimator from "../ItemAnimator";
 import { LayoutManager } from "../layoutmanager/LayoutManager";
 import { ComponentCompat } from "../../utils/ComponentCompat";
+import {LayoutRectangle} from "react-native";
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
@@ -28,7 +29,7 @@ export interface ViewRendererProps<T> {
     extendedState?: object;
     internalSnapshot?: object;
     layoutProvider?: BaseLayoutProvider;
-    onItemLayout?: (layout: Dimension, index: number) => void;
+    onItemLayout?: (layout: LayoutRectangle, index: number) => void;
 }
 export default abstract class BaseViewRenderer<T> extends ComponentCompat<ViewRendererProps<T>, {}> {
     protected animatorStyleOverrides: object | undefined;

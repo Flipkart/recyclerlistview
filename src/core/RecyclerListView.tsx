@@ -41,7 +41,7 @@ import { ComponentCompat } from "../utils/ComponentCompat";
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
-import { Platform } from "react-native";
+import {LayoutRectangle, Platform} from "react-native";
 const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
 
@@ -109,7 +109,7 @@ export interface RecyclerListViewProps {
     //and passed down. For better typescript support.
     scrollViewProps?: object;
     applyWindowCorrection?: (offsetX: number, offsetY: number, windowCorrection: WindowCorrection) => void;
-    onItemLayout?: (layout: Dimension, index: number) => void;
+    onItemLayout?: (layout: LayoutRectangle, index: number) => void;
 }
 
 export interface RecyclerListViewState {

@@ -2,6 +2,7 @@ import * as React from "react";
 import { CSSProperties } from "react";
 import { Dimension } from "../../../core/dependencies/LayoutProvider";
 import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
+import {LayoutRectangle} from "react-native";
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
@@ -12,6 +13,7 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _mainDiv: HTMLDivElement | null = null;
+    private layout: LayoutRectangle = {x: 0, y: 0, height: 0, width: 0};
     public componentDidMount(): void {
         if (super.componentDidMount) {
             super.componentDidMount();
@@ -60,7 +62,6 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     }
 
     private _checkSizeChange(): void {
-        this._onItemRendered();
         if (this.props.forceNonDeterministicRendering && this.props.onSizeChanged) {
             const mainDiv = this._mainDiv;
             if (mainDiv) {
@@ -71,14 +72,18 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 }
             }
         }
+        this._onItemRendered();
     }
 
     private _onItemRendered(): void {
         const mainDiv = this._mainDiv;
         if (this.props.onItemLayout && mainDiv) {
-            this._dim.width = mainDiv.clientWidth;
-            this._dim.height = mainDiv.clientHeight;
-            this.props.onItemLayout(this._dim, this.props.index);
+            const rect = mainDiv.getBoundingClientRect();
+            this.layout.x = rect.left;
+            this.layout.y = rect.top;
+            this.layout.height = rect.height;
+            this.layout.width = rect.width;
+            this.props.onItemLayout(this.layout, this.props.index);
         }
     }
 }
