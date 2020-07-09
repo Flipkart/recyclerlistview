@@ -28,6 +28,7 @@ export interface ViewRendererProps<T> {
     extendedState?: object;
     internalSnapshot?: object;
     layoutProvider?: BaseLayoutProvider;
+    onItemLayout?: (layout: Dimension, index: number) => void;
 }
 export default abstract class BaseViewRenderer<T> extends ComponentCompat<ViewRendererProps<T>, {}> {
     protected animatorStyleOverrides: object | undefined;

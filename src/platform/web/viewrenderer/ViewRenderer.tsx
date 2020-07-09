@@ -60,6 +60,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     }
 
     private _checkSizeChange(): void {
+        this._onItemRendered();
         if (this.props.forceNonDeterministicRendering && this.props.onSizeChanged) {
             const mainDiv = this._mainDiv;
             if (mainDiv) {
@@ -69,6 +70,15 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                     this.props.onSizeChanged(this._dim, this.props.index);
                 }
             }
+        }
+    }
+
+    private _onItemRendered(): void {
+        const mainDiv = this._mainDiv;
+        if (this.props.onItemLayout && mainDiv) {
+            this._dim.width = mainDiv.clientWidth;
+            this._dim.height = mainDiv.clientHeight;
+            this.props.onItemLayout(this._dim, this.props.index);
         }
     }
 }
