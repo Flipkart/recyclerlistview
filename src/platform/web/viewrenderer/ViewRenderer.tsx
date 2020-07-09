@@ -3,6 +3,7 @@ import { CSSProperties } from "react";
 import { Dimension } from "../../../core/dependencies/LayoutProvider";
 import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
 import {LayoutRectangle} from "react-native";
+import {LayoutRect} from "../../../core/layoutmanager/LayoutManager";
 
 /***
  * View renderer is responsible for creating a container of size provided by LayoutProvider and render content inside it.
@@ -13,7 +14,7 @@ import {LayoutRectangle} from "react-native";
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _mainDiv: HTMLDivElement | null = null;
-    private layout: LayoutRectangle = {x: 0, y: 0, height: 0, width: 0};
+    private layout: LayoutRect = {x: 0, y: 0, height: 0, width: 0};
     public componentDidMount(): void {
         if (super.componentDidMount) {
             super.componentDidMount();

@@ -27,7 +27,7 @@ import { BaseDataProvider } from "./dependencies/DataProvider";
 import { Dimension, BaseLayoutProvider } from "./dependencies/LayoutProvider";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
-import { Point, Layout, LayoutManager } from "./layoutmanager/LayoutManager";
+import { Point, Layout, LayoutManager, LayoutRect } from "./layoutmanager/LayoutManager";
 import { Constants } from "./constants/Constants";
 import { Messages } from "./constants/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
@@ -41,7 +41,7 @@ import { ComponentCompat } from "../utils/ComponentCompat";
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
-import {LayoutRectangle, Platform} from "react-native";
+import {Platform} from "react-native";
 const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
 
@@ -109,7 +109,7 @@ export interface RecyclerListViewProps {
     //and passed down. For better typescript support.
     scrollViewProps?: object;
     applyWindowCorrection?: (offsetX: number, offsetY: number, windowCorrection: WindowCorrection) => void;
-    onItemLayout?: (layout: LayoutRectangle, index: number) => void;
+    onItemLayout?: (layout: LayoutRect | ClientRect, index: number) => void;
 }
 
 export interface RecyclerListViewState {

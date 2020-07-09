@@ -213,3 +213,4 @@ export interface Point {
     x: number;
     y: number;
 }
+export interface LayoutRect extends Dimension, Point {}
