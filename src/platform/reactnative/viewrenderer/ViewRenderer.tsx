@@ -63,5 +63,12 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 this.props.onSizeChanged(this._dim, this.props.index);
             }
         }
+
+        if (this.props.onItemLayout) {
+            const dim: Dimension = { width: 0, height: 0 };
+            dim.height = event.nativeEvent.layout.height;
+            dim.width = event.nativeEvent.layout.width;
+            this.props.onItemLayout(dim, this.props.index);
+        }
     }
 }
