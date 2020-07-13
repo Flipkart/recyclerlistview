@@ -59,7 +59,7 @@ export default class StickyFooter<P extends StickyObjectProps> extends StickyObj
     }
 
     protected hasReachedBoundary(offsetY: number, windowBound?: number): boolean {
-        if (windowBound) {
+        if (windowBound !== undefined) {
             const endReachedMargin = Math.round(offsetY - (windowBound));
             return endReachedMargin >= 0;
         }
