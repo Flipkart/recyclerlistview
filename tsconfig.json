@@ -2,9 +2,9 @@
   "compilerOptions": {
     "lib": ["es6", "dom"], // target Node.js(v6)
     "types": ["react", "react-native"],
-    "module": "commonjs", // export compatibility
-    "target": "es5", // target Node.js(v6)
-    "moduleResolution": "node", // target Node.js(v6)
+    "module": "es6",
+    "target": "es6",
+    "moduleResolution": "node",
     "declaration": true, // generate TypeScript definitions
     "rootDir": "src",
     "strict": true,
@@ -12,6 +12,7 @@
     "removeComments": false,
     "jsx": "react",
     "sourceMap": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "esModuleInterop": true // to import a single function like lodash/debounce which is not a default export
   }
 }
