@@ -208,6 +208,7 @@ export class WrapGridLayoutManager extends LayoutManager {
 export interface Layout extends Dimension, Point {
     isOverridden?: boolean;
     type: string | number;
+    columnIdx?: number; // used by masonry layout
 }
 export interface Point {
     x: number;
