@@ -109,6 +109,7 @@ export interface RecyclerListViewProps {
     //and passed down. For better typescript support.
     scrollViewProps?: object;
     applyWindowCorrection?: (offsetX: number, offsetY: number, windowCorrection: WindowCorrection) => void;
+    onItemLayout?: (index: number) => void;
 }
 
 export interface RecyclerListViewState {
@@ -586,7 +587,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     width={itemRect.width}
                     itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
                     extendedState={this.props.extendedState}
-                    internalSnapshot={this.state.internalSnapshot} />
+                    internalSnapshot={this.state.internalSnapshot}
+                    onItemLayout={this.props.onItemLayout}/>
             );
         }
         return null;
@@ -778,4 +780,9 @@ RecyclerListView.propTypes = {
     // For e.x. toolbar within CoordinatorLayout are overlapping the recyclerlistview.
     // This method exposes the windowCorrection object of RecyclerListView, user can modify the values in realtime.
     applyWindowCorrection: PropTypes.func,
+
+    // This can be used to hook an itemLayoutListener to listen to which item at what index is layout.
+    // To get the layout params of the item, you can use the ref to call method getLayout(index), e.x. : `this._recyclerRef.getLayout(index)`
+    // but there is a catch here, since there might be a pending relayout due to which the queried layout might not be precise.
+    onItemLayout: PropTypes.func,
 };
