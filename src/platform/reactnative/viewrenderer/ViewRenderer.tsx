@@ -65,7 +65,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         }
 
         if (this.props.onItemLayout) {
-            this.props.onItemLayout(event.nativeEvent.layout, this.props.index);
+            this.props.onItemLayout(this.props.index);
         }
     }
 }
