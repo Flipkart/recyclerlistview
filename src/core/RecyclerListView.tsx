@@ -110,6 +110,7 @@ export interface RecyclerListViewProps {
     scrollViewProps?: object;
     applyWindowCorrection?: (offsetX: number, offsetY: number, windowCorrection: WindowCorrection) => void;
     onItemLayout?: (index: number) => void;
+    onSizeChange?: (rlvDimension: Dimension, contentDimension: Dimension) => void;
 }
 
 export interface RecyclerListViewState {
@@ -482,6 +483,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             } else {
                 this._refreshViewability();
             }
+        }
+
+        if (this.props.onSizeChange) {
+            this.props.onSizeChange(this.getRenderedSize(), this.getContentDimension());
         }
     }
 
