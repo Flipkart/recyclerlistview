@@ -43,6 +43,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     private _stickyHeaderRef: StickyHeader<StickyObjectProps> | null = null;
     private _stickyFooterRef: StickyFooter<StickyObjectProps> | null = null;
     private _visibleIndicesAll: number[] = [];
+    private _isScrollable: boolean = true;
     private _windowCorrection: WindowCorrection = {
         startCorrection: 0, endCorrection: 0, windowShift: 0,
     };
@@ -71,6 +72,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
             onScroll: this._onScroll,
             applyWindowCorrection: this._applyWindowCorrection,
             rowRenderer: this._rlvRowRenderer,
+            onSizeChange: this.props.alwaysStickyFooter ? this._onSizeChange : undefined,
         });
         return (
             <View style={this.props.style ? this.props.style : { flex: 1 }}>
@@ -102,7 +104,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         overrideRowRenderer={this.props.overrideRowRenderer}
                         renderContainer={this.props.renderStickyContainer}
                         getWindowCorrection={this._getCurrentWindowCorrection}
-                        alwaysStickBottom = {this.props.alwaysStickyFooter} />
+                        alwaysStickyFooter = {this.props.alwaysStickyFooter} />
                 ) : null}
             </View>
         );
@@ -110,18 +112,24 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
 
     private _rlvRowRenderer = (type: string | number, data: any, index: number, extendedState?: object): JSX.Element | JSX.Element[] | null => {
         if (this.props.alwaysStickyFooter) {
-            const rlvDimension: Dimension | undefined = this._getRLVRenderedSize();
-            const contentDimension: Dimension | undefined = this._getContentDimension();
-            let isScrollable = false;
-            if (rlvDimension && contentDimension) {
-                isScrollable = contentDimension.height > rlvDimension.height;
-            }
-            if (!isScrollable && this.props.stickyFooterIndices
-                && index === this.props.stickyFooterIndices[0]) {
+            if (!this._isScrollable && this.props.stickyFooterIndices
+                && index === this.props.stickyFooterIndices[this.props.stickyFooterIndices.length - 1]) {
                 return null;
             }
         }
         return this._rowRenderer(type, data, index, extendedState);
+    }
+
+    private _onSizeChange = (rlvDimension: Dimension, contentDimension: Dimension) => {
+        let isScrollable = this._isScrollable;
+        if (rlvDimension && contentDimension) {
+            isScrollable = contentDimension.height > rlvDimension.height;
+        }
+        // In case of scrollable state change, we have to force render to current Sticky slots rendering.
+        if (this._recyclerRef && this._isScrollable !== isScrollable) {
+            this._isScrollable = isScrollable;
+            this._recyclerRef.forceRerender();
+        }
     }
 
     private _getRecyclerRef = (recycler: any) => {
