@@ -7,7 +7,7 @@ import BinarySearch, { ValueAndIndex } from "../../utils/BinarySearch";
 import { WindowCorrection } from "../ViewabilityTracker";
 
 export interface StickyFooterProps extends StickyObjectProps {
-    alwaysStickBottom?: boolean;
+    alwaysStickyFooter?: boolean;
 }
 
 export default class StickyFooter<P extends StickyFooterProps> extends StickyObject<P> {
@@ -38,7 +38,7 @@ export default class StickyFooter<P extends StickyFooterProps> extends StickyObj
             if (largestVisibleIndex > stickyIndices[stickyIndices.length - 1] || this.bounceScrolling) {
                 this.stickyVisiblity = false;
                 //This is needed only in when the window is non-scrollable.
-                if (this.props.alwaysStickBottom && offsetY === 0) {
+                if (this.props.alwaysStickyFooter && offsetY === 0) {
                     this.stickyVisiblity = true;
                 }
             } else {

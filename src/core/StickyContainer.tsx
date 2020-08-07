@@ -27,7 +27,7 @@ export interface StickyContainerProps {
     applyWindowCorrection?: (offsetX: number, offsetY: number, winowCorrection: WindowCorrection) => void;
     renderStickyContainer?: (stickyContent: JSX.Element, index: number, extendedState?: object) => JSX.Element | null;
     style?: StyleProp<ViewStyle>;
-    alwaysStickBottom?: boolean;
+    alwaysStickyFooter?: boolean;
 }
 export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps> {
     ref: (recyclerRef: any) => {};
@@ -102,22 +102,24 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         overrideRowRenderer={this.props.overrideRowRenderer}
                         renderContainer={this.props.renderStickyContainer}
                         getWindowCorrection={this._getCurrentWindowCorrection}
-                        alwaysStickBottom = {this.props.alwaysStickBottom} />
+                        alwaysStickBottom = {this.props.alwaysStickyFooter} />
                 ) : null}
             </View>
         );
     }
 
     private _rlvRowRenderer = (type: string | number, data: any, index: number, extendedState?: object): JSX.Element | JSX.Element[] | null => {
-        const rlvDimension: Dimension | undefined = this._getRLVRenderedSize();
-        const contentDimension: Dimension | undefined = this._getContentDimension();
-        let isScrollable = false;
-        if (rlvDimension && contentDimension) {
-            isScrollable = contentDimension.height > rlvDimension.height;
-        }
-        if (this.props.alwaysStickBottom && !isScrollable && this.props.stickyFooterIndices
-            && index === this.props.stickyFooterIndices[0]) {
-            return null;
+        if (this.props.alwaysStickyFooter) {
+            const rlvDimension: Dimension | undefined = this._getRLVRenderedSize();
+            const contentDimension: Dimension | undefined = this._getContentDimension();
+            let isScrollable = false;
+            if (rlvDimension && contentDimension) {
+                isScrollable = contentDimension.height > rlvDimension.height;
+            }
+            if (!isScrollable && this.props.stickyFooterIndices
+                && index === this.props.stickyFooterIndices[0]) {
+                return null;
+            }
         }
         return this._rowRenderer(type, data, index, extendedState);
     }
