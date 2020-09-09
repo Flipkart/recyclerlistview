@@ -619,6 +619,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             }
             this._queueStateRefresh();
         }
+        if (this.props.onSizeChange) {
+            this.props.onSizeChange(this.getRenderedSize(), this.getContentDimension());
+        }
     }
 
     private _checkExpectedDimensionDiscrepancy(itemRect: Dimension, type: string | number, index: number): void {
