@@ -1,6 +1,6 @@
 node_modules/
 samples/
-scripts/
+#scripts/
 .idea/
 .babelrc
 .travis.yml
