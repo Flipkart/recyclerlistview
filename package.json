@@ -10,7 +10,7 @@
     "release": "sh scripts/publish-latest.sh",
     "release-beta": "sh scripts/publish-beta.sh",
     "release-local": "sh scripts/publish-local.sh",
-    "postinstall": "npm install && sh scripts/build.sh"
+    "prepare": "sh scripts/build.sh"
   },
   "keywords": [
     "react-native",
