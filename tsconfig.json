@@ -12,6 +12,8 @@
     "removeComments": false,
     "jsx": "react",
     "sourceMap": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false
   }
 }

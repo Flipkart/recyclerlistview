@@ -566,7 +566,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
     }
 
-    private _generateRenderStack(): T[] {
+    private _generateRenderStack(): Array<JSX.Element | null> {
         const renderedItems = [];
         for (const key in this.state.renderStack) {
             if (this.state.renderStack.hasOwnProperty(key)) {
