@@ -36,7 +36,7 @@ As seen in the example below
 
 ![Alt Text](/docs/images/getWindowCorrection_demo.gif)
 
-```
+```js
 /**
   * this method is invoked upon scrolling the recyclerlistview, and provides current X offset, Y offset and WindowCorrection object.
   * WindowCorrection has 3 params that can be used to change the perceived viewability of items present.
