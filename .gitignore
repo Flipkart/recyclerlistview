@@ -48,3 +48,4 @@ package-lock.json
 
 #npm release config
 .npmrc
+scripts/publish-local.sh

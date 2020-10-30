@@ -128,6 +128,10 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
         // In case of scrollable state change, we have to force render to current Sticky slots rendering.
         if (this._recyclerRef && this._isRlvScrollable !== isScrollable) {
             this._isRlvScrollable = isScrollable;
+            if (!isScrollable && this._stickyFooterRef)  {
+                this._stickyFooterRef.onScroll(0);
+                this.forceUpdate();
+            }
             this._recyclerRef.forceRerender();
         }
     }
