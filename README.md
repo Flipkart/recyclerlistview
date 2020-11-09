@@ -1,7 +1,7 @@
 # RecyclerListView
 
 [![npm version](https://img.shields.io/npm/v/recyclerlistview.svg)](https://www.npmjs.com/package/recyclerlistview)
-[![travis](https://travis-ci.org/Flipkart/recyclerlistview.svg?branch=master)](https://travis-ci.org/Flipkart/recyclerlistview)
+[![appveyor](https://ci.appveyor.com/api/projects/status/uwnp3r49127esj7k/branch/master?svg=true)](https://ci.appveyor.com/project/naqvitalha/recyclerlistview/branch/master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
 If this project has helped you out, please support us with a star :star2:.
