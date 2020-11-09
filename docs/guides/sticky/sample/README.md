@@ -1,6 +1,6 @@
 ```js
 import React from 'react';
-import {View} from 'react-native';
+import {View, Text} from 'react-native';
 import {RecyclerListView, DataProvider, LayoutProvider} from 'recyclerlistview';
 import StickyContainer from 'recyclerlistview/sticky';
 export default class StickySample extends React.Component {
