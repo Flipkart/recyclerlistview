@@ -10,7 +10,8 @@ export default class BinarySearch {
         let high = size - 1;
         let mid = Math.floor((low + high) / 2);
         let lastValue = 0;
-        let absoluteLastDiff = Math.abs(valueExtractor(mid) - targetValue);
+        const initialDiff = (valueExtractor(mid) - targetValue);
+        let absoluteLastDiff = initialDiff >= 0 ? initialDiff : Number.MAX_SAFE_INTEGER;
         let result = mid;
         let diff = 0;
         let absoluteDiff = 0;
