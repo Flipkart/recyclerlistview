@@ -243,7 +243,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
     }
 
-    public bringToFocus(index: number, animate?: boolean) {
+    public bringToFocus(index: number, animate?: boolean): void {
         const listSize = this.getRenderedSize();
         const itemLayout = this.getLayout(index);
         const currentScrollOffset = this.getCurrentScrollOffset();
