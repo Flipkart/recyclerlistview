@@ -110,6 +110,7 @@ export interface RecyclerListViewProps {
     scrollViewProps?: object;
     applyWindowCorrection?: (offsetX: number, offsetY: number, windowCorrection: WindowCorrection) => void;
     onItemLayout?: (index: number) => void;
+    onSizeChange?: (rlvDimension: Dimension, contentDimension: Dimension) => void;
 }
 
 export interface RecyclerListViewState {
@@ -424,6 +425,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _checkAndChangeLayouts(newProps: RecyclerListViewProps, forceFullRender?: boolean): void {
+        const { height: oldContentHeight, width: oldContentWidth } =  this.getContentDimension();
         this._params.isHorizontal = newProps.isHorizontal;
         this._params.itemCount = newProps.dataProvider.getSize();
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
@@ -465,6 +467,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 this._refreshViewability();
             }
         }
+        const {height: newContentHeight, width: newContentWidth} = this.getContentDimension();
+        if (this.props.onSizeChange && (oldContentHeight !== newContentHeight || oldContentWidth !== newContentWidth)) {
+            this.props.onSizeChange(this.getRenderedSize(), this.getContentDimension());
+        }
     }
 
     private _refreshViewability(): void {
@@ -504,6 +510,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             } else {
                 this._refreshViewability();
             }
+        }
+        if (this.props.onSizeChange) {
+            this.props.onSizeChange(this.getRenderedSize(), this.getContentDimension());
         }
     }
 
