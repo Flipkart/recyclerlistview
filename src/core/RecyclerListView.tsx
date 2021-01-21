@@ -242,6 +242,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
     }
 
+    /**
+     * This API is almost similar to scrollToIndex, but differs when the view is already in viewport. 
+     * Instead of bringing the view to the top of the viewport, it will calculate the overflow of the @param index 
+     * and scroll to just bring the entire view to viewport.
+     */
     public bringToFocus(index: number, animate?: boolean): void {
         const listSize = this.getRenderedSize();
         const itemLayout = this.getLayout(index);
