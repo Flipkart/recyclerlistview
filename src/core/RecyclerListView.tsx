@@ -400,7 +400,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 offset.x = 0;
             }
             setTimeout(() => {
-                this.scrollToOffset(offset.x, offset.y, false);
+                if (offset.x >= 0 && offset.y >= 0) {
+                    this.scrollToOffset(offset.x, offset.y, false);
+                }
             }, 0);
         }
     }
