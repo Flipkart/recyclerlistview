@@ -6,7 +6,11 @@ import StickyObject, { StickyObjectProps, StickyType } from "./StickyObject";
 import BinarySearch, { ValueAndIndex } from "../../utils/BinarySearch";
 import { WindowCorrection } from "../ViewabilityTracker";
 
-export default class StickyFooter<P extends StickyObjectProps> extends StickyObject<P> {
+export interface StickyFooterProps extends StickyObjectProps {
+    alwaysStickyFooter?: boolean;
+}
+
+export default class StickyFooter<P extends StickyFooterProps> extends StickyObject<P> {
     constructor(props: P, context?: any) {
         super(props, context);
     }
@@ -33,6 +37,10 @@ export default class StickyFooter<P extends StickyObjectProps> extends StickyObj
             this.bounceScrolling = this.hasReachedBoundary(offsetY, windowBound);
             if (largestVisibleIndex > stickyIndices[stickyIndices.length - 1] || this.bounceScrolling) {
                 this.stickyVisiblity = false;
+                //This is needed only in when the window is non-scrollable.
+                if (this.props.alwaysStickyFooter && offsetY === 0) {
+                    this.stickyVisiblity = true;
+                }
             } else {
                 this.stickyVisiblity = true;
                 const valueAndIndex: ValueAndIndex | undefined = BinarySearch.findValueLargerThanTarget(stickyIndices, largestVisibleIndex);
@@ -59,7 +67,7 @@ export default class StickyFooter<P extends StickyObjectProps> extends StickyObj
     }
 
     protected hasReachedBoundary(offsetY: number, windowBound?: number): boolean {
-        if (windowBound) {
+        if (windowBound !== undefined) {
             const endReachedMargin = Math.round(offsetY - (windowBound));
             return endReachedMargin >= 0;
         }

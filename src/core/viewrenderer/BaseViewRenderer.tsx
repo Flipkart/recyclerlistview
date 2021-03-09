@@ -1,7 +1,6 @@
 import * as React from "react";
 import { Dimension, BaseLayoutProvider } from "../dependencies/LayoutProvider";
 import ItemAnimator from "../ItemAnimator";
-import { LayoutManager } from "../layoutmanager/LayoutManager";
 import { ComponentCompat } from "../../utils/ComponentCompat";
 
 /***
@@ -28,6 +27,7 @@ export interface ViewRendererProps<T> {
     extendedState?: object;
     internalSnapshot?: object;
     layoutProvider?: BaseLayoutProvider;
+    onItemLayout?: (index: number) => void;
 }
 export default abstract class BaseViewRenderer<T> extends ComponentCompat<ViewRendererProps<T>, {}> {
     protected animatorStyleOverrides: object | undefined;

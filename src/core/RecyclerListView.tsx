@@ -109,6 +109,7 @@ export interface RecyclerListViewProps {
     //and passed down. For better typescript support.
     scrollViewProps?: object;
     applyWindowCorrection?: (offsetX: number, offsetY: number, windowCorrection: WindowCorrection) => void;
+    onItemLayout?: (index: number) => void;
 }
 
 export interface RecyclerListViewState {
@@ -185,14 +186,14 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     public componentWillReceivePropsCompat(newProps: RecyclerListViewProps): void {
         this._assertDependencyPresence(newProps);
         this._checkAndChangeLayouts(newProps);
-        if (!this.props.onVisibleIndicesChanged) {
+        if (!newProps.onVisibleIndicesChanged) {
             this._virtualRenderer.removeVisibleItemsListener();
         }
-        if (this.props.onVisibleIndexesChanged) {
+        if (newProps.onVisibleIndexesChanged) {
             throw new CustomError(RecyclerListViewExceptions.usingOldVisibleIndexesChangedParam);
         }
-        if (this.props.onVisibleIndicesChanged) {
-            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndicesChanged!);
+        if (newProps.onVisibleIndicesChanged) {
+            this._virtualRenderer.attachVisibleItemsListener(newProps.onVisibleIndicesChanged!);
         }
     }
 
@@ -238,6 +239,33 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             this.scrollToOffset(offsets.x, offsets.y, animate);
         } else {
             console.warn(Messages.WARN_SCROLL_TO_INDEX); //tslint:disable-line
+        }
+    }
+
+    /**
+     * This API is almost similar to scrollToIndex, but differs when the view is already in viewport.
+     * Instead of bringing the view to the top of the viewport, it will calculate the overflow of the @param index
+     * and scroll to just bring the entire view to viewport.
+     */
+    public bringToFocus(index: number, animate?: boolean): void {
+        const listSize = this.getRenderedSize();
+        const itemLayout = this.getLayout(index);
+        const currentScrollOffset = this.getCurrentScrollOffset();
+        const {isHorizontal} = this.props;
+        if (itemLayout) {
+            const mainAxisLayoutDimen = isHorizontal ? itemLayout.width : itemLayout.height;
+            const mainAxisLayoutPos = isHorizontal ? itemLayout.x : itemLayout.y;
+            const mainAxisListDimen = isHorizontal ? listSize.width : listSize.height;
+            const screenEndPos = mainAxisListDimen + currentScrollOffset;
+            if (mainAxisLayoutDimen > mainAxisListDimen || mainAxisLayoutPos < currentScrollOffset || mainAxisLayoutPos > screenEndPos) {
+                this.scrollToIndex(index);
+            } else {
+                const viewEndPos = mainAxisLayoutPos + mainAxisLayoutDimen;
+                if (viewEndPos > screenEndPos) {
+                    const offset = viewEndPos - screenEndPos;
+                    this.scrollToOffset(0, offset + currentScrollOffset, animate);
+                }
+            }
         }
     }
 
@@ -586,7 +614,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     width={itemRect.width}
                     itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
                     extendedState={this.props.extendedState}
-                    internalSnapshot={this.state.internalSnapshot} />
+                    internalSnapshot={this.state.internalSnapshot}
+                    onItemLayout={this.props.onItemLayout}/>
             );
         }
         return null;
@@ -778,4 +807,9 @@ RecyclerListView.propTypes = {
     // For e.x. toolbar within CoordinatorLayout are overlapping the recyclerlistview.
     // This method exposes the windowCorrection object of RecyclerListView, user can modify the values in realtime.
     applyWindowCorrection: PropTypes.func,
+
+    // This can be used to hook an itemLayoutListener to listen to which item at what index is layout.
+    // To get the layout params of the item, you can use the ref to call method getLayout(index), e.x. : `this._recyclerRef.getLayout(index)`
+    // but there is a catch here, since there might be a pending relayout due to which the queried layout might not be precise.
+    onItemLayout: PropTypes.func,
 };

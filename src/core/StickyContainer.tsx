@@ -27,6 +27,7 @@ export interface StickyContainerProps {
     applyWindowCorrection?: (offsetX: number, offsetY: number, winowCorrection: WindowCorrection) => void;
     renderStickyContainer?: (stickyContent: JSX.Element, index: number, extendedState?: object) => JSX.Element | null;
     style?: StyleProp<ViewStyle>;
+    alwaysStickyFooter?: boolean;
 }
 export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps> {
     ref: (recyclerRef: any) => {};
@@ -69,6 +70,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
             onVisibleIndicesChanged: this._onVisibleIndicesChanged,
             onScroll: this._onScroll,
             applyWindowCorrection: this._applyWindowCorrection,
+            rowRenderer: this._rlvRowRenderer,
         });
         return (
             <View style={this.props.style ? this.props.style : { flex: 1 }}>
@@ -99,10 +101,27 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
                         getRowRenderer={this._getRowRenderer}
                         overrideRowRenderer={this.props.overrideRowRenderer}
                         renderContainer={this.props.renderStickyContainer}
-                        getWindowCorrection={this._getCurrentWindowCorrection} />
+                        getWindowCorrection={this._getCurrentWindowCorrection}
+                        alwaysStickBottom = {this.props.alwaysStickyFooter} />
                 ) : null}
             </View>
         );
+    }
+
+    private _rlvRowRenderer = (type: string | number, data: any, index: number, extendedState?: object): JSX.Element | JSX.Element[] | null => {
+        if (this.props.alwaysStickyFooter) {
+            const rlvDimension: Dimension | undefined = this._getRLVRenderedSize();
+            const contentDimension: Dimension | undefined = this._getContentDimension();
+            let isScrollable = false;
+            if (rlvDimension && contentDimension) {
+                isScrollable = contentDimension.height > rlvDimension.height;
+            }
+            if (!isScrollable && this.props.stickyFooterIndices
+                && index === this.props.stickyFooterIndices[0]) {
+                return null;
+            }
+        }
+        return this._rowRenderer(type, data, index, extendedState);
     }
 
     private _getRecyclerRef = (recycler: any) => {

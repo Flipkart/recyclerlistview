@@ -70,6 +70,13 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 }
             }
         }
+        this._onItemRendered();
+    }
+
+    private _onItemRendered(): void {
+        if (this.props.onItemLayout) {
+            this.props.onItemLayout(this.props.index);
+        }
     }
 }
 

@@ -35,3 +35,41 @@ _setRef(recycler) {
 As seen in the example below
 
 ![Alt Text](/docs/images/getWindowCorrection_demo.gif)
+
+```js
+/**
+  * this method is invoked upon scrolling the recyclerlistview, and provides current X offset, Y offset and WindowCorrection object.
+  * WindowCorrection has 3 params that can be used to change the perceived viewability of items present.
+  * 
+  * The value of startCorrection and endCorrection is provided to StickyContainer upon scroll.
+  * current offset can be used to dynamically calculate the correctional offset to be provided.
+  * 
+  * @param {current X offset value} offsetX 
+  * @param {current Y offset value} offsetY 
+  * @param {*} windowCorrection 
+  */
+_applyWindowCorrection(offset, offsetY, windowCorrection) {
+    // Provide a positive value to startCorrection to shift the Top Sticky widget downwards.
+    windowCorrection.startCorrection = -20; 
+
+    // Provide a positive value to endCorrection to shift the Bottom Sticky widget upwards.
+    windowCorrection.endCorrection = 20;
+}
+
+render() {
+    return (
+        <StickyContainer stickyHeaderIndices={[3, 7, 10]}
+            stickyFooterIndices={[3, 7, 10]}
+            overrideRowRenderer={this._overrideRowRenderer}
+            applyWindowCorrection={this._applyWindowCorrection} // pass the function containing window correctional logic to StickyContainer
+        >
+            <RecyclerListView layoutProvider={this.layoutProvider}
+                ref={this._setRef}
+                dataProvider={this.dataProvider}
+                rowRenderer={this._rowRenderer}
+                showsVerticalScrollIndicator={false}
+            />
+        </StickyContainer>
+    );
+}
+```

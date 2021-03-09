@@ -1,7 +1,7 @@
 # RecyclerListView
 
 [![npm version](https://img.shields.io/npm/v/recyclerlistview.svg)](https://www.npmjs.com/package/recyclerlistview)
-[![travis](https://travis-ci.org/Flipkart/recyclerlistview.svg?branch=master)](https://travis-ci.org/Flipkart/recyclerlistview)
+[![appveyor](https://ci.appveyor.com/api/projects/status/uwnp3r49127esj7k/branch/master?svg=true)](https://ci.appveyor.com/project/naqvitalha/recyclerlistview/branch/master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](https://opensource.org/licenses/Apache-2.0)
 
 If this project has helped you out, please support us with a star :star2:.
@@ -108,6 +108,7 @@ not be as fast.
 | style | No | object | To pass down style to inner ScrollView |
 | scrollViewProps | No | object | For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread and passed down. |
 | layoutSize | No | Dimension | Will prevent the initial empty render required to compute the size of the listview and use these dimensions to render list items in the first render itself. This is useful for cases such as server side rendering. The prop canChangeSize has to be set to true if the size can be changed after rendering. Note that this is not the scroll view size and is used solely for layouting. |
+| onItemLayout | No | number | A callback function that is executed when an item of the recyclerListView (at an index) has been layout. This can also be used as a proxy to itemsRendered kind of callbacks. |
 
 For full feature set have a look at prop definitions of [RecyclerListView](https://github.com/Flipkart/recyclerlistview/blob/21049cc89ad606ec9fe8ea045dc73732ff29eac9/src/core/RecyclerListView.tsx#L540-L634)
 (bottom of the file). All `ScrollView` features like `RefreshControl` also work out of the box.
