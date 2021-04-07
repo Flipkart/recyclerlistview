@@ -393,7 +393,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _processInitialOffset(): void {
         if (this._pendingScrollToOffset) {
             const offset = this._pendingScrollToOffset;
-            this._pendingScrollToOffset = null;
             if (this.props.isHorizontal) {
                 offset.y = 0;
             } else {
@@ -401,6 +400,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             }
             setTimeout(() => {
                 this.scrollToOffset(offset.x, offset.y, false);
+                this._pendingScrollToOffset = null;
             }, 0);
         }
     }
@@ -524,7 +524,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _renderStackWhenReady = (stack: RenderStack): void => {
-        if (!this._initStateIfRequired(stack)) {
+        if (!this._initStateIfRequired(stack) && !this._pendingScrollToOffset) {
             this.setState(() => {
                 return { renderStack: stack };
             });
