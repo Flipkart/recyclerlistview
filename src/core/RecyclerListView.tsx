@@ -147,6 +147,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     };
     private _layout: Dimension = { height: 0, width: 0 };
     private _pendingScrollToOffset: Point | null = null;
+    private _pendingScrollComplete: boolean = true;
     private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
     private _cachedLayouts?: Layout[];
@@ -393,6 +394,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _processInitialOffset(): void {
         if (this._pendingScrollToOffset) {
             const offset = this._pendingScrollToOffset;
+            this._pendingScrollToOffset = null;
             if (this.props.isHorizontal) {
                 offset.y = 0;
             } else {
@@ -400,7 +402,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             }
             setTimeout(() => {
                 this.scrollToOffset(offset.x, offset.y, false);
-                this._pendingScrollToOffset = null;
+                this._pendingScrollComplete = true;
             }, 0);
         }
     }
@@ -524,7 +526,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _renderStackWhenReady = (stack: RenderStack): void => {
-        if (!this._initStateIfRequired(stack) && !this._pendingScrollToOffset) {
+        if (!this._initStateIfRequired(stack) && this._pendingScrollComplete) {
             this.setState(() => {
                 return { renderStack: stack };
             });
@@ -556,6 +558,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if ((offset.y > 0 && contentDimension.height > this._layout.height) ||
             (offset.x > 0 && contentDimension.width > this._layout.width)) {
             this._pendingScrollToOffset = offset;
+            this._pendingScrollComplete =  false;
             if (!this._initStateIfRequired()) {
                 this.setState({});
             }
