@@ -148,6 +148,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _layout: Dimension = { height: 0, width: 0 };
     private _pendingScrollToOffset: Point | null = null;
     private _pendingScrollComplete: boolean = true;
+    private _pendingRenderStack?: RenderStack;
     private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
     private _cachedLayouts?: Layout[];
@@ -403,6 +404,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             setTimeout(() => {
                 this.scrollToOffset(offset.x, offset.y, false);
                 this._pendingScrollComplete = true;
+                if (this._pendingRenderStack) {
+                    this._renderStackWhenReady(this._pendingRenderStack);
+                    this._pendingRenderStack = undefined;
+                }
             }, 0);
         }
     }
@@ -526,7 +531,12 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _renderStackWhenReady = (stack: RenderStack): void => {
-        if (!this._initStateIfRequired(stack) && this._pendingScrollComplete) {
+        if (!this._pendingScrollComplete) {
+            if (!this._pendingRenderStack) { this._pendingRenderStack = {}; }
+            Object.assign(this._pendingRenderStack, stack);
+            return;
+        }
+        if (!this._initStateIfRequired(stack)) {
             this.setState(() => {
                 return { renderStack: stack };
             });
