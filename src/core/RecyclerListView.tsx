@@ -532,6 +532,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _renderStackWhenReady = (stack: RenderStack): void => {
         if (!this._pendingScrollComplete) {
+            // TODO: Flickers can further be reduced by setting _pendingScrollComplete in constructor
+            // rather than in _onSizeChanged -> _initTrackers
             if (!this._pendingRenderStack) { this._pendingRenderStack = {}; }
             Object.assign(this._pendingRenderStack, stack);
             return;
