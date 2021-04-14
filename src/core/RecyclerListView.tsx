@@ -147,7 +147,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     };
     private _layout: Dimension = { height: 0, width: 0 };
     private _pendingScrollToOffset: Point | null = null;
-    private _pendingScrollComplete: boolean = true;
     private _pendingRenderStack?: RenderStack;
     private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
@@ -404,7 +403,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                         offset.x = 0;
                     }
                     this.scrollToOffset(offset.x, offset.y, false);
-                    this._pendingScrollComplete = true;
                     if (this._pendingRenderStack) {
                         this._renderStackWhenReady(this._pendingRenderStack);
                         this._pendingRenderStack = undefined;
@@ -533,9 +531,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _renderStackWhenReady = (stack: RenderStack): void => {
-        // TODO: Flickers can further be reduced by setting _pendingScrollComplete in constructor
+        // TODO: Flickers can further be reduced by setting _pendingScrollToOffset in constructor
         // rather than in _onSizeChanged -> _initTrackers
-        if (!this._pendingScrollComplete) {
+        if (this._pendingScrollToOffset) {
             this._pendingRenderStack = stack;
             return;
         }
@@ -571,7 +569,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if ((offset.y > 0 && contentDimension.height > this._layout.height) ||
             (offset.x > 0 && contentDimension.width > this._layout.width)) {
             this._pendingScrollToOffset = offset;
-            this._pendingScrollComplete =  false;
             if (!this._initStateIfRequired()) {
                 this.setState({});
             }
