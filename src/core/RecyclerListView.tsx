@@ -394,19 +394,21 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _processInitialOffset(): void {
         if (this._pendingScrollToOffset) {
-            const offset = this._pendingScrollToOffset;
-            this._pendingScrollToOffset = null;
-            if (this.props.isHorizontal) {
-                offset.y = 0;
-            } else {
-                offset.x = 0;
-            }
             setTimeout(() => {
-                this.scrollToOffset(offset.x, offset.y, false);
-                this._pendingScrollComplete = true;
-                if (this._pendingRenderStack) {
-                    this._renderStackWhenReady(this._pendingRenderStack);
-                    this._pendingRenderStack = undefined;
+                if (this._pendingScrollToOffset) {
+                    const offset = this._pendingScrollToOffset;
+                    this._pendingScrollToOffset = null;
+                    if (this.props.isHorizontal) {
+                        offset.y = 0;
+                    } else {
+                        offset.x = 0;
+                    }
+                    this.scrollToOffset(offset.x, offset.y, false);
+                    this._pendingScrollComplete = true;
+                    if (this._pendingRenderStack) {
+                        this._renderStackWhenReady(this._pendingRenderStack);
+                        this._pendingRenderStack = undefined;
+                    }
                 }
             }, 0);
         }
@@ -531,11 +533,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _renderStackWhenReady = (stack: RenderStack): void => {
+        // TODO: Flickers can further be reduced by setting _pendingScrollComplete in constructor
+        // rather than in _onSizeChanged -> _initTrackers
         if (!this._pendingScrollComplete) {
-            // TODO: Flickers can further be reduced by setting _pendingScrollComplete in constructor
-            // rather than in _onSizeChanged -> _initTrackers
-            if (!this._pendingRenderStack) { this._pendingRenderStack = {}; }
-            Object.assign(this._pendingRenderStack, stack);
+            this._pendingRenderStack = stack;
             return;
         }
         if (!this._initStateIfRequired(stack)) {
