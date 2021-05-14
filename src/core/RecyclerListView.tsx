@@ -147,6 +147,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     };
     private _layout: Dimension = { height: 0, width: 0 };
     private _pendingScrollToOffset: Point | null = null;
+    private _pendingRenderStack?: RenderStack;
     private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
     private _cachedLayouts?: Layout[];
@@ -392,16 +393,20 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _processInitialOffset(): void {
         if (this._pendingScrollToOffset) {
-            const offset = this._pendingScrollToOffset;
-            this._pendingScrollToOffset = null;
-            if (this.props.isHorizontal) {
-                offset.y = 0;
-            } else {
-                offset.x = 0;
-            }
             setTimeout(() => {
-                if (offset.x >= 0 && offset.y >= 0) {
+                if (this._pendingScrollToOffset) {
+                    const offset = this._pendingScrollToOffset;
+                    this._pendingScrollToOffset = null;
+                    if (this.props.isHorizontal) {
+                        offset.y = 0;
+                    } else {
+                        offset.x = 0;
+                    }
                     this.scrollToOffset(offset.x, offset.y, false);
+                    if (this._pendingRenderStack) {
+                        this._renderStackWhenReady(this._pendingRenderStack);
+                        this._pendingRenderStack = undefined;
+                    }
                 }
             }, 0);
         }
@@ -526,6 +531,12 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _renderStackWhenReady = (stack: RenderStack): void => {
+        // TODO: Flickers can further be reduced by setting _pendingScrollToOffset in constructor
+        // rather than in _onSizeChanged -> _initTrackers
+        if (this._pendingScrollToOffset) {
+            this._pendingRenderStack = stack;
+            return;
+        }
         if (!this._initStateIfRequired(stack)) {
             this.setState(() => {
                 return { renderStack: stack };
