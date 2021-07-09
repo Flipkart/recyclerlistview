@@ -45,7 +45,8 @@ export default class ScrollComponent extends BaseScrollComponent {
 
                 <div style={{
                     height: this.props.contentHeight,
-                    width: this.props.contentWidth,
+                    // width: this.props.contentWidth,
+                    width: "100%",
                 }}>
                     {this.props.children}
                 </div>

@@ -49,7 +49,8 @@ export default class ScrollComponent extends BaseScrollComponent {
         const contentContainerProps = {
             style: {
                 height: this.props.contentHeight,
-                width: this.props.contentWidth,
+                // width: this.props.contentWidth,
+                width: "100%",
             },
             horizontal : this.props.isHorizontal,
             scrollOffset : this._offset,
