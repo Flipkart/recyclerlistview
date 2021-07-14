@@ -1,3 +1,4 @@
+import { I18nManager, Platform } from "react-native";
 import RecycleItemPool from "../utils/RecycleItemPool";
 import { Dimension, BaseLayoutProvider } from "./dependencies/LayoutProvider";
 import CustomError from "./exceptions/CustomError";
@@ -97,7 +98,11 @@ export default class VirtualRenderer {
 
     public updateOffset(offsetX: number, offsetY: number, isActual: boolean, correction: WindowCorrection): void {
         if (this._viewabilityTracker) {
-            const offset = this._params && this._params.isHorizontal ? offsetX : offsetY;
+            const offset = this._params && this._params.isHorizontal ?
+                I18nManager.isRTL && Platform.OS === "android" ?
+                    this.getLayoutDimension().width - offsetX :
+                    offsetX
+                : offsetY;
             if (!this._isViewTrackerRunning) {
                 if (isActual) {
                     this._viewabilityTracker.setActualOffset(offset);
