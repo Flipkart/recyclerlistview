@@ -164,7 +164,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this._virtualRenderer = new VirtualRenderer(this._renderStackWhenReady, (offset) => {
             this._pendingScrollToOffset = offset;
         }, (index) => {
-            return this.props.dataProvider.getStableId(index);
+            return this.props.dataProvider.getStableId(index, this.props.dataProvider.getAllData());
         }, !props.disableRecycling);
 
         this._windowCorrection = {

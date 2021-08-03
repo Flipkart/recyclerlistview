@@ -8,24 +8,24 @@ export abstract class BaseDataProvider {
     public rowHasChanged: (r1: any, r2: any) => boolean;
 
     // In JS context make sure stable id is a string
-    public getStableId: (index: number) => string;
+    public getStableId: (index: number, data: any[]) => string;
     private _firstIndexToProcess: number = 0;
     private _size: number = 0;
     private _data: any[] = [];
     private _hasStableIds = false;
     private _requiresDataChangeHandling = false;
 
-    constructor(rowHasChanged: (r1: any, r2: any) => boolean, getStableId?: (index: number) => string) {
+    constructor(rowHasChanged: (r1: any, r2: any) => boolean, getStableId?: (index: number, data: any[]) => string) {
         this.rowHasChanged = rowHasChanged;
         if (getStableId) {
             this.getStableId = getStableId;
             this._hasStableIds = true;
         } else {
-            this.getStableId = (index) => index.toString();
+            this.getStableId = (index, data) => index.toString();
         }
     }
 
-    public abstract newInstance(rowHasChanged: (r1: any, r2: any) => boolean, getStableId?: (index: number) => string): BaseDataProvider;
+    public abstract newInstance(rowHasChanged: (r1: any, r2: any) => boolean, getStableId?: (index: number, data: any[]) => string): BaseDataProvider;
 
     public getDataForIndex(index: number): any {
         return this._data[index];
@@ -78,7 +78,7 @@ export abstract class BaseDataProvider {
 }
 
 export default class DataProvider extends BaseDataProvider {
-    public newInstance(rowHasChanged: (r1: any, r2: any) => boolean, getStableId?: ((index: number) => string) | undefined): BaseDataProvider {
+    public newInstance(rowHasChanged: (r1: any, r2: any) => boolean, getStableId?: ((index: number, data: any[]) => string) | undefined): BaseDataProvider {
         return new DataProvider(rowHasChanged, getStableId);
     }
 }

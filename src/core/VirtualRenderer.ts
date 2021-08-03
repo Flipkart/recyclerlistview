@@ -260,7 +260,7 @@ export default class VirtualRenderer {
                 const index = this._renderStack[key].dataIndex;
                 if (!ObjectUtil.isNullOrUndefined(index)) {
                     if (index <= maxIndex) {
-                        const stableId = getStableId(index);
+                        const stableId = getStableId(index, newDataProvider.getAllData());
                         activeStableIds[stableId] = 1;
                     }
                 }
@@ -288,14 +288,17 @@ export default class VirtualRenderer {
                 const index = this._renderStack[key].dataIndex;
                 if (!ObjectUtil.isNullOrUndefined(index)) {
                     if (index <= maxIndex) {
-                        const newKey = this.syncAndGetKey(index, getStableId, newRenderStack);
+                        const newKey = this.syncAndGetKey(
+                            index, 
+                            (i: number) => getStableId(i, newDataProvider.getAllData()),
+                            newRenderStack);
                         const newStackItem = newRenderStack[newKey];
                         if (!newStackItem) {
                             newRenderStack[newKey] = { dataIndex: index };
                         } else if (newStackItem.dataIndex !== index) {
                             const cllKey = this._getCollisionAvoidingKey();
                             newRenderStack[cllKey] = { dataIndex: index };
-                            this._stableIdToRenderKeyMap[getStableId(index)] = {
+                            this._stableIdToRenderKeyMap[getStableId(index, newDataProvider.getAllData())] = {
                                 key: cllKey, type: this._layoutProvider.getLayoutTypeForIndex(index),
                             };
                         }
