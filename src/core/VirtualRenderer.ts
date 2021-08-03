@@ -289,7 +289,7 @@ export default class VirtualRenderer {
                 if (!ObjectUtil.isNullOrUndefined(index)) {
                     if (index <= maxIndex) {
                         const newKey = this.syncAndGetKey(
-                            index, 
+                            index,
                             (i: number) => getStableId(i, newDataProvider.getAllData()),
                             newRenderStack);
                         const newStackItem = newRenderStack[newKey];
