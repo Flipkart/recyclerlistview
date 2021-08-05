@@ -35,7 +35,7 @@ that does not compromise performance or memory efficiency.
 Apart from all performance benefits RecyclerListView comes with great features out of the box:
 - Cross Platform, works on Web
 - Supports staggered grid layouts
-- Supports variable height items even if dimension cannot be predetermined (prop - `forceNonDeterministicRendering`)
+- Supports variable height items even if dimensions cannot be predetermined (prop - `forceNonDeterministicRendering`)
 - Instant layout switching like going from GridView to ListView and vice versa
 - End reach detections
 - Horizontal Mode
