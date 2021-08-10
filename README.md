@@ -35,6 +35,7 @@ that does not compromise performance or memory efficiency.
 Apart from all performance benefits RecyclerListView comes with great features out of the box:
 - Cross Platform, works on Web
 - Supports staggered grid layouts
+- Supports variable height items even if dimensions cannot be predetermined (prop - `forceNonDeterministicRendering`)
 - Instant layout switching like going from GridView to ListView and vice versa
 - End reach detections
 - Horizontal Mode
@@ -44,7 +45,6 @@ Apart from all performance benefits RecyclerListView comes with great features o
 - Reflow support on container size change with first visible item preservation
 - Scroll position preservation
 - Window scrolling support for web
-- Non deterministic rendering mode on demand (height cannot be determined before rendering)
 - (New) ItemAnimator interface added, customize to your will how RLV handles layout changes. Allows you to modify animations that move cells. You can do things like smoothly move an item to a new position when height of one of the cells has changed.
 - (New) Stable Id support, ability to associate a stable id with an item. Will enable beautiful add/remove animations and optimize re-renders when DataProvider is updated.
 - (New) Sticky recycler items that stick to either the top or bottom.
@@ -57,8 +57,7 @@ is a way to look at the data and compute height upfront so that RecyclerListView
 You can still do all sorts of GridViews and ListViews with different types of items which are all recycled in optimal ways. Type based recycling is very easy
 to do and comes out of the box.
 
-In case you really need non deterministic rendering set `forceNonDeterministicRendering` prop to true on RecyclerListView. This increases layout thrashing and thus, will
-not be as fast.
+In case you cannot determine heights of items in advance just set `forceNonDeterministicRendering` prop to true on RecyclerListView. Now, it will treat given dimensions as estimates and let items resize. Try to give good estimates to improve experience.
 
 
 ## Demo
