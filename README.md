@@ -88,8 +88,10 @@ In case you cannot determine heights of items in advance just set `forceNonDeter
 | onScroll | No | rawEvent: ScrollEvent, offsetX: number, offsetY: number) => void | On scroll callback function that executes as a user scrolls |
 | onRecreate | No | (params: OnRecreateParams) => void | callback function that gets executed when recreating the recycler view from context provider |
 | externalScrollView | No | { new (props: ScrollViewDefaultProps): BaseScrollView } | Use this to pass your on implementation of BaseScrollView |
-| onEndReached | No | () => void | Callback function executed when the end of the view is hit (minus onEndThreshold if defined) |
+| onEndReached | No | () => void | Callback function executed when the end of the view is hit (minus onEndReachedThreshold if defined) |
 | onEndReachedThreshold | No | number | Specify how many pixels in advance for the onEndReached callback |
+| onStartReached | No | () => void | Callback function executed when the start of the view is hit (plus onStartReachedThreshold if defined) |
+| onStartReachedThreshold | No | number | Specify how many pixels in advance for the onStartReached callback |
 | onVisibleIndicesChanged | No | TOnItemStatusChanged | Provides visible index; helpful in sending impression events |
 | onVisibleIndexesChanged | No | TOnItemStatusChanged | (Deprecated in 2.0 beta) Provides visible index; helpful in sending impression events |
 | renderFooter | No | () => JSX.Element \| JSX.Element[] \| null | Provide this method if you want to render a footer. Helpful in showing a loader while doing incremental loads |

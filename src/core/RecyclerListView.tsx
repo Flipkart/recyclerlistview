@@ -87,6 +87,8 @@ export interface RecyclerListViewProps {
     onRecreate?: (params: OnRecreateParams) => void;
     onEndReached?: () => void;
     onEndReachedThreshold?: number;
+    onStartReached?: () => void;
+    onStartReachedThreshold?: number;
     onVisibleIndexesChanged?: TOnItemStatusChanged;
     onVisibleIndicesChanged?: TOnItemStatusChanged;
     renderFooter?: () => JSX.Element | JSX.Element[] | null;
@@ -125,6 +127,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         initialRenderIndex: 0,
         isHorizontal: false,
         onEndReachedThreshold: 0,
+        onStartReachedThreshold: 0,
         renderAheadOffset: IS_WEB ? 1000 : 250,
     };
 
@@ -135,7 +138,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     });
 
     private _virtualRenderer: VirtualRenderer;
-    private _onEndReachedCalled = false;
+    private _onEdgeReachedCalled = false;
     private _initComplete = false;
     private _relayoutReqIndex: number = -1;
     private _params: RenderStackParams = {
@@ -200,7 +203,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     public componentDidUpdate(): void {
         this._processInitialOffset();
-        this._processOnEndReached();
+        this._processOnEdgeReached();
         this._checkAndChangeLayouts(this.props);
         if (this.props.dataProvider.getSize() === 0) {
             console.warn(Messages.WARN_NO_DATA); //tslint:disable-line
@@ -210,7 +213,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     public componentDidMount(): void {
         if (this._initComplete) {
             this._processInitialOffset();
-            this._processOnEndReached();
+            this._processOnEdgeReached();
         }
     }
 
@@ -454,7 +457,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             this._refreshViewability();
         } else if (this.props.dataProvider !== newProps.dataProvider) {
             if (newProps.dataProvider.getSize() > this.props.dataProvider.getSize()) {
-                this._onEndReachedCalled = false;
+                this._onEdgeReachedCalled = false;
             }
             const layoutManager = this._virtualRenderer.getLayoutManager();
             if (layoutManager) {
@@ -507,7 +510,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (!this._initComplete) {
             this._initComplete = true;
             this._initTrackers(this.props);
-            this._processOnEndReached();
+            this._processOnEdgeReached();
         } else {
             if ((hasHeightChanged && hasWidthChanged) ||
                 (hasHeightChanged && this.props.isHorizontal) ||
@@ -684,23 +687,24 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (this.props.onScroll) {
             this.props.onScroll(rawEvent, offsetX, offsetY);
         }
-        this._processOnEndReached();
+        this._processOnEdgeReached();
     }
 
-    private _processOnEndReached(): void {
-        if (this.props.onEndReached && this._virtualRenderer) {
+    private _processOnEdgeReached(): void {
+        if (!this._onEdgeReachedCalled && this._virtualRenderer && (this.props.onEndReached || this.props.onStartReached)) {
             const layout = this._virtualRenderer.getLayoutDimension();
             const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
             if (viewabilityTracker) {
                 const windowBound = this.props.isHorizontal ? layout.width - this._layout.width : layout.height - this._layout.height;
-                const lastOffset = viewabilityTracker ? viewabilityTracker.getLastOffset() : 0;
-                if (windowBound - lastOffset <= Default.value<number>(this.props.onEndReachedThreshold, 0)) {
-                    if (this.props.onEndReached && !this._onEndReachedCalled) {
-                        this._onEndReachedCalled = true;
-                        this.props.onEndReached();
-                    }
-                } else {
-                    this._onEndReachedCalled = false;
+                const lastOffset = viewabilityTracker.getLastOffset();
+                const isWithinEndThreshold = windowBound - lastOffset <= Default.value<number>(this.props.onEndReachedThreshold, 0);
+                const isWithinStartThreshold = lastOffset <= Default.value<number>(this.props.onStartReachedThreshold, 0);
+                if (this.props.onEndReached && isWithinEndThreshold) {
+                    this._onEdgeReachedCalled = true;
+                    this.props.onEndReached();
+                } else if (this.props.onStartReached && isWithinStartThreshold) {
+                    this._onEdgeReachedCalled = true;
+                    this.props.onStartReached();
                 }
             }
         }
@@ -748,6 +752,12 @@ RecyclerListView.propTypes = {
 
     //Specify how many pixels in advance you onEndReached callback
     onEndReachedThreshold: PropTypes.number,
+
+    //Callback given when user scrolls to the start of the list, useful in incremental loading scenarios.
+    onStartReached: PropTypes.func,
+
+    //Specify how many pixels in advance you onStartReached callback
+    onStartReachedThreshold: PropTypes.number,
 
     //Deprecated. Please use onVisibleIndicesChanged instead.
     onVisibleIndexesChanged: PropTypes.func,
