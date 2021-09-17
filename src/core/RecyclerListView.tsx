@@ -382,7 +382,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 {...this.props.scrollViewProps}
                 onScroll={this._onScroll}
                 onSizeChanged={this._onSizeChanged}
-                onWindowResize={this._onWindowResize}
+                onWindowResize={this._processOnEdgeReached}
                 contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
                 contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}
                 renderAheadOffset={this.getCurrentRenderAheadOffset()}>
@@ -521,11 +521,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 this._refreshViewability();
             }
         }
-    }
-
-    private _onWindowResize = (layout: Dimension): void => {
-        this._layout = layout;
-        this._processOnEdgeReached();
     }
 
     private _initStateIfRequired(stack?: RenderStack): boolean {
@@ -698,10 +693,10 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _processOnEdgeReached = (): void => {
         if (!this._onEdgeReachedCalled && this._virtualRenderer && (this.props.onEndReached || this.props.onStartReached)) {
-            const layout = this._virtualRenderer.getLayoutDimension();
+            const virtualLayout = this._virtualRenderer.getLayoutDimension();
             const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
             if (viewabilityTracker) {
-                const windowBound = this.props.isHorizontal ? layout.width - this._layout.width : layout.height - this._layout.height;
+                const windowBound = this.props.isHorizontal ? virtualLayout.width - this._layout.width : virtualLayout.height - this._layout.height;
                 const lastOffset = viewabilityTracker.getLastOffset();
                 const isWithinEndThreshold = windowBound - lastOffset <= Default.value<number>(this.props.onEndReachedThreshold, 0);
                 const isWithinStartThreshold = lastOffset <= Default.value<number>(this.props.onStartReachedThreshold, 0);

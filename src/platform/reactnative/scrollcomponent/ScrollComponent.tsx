@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import BaseScrollComponent, { ScrollComponentProps } from "../../../core/scrollcomponent/BaseScrollComponent";
 import TSCast from "../../../utils/TSCast";
+import debounce = require("lodash.debounce");
+
 /***
  * The responsibility of a scroll component is to report its size, scroll events and provide a way to scroll to a given offset.
  * RecyclerListView works on top of this interface and doesn't care about the implementation. To support web we only had to provide
@@ -49,12 +51,12 @@ export default class ScrollComponent extends BaseScrollComponent {
     }
 
     public componentDidMount(): void {
-        this._dimensionsChangeSubscription = Dimensions.addEventListener("change", ({window}) => {
+        this._dimensionsChangeSubscription = Dimensions.addEventListener("change", debounce(({window}) => {
             this.props.onWindowResize({
                 width: window.width,
                 height: window.height,
             });
-        });
+        }, 100));
     }
 
     public componentWillUnmount(): void {
