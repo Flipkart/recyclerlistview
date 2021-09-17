@@ -382,7 +382,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 {...this.props.scrollViewProps}
                 onScroll={this._onScroll}
                 onSizeChanged={this._onSizeChanged}
-                onWindowResize={this._processOnEdgeReached}
+                onWindowResize={this._onWindowResize}
                 contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
                 contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}
                 renderAheadOffset={this.getCurrentRenderAheadOffset()}>
@@ -521,6 +521,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 this._refreshViewability();
             }
         }
+    }
+
+    private _onWindowResize = (layout: Dimension): void => {
+        this._layout = layout;
+        this._processOnEdgeReached();
     }
 
     private _initStateIfRequired(stack?: RenderStack): boolean {

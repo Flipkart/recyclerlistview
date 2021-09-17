@@ -36,13 +36,13 @@ export default class StickyFooter<P extends StickyFooterProps> extends StickyObj
         if (stickyIndices && largestVisibleIndex) {
             this.bounceScrolling = this.hasReachedBoundary(offsetY, windowBound);
             if (largestVisibleIndex > stickyIndices[stickyIndices.length - 1] || this.bounceScrolling) {
-                this.stickyVisiblity = false;
+                this.stickyVisibility = false;
                 //This is needed only in when the window is non-scrollable.
                 if (this.props.alwaysStickyFooter && offsetY === 0) {
-                    this.stickyVisiblity = true;
+                    this.stickyVisibility = true;
                 }
             } else {
-                this.stickyVisiblity = true;
+                this.stickyVisibility = true;
                 const valueAndIndex: ValueAndIndex | undefined = BinarySearch.findValueLargerThanTarget(stickyIndices, largestVisibleIndex);
                 if (valueAndIndex) {
                     this.currentIndex = valueAndIndex.index;

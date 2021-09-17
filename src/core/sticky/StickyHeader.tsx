@@ -35,9 +35,9 @@ export default class StickyHeader<P extends StickyObjectProps> extends StickyObj
         if (stickyIndices && smallestVisibleIndex !== undefined) {
             this.bounceScrolling = this.hasReachedBoundary(offsetY, windowBound);
             if (smallestVisibleIndex < stickyIndices[0] || this.bounceScrolling) {
-                this.stickyVisiblity = false;
+                this.stickyVisibility = false;
             } else {
-                this.stickyVisiblity = true;
+                this.stickyVisibility = true;
                 const valueAndIndex: ValueAndIndex | undefined = BinarySearch.findValueSmallerThanTarget(stickyIndices, smallestVisibleIndex);
                 if (valueAndIndex) {
                     this.currentIndex = valueAndIndex.index;

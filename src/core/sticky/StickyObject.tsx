@@ -33,7 +33,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
 
     protected stickyType: StickyType = StickyType.HEADER;
     protected stickyTypeMultiplier: number = 1;
-    protected stickyVisiblity: boolean = false;
+    protected stickyVisibility: boolean = false;
     protected containerPosition: StyleProp<ViewStyle>;
     protected currentIndex: number = 0;
     protected currentStickyIndex: number = 0;
@@ -66,7 +66,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         startCorrection: 0, endCorrection: 0, windowShift: 0,
     };
 
-    constructor(props: P, context?: any) {
+    protected constructor(props: P, context?: any) {
         super(props, context);
     }
 
@@ -75,18 +75,28 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         this.calculateVisibleStickyIndex(newProps.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
             this._offsetY, this._windowBound);
         this._computeLayouts(newProps.stickyIndices);
-        this.stickyViewVisible(this.stickyVisiblity, false);
+        this.stickyViewVisible(this.stickyVisibility, false);
     }
 
     public renderCompat(): JSX.Element | null {
         // Add the container style if renderContainer is undefined
-
-        const containerStyle = [{ transform: [{ translateY: this._stickyViewOffset }] },
-            (!this.props.renderContainer && [{ position: "absolute", width: this._scrollableWidth }, this.containerPosition])];
+        let containerStyle: Animated.Animated = { transform: [{ translateY: this._stickyViewOffset }] };
+        if (!this.props.renderContainer) {
+            containerStyle = {
+                ...containerStyle,
+                ...[
+                    {
+                        position: "absolute",
+                        width: this._scrollableWidth,
+                    },
+                    this.containerPosition,
+                ],
+            };
+        }
 
         const content = (
             <Animated.View style={containerStyle}>
-                {this.stickyVisiblity ? this._renderSticky() : null}
+                {this.stickyVisibility ? this._renderSticky() : null}
             </Animated.View>
         );
 
@@ -109,7 +119,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         this.calculateVisibleStickyIndex(this.props.stickyIndices, this._smallestVisibleIndex, this._largestVisibleIndex,
             this._offsetY, this._windowBound);
         this._computeLayouts();
-        this.stickyViewVisible(this.stickyVisiblity);
+        this.stickyViewVisible(this.stickyVisibility);
     }
 
     public onScroll(offsetY: number): void {
@@ -164,7 +174,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     protected abstract getScrollY(offsetY: number, scrollableHeight?: number): number | undefined;
 
     protected stickyViewVisible(_visible: boolean, shouldTriggerRender: boolean = true): void {
-        this.stickyVisiblity = _visible;
+        this.stickyVisibility = _visible;
         if (shouldTriggerRender) {
             this.setState({});
         }
