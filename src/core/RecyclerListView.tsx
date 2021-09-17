@@ -32,7 +32,7 @@ import { Constants } from "./constants/Constants";
 import { Messages } from "./constants/Messages";
 import BaseScrollComponent from "./scrollcomponent/BaseScrollComponent";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./scrollcomponent/BaseScrollView";
-import { TOnItemStatusChanged, WindowCorrection } from "./ViewabilityTracker";
+import ViewabilityTracker, { TOnItemStatusChanged, WindowCorrection } from "./ViewabilityTracker";
 import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from "./VirtualRenderer";
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 import { DebugHandlers } from "..";
@@ -463,7 +463,29 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             }
             const layoutManager = this._virtualRenderer.getLayoutManager();
             if (layoutManager) {
+                const virtualLayoutDimensionsBeforeUpdate: Dimension = layoutManager.getContentDimension();
                 layoutManager.relayoutFromIndex(newProps.dataProvider.getFirstIndexToProcessInternal(), newProps.dataProvider.getSize());
+                const virtualLayoutDimensionsAfterUpdate: Dimension = layoutManager.getContentDimension();
+                const viewabilityTracker: ViewabilityTracker | null = this._virtualRenderer.getViewabilityTracker();
+                if (viewabilityTracker) {
+                    const previousOffset: number = viewabilityTracker.getLastOffset();
+                    const adjustedOffset: number = this.props.isHorizontal
+                        ? previousOffset + virtualLayoutDimensionsAfterUpdate.width - virtualLayoutDimensionsBeforeUpdate.width
+                        : previousOffset + virtualLayoutDimensionsAfterUpdate.height - virtualLayoutDimensionsBeforeUpdate.height;
+                    const offsetX = (this.props.isHorizontal ? adjustedOffset : undefined) as number;
+                    const offsetY = (this.props.isHorizontal ? undefined : adjustedOffset) as number;
+                    this._virtualRenderer.updateOffset(
+                        offsetX,
+                        offsetY,
+                        false,
+                        this._getWindowCorrection(offsetX, offsetY, this.props),
+                    );
+                }
+                // FIXME: maybe need to use this._virtualRenderer.forceRefreshWithOffset ?
+                // FIXME: latest change has three symptoms:
+                //   1. Causes immediate `onStartReached`
+                //   2. Causes every `onEndReached` to trigger twice
+                //   3. After `onStartReached`, the scroll jumps to the top, but doesn't reload again. Needs to not jump and have some stuff displaying off-screen
                 this._virtualRenderer.refresh();
             }
         } else if (forceFullRender) {

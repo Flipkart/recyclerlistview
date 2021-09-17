@@ -18,7 +18,7 @@ export abstract class LayoutManager {
         }
     }
 
-    //You can ovveride this incase you want to override style in some cases e.g, say you want to enfore width but not height
+    //You can override this in case you want to override style in some cases e.g, say you want to enforce width but not height
     public getStyleOverridesForIndex(index: number): object | undefined {
         return undefined;
     }
