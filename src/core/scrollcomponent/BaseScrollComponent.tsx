@@ -4,6 +4,7 @@ import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./BaseScrol
 
 export interface ScrollComponentProps {
     onSizeChanged: (dimensions: Dimension) => void;
+    onWindowResize: (dimensions: Dimension) => void;
     onScroll: (offsetX: number, offsetY: number, rawEvent: ScrollEvent) => void;
     contentHeight: number;
     contentWidth: number;

@@ -382,6 +382,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 {...this.props.scrollViewProps}
                 onScroll={this._onScroll}
                 onSizeChanged={this._onSizeChanged}
+                onWindowResize={this._processOnEdgeReached}
                 contentHeight={this._initComplete ? this._virtualRenderer.getLayoutDimension().height : 0}
                 contentWidth={this._initComplete ? this._virtualRenderer.getLayoutDimension().width : 0}
                 renderAheadOffset={this.getCurrentRenderAheadOffset()}>
@@ -690,7 +691,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this._processOnEdgeReached();
     }
 
-    private _processOnEdgeReached(): void {
+    private _processOnEdgeReached = (): void => {
         if (!this._onEdgeReachedCalled && this._virtualRenderer && (this.props.onEndReached || this.props.onStartReached)) {
             const layout = this._virtualRenderer.getLayoutDimension();
             const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();

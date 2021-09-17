@@ -1,5 +1,7 @@
 import * as React from "react";
 import {
+    Dimensions,
+    EmitterSubscription,
     LayoutChangeEvent,
     NativeScrollEvent,
     NativeSyntheticEvent,
@@ -23,11 +25,20 @@ export default class ScrollComponent extends BaseScrollComponent {
         scrollThrottle: 16,
     };
 
+    private static _defaultContainer(props: object, children: React.ReactNode): React.ReactNode | null {
+        return (
+            <View {...props}>
+                {children}
+            </View>
+        );
+    }
+
     private _height: number;
     private _width: number;
     private _offset: number;
     private _isSizeChangedCalledOnce: boolean;
     private _scrollViewRef: ScrollView | null = null;
+    private _dimensionsChangeSubscription: EmitterSubscription | null = null;
 
     constructor(args: ScrollComponentProps) {
         super(args);
@@ -35,6 +46,21 @@ export default class ScrollComponent extends BaseScrollComponent {
         this._width = 0;
         this._offset = 0;
         this._isSizeChangedCalledOnce = false;
+    }
+
+    public componentDidMount(): void {
+        this._dimensionsChangeSubscription = Dimensions.addEventListener("change", ({window}) => {
+            this.props.onWindowResize({
+                width: window.width,
+                height: window.height,
+            });
+        });
+    }
+
+    public componentWillUnmount(): void {
+        if (this._dimensionsChangeSubscription) {
+            this._dimensionsChangeSubscription.remove();
+        }
     }
 
     public scrollTo(x: number, y: number, isAnimated: boolean): void {
@@ -45,7 +71,7 @@ export default class ScrollComponent extends BaseScrollComponent {
 
     public render(): JSX.Element {
         const Scroller = TSCast.cast<ScrollView>(this.props.externalScrollView); //TSI
-        const renderContentContainer = this.props.renderContentContainer ? this.props.renderContentContainer : this._defaultContainer;
+        const renderContentContainer = this.props.renderContentContainer ? this.props.renderContentContainer : ScrollComponent._defaultContainer;
         const contentContainerProps = {
             style: {
                 height: this.props.contentHeight,
@@ -68,6 +94,7 @@ export default class ScrollComponent extends BaseScrollComponent {
         //     ...props,
         // } = this.props;
         return (
+            // @ts-ignore
             <Scroller ref={this._getScrollViewRef}
                 removeClippedSubviews={false}
                 scrollEventThrottle={this.props.scrollThrottle}
@@ -80,14 +107,6 @@ export default class ScrollComponent extends BaseScrollComponent {
                     {this.props.renderFooter ? this.props.renderFooter() : null}
                 </View>
             </Scroller>
-        );
-    }
-
-    private _defaultContainer(props: object, children: React.ReactNode): React.ReactNode | null {
-        return (
-            <View {...props}>
-                {children}
-            </View>
         );
     }
 
