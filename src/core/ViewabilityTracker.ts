@@ -307,21 +307,11 @@ export default class ViewabilityTracker {
         const startOffset = offset + startCorrection;
         const endOffset = (offset + this._windowBound) + endCorrection;
 
-        // tslint:disable-next-line:no-console
-        console.log("Engaged window before update:", this._engagedWindow);
-        // tslint:disable-next-line:no-console
-        console.log("Visible window before update:", this._visibleWindow);
-
         this._engagedWindow.start = Math.max(0, startOffset - this._renderAheadOffset);
         this._engagedWindow.end = endOffset + this._renderAheadOffset;
 
         this._visibleWindow.start = startOffset;
         this._visibleWindow.end = endOffset;
-
-        // tslint:disable-next-line:no-console
-        console.log("Engaged window after update:", this._engagedWindow);
-        // tslint:disable-next-line:no-console
-        console.log("Visible window after update:", this._visibleWindow);
     }
 
     //TODO:Talha optimize this
