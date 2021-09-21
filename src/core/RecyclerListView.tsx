@@ -526,8 +526,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
         const hasHeightChanged = this._layout.height !== layout.height;
         const hasWidthChanged = this._layout.width !== layout.width;
-        this._layout.height = layout.height;
-        this._layout.width = layout.width;
+        this._layout.height = Math.round(layout.height);
+        this._layout.width = Math.round(layout.width);
         if (layout.height === 0 || layout.width === 0) {
             throw new CustomError(RecyclerListViewExceptions.layoutException);
         }

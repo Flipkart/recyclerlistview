@@ -93,7 +93,7 @@ export default class ViewabilityTracker {
         }
 
         if (this._currentOffset !== correctedOffset) {
-            this._currentOffset = correctedOffset;
+            this._currentOffset = Math.round(correctedOffset);
             this._updateTrackingWindows(offset, windowCorrection);
             let startIndex = 0;
             if (this._visibleIndexes.length > 0) {
@@ -169,7 +169,7 @@ export default class ViewabilityTracker {
     }
 
     private _doInitialFit(offset: number, windowCorrection: WindowCorrection): void {
-        offset = Math.min(this._maxOffset, Math.max(0, offset));
+        offset = Math.round(Math.min(this._maxOffset, Math.max(0, offset)));
         this._updateTrackingWindows(offset, windowCorrection);
         const firstVisibleIndex = this._findFirstVisibleIndexOptimally();
         this._fitAndUpdate(firstVisibleIndex);
