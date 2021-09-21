@@ -469,11 +469,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 layoutManager.relayoutFromIndex(newProps.dataProvider.getFirstIndexToProcessInternal(), newProps.dataProvider.getSize());
                 const virtualLayoutDimensionsAfterUpdate: Dimension = layoutManager.getContentDimension();
                 const viewabilityTracker: ViewabilityTracker | null = this._virtualRenderer.getViewabilityTracker();
-                // TODO:
-                //    This works for us (probably most cases) but relies on an assumption that onStartReachedCalled
-                //       loaded more items and prepended them to the dataset.
-                //    Would be more robust to somehow check if new items were inserted to the layoutManager._layouts,
-                //       and adjust the offset based on where those items were inserted.
+                // NOTE: This works for most cases, but relies on an assumption that any items loaded onStartReached
+                //       were prepended prepended to the dataset (not inserted at the end or middle somewhere).
                 if (viewabilityTracker && onStartReachedCalled) {
                     // Adjust offset for prepended items
                     const previousOffset: number = viewabilityTracker.getLastOffset();
@@ -485,17 +482,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     this._virtualRenderer.updateOffset(
                         offsetX,
                         offsetY,
-                        false,
+                        true,
                         this._getWindowCorrection(offsetX, offsetY, this.props),
                     );
                 }
-                // FIXME: maybe need to use this._virtualRenderer.forceRefreshWithOffset ?
-                // FIXME: latest change has three symptoms:
-                //   1. Causes immediate `onStartReached`
-                //   2. ~~Causes every `onEndReached` to trigger twice~~ This is fixed by adjusting the offset only if onStartReachedCalled
-                //   3. After `onStartReached`, the scroll jumps to the top, but doesn't reload again.
-                //      Needs to not jump and have some stuff displaying off-screen
-                this._virtualRenderer.refresh();
+                this._virtualRenderer.refresh(onStartReachedCalled);
             }
         } else if (forceFullRender) {
             const layoutManager = this._virtualRenderer.getLayoutManager();

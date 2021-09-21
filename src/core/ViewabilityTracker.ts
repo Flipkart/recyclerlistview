@@ -74,10 +74,9 @@ export default class ViewabilityTracker {
         this._windowBound = isHorizontal ? dimension.width : dimension.height;
     }
 
-    public forceRefresh(): boolean {
-        const shouldForceScroll = this._currentOffset >= (this._maxOffset - this._windowBound);
+    public forceRefresh(shouldForceScroll: boolean = false): boolean {
         this.forceRefreshWithOffset(this._currentOffset);
-        return shouldForceScroll;
+        return shouldForceScroll || this._currentOffset >= (this._maxOffset - this._windowBound);
     }
 
     public forceRefreshWithOffset(offset: number): void {

@@ -150,10 +150,10 @@ export default class VirtualRenderer {
         }
     }
 
-    public refresh(): void {
+    public refresh(shouldForceScroll: boolean = false): void {
         if (this._viewabilityTracker) {
             this._prepareViewabilityTracker();
-            if (this._viewabilityTracker.forceRefresh()) {
+            if (this._viewabilityTracker.forceRefresh(shouldForceScroll)) {
                 if (this._params && this._params.isHorizontal) {
                     this._scrollOnNextUpdate({ x: this._viewabilityTracker.getLastActualOffset(), y: 0 });
                 } else {
