@@ -139,7 +139,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     });
 
     private _virtualRenderer: VirtualRenderer;
-    private _onEdgeReachedCalled = false;
+    private _onStartReachedCalled = false;
+    private _onEndReachedCalled = false;
     private _initComplete = false;
     private _relayoutReqIndex: number = -1;
     private _params: RenderStackParams = {
@@ -458,8 +459,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             }
             this._refreshViewability();
         } else if (this.props.dataProvider !== newProps.dataProvider) {
+            const onStartReachedCalled = this._onStartReachedCalled;
             if (newProps.dataProvider.getSize() > this.props.dataProvider.getSize()) {
-                this._onEdgeReachedCalled = false;
+                this._setOnEdgeReachedCalled(false);
             }
             const layoutManager = this._virtualRenderer.getLayoutManager();
             if (layoutManager) {
@@ -467,7 +469,13 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 layoutManager.relayoutFromIndex(newProps.dataProvider.getFirstIndexToProcessInternal(), newProps.dataProvider.getSize());
                 const virtualLayoutDimensionsAfterUpdate: Dimension = layoutManager.getContentDimension();
                 const viewabilityTracker: ViewabilityTracker | null = this._virtualRenderer.getViewabilityTracker();
-                if (viewabilityTracker) {
+                // TODO:
+                //    This works for us (probably most cases) but relies on an assumption that onStartReachedCalled
+                //       loaded more items and prepended them to the dataset.
+                //    Would be more robust to somehow check if new items were inserted to the layoutManager._layouts,
+                //       and adjust the offset based on where those items were inserted.
+                if (viewabilityTracker && onStartReachedCalled) {
+                    // Adjust offset for prepended items
                     const previousOffset: number = viewabilityTracker.getLastOffset();
                     const adjustedOffset: number = this.props.isHorizontal
                         ? previousOffset + virtualLayoutDimensionsAfterUpdate.width - virtualLayoutDimensionsBeforeUpdate.width
@@ -484,8 +492,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 // FIXME: maybe need to use this._virtualRenderer.forceRefreshWithOffset ?
                 // FIXME: latest change has three symptoms:
                 //   1. Causes immediate `onStartReached`
-                //   2. Causes every `onEndReached` to trigger twice
-                //   3. After `onStartReached`, the scroll jumps to the top, but doesn't reload again. Needs to not jump and have some stuff displaying off-screen
+                //   2. ~~Causes every `onEndReached` to trigger twice~~ This is fixed by adjusting the offset only if onStartReachedCalled
+                //   3. After `onStartReached`, the scroll jumps to the top, but doesn't reload again.
+                //      Needs to not jump and have some stuff displaying off-screen
                 this._virtualRenderer.refresh();
             }
         } else if (forceFullRender) {
@@ -715,7 +724,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _processOnEdgeReached = (): void => {
-        if (!this._onEdgeReachedCalled && this._virtualRenderer && (this.props.onEndReached || this.props.onStartReached)) {
+        if (!this._getOnEdgeReachedCalled() && this._virtualRenderer && (this.props.onEndReached || this.props.onStartReached)) {
             const virtualLayout = this._virtualRenderer.getLayoutDimension();
             const viewabilityTracker = this._virtualRenderer.getViewabilityTracker();
             if (viewabilityTracker) {
@@ -724,14 +733,23 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 const isWithinEndThreshold = windowBound - lastOffset <= Default.value<number>(this.props.onEndReachedThreshold, 0);
                 const isWithinStartThreshold = lastOffset <= Default.value<number>(this.props.onStartReachedThreshold, 0);
                 if (this.props.onEndReached && isWithinEndThreshold) {
-                    this._onEdgeReachedCalled = true;
+                    this._onEndReachedCalled = true;
                     this.props.onEndReached();
                 } else if (this.props.onStartReached && isWithinStartThreshold) {
-                    this._onEdgeReachedCalled = true;
+                    this._onStartReachedCalled = true;
                     this.props.onStartReached();
                 }
             }
         }
+    }
+
+    private _getOnEdgeReachedCalled(): boolean {
+        return this._onStartReachedCalled || this._onEndReachedCalled;
+    }
+
+    private _setOnEdgeReachedCalled(onEdgeReachedCalled: boolean): void {
+        this._onStartReachedCalled = onEdgeReachedCalled;
+        this._onEndReachedCalled = onEdgeReachedCalled;
     }
 }
 
