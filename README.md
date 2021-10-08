@@ -95,6 +95,7 @@ In case you cannot determine heights of items in advance just set `forceNonDeter
 | onVisibleIndicesChanged | No | TOnItemStatusChanged | Provides visible index; helpful in sending impression events |
 | onVisibleIndexesChanged | No | TOnItemStatusChanged | (Deprecated in 2.0 beta) Provides visible index; helpful in sending impression events |
 | renderFooter | No | () => JSX.Element \| JSX.Element[] \| null | Provide this method if you want to render a footer. Helpful in showing a loader while doing incremental loads |
+| renderHeader | No | () => JSX.Element \| JSX.Element[] \| null | Provide this method if you want to render a header. Helpful in showing a loader while doing incremental loads |
 | initialRenderIndex | No | number | Specify the initial item index you want rendering to start from. Preferred over initialOffset if both specified |
 | scrollThrottle | No | number |iOS only; Scroll throttle duration |
 | canChangeSize | No | boolean | Specify if size can change |
