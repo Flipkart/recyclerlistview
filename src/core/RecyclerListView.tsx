@@ -469,8 +469,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 layoutManager.relayoutFromIndex(newProps.dataProvider.getFirstIndexToProcessInternal(), newProps.dataProvider.getSize());
                 const virtualLayoutDimensionsAfterUpdate: Dimension = layoutManager.getContentDimension();
                 const viewabilityTracker: ViewabilityTracker | null = this._virtualRenderer.getViewabilityTracker();
-                // NOTE: This works for most cases, but relies on an assumption that any items loaded onStartReached
-                //       were prepended prepended to the dataset (not inserted at the end or middle somewhere).
+                // NOTE: This works for most cases, but relies on an assumption that any items loaded during the onStartReached callback
+                //       were prepended to the dataset (not inserted at the end or middle somewhere).
                 if (viewabilityTracker && onStartReachedCalled) {
                     // Adjust offset for prepended items
                     const previousOffset: number = viewabilityTracker.getLastOffset();

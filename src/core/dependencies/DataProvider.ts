@@ -10,6 +10,7 @@ export abstract class BaseDataProvider {
     // In JS context make sure stable id is a string
     public getStableId: (index: number) => string;
     private _firstIndexToProcess: number = 0;
+    private _lastIndexToProcess: number = 0;
     private _size: number = 0;
     private _data: any[] = [];
     private _hasStableIds = false;
@@ -51,24 +52,57 @@ export abstract class BaseDataProvider {
         return this._firstIndexToProcess;
     }
 
-    //No need to override this one
+    public getLastIndexToProcessInternal(): number {
+        return this._lastIndexToProcess;
+    }
+
+    //No need to override this one`
     //If you already know the first row where rowHasChanged will be false pass it upfront to avoid loop
-    public cloneWithRows(newData: any[], firstModifiedIndex?: number): DataProvider {
+    // TODO: Optimize this with lastModifiedIndex, _lastIndexToProcess, etc...
+    public cloneWithRows(newData: any[], firstModifiedIndex: number = 0, lastModifiedIndex?: number): DataProvider {
         const dp = this.newInstance(this.rowHasChanged, this.getStableId);
         const newSize = newData.length;
         const iterCount = Math.min(this._size, newSize);
-        if (ObjectUtil.isNullOrUndefined(firstModifiedIndex)) {
-            let i = 0;
-            for (i = 0; i < iterCount; i++) {
+        if (!ObjectUtil.isNullOrUndefined(firstModifiedIndex) && !ObjectUtil.isNullOrUndefined(lastModifiedIndex)) {
+            dp._firstIndexToProcess = Math.max(Math.min(firstModifiedIndex, this._data.length), 0);
+            dp._lastIndexToProcess = Math.min(Math.max(firstModifiedIndex, lastModifiedIndex), this._data.length);
+        } else if (ObjectUtil.isNullOrUndefined(firstModifiedIndex)) {
+            const endIndex = lastModifiedIndex || iterCount;
+            for (let i = 0; i < endIndex; i++) {
                 if (this.rowHasChanged(this._data[i], newData[i])) {
                     break;
                 }
+                dp._firstIndexToProcess = i;
             }
-            dp._firstIndexToProcess = i;
+            dp._lastIndexToProcess = endIndex;
+        } else if (ObjectUtil.isNullOrUndefined(lastModifiedIndex)) {
+            for (let i = iterCount; i > firstModifiedIndex; i--) {
+                if (this.rowHasChanged(this._data[i], newData[i])) {
+                    break;
+                }
+                dp._lastIndexToProcess = i;
+            }
+            dp._firstIndexToProcess = firstModifiedIndex;
         } else {
-            dp._firstIndexToProcess = Math.max(Math.min(firstModifiedIndex, this._data.length), 0);
+            let firstIndexToProcess = 0;
+            let isFirstIndexFound = false;
+            let lastIndexToProcess = newSize;
+            for (let i = 0; i < iterCount; i++) {
+                const rowHasChanged = this.rowHasChanged(this._data[i], newData[i]);
+                if (!isFirstIndexFound && rowHasChanged) {
+                    firstIndexToProcess = i;
+                    isFirstIndexFound = true;
+                }
+                if (isFirstIndexFound && !rowHasChanged) {
+                    lastIndexToProcess = i;
+                    break;
+                }
+            }
+            dp._firstIndexToProcess = firstIndexToProcess;
+            dp._lastIndexToProcess = lastIndexToProcess;
         }
-        if (dp._firstIndexToProcess !== this._data.length) {
+
+        if (dp._firstIndexToProcess !== this._data.length || dp._lastIndexToProcess !== 0) {
             dp._requiresDataChangeHandling = true;
         }
         dp._data = newData;
