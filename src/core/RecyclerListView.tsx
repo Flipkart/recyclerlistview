@@ -105,6 +105,7 @@ export interface RecyclerListViewProps {
     style?: object | number;
     debugHandlers?: DebugHandlers;
     renderContentContainer?: (props?: object, children?: React.ReactNode) => React.ReactNode | null;
+    renderItemContainer?: (props: object, parentProps: object, children?: React.ReactNode) => React.ReactNode;
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
@@ -628,6 +629,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
                     extendedState={this.props.extendedState}
                     internalSnapshot={this.state.internalSnapshot}
+                    renderItemContainer={this.props.renderItemContainer}
                     onItemLayout={this.props.onItemLayout}/>
             );
         }
@@ -801,6 +803,8 @@ RecyclerListView.propTypes = {
     //amount in the correct direction if the estimated sizes of the item cells are not accurate. If this props is passed, it will be used to
     //enclose the list items and otherwise a default react native View will be used for the same.
     renderContentContainer: PropTypes.func,
+
+    renderItemContainer: PropTypes.func,
 
     //Enables you to utilize layout animations better by unmounting removed items. Please note, this might increase unmounts
     //on large data changes.

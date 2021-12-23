@@ -28,6 +28,7 @@ export interface ViewRendererProps<T> {
     internalSnapshot?: object;
     layoutProvider?: BaseLayoutProvider;
     onItemLayout?: (index: number) => void;
+    renderItemContainer?: (props: object, parentProps: ViewRendererProps<T>, children?: React.ReactNode) => React.ReactNode;
 }
 export default abstract class BaseViewRenderer<T> extends ComponentCompat<ViewRendererProps<T>, {}> {
     protected animatorStyleOverrides: object | undefined;
