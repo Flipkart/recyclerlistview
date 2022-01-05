@@ -230,7 +230,7 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     }
 
     private _renderSticky(): JSX.Element | JSX.Element[] | null {
-        if(this.currentStickyIndex !== undefined) {
+        if (this.currentStickyIndex !== undefined) {
             const _stickyData: any = this.props.getDataForIndex(this.currentStickyIndex);
             const _stickyLayoutType: string | number = this.props.getLayoutTypeForIndex(this.currentStickyIndex);
             const _extendedState: object | undefined = this.props.getExtendedState();
