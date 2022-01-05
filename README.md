@@ -82,7 +82,7 @@ In case you cannot determine heights of items in advance just set `forceNonDeter
 | dataProvider | Yes | DataProvider | Constructor function the defines the data for each element |
 | contextProvider | No | ContextProvider | Used to maintain scroll position in case view gets destroyed, which often happens with back navigation |
 | rowRenderer | Yes | (type: string \| number, data: any, index: number) => JSX.Element \| JSX.Element[] \| null | Method that returns react component to be rendered. You get the type, data, index and extendedState of the view in the callback | 
-| initialOffset | No | number | Initial offset you want to start rendering from; This is very useful if you want to maintan scroll context across pages. | 
+| initialOffset | No | number | Initial offset you want to start rendering from; This is very useful if you want to maintain scroll context across pages. | 
 | renderAheadOffset | No | number | specify how many pixels in advance you want views to be rendered. Increasing this value can help reduce blanks (if any). However, keeping this as low as possible should be the intent. Higher values also increase re-render compute |
 | isHorizontal | No | boolean | If true, the list will operate horizontally rather than vertically | 
 | onScroll | No | rawEvent: ScrollEvent, offsetX: number, offsetY: number) => void | On scroll callback function that executes as a user scrolls |
