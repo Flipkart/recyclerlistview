@@ -5,6 +5,7 @@
 import * as React from "react";
 import * as PropTypes from "prop-types";
 import { StyleProp, View, ViewStyle } from "react-native";
+import { List } from "immutable";
 import RecyclerListView, { RecyclerListViewState, RecyclerListViewProps } from "./RecyclerListView";
 import { ScrollEvent } from "./scrollcomponent/BaseScrollView";
 import StickyObject, { StickyObjectProps } from "./sticky/StickyObject";
@@ -14,7 +15,7 @@ import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
 import { Layout } from "./layoutmanager/LayoutManager";
 import { BaseLayoutProvider, Dimension } from "./dependencies/LayoutProvider";
-import { BaseDataProvider } from "./dependencies/DataProvider";
+import { BaseDataProvider, ListBaseDataProvider } from "./dependencies/DataProvider";
 import { ReactElement } from "react";
 import { ComponentCompat } from "../utils/ComponentCompat";
 import { WindowCorrection } from "./ViewabilityTracker";
@@ -23,7 +24,8 @@ export interface StickyContainerProps {
     children: RecyclerChild;
     stickyHeaderIndices?: number[];
     stickyFooterIndices?: number[];
-    overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
+    overrideRowRenderer?: (type: string | number | undefined,
+                           data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | List<JSX.Element> | null;
     applyWindowCorrection?: (offsetX: number, offsetY: number, winowCorrection: WindowCorrection) => void;
     renderStickyContainer?: (stickyContent: JSX.Element, index: number, extendedState?: object) => JSX.Element | null;
     style?: StyleProp<ViewStyle>;
@@ -36,10 +38,10 @@ export interface RecyclerChild extends React.ReactElement<RecyclerListViewProps>
 export default class StickyContainer<P extends StickyContainerProps> extends ComponentCompat<P> {
     public static propTypes = {};
     private _recyclerRef: RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | undefined = undefined;
-    private _dataProvider: BaseDataProvider;
+    private _dataProvider: BaseDataProvider | ListBaseDataProvider;
     private _layoutProvider: BaseLayoutProvider;
     private _extendedState: object | undefined;
-    private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
+    private _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | List<JSX.Element> | null);
     private _stickyHeaderRef: StickyHeader<StickyObjectProps> | null = null;
     private _stickyFooterRef: StickyFooter<StickyObjectProps> | null = null;
     private _visibleIndicesAll: number[] = [];
@@ -223,7 +225,7 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
     }
 
     private _getRowRenderer = (): ((type: string | number, data: any, index: number, extendedState?: object)
-        => JSX.Element | JSX.Element[] | null) => {
+        => JSX.Element | JSX.Element[] | List<JSX.Element> | null) => {
         return this._rowRenderer;
     }
 

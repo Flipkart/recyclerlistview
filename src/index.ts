@@ -1,5 +1,5 @@
 import ContextProvider from "./core/dependencies/ContextProvider";
-import DataProvider, { BaseDataProvider } from "./core/dependencies/DataProvider";
+import DataProvider, { BaseDataProvider, ListDataProvider, ListBaseDataProvider } from "./core/dependencies/DataProvider";
 import { BaseLayoutProvider, Dimension, LayoutProvider } from "./core/dependencies/LayoutProvider";
 import { GridLayoutProvider } from "./core/dependencies/GridLayoutProvider";
 import RecyclerListView, { OnRecreateParams, RecyclerListViewProps } from "./core/RecyclerListView";
@@ -15,6 +15,7 @@ import { ComponentCompat } from "./utils/ComponentCompat";
 export {
     ContextProvider,
     DataProvider,
+    ListDataProvider,
     LayoutProvider,
     BaseLayoutProvider,
     LayoutManager,
@@ -33,5 +34,6 @@ export {
     RecyclerListViewProps,
     DebugHandlers,
     BaseDataProvider,
+    ListBaseDataProvider,
     ComponentCompat,
 };

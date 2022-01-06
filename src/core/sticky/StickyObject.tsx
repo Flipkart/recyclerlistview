@@ -4,6 +4,7 @@
 
 import * as React from "react";
 import { Animated, StyleProp, ViewStyle } from "react-native";
+import { List } from "immutable";
 import { Layout } from "../layoutmanager/LayoutManager";
 import { Dimension } from "../dependencies/LayoutProvider";
 import RecyclerListViewExceptions from "../exceptions/RecyclerListViewExceptions";
@@ -23,8 +24,9 @@ export interface StickyObjectProps {
     getExtendedState: () => object | undefined;
     getRLVRenderedSize: () => Dimension | undefined;
     getContentDimension: () => Dimension | undefined;
-    getRowRenderer: () => ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null);
-    overrideRowRenderer?: (type: string | number | undefined, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | null;
+    getRowRenderer: () => ((type: string | number, data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | List<JSX.Element> | null);
+    overrideRowRenderer?: (type: string | number | undefined,
+                           data: any, index: number, extendedState?: object) => JSX.Element | JSX.Element[] | List<JSX.Element> | null;
     renderContainer?: ((rowContent: JSX.Element, index: number, extendState?: object) => JSX.Element | null);
     getWindowCorrection?: () => WindowCorrection;
 }
@@ -229,12 +231,12 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
         this._largestVisibleIndex = indicesArray[indicesArray.length - 1];
     }
 
-    private _renderSticky(): JSX.Element | JSX.Element[] | null {
+    private _renderSticky(): JSX.Element | JSX.Element[] | List<JSX.Element> | null {
         const _stickyData: any = this.props.getDataForIndex(this.currentStickyIndex);
         const _stickyLayoutType: string | number = this.props.getLayoutTypeForIndex(this.currentStickyIndex);
         const _extendedState: object | undefined = this.props.getExtendedState();
         const _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object)
-            => JSX.Element | JSX.Element[] | null) = this.props.getRowRenderer();
+            => JSX.Element | JSX.Element[] | List<JSX.Element> | null) = this.props.getRowRenderer();
         if (this.props.overrideRowRenderer) {
             return this.props.overrideRowRenderer(_stickyLayoutType, _stickyData, this.currentStickyIndex, _extendedState);
         } else {
