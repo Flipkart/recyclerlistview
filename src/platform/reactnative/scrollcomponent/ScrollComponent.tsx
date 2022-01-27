@@ -31,8 +31,8 @@ export default class ScrollComponent extends BaseScrollComponent {
 
     constructor(args: ScrollComponentProps) {
         super(args);
-        this._height = 0;
-        this._width = 0;
+        this._height = (args.layoutSize && args.layoutSize.height) || 0;
+        this._width = (args.layoutSize && args.layoutSize.width) || 0;
         this._offset = 0;
         this._isSizeChangedCalledOnce = false;
     }
@@ -53,6 +53,7 @@ export default class ScrollComponent extends BaseScrollComponent {
             },
             horizontal : this.props.isHorizontal,
             scrollOffset : this._offset,
+            renderAheadOffset: this.props.renderAheadOffset,
             windowSize: (this.props.isHorizontal ? this._width : this._height) + this.props.renderAheadOffset,
         };
         //TODO:Talha
