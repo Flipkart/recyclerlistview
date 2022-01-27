@@ -16,6 +16,7 @@ export interface ScrollComponentProps {
     onLayout?: any;
     renderContentContainer?: (props?: object, children?: React.ReactNode) => React.ReactNode | null;
     renderAheadOffset: number;
+    layoutSize?: Dimension;
 }
 export default abstract class BaseScrollComponent extends React.Component<ScrollComponentProps, {}> {
     public abstract scrollTo(x: number, y: number, animate: boolean): void;
