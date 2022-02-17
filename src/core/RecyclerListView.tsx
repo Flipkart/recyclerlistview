@@ -353,6 +353,13 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         });
     }
 
+    public getScrollableNode(): number | null {
+        if (this._scrollComponent && this._scrollComponent.getScrollableNode) {
+          return this._scrollComponent.getScrollableNode();
+        }
+        return null;
+    }
+
     public renderCompat(): JSX.Element {
         //TODO:Talha
         // const {

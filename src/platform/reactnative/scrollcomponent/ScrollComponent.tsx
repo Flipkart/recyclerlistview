@@ -43,6 +43,13 @@ export default class ScrollComponent extends BaseScrollComponent {
         }
     }
 
+    public getScrollableNode(): number | null {
+        if (this._scrollViewRef && this._scrollViewRef.getScrollableNode) {
+          return this._scrollViewRef.getScrollableNode();
+        }
+        return null;
+    }
+
     public render(): JSX.Element {
         const Scroller = TSCast.cast<ScrollView>(this.props.externalScrollView); //TSI
         const renderContentContainer = this.props.renderContentContainer ? this.props.renderContentContainer : this._defaultContainer;
