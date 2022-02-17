@@ -13,9 +13,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _mainDiv: HTMLDivElement | null = null;
     public componentDidMount(): void {
-        if (super.componentDidMount) {
-            super.componentDidMount();
-        }
+        super.componentDidMount();
         this._checkSizeChange();
     }
 
@@ -42,19 +40,25 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 ...this.props.styleOverrides,
                 ...this.animatorStyleOverrides,
             };
-        return (
-            <div ref={this._setRef} style={style}>
-                {this.renderChild()}
-            </div>
-        );
+        const props = {
+            style,
+            ref: this._setRef,
+        };
+        return this._renderItemContainer(props, this.props, this.renderChild()) as JSX.Element;
     }
 
     protected getRef(): object | null {
         return this._mainDiv;
     }
+
+    private _renderItemContainer(props: object, parentProps: ViewRendererProps<any>, children: React.ReactNode): React.ReactNode {
+        return (this.props.renderItemContainer && this.props.renderItemContainer(props, parentProps, children)) || (<div {...props}>{children}</div>);
+    }
+
     private _setRef = (div: HTMLDivElement | null): void => {
         this._mainDiv = div;
     }
+
     private _getTransform(): string {
         return "translate(" + this.props.x + "px," + this.props.y + "px)";
     }
