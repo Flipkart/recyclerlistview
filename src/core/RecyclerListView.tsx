@@ -105,6 +105,7 @@ export interface RecyclerListViewProps {
     style?: object | number;
     debugHandlers?: DebugHandlers;
     renderContentContainer?: (props?: object, children?: React.ReactNode) => React.ReactNode | null;
+    renderItemContainer?: (props: object, parentProps: object, children?: React.ReactNode) => React.ReactNode;
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
@@ -147,6 +148,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     };
     private _layout: Dimension = { height: 0, width: 0 };
     private _pendingScrollToOffset: Point | null = null;
+    private _pendingRenderStack?: RenderStack;
     private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
     private _cachedLayouts?: Layout[];
@@ -186,14 +188,14 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     public componentWillReceivePropsCompat(newProps: RecyclerListViewProps): void {
         this._assertDependencyPresence(newProps);
         this._checkAndChangeLayouts(newProps);
-        if (!this.props.onVisibleIndicesChanged) {
+        if (!newProps.onVisibleIndicesChanged) {
             this._virtualRenderer.removeVisibleItemsListener();
         }
-        if (this.props.onVisibleIndexesChanged) {
+        if (newProps.onVisibleIndexesChanged) {
             throw new CustomError(RecyclerListViewExceptions.usingOldVisibleIndexesChangedParam);
         }
-        if (this.props.onVisibleIndicesChanged) {
-            this._virtualRenderer.attachVisibleItemsListener(this.props.onVisibleIndicesChanged!);
+        if (newProps.onVisibleIndicesChanged) {
+            this._virtualRenderer.attachVisibleItemsListener(newProps.onVisibleIndicesChanged!);
         }
     }
 
@@ -239,6 +241,33 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             this.scrollToOffset(offsets.x, offsets.y, animate);
         } else {
             console.warn(Messages.WARN_SCROLL_TO_INDEX); //tslint:disable-line
+        }
+    }
+
+    /**
+     * This API is almost similar to scrollToIndex, but differs when the view is already in viewport.
+     * Instead of bringing the view to the top of the viewport, it will calculate the overflow of the @param index
+     * and scroll to just bring the entire view to viewport.
+     */
+    public bringToFocus(index: number, animate?: boolean): void {
+        const listSize = this.getRenderedSize();
+        const itemLayout = this.getLayout(index);
+        const currentScrollOffset = this.getCurrentScrollOffset();
+        const {isHorizontal} = this.props;
+        if (itemLayout) {
+            const mainAxisLayoutDimen = isHorizontal ? itemLayout.width : itemLayout.height;
+            const mainAxisLayoutPos = isHorizontal ? itemLayout.x : itemLayout.y;
+            const mainAxisListDimen = isHorizontal ? listSize.width : listSize.height;
+            const screenEndPos = mainAxisListDimen + currentScrollOffset;
+            if (mainAxisLayoutDimen > mainAxisListDimen || mainAxisLayoutPos < currentScrollOffset || mainAxisLayoutPos > screenEndPos) {
+                this.scrollToIndex(index);
+            } else {
+                const viewEndPos = mainAxisLayoutPos + mainAxisLayoutDimen;
+                if (viewEndPos > screenEndPos) {
+                    const offset = viewEndPos - screenEndPos;
+                    this.scrollToOffset(0, offset + currentScrollOffset, animate);
+                }
+            }
         }
     }
 
@@ -365,15 +394,21 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _processInitialOffset(): void {
         if (this._pendingScrollToOffset) {
-            const offset = this._pendingScrollToOffset;
-            this._pendingScrollToOffset = null;
-            if (this.props.isHorizontal) {
-                offset.y = 0;
-            } else {
-                offset.x = 0;
-            }
             setTimeout(() => {
-                this.scrollToOffset(offset.x, offset.y, false);
+                if (this._pendingScrollToOffset) {
+                    const offset = this._pendingScrollToOffset;
+                    this._pendingScrollToOffset = null;
+                    if (this.props.isHorizontal) {
+                        offset.y = 0;
+                    } else {
+                        offset.x = 0;
+                    }
+                    this.scrollToOffset(offset.x, offset.y, false);
+                    if (this._pendingRenderStack) {
+                        this._renderStackWhenReady(this._pendingRenderStack);
+                        this._pendingRenderStack = undefined;
+                    }
+                }
             }, 0);
         }
     }
@@ -497,6 +532,12 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _renderStackWhenReady = (stack: RenderStack): void => {
+        // TODO: Flickers can further be reduced by setting _pendingScrollToOffset in constructor
+        // rather than in _onSizeChanged -> _initTrackers
+        if (this._pendingScrollToOffset) {
+            this._pendingRenderStack = stack;
+            return;
+        }
         if (!this._initStateIfRequired(stack)) {
             this.setState(() => {
                 return { renderStack: stack };
@@ -588,6 +629,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     itemAnimator={Default.value<ItemAnimator>(this.props.itemAnimator, this._defaultItemAnimator)}
                     extendedState={this.props.extendedState}
                     internalSnapshot={this.state.internalSnapshot}
+                    renderItemContainer={this.props.renderItemContainer}
                     onItemLayout={this.props.onItemLayout}/>
             );
         }
@@ -756,11 +798,14 @@ RecyclerListView.propTypes = {
     //animations are JS driven to avoid workflow interference. Also, please note LayoutAnimation is buggy on Android.
     itemAnimator: PropTypes.instanceOf(BaseItemAnimator),
 
-    //The Recyclerlistview item cells are enclosed inside this item container. The idea is pass a native UI component which implements a
+    //All of the Recyclerlistview item cells are enclosed inside this item container. The idea is pass a native UI component which implements a
     //view shifting algorithm to remove the overlaps between the neighbouring views. This is achieved by shifting them by the appropriate
     //amount in the correct direction if the estimated sizes of the item cells are not accurate. If this props is passed, it will be used to
     //enclose the list items and otherwise a default react native View will be used for the same.
     renderContentContainer: PropTypes.func,
+
+    //This container is for wrapping individual cells that are being rendered by recyclerlistview unlike contentContainer which wraps all of them.
+    renderItemContainer: PropTypes.func,
 
     //Enables you to utilize layout animations better by unmounting removed items. Please note, this might increase unmounts
     //on large data changes.

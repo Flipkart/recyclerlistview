@@ -230,16 +230,19 @@ export default abstract class StickyObject<P extends StickyObjectProps> extends 
     }
 
     private _renderSticky(): JSX.Element | JSX.Element[] | null {
-        const _stickyData: any = this.props.getDataForIndex(this.currentStickyIndex);
-        const _stickyLayoutType: string | number = this.props.getLayoutTypeForIndex(this.currentStickyIndex);
-        const _extendedState: object | undefined = this.props.getExtendedState();
-        const _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object)
-            => JSX.Element | JSX.Element[] | null) = this.props.getRowRenderer();
-        if (this.props.overrideRowRenderer) {
-            return this.props.overrideRowRenderer(_stickyLayoutType, _stickyData, this.currentStickyIndex, _extendedState);
-        } else {
-            return _rowRenderer(_stickyLayoutType, _stickyData, this.currentStickyIndex, _extendedState);
+        if (this.currentStickyIndex !== undefined) {
+            const _stickyData: any = this.props.getDataForIndex(this.currentStickyIndex);
+            const _stickyLayoutType: string | number = this.props.getLayoutTypeForIndex(this.currentStickyIndex);
+            const _extendedState: object | undefined = this.props.getExtendedState();
+            const _rowRenderer: ((type: string | number, data: any, index: number, extendedState?: object)
+                => JSX.Element | JSX.Element[] | null) = this.props.getRowRenderer();
+            if (this.props.overrideRowRenderer) {
+                return this.props.overrideRowRenderer(_stickyLayoutType, _stickyData, this.currentStickyIndex, _extendedState);
+            } else {
+                return _rowRenderer(_stickyLayoutType, _stickyData, this.currentStickyIndex, _extendedState);
+            }
         }
+        return null;
     }
 
     private _getAdjustedOffsetY(offsetY: number): number {
