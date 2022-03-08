@@ -391,6 +391,15 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     protected getVirtualRenderer(): VirtualRenderer {
         return this._virtualRenderer;
     }
+    protected onItemLayout(index: number): void {
+        if (this.props.onItemLayout) {
+            this.props.onItemLayout(index);
+        }
+    }
+
+    private _onItemLayout = (index: number) => {
+        this.onItemLayout(index);
+    }
 
     private _processInitialOffset(): void {
         if (this._pendingScrollToOffset) {
@@ -630,7 +639,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     extendedState={this.props.extendedState}
                     internalSnapshot={this.state.internalSnapshot}
                     renderItemContainer={this.props.renderItemContainer}
-                    onItemLayout={this.props.onItemLayout}/>
+                    onItemLayout={this._onItemLayout}/>
             );
         }
         return null;
@@ -829,5 +838,6 @@ RecyclerListView.propTypes = {
     // This can be used to hook an itemLayoutListener to listen to which item at what index is layout.
     // To get the layout params of the item, you can use the ref to call method getLayout(index), e.x. : `this._recyclerRef.getLayout(index)`
     // but there is a catch here, since there might be a pending relayout due to which the queried layout might not be precise.
+    // Caution: RLV only listens to layout changes if forceNonDeterministicRendering is true
     onItemLayout: PropTypes.func,
 };

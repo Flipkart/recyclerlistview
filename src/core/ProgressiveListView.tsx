@@ -24,12 +24,23 @@ export default class ProgressiveListView extends RecyclerListView<ProgressiveLis
         renderAheadOffset: 0,
     };
     private renderAheadUdpateCallbackId?: number;
+    private isFirstLayoutComplete: boolean = false;
 
     public componentDidMount(): void {
-        if (super.componentDidMount) {
-            super.componentDidMount();
+        super.componentDidMount();
+        if (!this.props.forceNonDeterministicRendering) {
+            this.updateRenderAheadProgessively(this.getCurrentRenderAheadOffset());
         }
-        this.updateRenderAheadProgessively(this.getCurrentRenderAheadOffset());
+    }
+
+    protected onItemLayout(index: number): void {
+        if (!this.isFirstLayoutComplete) {
+            this.isFirstLayoutComplete = true;
+            if (this.props.forceNonDeterministicRendering) {
+                this.updateRenderAheadProgessively(this.getCurrentRenderAheadOffset());
+            }
+        }
+        super.onItemLayout(index);
     }
 
     private updateRenderAheadProgessively(newVal: number): void {
