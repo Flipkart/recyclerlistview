@@ -716,8 +716,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 const lastOffset = viewabilityTracker ? viewabilityTracker.getLastOffset() : 0;
                 const threshold = windowBound - lastOffset
 
-                const triggerOnEndThresholdRelative = windowBound * Default.value<number>(this.props.onEndReachedThresholdRelative, 0);
-                const triggerOnEndThreshold = windowBound * Default.value<number>(this.props.onEndReachedThreshold, 0);
+                const listLength = this.props.isHorizontal ? this._layout.width : this._layout.height;
+                const triggerOnEndThresholdRelative = listLength * Default.value<number>(this.props.onEndReachedThresholdRelative, 0);
+                const triggerOnEndThreshold = Default.value<number>(this.props.onEndReachedThreshold, 0);
 
                 if (threshold <= triggerOnEndThresholdRelative || threshold <= triggerOnEndThreshold) {
                     if (this.props.onEndReached && !this._onEndReachedCalled) {
