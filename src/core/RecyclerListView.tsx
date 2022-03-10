@@ -775,7 +775,7 @@ RecyclerListView.propTypes = {
     //Specify how many pixels in advance you onEndReached callback
     onEndReachedThreshold: PropTypes.number,
 
-    //Specify how far from the end (in units of visible length of the list) 
+    //Specify how far from the end (in units of visible length of the list)
     //the bottom edge of the list must be from the end of the content to trigger the onEndReached callback
     onEndReachedThresholdRelative: PropTypes.number,
 
