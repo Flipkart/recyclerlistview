@@ -90,7 +90,7 @@ In case you cannot determine heights of items in advance just set `forceNonDeter
 | externalScrollView | No | { new (props: ScrollViewDefaultProps): BaseScrollView } | Use this to pass your on implementation of BaseScrollView |
 | onEndReached | No | () => void | Callback function executed when the end of the view is hit (minus onEndThreshold if defined) |
 | onEndReachedThreshold | No | number | Specify how many pixels in advance for the onEndReached callback |
-| onEndReachedThresholdRelative | No | number | Specify the percent of a view in advance for the onEndReached callback |
+| onEndReachedThresholdRelative | No | number | Specify how far from the end (in units of visible length of the list) the bottom edge of the list must be from the end of the content to trigger the onEndReached callback |
 | onVisibleIndicesChanged | No | TOnItemStatusChanged | Provides visible index; helpful in sending impression events |
 | onVisibleIndexesChanged | No | TOnItemStatusChanged | (Deprecated in 2.0 beta) Provides visible index; helpful in sending impression events |
 | renderFooter | No | () => JSX.Element \| JSX.Element[] \| null | Provide this method if you want to render a footer. Helpful in showing a loader while doing incremental loads |

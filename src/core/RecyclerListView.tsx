@@ -87,7 +87,7 @@ export interface RecyclerListViewProps {
     onRecreate?: (params: OnRecreateParams) => void;
     onEndReached?: () => void;
     onEndReachedThreshold?: number;
-    onEndReachedThresholdRelative?: number; 
+    onEndReachedThresholdRelative?: number;
     onVisibleIndexesChanged?: TOnItemStatusChanged;
     onVisibleIndicesChanged?: TOnItemStatusChanged;
     renderFooter?: () => JSX.Element | JSX.Element[] | null;
@@ -714,7 +714,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             if (viewabilityTracker) {
                 const windowBound = this.props.isHorizontal ? layout.width - this._layout.width : layout.height - this._layout.height;
                 const lastOffset = viewabilityTracker ? viewabilityTracker.getLastOffset() : 0;
-                const threshold = windowBound - lastOffset
+                const threshold = windowBound - lastOffset;
 
                 const listLength = this.props.isHorizontal ? this._layout.width : this._layout.height;
                 const triggerOnEndThresholdRelative = listLength * Default.value<number>(this.props.onEndReachedThresholdRelative, 0);
@@ -775,7 +775,8 @@ RecyclerListView.propTypes = {
     //Specify how many pixels in advance you onEndReached callback
     onEndReachedThreshold: PropTypes.number,
 
-    //Specify how far from the end (in units of visible length of the list) the bottom edge of the list must be from the end of the content to trigger the onEndReached callback
+    //Specify how far from the end (in units of visible length of the list) 
+    //the bottom edge of the list must be from the end of the content to trigger the onEndReached callback
     onEndReachedThresholdRelative: PropTypes.number,
 
     //Deprecated. Please use onVisibleIndicesChanged instead.
