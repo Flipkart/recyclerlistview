@@ -238,7 +238,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         const layoutManager = this._virtualRenderer.getLayoutManager();
         if (layoutManager) {
             const offsets = layoutManager.getOffsetForIndex(index);
-            this.scrollToOffset(offsets.x, offsets.y, animate);
+            this.scrollToOffsetWithCorrection(offsets.x, offsets.y, animate);
         } else {
             console.warn(Messages.WARN_SCROLL_TO_INDEX); //tslint:disable-line
         }
@@ -252,7 +252,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     public bringToFocus(index: number, animate?: boolean): void {
         const listSize = this.getRenderedSize();
         const itemLayout = this.getLayout(index);
-        const currentScrollOffset = this.getCurrentScrollOffset();
+        const currentScrollOffset = this.getCurrentScrollOffset() + this._windowCorrection.windowShift;
         const {isHorizontal} = this.props;
         if (itemLayout) {
             const mainAxisLayoutDimen = isHorizontal ? itemLayout.width : itemLayout.height;
@@ -303,6 +303,13 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 x = 0;
             }
             this._scrollComponent.scrollTo(x, y, animate);
+        }
+    }
+
+    public scrollToOffsetWithCorrection = (x: number, y: number, animate: boolean = false): void => {
+        if (this._scrollComponent) {
+            const windowShift = this._getWindowCorrection(x, y, this.props).windowShift;
+            this.scrollToOffset(x + windowShift, y + windowShift, animate);
         }
     }
 
@@ -419,7 +426,12 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     } else {
                         offset.x = 0;
                     }
-                    this.scrollToOffset(offset.x, offset.y, false);
+                    if (Default.value(this.props.initialRenderIndex, 0) >= 0) {
+                        this.scrollToOffsetWithCorrection(offset.x, offset.y, false);
+
+                    } else {
+                        this.scrollToOffset(offset.x, offset.y, false);
+                    }
                     if (this._pendingRenderStack) {
                         this._renderStackWhenReady(this._pendingRenderStack);
                         this._pendingRenderStack = undefined;
