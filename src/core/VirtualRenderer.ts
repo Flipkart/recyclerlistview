@@ -38,6 +38,7 @@ export default class VirtualRenderer {
     private _stableIdToRenderKeyMap: { [key: string]: StableIdMapItem | undefined };
     private _engagedIndexes: { [key: number]: number | undefined };
     private _renderStack: RenderStack;
+    private _cachedRenderStack: RenderStack;
     private _renderStackChanged: (renderStack: RenderStack) => void;
     private _fetchStableId: StableIdProvider;
     private _isRecyclingEnabled: boolean;
@@ -58,6 +59,7 @@ export default class VirtualRenderer {
                 isRecyclingEnabled: boolean) {
         //Keeps track of items that need to be rendered in the next render cycle
         this._renderStack = {};
+        this._cachedRenderStack = {};
 
         this._fetchStableId = fetchStableId;
 
@@ -225,6 +227,10 @@ export default class VirtualRenderer {
                 }
             } else {
                 key = getStableId(index);
+                if (this._cachedRenderStack[key]) {
+                    delete this._cachedRenderStack[key];
+                    key = this._getCollisionAvoidingKey();
+                }
                 if (renderStack[key]) {
                     //Probable collision, warn and avoid
                     //TODO: Disabled incorrectly triggering in some cases
@@ -282,7 +288,10 @@ export default class VirtualRenderer {
                 delete this._stableIdToRenderKeyMap[key];
             }
         }
-
+        if (shouldOptimizeForAnimations && this._isRecyclingEnabled && this._recyclePool) {
+            this._recyclePool.clearAll();
+        }
+        this._cachedRenderStack = Object.assign({}, this._renderStack);
         for (const key in this._renderStack) {
             if (this._renderStack.hasOwnProperty(key)) {
                 const index = this._renderStack[key].dataIndex;
@@ -304,14 +313,16 @@ export default class VirtualRenderer {
                 delete this._renderStack[key];
             }
         }
+        this._cachedRenderStack = {};
         Object.assign(this._renderStack, newRenderStack);
-
-        for (const key in this._renderStack) {
-            if (this._renderStack.hasOwnProperty(key)) {
-                const index = this._renderStack[key].dataIndex;
-                if (!ObjectUtil.isNullOrUndefined(index) && ObjectUtil.isNullOrUndefined(this._engagedIndexes[index])) {
-                    const type = this._layoutProvider.getLayoutTypeForIndex(index);
-                    this._recyclePool.putRecycledObject(type, key);
+        if (!shouldOptimizeForAnimations && this._isRecyclingEnabled) {
+            for (const key in this._renderStack) {
+                if (this._renderStack.hasOwnProperty(key)) {
+                    const index = this._renderStack[key].dataIndex;
+                    if (!ObjectUtil.isNullOrUndefined(index) && ObjectUtil.isNullOrUndefined(this._engagedIndexes[index])) {
+                        const type = this._layoutProvider.getLayoutTypeForIndex(index);
+                        this._recyclePool.putRecycledObject(type, key);
+                    }
                 }
             }
         }
