@@ -87,6 +87,7 @@ export interface RecyclerListViewProps {
     onRecreate?: (params: OnRecreateParams) => void;
     onEndReached?: () => void;
     onEndReachedThreshold?: number;
+    onEndReachedThresholdRelative?: number;
     onVisibleIndexesChanged?: TOnItemStatusChanged;
     onVisibleIndicesChanged?: TOnItemStatusChanged;
     renderFooter?: () => JSX.Element | JSX.Element[] | null;
@@ -126,6 +127,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         initialRenderIndex: 0,
         isHorizontal: false,
         onEndReachedThreshold: 0,
+        onEndReachedThresholdRelative: 0,
         renderAheadOffset: IS_WEB ? 1000 : 250,
     };
 
@@ -712,7 +714,13 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             if (viewabilityTracker) {
                 const windowBound = this.props.isHorizontal ? layout.width - this._layout.width : layout.height - this._layout.height;
                 const lastOffset = viewabilityTracker ? viewabilityTracker.getLastOffset() : 0;
-                if (windowBound - lastOffset <= Default.value<number>(this.props.onEndReachedThreshold, 0)) {
+                const threshold = windowBound - lastOffset;
+
+                const listLength = this.props.isHorizontal ? this._layout.width : this._layout.height;
+                const triggerOnEndThresholdRelative = listLength * Default.value<number>(this.props.onEndReachedThresholdRelative, 0);
+                const triggerOnEndThreshold = Default.value<number>(this.props.onEndReachedThreshold, 0);
+
+                if (threshold <= triggerOnEndThresholdRelative || threshold <= triggerOnEndThreshold) {
                     if (this.props.onEndReached && !this._onEndReachedCalled) {
                         this._onEndReachedCalled = true;
                         this.props.onEndReached();
@@ -766,6 +774,10 @@ RecyclerListView.propTypes = {
 
     //Specify how many pixels in advance you onEndReached callback
     onEndReachedThreshold: PropTypes.number,
+
+    //Specify how far from the end (in units of visible length of the list)
+    //the bottom edge of the list must be from the end of the content to trigger the onEndReached callback
+    onEndReachedThresholdRelative: PropTypes.number,
 
     //Deprecated. Please use onVisibleIndicesChanged instead.
     onVisibleIndexesChanged: PropTypes.func,
