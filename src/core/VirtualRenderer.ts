@@ -203,7 +203,9 @@ export default class VirtualRenderer {
         }
     }
 
-    public syncAndGetKey(index: number, overrideStableIdProvider?: StableIdProvider, newRenderStack?: RenderStack): string {
+    public syncAndGetKey(index: number, overrideStableIdProvider?: StableIdProvider,
+                         newRenderStack?: RenderStack,
+                         keyToStableIdMap?: { [key: string]: string } ): string {
         const getStableId = overrideStableIdProvider ? overrideStableIdProvider : this._fetchStableId;
         const renderStack = newRenderStack ? newRenderStack : this._renderStack;
         const stableIdItem = this._stableIdToRenderKeyMap[getStableId(index)];
@@ -222,6 +224,9 @@ export default class VirtualRenderer {
                     }
                 } else {
                     renderStack[key] = { dataIndex: index };
+                    if (keyToStableIdMap && keyToStableIdMap[key]) {
+                        delete this._stableIdToRenderKeyMap[keyToStableIdMap[key]];
+                    }
                 }
             } else {
                 key = getStableId(index);
@@ -253,6 +258,7 @@ export default class VirtualRenderer {
         const maxIndex = newDataProvider.getSize() - 1;
         const activeStableIds: { [key: string]: number } = {};
         const newRenderStack: RenderStack = {};
+        const keyToStableIdMap: { [key: string]: string } = {};
 
         //Compute active stable ids and stale active keys and resync render stack
         for (const key in this._renderStack) {
@@ -272,38 +278,56 @@ export default class VirtualRenderer {
         const oldActiveStableIdsCount = oldActiveStableIds.length;
         for (let i = 0; i < oldActiveStableIdsCount; i++) {
             const key = oldActiveStableIds[i];
-            if (!activeStableIds[key]) {
-                if (!shouldOptimizeForAnimations && this._isRecyclingEnabled) {
-                    const stableIdItem = this._stableIdToRenderKeyMap[key];
-                    if (stableIdItem) {
+            const stableIdItem = this._stableIdToRenderKeyMap[key];
+            if (stableIdItem) {
+                if (!activeStableIds[key]) {
+                    if (!shouldOptimizeForAnimations && this._isRecyclingEnabled) {
                         this._recyclePool.putRecycledObject(stableIdItem.type, stableIdItem.key);
                     }
+                    delete this._stableIdToRenderKeyMap[key];
+
+                    const stackItem = this._renderStack[stableIdItem.key];
+                    const dataIndex = stackItem ? stackItem.dataIndex : undefined;
+                    if (!ObjectUtil.isNullOrUndefined(dataIndex) && dataIndex <= maxIndex && this._layoutManager) {
+                        //TODO: Introduce a better API in layout manager to delete layouts
+                        this._layoutManager.getLayouts().splice(dataIndex, 1);
+                    }
+                } else {
+                    keyToStableIdMap[stableIdItem.key] = key;
                 }
-                delete this._stableIdToRenderKeyMap[key];
             }
         }
-
-        for (const key in this._renderStack) {
-            if (this._renderStack.hasOwnProperty(key)) {
-                const index = this._renderStack[key].dataIndex;
-                if (!ObjectUtil.isNullOrUndefined(index)) {
-                    if (index <= maxIndex) {
-                        const newKey = this.syncAndGetKey(index, getStableId, newRenderStack);
-                        const newStackItem = newRenderStack[newKey];
-                        if (!newStackItem) {
-                            newRenderStack[newKey] = { dataIndex: index };
-                        } else if (newStackItem.dataIndex !== index) {
-                            const cllKey = this._getCollisionAvoidingKey();
-                            newRenderStack[cllKey] = { dataIndex: index };
-                            this._stableIdToRenderKeyMap[getStableId(index)] = {
-                                key: cllKey, type: this._layoutProvider.getLayoutTypeForIndex(index),
-                            };
-                        }
+        const renderStackKeys = Object.keys(this._renderStack);
+        // .sort((a, b) => {
+        //     const firstItem = this._renderStack[a];
+        //     const secondItem = this._renderStack[b];
+        //     if (firstItem && firstItem.dataIndex && secondItem && secondItem.dataIndex) {
+        //         return firstItem.dataIndex - secondItem.dataIndex;
+        //     }
+        //     return 1;
+        // });
+        const renderStackLength = renderStackKeys.length;
+        for (let i = 0; i < renderStackLength; i++) {
+            const key = renderStackKeys[i];
+            const index = this._renderStack[key].dataIndex;
+            if (!ObjectUtil.isNullOrUndefined(index)) {
+                if (index <= maxIndex) {
+                    const newKey = this.syncAndGetKey(index, getStableId, newRenderStack, keyToStableIdMap);
+                    const newStackItem = newRenderStack[newKey];
+                    if (!newStackItem) {
+                        newRenderStack[newKey] = { dataIndex: index };
+                    } else if (newStackItem.dataIndex !== index) {
+                        const cllKey = this._getCollisionAvoidingKey();
+                        newRenderStack[cllKey] = { dataIndex: index };
+                        this._stableIdToRenderKeyMap[getStableId(index)] = {
+                            key: cllKey, type: this._layoutProvider.getLayoutTypeForIndex(index),
+                        };
                     }
                 }
-                delete this._renderStack[key];
             }
+            delete this._renderStack[key];
         }
+
         Object.assign(this._renderStack, newRenderStack);
 
         for (const key in this._renderStack) {
