@@ -208,6 +208,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (this.props.dataProvider.getSize() === 0) {
             console.warn(Messages.WARN_NO_DATA); //tslint:disable-line
         }
+        this._virtualRenderer.setOptimizeForAnimations(false);
     }
 
     public componentDidMount(): void {
@@ -397,6 +398,14 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         );
     }
 
+    // Disables recycling for the next frame so that layout animations run well.
+    // WARNING: Avoid this when making large changes to the data as the list might draw too much to run animations. Single item insertions/deletions
+    // should be good. With recycling paused the list cannot do much optimization.
+    // The next render will run as normal and reuse items.
+    public prepareForLayoutAnimationRender(): void {
+        this._virtualRenderer.setOptimizeForAnimations(true);
+    }
+
     protected getVirtualRenderer(): VirtualRenderer {
         return this._virtualRenderer;
     }
@@ -460,7 +469,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
         this._virtualRenderer.setLayoutProvider(newProps.layoutProvider);
         if (newProps.dataProvider.hasStableIds() && this.props.dataProvider !== newProps.dataProvider && newProps.dataProvider.requiresDataChangeHandling()) {
-            this._virtualRenderer.handleDataSetChange(newProps.dataProvider, this.props.optimizeForInsertDeleteAnimations);
+            this._virtualRenderer.handleDataSetChange(newProps.dataProvider);
         }
         if (this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
