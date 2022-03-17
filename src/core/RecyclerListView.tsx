@@ -848,8 +848,7 @@ RecyclerListView.propTypes = {
     //This container is for wrapping individual cells that are being rendered by recyclerlistview unlike contentContainer which wraps all of them.
     renderItemContainer: PropTypes.func,
 
-    //Enables you to utilize layout animations better by unmounting removed items. Please note, this might increase unmounts
-    //on large data changes.
+    //Deprecated in favour of `prepareForLayoutAnimationRender` method
     optimizeForInsertDeleteAnimations: PropTypes.bool,
 
     //To pass down style to inner ScrollView
