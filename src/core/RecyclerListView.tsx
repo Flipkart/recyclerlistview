@@ -111,11 +111,19 @@ export interface RecyclerListViewProps {
     scrollViewProps?: object;
     applyWindowCorrection?: (offsetX: number, offsetY: number, windowCorrection: WindowCorrection) => void;
     onItemLayout?: (index: number) => void;
+    windowCorrectionConfig?: { value?: WindowCorrection, applyToInitialOffset?: boolean, applyToOffsetScroll?: boolean, applyToItemScroll?: boolean };
 }
 
 export interface RecyclerListViewState {
     renderStack: RenderStack;
     internalSnapshot: Record<string, object>;
+}
+
+export interface WindowCorrectionConfig {
+    value: WindowCorrection;
+    applyToInitialOffset: boolean;
+    applyToOffsetScroll: boolean;
+    applyToItemScroll: boolean;
 }
 
 export default class RecyclerListView<P extends RecyclerListViewProps, S extends RecyclerListViewState> extends ComponentCompat<P, S> {
@@ -153,7 +161,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _initialOffset = 0;
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
-    private _windowCorrection: WindowCorrection;
+    private _windowCorrectionConfig: WindowCorrectionConfig;
 
     //If the native content container is used, then positions of the list items are changed on the native side. The animated library used
     //by the default item animator also changes the same positions which could lead to inconsistency. Hence, the base item animator which
@@ -168,9 +176,27 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             return this.props.dataProvider.getStableId(index);
         }, !props.disableRecycling);
 
-        this._windowCorrection = {
-            startCorrection: 0, endCorrection: 0, windowShift: 0,
-        };
+        if (this.props.windowCorrectionConfig) {
+            let windowCorrection;
+            if (this.props.windowCorrectionConfig.value) {
+                windowCorrection = this.props.windowCorrectionConfig.value;
+            } else {
+                windowCorrection = {  startCorrection: 0, endCorrection: 0, windowShift: 0  };
+            }
+            this._windowCorrectionConfig = {
+                applyToItemScroll: !!this.props.windowCorrectionConfig.applyToItemScroll,
+                applyToInitialOffset: !!this.props.windowCorrectionConfig.applyToInitialOffset,
+                applyToOffsetScroll: !!this.props.windowCorrectionConfig.applyToOffsetScroll,
+                value: windowCorrection,
+             };
+        } else {
+            this._windowCorrectionConfig = {
+                applyToItemScroll: false,
+                applyToInitialOffset: false,
+                applyToOffsetScroll: false,
+                value: { startCorrection: 0, endCorrection: 0, windowShift: 0 },
+             };
+        }
         this._getContextFromContextProvider(props);
         if (props.layoutSize) {
             this._layout.height = props.layoutSize.height;
@@ -252,7 +278,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     public bringToFocus(index: number, animate?: boolean): void {
         const listSize = this.getRenderedSize();
         const itemLayout = this.getLayout(index);
-        const currentScrollOffset = this.getCurrentScrollOffset() + this._windowCorrection.windowShift;
+        const currentScrollOffset = this.getCurrentScrollOffset() + this._windowCorrectionConfig.value.windowShift;
         const {isHorizontal} = this.props;
         if (itemLayout) {
             const mainAxisLayoutDimen = isHorizontal ? itemLayout.width : itemLayout.height;
@@ -295,16 +321,16 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this.scrollToIndex(lastIndex, animate);
     }
 
-    // useWindowCorrection specifies if correction should be applied to these offsets in case you implement 
+    // useWindowCorrection specifies if correction should be applied to these offsets in case you implement
     // `applyWindowCorrection` method
     public scrollToOffset = (x: number, y: number, animate: boolean = false, useWindowCorrection: boolean = false): void => {
         if (this._scrollComponent) {
             if (this.props.isHorizontal) {
                 y = 0;
-                x = useWindowCorrection ? x - this._windowCorrection.windowShift : x;
+                x = useWindowCorrection ? x - this._windowCorrectionConfig.value.windowShift : x;
             } else {
                 x = 0;
-                y = useWindowCorrection ? y - this._windowCorrection.windowShift : y;
+                y = useWindowCorrection ? y - this._windowCorrectionConfig.value.windowShift : y;
             }
             this._scrollComponent.scrollTo(x, y, animate);
         }
@@ -423,12 +449,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                     } else {
                         offset.x = 0;
                     }
-                    if (Default.value(this.props.initialRenderIndex, 0) >= 0) {
-                        this.scrollToOffsetWithCorrection(offset.x, offset.y, false);
-
-                    } else {
-                        this.scrollToOffset(offset.x, offset.y, false);
-                    }
+                    this.scrollToOffset(offset.x, offset.y, false, this._windowCorrectionConfig.applyToInitialOffset);
                     if (this._pendingRenderStack) {
                         this._renderStackWhenReady(this._pendingRenderStack);
                         this._pendingRenderStack = undefined;
@@ -604,7 +625,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _getWindowCorrection(offsetX: number, offsetY: number, props: RecyclerListViewProps): WindowCorrection {
-        return (props.applyWindowCorrection && props.applyWindowCorrection(offsetX, offsetY, this._windowCorrection)) || this._windowCorrection;
+        return (props.applyWindowCorrection && props.applyWindowCorrection(offsetX, offsetY, this._windowCorrectionConfig.value))
+                || this._windowCorrectionConfig.value;
     }
 
     private _assertDependencyPresence(props: RecyclerListViewProps): void {
@@ -856,4 +878,7 @@ RecyclerListView.propTypes = {
     // but there is a catch here, since there might be a pending relayout due to which the queried layout might not be precise.
     // Caution: RLV only listens to layout changes if forceNonDeterministicRendering is true
     onItemLayout: PropTypes.func,
+
+    //Used to specify is window correction config and whether it should be applied to some scroll events
+    windowCorrectionConfig: PropTypes.object,
 };
