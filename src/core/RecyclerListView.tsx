@@ -238,7 +238,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         const layoutManager = this._virtualRenderer.getLayoutManager();
         if (layoutManager) {
             const offsets = layoutManager.getOffsetForIndex(index);
-            this.scrollToOffsetWithCorrection(offsets.x, offsets.y, animate);
+            this.scrollToOffset(offsets.x, offsets.y, animate, true);
         } else {
             console.warn(Messages.WARN_SCROLL_TO_INDEX); //tslint:disable-line
         }
@@ -295,21 +295,18 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this.scrollToIndex(lastIndex, animate);
     }
 
-    public scrollToOffset = (x: number, y: number, animate: boolean = false): void => {
+    // useWindowCorrection specifies if correction should be applied to these offsets in case you implement 
+    // `applyWindowCorrection` method
+    public scrollToOffset = (x: number, y: number, animate: boolean = false, useWindowCorrection: boolean = false): void => {
         if (this._scrollComponent) {
             if (this.props.isHorizontal) {
                 y = 0;
+                x = useWindowCorrection ? x - this._windowCorrection.windowShift : x;
             } else {
                 x = 0;
+                y = useWindowCorrection ? y - this._windowCorrection.windowShift : y;
             }
             this._scrollComponent.scrollTo(x, y, animate);
-        }
-    }
-
-    public scrollToOffsetWithCorrection = (x: number, y: number, animate: boolean = false): void => {
-        if (this._scrollComponent) {
-            const windowShift = this._getWindowCorrection(x, y, this.props).windowShift;
-            this.scrollToOffset(x + windowShift, y + windowShift, animate);
         }
     }
 
