@@ -468,8 +468,12 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this._params.itemCount = newProps.dataProvider.getSize();
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
         this._virtualRenderer.setLayoutProvider(newProps.layoutProvider);
-        if (newProps.dataProvider.hasStableIds() && this.props.dataProvider !== newProps.dataProvider && newProps.dataProvider.requiresDataChangeHandling()) {
-            this._virtualRenderer.handleDataSetChange(newProps.dataProvider);
+        if (newProps.dataProvider.hasStableIds() && this.props.dataProvider !== newProps.dataProvider) {
+            if (newProps.dataProvider.requiresDataChangeHandling()) {
+                this._virtualRenderer.handleDataSetChange(newProps.dataProvider);
+            } else if (this._virtualRenderer.hasPendingAnimationOptimization()) {
+                console.warn(Messages.ANIMATION_ON_PAGINATION); //tslint:disable-line
+            }
         }
         if (this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager

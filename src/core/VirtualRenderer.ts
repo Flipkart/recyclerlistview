@@ -91,6 +91,10 @@ export default class VirtualRenderer {
         this._optimizeForAnimations = shouldOptimize;
     }
 
+    public hasPendingAnimationOptimization(): boolean {
+        return this._optimizeForAnimations;
+    }
+
     public updateOffset(offsetX: number, offsetY: number, isActual: boolean, correction: WindowCorrection): void {
         if (this._viewabilityTracker) {
             const offset = this._params && this._params.isHorizontal ? offsetX : offsetY;
