@@ -112,7 +112,7 @@ export interface RecyclerListViewProps {
     scrollViewProps?: object;
     applyWindowCorrection?: (offsetX: number, offsetY: number, windowCorrection: WindowCorrection) => void;
     onItemLayout?: (index: number) => void;
-    windowCorrectionConfig?: { value?: WindowCorrection, applyToInitialOffset?: boolean, applyToOffsetScroll?: boolean, applyToItemScroll?: boolean };
+    windowCorrectionConfig?: { value?: WindowCorrection, applyToInitialOffset?: boolean, applyToItemScroll?: boolean };
 }
 
 export interface RecyclerListViewState {
@@ -123,7 +123,6 @@ export interface RecyclerListViewState {
 export interface WindowCorrectionConfig {
     value: WindowCorrection;
     applyToInitialOffset: boolean;
-    applyToOffsetScroll: boolean;
     applyToItemScroll: boolean;
 }
 
@@ -188,14 +187,12 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             this._windowCorrectionConfig = {
                 applyToItemScroll: !!this.props.windowCorrectionConfig.applyToItemScroll,
                 applyToInitialOffset: !!this.props.windowCorrectionConfig.applyToInitialOffset,
-                applyToOffsetScroll: !!this.props.windowCorrectionConfig.applyToOffsetScroll,
                 value: windowCorrection,
              };
         } else {
             this._windowCorrectionConfig = {
                 applyToItemScroll: false,
                 applyToInitialOffset: false,
-                applyToOffsetScroll: false,
                 value: { startCorrection: 0, endCorrection: 0, windowShift: 0 },
              };
         }
@@ -267,7 +264,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         const layoutManager = this._virtualRenderer.getLayoutManager();
         if (layoutManager) {
             const offsets = layoutManager.getOffsetForIndex(index);
-            this.scrollToOffset(offsets.x, offsets.y, animate, true);
+            this.scrollToOffset(offsets.x, offsets.y, animate, this._windowCorrectionConfig.applyToItemScroll);
         } else {
             console.warn(Messages.WARN_SCROLL_TO_INDEX); //tslint:disable-line
         }
