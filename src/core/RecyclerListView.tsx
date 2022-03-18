@@ -291,7 +291,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 const viewEndPos = mainAxisLayoutPos + mainAxisLayoutDimen;
                 if (viewEndPos > screenEndPos) {
                     const offset = viewEndPos - screenEndPos;
-                    this.scrollToOffset(0, offset + currentScrollOffset, animate);
+                    this.scrollToOffset(offset + currentScrollOffset, offset + currentScrollOffset, animate, true);
                 }
             }
         }
