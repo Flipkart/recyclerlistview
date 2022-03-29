@@ -147,6 +147,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _virtualRenderer: VirtualRenderer;
     private _onEndReachedCalled = false;
     private _initComplete = false;
+    private _isMounted = true;
     private _relayoutReqIndex: number = -1;
     private _params: RenderStackParams = {
         initialOffset: 0,
@@ -242,6 +243,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     public componentWillUnmount(): void {
+        this._isMounted = false;
         if (this.props.contextProvider) {
             const uniqueKey = this.props.contextProvider.getUniqueKey();
             if (uniqueKey) {
@@ -546,9 +548,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _queueStateRefresh(): void {
         this.refreshRequestDebouncer(() => {
-            this.setState((prevState) => {
-                return prevState;
-            });
+            if (this._isMounted) {
+                this.setState((prevState) => {
+                    return prevState;
+                });
+            }
         });
     }
 
