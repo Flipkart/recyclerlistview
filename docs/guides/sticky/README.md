@@ -17,7 +17,59 @@ _setRef(recycler) {
 * If using `overrideRowRenderer`, keep in mind that upon scrolling to the very top or bottom of the content, stickies will be hidden. eg. If the first item in the list is given as sticky, scrolling to the top will display the original view and not the overridden view.
 
 ### 2) Props
-* `stickyHeaderIndices`   - An array of indices whose corresponding items need to be stuck to the top of the RecyclerListView once the items scroll off the top. Every subsequent sticky index view will push the previous sticky view off the top to take its place. Needs to be sorted ascending.
-* `stickyFooterIndices`   - Works same as sticky headers, but for views to be stuck at the bottom of the recyclerView. Needs to be sorted ascending.
-* `overrideRowRenderer`   - Optional. Will be called instead of rowRenderer for all sticky items. Any changes to the item for when they are stuck can be done here. Refer to sample code for usage.
-* `style`                 - Optional. Pass the same style that is applied to the RecyclerListView component here.
+* `stickyHeaderIndices`     - An array of indices whose corresponding items need to be stuck to the top of the RecyclerListView once the items scroll off the top. Every subsequent sticky index view will push the previous sticky view off the top to take its place. Needs to be sorted ascending.
+* `stickyFooterIndices`     - Works same as sticky headers, but for views to be stuck at the bottom of the recyclerView. Needs to be sorted ascending.
+* `overrideRowRenderer`     - Optional. Will be called instead of rowRenderer for all sticky items. Any changes to the item for when they are stuck can be done here. Refer to sample code for usage.
+* `renderStickyContainer`   - Optional. Pass a stylized container for StickyHeader and StickyFooter, providing user extensibility to customize the look and feel of these items.
+* `applyWindowCorrection`   - Optional. Enhancement/replacement of `distanceFromWindow` API. Used when window bound of visible view port needs to be altered. Should be used when visible window bound need to be updated for e.g. Other components overlaying on the RecyclerListView. **[Usage?](#applywindowcorrection-usage)**
+* `style`                   - Optional. Pass the same style that is applied to the RecyclerListView component here.
+
+
+### applyWindowCorrection usage
+
+`applyWindowCorrection` is used to alter the visible window bounds of the RecyclerListView dynamically. The windowCorrection of RecyclerListView along with the current scroll offset are exposed to the user. The `windowCorrection` object consists of 3 numeric values:
+ - `windowShift`        - Direct replacement of `distanceFromWindow` parameter. Window shift is the offset value by which the RecyclerListView as a whole is displaced within the StickyContainer, use this param to specify how far away the first list item is from window top. This value corrects the scroll offsets for StickyObjects as well as RecyclerListView.
+ - `startCorrection`    - startCorrection is used to specify the shift in the top visible window bound, with which user can receive the correct Sticky header instance even when an external factor like CoordinatorLayout toolbar. 
+ - `endCorrection`      - endCorrection is used to specify the shift in the bottom visible window bound, with which user can receive correct Sticky Footer instance when an external factor like bottom app bar is changing the visible view bound.
+
+As seen in the example below
+
+![Alt Text](/docs/images/getWindowCorrection_demo.gif)
+
+```js
+/**
+  * this method is invoked upon scrolling the recyclerlistview, and provides current X offset, Y offset and WindowCorrection object.
+  * WindowCorrection has 3 params that can be used to change the perceived viewability of items present.
+  * 
+  * The value of startCorrection and endCorrection is provided to StickyContainer upon scroll.
+  * current offset can be used to dynamically calculate the correctional offset to be provided.
+  * 
+  * @param {current X offset value} offsetX 
+  * @param {current Y offset value} offsetY 
+  * @param {*} windowCorrection 
+  */
+_applyWindowCorrection(offset, offsetY, windowCorrection) {
+    // Provide a positive value to startCorrection to shift the Top Sticky widget downwards.
+    windowCorrection.startCorrection = -20; 
+
+    // Provide a positive value to endCorrection to shift the Bottom Sticky widget upwards.
+    windowCorrection.endCorrection = 20;
+}
+
+render() {
+    return (
+        <StickyContainer stickyHeaderIndices={[3, 7, 10]}
+            stickyFooterIndices={[3, 7, 10]}
+            overrideRowRenderer={this._overrideRowRenderer}
+            applyWindowCorrection={this._applyWindowCorrection} // pass the function containing window correctional logic to StickyContainer
+        >
+            <RecyclerListView layoutProvider={this.layoutProvider}
+                ref={this._setRef}
+                dataProvider={this.dataProvider}
+                rowRenderer={this._rowRenderer}
+                showsVerticalScrollIndicator={false}
+            />
+        </StickyContainer>
+    );
+}
+```

@@ -13,37 +13,40 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
     public renderCompat(): JSX.Element {
-        return this.props.forceNonDeterministicRendering ? (
-            <View ref={this._setRef}
-            onLayout={this._onLayout}
-                style={{
-                    flexDirection: this.props.isHorizontal ? "column" : "row",
-                    left: this.props.x,
-                    position: "absolute",
-                    top: this.props.y,
-                    ...this.props.styleOverrides,
-                    ...this.animatorStyleOverrides,
-                }}>
-                {this.renderChild()}
-            </View>
-        ) : (
-                <View ref={this._setRef}
-                    style={{
-                        left: this.props.x,
-                        position: "absolute",
-                        top: this.props.y,
-                        height: this.props.height,
-                        width: this.props.width,
-                        ...this.props.styleOverrides,
-                        ...this.animatorStyleOverrides,
-                    }}>
-                    {this.renderChild()}
-                </View>
-            );
+        const props = this.props.forceNonDeterministicRendering
+          ? {
+              ref: this._setRef,
+              onLayout: this._onLayout,
+              style: {
+                flexDirection: this.props.isHorizontal ? "column" : "row",
+                left: this.props.x,
+                position: "absolute",
+                top: this.props.y,
+                ...this.props.styleOverrides,
+                ...this.animatorStyleOverrides,
+              },
+            }
+          : {
+              ref: this._setRef,
+              style: {
+                left: this.props.x,
+                position: "absolute",
+                top: this.props.y,
+                height: this.props.height,
+                width: this.props.width,
+                ...this.props.styleOverrides,
+                ...this.animatorStyleOverrides,
+              },
+            };
+        return this._renderItemContainer(props, this.props, this.renderChild()) as JSX.Element;
     }
 
     protected getRef(): object | null {
         return this._viewRef;
+    }
+
+    private _renderItemContainer(props: object, parentProps: ViewRendererProps<any>, children: React.ReactNode): React.ReactNode {
+        return (this.props.renderItemContainer && this.props.renderItemContainer(props, parentProps, children)) || (<View {...props}>{children}</View>);
     }
 
     private _setRef = (view: React.Component<ViewProperties, React.ComponentState> | null): void => {
@@ -62,6 +65,10 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             if (this.props.onSizeChanged) {
                 this.props.onSizeChanged(this._dim, this.props.index);
             }
+        }
+
+        if (this.props.onItemLayout) {
+            this.props.onItemLayout(this.props.index);
         }
     }
 }

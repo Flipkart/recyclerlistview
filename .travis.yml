@@ -1,8 +1,0 @@
-language: node_js
-branches:
-  only:
-    - 'master'
-    - 'release'
-node_js:
-  - 'stable'
-script: npm run build
