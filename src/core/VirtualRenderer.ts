@@ -3,7 +3,7 @@ import { Dimension, BaseLayoutProvider } from "./dependencies/LayoutProvider";
 import CustomError from "./exceptions/CustomError";
 import RecyclerListViewExceptions from "./exceptions/RecyclerListViewExceptions";
 import { Point, LayoutManager } from "./layoutmanager/LayoutManager";
-import ViewabilityTracker, { TOnItemStatusChanged } from "./ViewabilityTracker";
+import ViewabilityTracker, { TOnItemStatusChanged, WindowCorrection } from "./ViewabilityTracker";
 import { ObjectUtil, Default } from "ts-object-utils";
 import TSCast from "../utils/TSCast";
 import { BaseDataProvider } from "./dependencies/DataProvider";
@@ -51,6 +51,7 @@ export default class VirtualRenderer {
     private _layoutManager: LayoutManager | null = null;
     private _viewabilityTracker: ViewabilityTracker | null = null;
     private _dimensions: Dimension | null;
+    private _optimizeForAnimations: boolean = false;
 
     constructor(renderStackChanged: (renderStack: RenderStack) => void,
                 scrollOnNextUpdate: (point: Point) => void,
@@ -86,16 +87,24 @@ export default class VirtualRenderer {
         return { height: 0, width: 0 };
     }
 
-    public updateOffset(offsetX: number, offsetY: number, correction: number, isActual: boolean): void {
+    public setOptimizeForAnimations(shouldOptimize: boolean): void {
+        this._optimizeForAnimations = shouldOptimize;
+    }
+
+    public hasPendingAnimationOptimization(): boolean {
+        return this._optimizeForAnimations;
+    }
+
+    public updateOffset(offsetX: number, offsetY: number, isActual: boolean, correction: WindowCorrection): void {
         if (this._viewabilityTracker) {
             const offset = this._params && this._params.isHorizontal ? offsetX : offsetY;
             if (!this._isViewTrackerRunning) {
                 if (isActual) {
                     this._viewabilityTracker.setActualOffset(offset);
                 }
-                this.startViewabilityTracker();
+                this.startViewabilityTracker(correction);
             }
-            this._viewabilityTracker.updateOffset(offset, correction, isActual);
+            this._viewabilityTracker.updateOffset(offset, isActual, correction);
         }
     }
 
@@ -196,14 +205,16 @@ export default class VirtualRenderer {
         this._prepareViewabilityTracker();
     }
 
-    public startViewabilityTracker(): void {
+    public startViewabilityTracker(windowCorrection: WindowCorrection): void {
         if (this._viewabilityTracker) {
             this._isViewTrackerRunning = true;
-            this._viewabilityTracker.init();
+            this._viewabilityTracker.init(windowCorrection);
         }
     }
 
-    public syncAndGetKey(index: number, overrideStableIdProvider?: StableIdProvider, newRenderStack?: RenderStack): string {
+    public syncAndGetKey(index: number, overrideStableIdProvider?: StableIdProvider,
+                         newRenderStack?: RenderStack,
+                         keyToStableIdMap?: { [key: string]: string } ): string {
         const getStableId = overrideStableIdProvider ? overrideStableIdProvider : this._fetchStableId;
         const renderStack = newRenderStack ? newRenderStack : this._renderStack;
         const stableIdItem = this._stableIdToRenderKeyMap[getStableId(index)];
@@ -222,6 +233,9 @@ export default class VirtualRenderer {
                     }
                 } else {
                     renderStack[key] = { dataIndex: index };
+                    if (keyToStableIdMap && keyToStableIdMap[key]) {
+                        delete this._stableIdToRenderKeyMap[keyToStableIdMap[key]];
+                    }
                 }
             } else {
                 key = getStableId(index);
@@ -248,11 +262,18 @@ export default class VirtualRenderer {
     }
 
     //Further optimize in later revision, pretty fast for now considering this is a low frequency event
-    public handleDataSetChange(newDataProvider: BaseDataProvider, shouldOptimizeForAnimations?: boolean): void {
+    public handleDataSetChange(newDataProvider: BaseDataProvider): void {
         const getStableId = newDataProvider.getStableId;
         const maxIndex = newDataProvider.getSize() - 1;
         const activeStableIds: { [key: string]: number } = {};
         const newRenderStack: RenderStack = {};
+        const keyToStableIdMap: { [key: string]: string } = {};
+
+        // Do not use recycle pool so that elements don't fly top to bottom or vice version
+        // Doing this is expensive and can draw extra items
+        if (this._optimizeForAnimations) {
+            this._recyclePool.clearAll();
+        }
 
         //Compute active stable ids and stale active keys and resync render stack
         for (const key in this._renderStack) {
@@ -272,38 +293,54 @@ export default class VirtualRenderer {
         const oldActiveStableIdsCount = oldActiveStableIds.length;
         for (let i = 0; i < oldActiveStableIdsCount; i++) {
             const key = oldActiveStableIds[i];
-            if (!activeStableIds[key]) {
-                if (!shouldOptimizeForAnimations && this._isRecyclingEnabled) {
-                    const stableIdItem = this._stableIdToRenderKeyMap[key];
-                    if (stableIdItem) {
+            const stableIdItem = this._stableIdToRenderKeyMap[key];
+            if (stableIdItem) {
+                if (!activeStableIds[key]) {
+                    if (!this._optimizeForAnimations && this._isRecyclingEnabled) {
                         this._recyclePool.putRecycledObject(stableIdItem.type, stableIdItem.key);
                     }
+                    delete this._stableIdToRenderKeyMap[key];
+
+                    const stackItem = this._renderStack[stableIdItem.key];
+                    const dataIndex = stackItem ? stackItem.dataIndex : undefined;
+                    if (!ObjectUtil.isNullOrUndefined(dataIndex) && dataIndex <= maxIndex && this._layoutManager) {
+                        this._layoutManager.removeLayout(dataIndex);
+                    }
+                } else {
+                    keyToStableIdMap[stableIdItem.key] = key;
                 }
-                delete this._stableIdToRenderKeyMap[key];
             }
         }
-
-        for (const key in this._renderStack) {
-            if (this._renderStack.hasOwnProperty(key)) {
-                const index = this._renderStack[key].dataIndex;
-                if (!ObjectUtil.isNullOrUndefined(index)) {
-                    if (index <= maxIndex) {
-                        const newKey = this.syncAndGetKey(index, getStableId, newRenderStack);
-                        const newStackItem = newRenderStack[newKey];
-                        if (!newStackItem) {
-                            newRenderStack[newKey] = { dataIndex: index };
-                        } else if (newStackItem.dataIndex !== index) {
-                            const cllKey = this._getCollisionAvoidingKey();
-                            newRenderStack[cllKey] = { dataIndex: index };
-                            this._stableIdToRenderKeyMap[getStableId(index)] = {
-                                key: cllKey, type: this._layoutProvider.getLayoutTypeForIndex(index),
-                            };
-                        }
+        const renderStackKeys = Object.keys(this._renderStack).sort((a, b) => {
+            const firstItem = this._renderStack[a];
+            const secondItem = this._renderStack[b];
+            if (firstItem && firstItem.dataIndex && secondItem && secondItem.dataIndex) {
+                return firstItem.dataIndex - secondItem.dataIndex;
+            }
+            return 1;
+        });
+        const renderStackLength = renderStackKeys.length;
+        for (let i = 0; i < renderStackLength; i++) {
+            const key = renderStackKeys[i];
+            const index = this._renderStack[key].dataIndex;
+            if (!ObjectUtil.isNullOrUndefined(index)) {
+                if (index <= maxIndex) {
+                    const newKey = this.syncAndGetKey(index, getStableId, newRenderStack, keyToStableIdMap);
+                    const newStackItem = newRenderStack[newKey];
+                    if (!newStackItem) {
+                        newRenderStack[newKey] = { dataIndex: index };
+                    } else if (newStackItem.dataIndex !== index) {
+                        const cllKey = this._getCollisionAvoidingKey();
+                        newRenderStack[cllKey] = { dataIndex: index };
+                        this._stableIdToRenderKeyMap[getStableId(index)] = {
+                            key: cllKey, type: this._layoutProvider.getLayoutTypeForIndex(index),
+                        };
                     }
                 }
-                delete this._renderStack[key];
             }
+            delete this._renderStack[key];
         }
+
         Object.assign(this._renderStack, newRenderStack);
 
         for (const key in this._renderStack) {

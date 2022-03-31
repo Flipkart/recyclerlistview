@@ -2,9 +2,19 @@ import RecyclerListView, { RecyclerListViewProps, RecyclerListViewState } from "
 export interface ProgressiveListViewProps extends RecyclerListViewProps {
     maxRenderAhead?: number;
     renderAheadStep?: number;
+
+    /**
+     * A smaller final value can help in building up recycler pool in advance. This is only used if there is a valid updated cycle.
+     * e.g, if maxRenderAhead is 0 then there will be no cycle and final value will be unused
+     */
+    finalRenderAheadOffset?: number;
 }
 /**
  * This will incremently update renderAhread distance and render the page progressively.
+ * renderAheadOffset = initial value which will be incremented
+ * renderAheadStep = amount of increment made on each frame
+ * maxRenderAhead = maximum value for render ahead at the end of update cycle
+ * finalRenderAheadOffset = value to set after whole update cycle is completed. If undefined, final offset value will be equal to maxRenderAhead
  */
 export default class ProgressiveListView extends RecyclerListView<ProgressiveListViewProps, RecyclerListViewState> {
     public static defaultProps = {
@@ -14,12 +24,23 @@ export default class ProgressiveListView extends RecyclerListView<ProgressiveLis
         renderAheadOffset: 0,
     };
     private renderAheadUdpateCallbackId?: number;
+    private isFirstLayoutComplete: boolean = false;
 
     public componentDidMount(): void {
-        if (super.componentDidMount) {
-            super.componentDidMount();
+        super.componentDidMount();
+        if (!this.props.forceNonDeterministicRendering) {
+            this.updateRenderAheadProgessively(this.getCurrentRenderAheadOffset());
         }
-        this.updateRenderAheadProgessively(this.getCurrentRenderAheadOffset());
+    }
+
+    protected onItemLayout(index: number): void {
+        if (!this.isFirstLayoutComplete) {
+            this.isFirstLayoutComplete = true;
+            if (this.props.forceNonDeterministicRendering) {
+                this.updateRenderAheadProgessively(this.getCurrentRenderAheadOffset());
+            }
+        }
+        super.onItemLayout(index);
     }
 
     private updateRenderAheadProgessively(newVal: number): void {
@@ -43,9 +64,19 @@ export default class ProgressiveListView extends RecyclerListView<ProgressiveLis
                 if (currentRenderAheadOffset < maxContentSize && currentRenderAheadOffset < this.props.maxRenderAhead) {
                     const newRenderAheadOffset = currentRenderAheadOffset + this.props.renderAheadStep;
                     this.updateRenderAheadProgessively(newRenderAheadOffset);
+                } else {
+                    this.performFinalUpdate();
                 }
             }
         }
+    }
+
+    private performFinalUpdate(): void {
+        requestAnimationFrame(() => {
+        if (this.props.finalRenderAheadOffset !== undefined) {
+                this.updateRenderAheadOffset(this.props.finalRenderAheadOffset);
+            }
+        });
     }
 
     private cancelRenderAheadUpdate(): void {
