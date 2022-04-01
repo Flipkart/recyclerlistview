@@ -1,6 +1,7 @@
 import * as React from "react";
 import { LayoutChangeEvent, View, ViewProperties } from "react-native";
 import { Dimension } from "../../../core/dependencies/LayoutProvider";
+import { LayoutManager } from "../../../core/layoutmanager/LayoutManager";
 import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
 
 /***
@@ -12,6 +13,7 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _viewRef: React.Component<ViewProperties, React.ComponentState> | null = null;
+    private _layoutManagerRef?: LayoutManager;
     public renderCompat(): JSX.Element {
         const props = this.props.forceNonDeterministicRendering
           ? {
@@ -39,6 +41,26 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
               },
             };
         return this._renderItemContainer(props, this.props, this.renderChild()) as JSX.Element;
+    }
+
+    public componentDidUpdate(): void {
+        super.componentDidUpdate();
+        if (this.props.layoutProvider && this._layoutManagerRef) {
+            if (this.props.layoutProvider.getLayoutManager() !== this._layoutManagerRef) {
+                this._layoutManagerRef = this.props.layoutProvider.getLayoutManager();
+                const oldDim = {...this._dim};
+                setTimeout(() => {
+                    this._forceSizeUpdate(oldDim);
+                }, 32);
+            }
+        }
+    }
+
+    public componentDidMount(): void {
+        super.componentDidMount();
+        if (this.props.layoutProvider) {
+            this._layoutManagerRef = this.props.layoutProvider.getLayoutManager();
+        }
     }
 
     protected getRef(): object | null {
@@ -69,6 +91,13 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
 
         if (this.props.onItemLayout) {
             this.props.onItemLayout(this.props.index);
+        }
+    }
+    private _forceSizeUpdate = (dim: Dimension): void => {
+        if (dim.width === this._dim.width && dim.height === this._dim.height) {
+            if (this.isRendererMounted && this.props.onSizeChanged) {
+                this.props.onSizeChanged(this._dim, this.props.index);
+            }
         }
     }
 }

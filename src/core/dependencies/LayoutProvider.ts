@@ -17,10 +17,7 @@ import { Layout, WrapGridLayoutManager, LayoutManager } from "../layoutmanager/L
 export abstract class BaseLayoutProvider {
     //Unset if your new layout provider doesn't require firstVisibleIndex preservation on application
     public shouldRefreshWithAnchoring: boolean = true;
-
-    //Return your layout manager, you get all required dependencies here. Also, make sure to use cachedLayouts. RLV might cache layouts and give back to
-    //in cases of conxtext preservation. Make sure you use them if provided.
-    public abstract newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager;
+    private _lastLayoutManager?: LayoutManager;
 
     //Given an index a provider is expected to return a view type which used to recycling choices
     public abstract getLayoutTypeForIndex(index: number): string | number;
@@ -28,14 +25,26 @@ export abstract class BaseLayoutProvider {
     //Check if given dimension contradicts with your layout provider, return true for mismatches. Returning true will
     //cause a relayout to fix the discrepancy
     public abstract checkDimensionDiscrepancy(dimension: Dimension, type: string | number, index: number): boolean;
+
+    public createLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager {
+        this._lastLayoutManager = this.newLayoutManager(renderWindowSize, isHorizontal, cachedLayouts);
+        return this._lastLayoutManager;
+    }
+
+    public getLayoutManager(): LayoutManager | undefined {
+        return this._lastLayoutManager;
+    }
+
+    //Return your layout manager, you get all required dependencies here. Also, make sure to use cachedLayouts. RLV might cache layouts and give back to
+    //in cases of context preservation. Make sure you use them if provided.
+    // IMP: Output of this method should be cached in lastLayoutManager. It's not required to be cached, but it's good for internal optimization.
+    protected abstract newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager;
 }
 
 export class LayoutProvider extends BaseLayoutProvider {
-
     private _getLayoutTypeForIndex: (index: number) => string | number;
     private _setLayoutForType: (type: string | number, dim: Dimension, index: number) => void;
     private _tempDim: Dimension;
-    private _lastLayoutManager: WrapGridLayoutManager | undefined;
 
     constructor(getLayoutTypeForIndex: (index: number) => string | number, setLayoutForType: (type: string | number, dim: Dimension, index: number) => void) {
         super();
@@ -45,8 +54,7 @@ export class LayoutProvider extends BaseLayoutProvider {
     }
 
     public newLayoutManager(renderWindowSize: Dimension, isHorizontal?: boolean, cachedLayouts?: Layout[]): LayoutManager {
-        this._lastLayoutManager = new WrapGridLayoutManager(this, renderWindowSize, isHorizontal, cachedLayouts);
-        return this._lastLayoutManager;
+        return new WrapGridLayoutManager(this, renderWindowSize, isHorizontal, cachedLayouts);
     }
 
     //Provide a type for index, something which identifies the template of view about to load
@@ -64,8 +72,9 @@ export class LayoutProvider extends BaseLayoutProvider {
         const dimension1 = dimension;
         this.setComputedLayout(type, this._tempDim, index);
         const dimension2 = this._tempDim;
-        if (this._lastLayoutManager) {
-            this._lastLayoutManager.setMaxBounds(dimension2);
+        const layoutManager = this.getLayoutManager();
+        if (layoutManager) {
+            (layoutManager as WrapGridLayoutManager).setMaxBounds(dimension2);
         }
         return dimension1.height !== dimension2.height || dimension1.width !== dimension2.width;
     }
