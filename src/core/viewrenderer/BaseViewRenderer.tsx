@@ -31,6 +31,7 @@ export interface ViewRendererProps<T> {
     renderItemContainer?: (props: object, parentProps: ViewRendererProps<T>, children?: React.ReactNode) => React.ReactNode;
 }
 export default abstract class BaseViewRenderer<T> extends ComponentCompat<ViewRendererProps<T>, {}> {
+    public isRendererMounted: boolean = true;
     protected animatorStyleOverrides: object | undefined;
 
     public shouldComponentUpdate(newProps: ViewRendererProps<any>): boolean {
@@ -59,7 +60,11 @@ export default abstract class BaseViewRenderer<T> extends ComponentCompat<ViewRe
         this.animatorStyleOverrides = this.props.itemAnimator.animateWillMount(this.props.x, this.props.y, this.props.index);
     }
     public componentWillUnmount(): void {
+        this.isRendererMounted = false;
         this.props.itemAnimator.animateWillUnmount(this.props.x, this.props.y, this.getRef() as object, this.props.index);
+    }
+    public componentDidUpdate(): void {
+        // no op
     }
     protected abstract getRef(): object | null;
     protected renderChild(): JSX.Element | JSX.Element[] | null {
