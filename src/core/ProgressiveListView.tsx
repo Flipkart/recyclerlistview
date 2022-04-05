@@ -10,7 +10,7 @@ export interface ProgressiveListViewProps extends RecyclerListViewProps {
     finalRenderAheadOffset?: number;
 }
 /**
- * This will incremently update renderAhread distance and render the page progressively.
+ * This will incrementally update renderAhead distance and render the page progressively.
  * renderAheadOffset = initial value which will be incremented
  * renderAheadStep = amount of increment made on each frame
  * maxRenderAhead = maximum value for render ahead at the end of update cycle
@@ -23,31 +23,36 @@ export default class ProgressiveListView extends RecyclerListView<ProgressiveLis
         renderAheadStep: 300,
         renderAheadOffset: 0,
     };
-    private renderAheadUdpateCallbackId?: number;
+    private renderAheadUpdateCallbackId?: number;
     private isFirstLayoutComplete: boolean = false;
 
     public componentDidMount(): void {
         super.componentDidMount();
         if (!this.props.forceNonDeterministicRendering) {
-            this.updateRenderAheadProgessively(this.getCurrentRenderAheadOffset());
+            this.updateRenderAheadProgressively(this.getCurrentRenderAheadOffset());
         }
+    }
+
+    public componentWillUnmount(): void {
+        this.cancelRenderAheadUpdate();
+        super.componentWillUnmount();
     }
 
     protected onItemLayout(index: number): void {
         if (!this.isFirstLayoutComplete) {
             this.isFirstLayoutComplete = true;
             if (this.props.forceNonDeterministicRendering) {
-                this.updateRenderAheadProgessively(this.getCurrentRenderAheadOffset());
+                this.updateRenderAheadProgressively(this.getCurrentRenderAheadOffset());
             }
         }
         super.onItemLayout(index);
     }
 
-    private updateRenderAheadProgessively(newVal: number): void {
+    private updateRenderAheadProgressively(newVal: number): void {
         this.cancelRenderAheadUpdate(); // Cancel any pending callback.
-        this.renderAheadUdpateCallbackId = requestAnimationFrame(() => {
+        this.renderAheadUpdateCallbackId = requestAnimationFrame(() => {
             if (!this.updateRenderAheadOffset(newVal)) {
-                this.updateRenderAheadProgessively(newVal);
+                this.updateRenderAheadProgressively(newVal);
             } else {
                 this.incrementRenderAhead();
             }
@@ -63,7 +68,7 @@ export default class ProgressiveListView extends RecyclerListView<ProgressiveLis
                 const maxContentSize = this.props.isHorizontal ? contentDimension.width : contentDimension.height;
                 if (currentRenderAheadOffset < maxContentSize && currentRenderAheadOffset < this.props.maxRenderAhead) {
                     const newRenderAheadOffset = currentRenderAheadOffset + this.props.renderAheadStep;
-                    this.updateRenderAheadProgessively(newRenderAheadOffset);
+                    this.updateRenderAheadProgressively(newRenderAheadOffset);
                 } else {
                     this.performFinalUpdate();
                 }
@@ -72,7 +77,8 @@ export default class ProgressiveListView extends RecyclerListView<ProgressiveLis
     }
 
     private performFinalUpdate(): void {
-        requestAnimationFrame(() => {
+        this.cancelRenderAheadUpdate(); // Cancel any pending callback.
+        this.renderAheadUpdateCallbackId = requestAnimationFrame(() => {
         if (this.props.finalRenderAheadOffset !== undefined) {
                 this.updateRenderAheadOffset(this.props.finalRenderAheadOffset);
             }
@@ -80,8 +86,8 @@ export default class ProgressiveListView extends RecyclerListView<ProgressiveLis
     }
 
     private cancelRenderAheadUpdate(): void {
-        if (this.renderAheadUdpateCallbackId) {
-            cancelAnimationFrame(this.renderAheadUdpateCallbackId);
+        if (this.renderAheadUpdateCallbackId !== undefined) {
+            cancelAnimationFrame(this.renderAheadUpdateCallbackId);
         }
     }
 }
