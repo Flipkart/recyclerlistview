@@ -113,6 +113,11 @@ export interface RecyclerListViewProps {
     applyWindowCorrection?: (offsetX: number, offsetY: number, windowCorrection: WindowCorrection) => void;
     onItemLayout?: (index: number) => void;
     windowCorrectionConfig?: { value?: WindowCorrection, applyToInitialOffset?: boolean, applyToItemScroll?: boolean };
+
+    //This can lead to inconsistent behavior. Use with caution.
+    //If set to true, recyclerlistview will not measure itself if scrollview mounts with zero height or width.
+    //If there are no following events with right dimensions nothing will be rendered.
+    suppressBoundedSizeException?: boolean;
 }
 
 export interface RecyclerListViewState {
@@ -557,6 +562,13 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _onSizeChanged = (layout: Dimension): void => {
+        if (layout.height === 0 || layout.width === 0) {
+            if (!this.props.suppressBoundedSizeException) {
+                throw new CustomError(RecyclerListViewExceptions.layoutException);
+            } else {
+                return;
+            }
+        }
         if (!this.props.canChangeSize && this.props.layoutSize) {
             return;
         }
@@ -564,9 +576,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         const hasWidthChanged = this._layout.width !== layout.width;
         this._layout.height = layout.height;
         this._layout.width = layout.width;
-        if (layout.height === 0 || layout.width === 0) {
-            throw new CustomError(RecyclerListViewExceptions.layoutException);
-        }
         if (!this._initComplete) {
             this._initComplete = true;
             this._initTrackers(this.props);
