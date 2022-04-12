@@ -234,9 +234,6 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         this._processInitialOffset();
         this._processOnEndReached();
         this._checkAndChangeLayouts(this.props);
-        if (this.props.dataProvider.getSize() === 0) {
-            console.warn(Messages.WARN_NO_DATA); //tslint:disable-line
-        }
         this._virtualRenderer.setOptimizeForAnimations(false);
     }
 
