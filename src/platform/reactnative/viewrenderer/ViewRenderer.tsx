@@ -30,6 +30,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             }
           : {
               ref: this._setRef,
+              onLayout: this._onLayout,
               style: {
                 left: this.props.x,
                 position: "absolute",
