@@ -30,7 +30,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             }
           : {
               ref: this._setRef,
-              onLayout: this._onLayout,
+              onLayout: this._onItemLayout,
               style: {
                 left: this.props.x,
                 position: "absolute",
@@ -76,6 +76,12 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         this._viewRef = view;
     }
 
+    private _onItemLayout = (): void => {
+        if (this.props.onItemLayout) {
+            this.props.onItemLayout(this.props.index);
+        }
+    }
+
     private _onLayout = (event: LayoutChangeEvent): void => {
         //Preventing layout thrashing in super fast scrolls where RN messes up onLayout event
         const xDiff = Math.abs(this.props.x - event.nativeEvent.layout.x);
@@ -90,9 +96,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             }
         }
 
-        if (this.props.onItemLayout) {
-            this.props.onItemLayout(this.props.index);
-        }
+        this._onItemLayout();
     }
     private _forceSizeUpdate = (dim: Dimension): void => {
         if (dim.width === this._dim.width && dim.height === this._dim.height) {
