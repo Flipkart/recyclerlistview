@@ -12,29 +12,31 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _mainDiv: HTMLDivElement | null = null;
-    private sizeObserver?: ResizeObserver;
+    private _sizeObserver?: ResizeObserver;
+    private _isPendingSizeUpdate: boolean = false;
     public componentDidMount(): void {
         super.componentDidMount();
         this._checkSizeChange();
-        if (!this.sizeObserver && ResizeObserver) {
-            this.sizeObserver = new ResizeObserver(() => {
-                this._checkSizeChange();
+        if (!this._sizeObserver && ResizeObserver) {
+            this._sizeObserver = new ResizeObserver(() => {
+                this._checkSizeChange(true);
             });
             if (this._mainDiv) {
-                this.sizeObserver.observe(this._mainDiv);
+                this._sizeObserver.observe(this._mainDiv);
             }
         }
     }
 
     public componentDidUpdate(): void {
+        this._isPendingSizeUpdate = false;
         this._checkSizeChange();
     }
 
     public componentWillUnmount(): void {
         super.componentWillUnmount();
-        if (this.sizeObserver) {
-            this.sizeObserver.disconnect();
-            this.sizeObserver = undefined;
+        if (this._sizeObserver) {
+            this._sizeObserver.disconnect();
+            this._sizeObserver = undefined;
         }
     }
 
@@ -80,13 +82,16 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         return "translate(" + this.props.x + "px," + this.props.y + "px)";
     }
 
-    private _checkSizeChange(): void {
+    private _checkSizeChange(fromObserver: boolean = false): void {
         if (this.props.forceNonDeterministicRendering && this.props.onSizeChanged) {
             const mainDiv = this._mainDiv;
             if (mainDiv) {
                 this._dim.width = mainDiv.clientWidth;
                 this._dim.height = mainDiv.clientHeight;
                 if (this.props.width !== this._dim.width || this.props.height !== this._dim.height) {
+                    this._isPendingSizeUpdate = true;
+                    this.props.onSizeChanged(this._dim, this.props.index);
+                } else if (fromObserver && this._isPendingSizeUpdate) {
                     this.props.onSizeChanged(this._dim, this.props.index);
                 }
             }
