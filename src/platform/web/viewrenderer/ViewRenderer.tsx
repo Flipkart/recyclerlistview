@@ -12,13 +12,30 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _mainDiv: HTMLDivElement | null = null;
+    private sizeObserver?: ResizeObserver;
     public componentDidMount(): void {
         super.componentDidMount();
         this._checkSizeChange();
+        if (!this.sizeObserver && ResizeObserver) {
+            this.sizeObserver = new ResizeObserver(() => {
+                this._checkSizeChange();
+            });
+            if (this._mainDiv) {
+                this.sizeObserver.observe(this._mainDiv);
+            }
+        }
     }
 
     public componentDidUpdate(): void {
         this._checkSizeChange();
+    }
+
+    public componentWillUnmount(): void {
+        super.componentWillUnmount();
+        if (this.sizeObserver) {
+            this.sizeObserver.disconnect();
+            this.sizeObserver = undefined;
+        }
     }
 
     public renderCompat(): JSX.Element {
