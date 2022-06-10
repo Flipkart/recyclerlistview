@@ -13,7 +13,7 @@ interface UnmountAwareView extends View {
  * you need to. Check DefaultNativeItemAnimator for inspiration. LayoutAnimation definitely gives better performance but is
  * hardly customizable.
  */
-export class DefaultJSItemAnimator implements BaseItemAnimator {
+export class DefaultJSItemAnimator extends BaseItemAnimator {
     public shouldAnimateOnce: boolean = true;
     private _hasAnimatedOnce: boolean = false;
     private _isTimerOn: boolean = false;
