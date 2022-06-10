@@ -156,7 +156,7 @@ Typescript works out of the box. The only execption is with the inherited Scroll
 * **[Performance](https://github.com/Flipkart/recyclerlistview/tree/master/docs/guides/performance)**
 * **[Sticky Guide](https://github.com/Flipkart/recyclerlistview/tree/master/docs/guides/sticky)**
 * **Web Support:** Works with React Native Web out of the box. For use with ReactJS start importing from `recyclerlistview/web` e.g., `import { RecyclerListView } from "recyclerlistview/web"`. Use aliases if you want to preserve import path. Only platform specific code is part of the build so, no unnecessary code will ship with your app.
-* **Polyfills Needed:** `requestAnimationFrame`
+* **Polyfills Needed:** `requestAnimationFrame`, `ResizeObserver`
 
 ## License
 **[Apache v2.0](https://github.com/Flipkart/recyclerlistview/blob/master/LICENSE.md)**
