@@ -263,10 +263,10 @@ export default class VirtualRenderer {
         const newRenderStack: RenderStack = {};
         const keyToStableIdMap: { [key: string]: string } = {};
 
-        // Do not use recycle pool so that elements don't fly top to bottom or vice version
+        // Do not use recycle pool so that elements don't fly top to bottom or vice versa
         // Doing this is expensive and can draw extra items
         if (this._optimizeForAnimations) {
-            this._recyclePool.clearAll();
+            this._recyclePool?.clearAll();
         }
 
         //Compute active stable ids and stale active keys and resync render stack
