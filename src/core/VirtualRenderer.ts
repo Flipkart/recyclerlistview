@@ -265,8 +265,8 @@ export default class VirtualRenderer {
 
         // Do not use recycle pool so that elements don't fly top to bottom or vice versa
         // Doing this is expensive and can draw extra items
-        if (this._optimizeForAnimations) {
-            this._recyclePool?.clearAll();
+        if (this._optimizeForAnimations && this._recyclePool) {
+            this._recyclePool.clearAll();
         }
 
         //Compute active stable ids and stale active keys and resync render stack
@@ -291,7 +291,7 @@ export default class VirtualRenderer {
             if (stableIdItem) {
                 if (!activeStableIds[key]) {
                     if (!this._optimizeForAnimations && this._isRecyclingEnabled) {
-                        this._recyclePool?.putRecycledObject(stableIdItem.type, stableIdItem.key);
+                        this._recyclePool.putRecycledObject(stableIdItem.type, stableIdItem.key);
                     }
                     delete this._stableIdToRenderKeyMap[key];
 
@@ -342,7 +342,7 @@ export default class VirtualRenderer {
                 const index = this._renderStack[key].dataIndex;
                 if (!ObjectUtil.isNullOrUndefined(index) && ObjectUtil.isNullOrUndefined(this._engagedIndexes[index])) {
                     const type = this._layoutProvider.getLayoutTypeForIndex(index);
-                    this._recyclePool?.putRecycledObject(type, key);
+                    this._recyclePool.putRecycledObject(type, key);
                 }
             }
         }
