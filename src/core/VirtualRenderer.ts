@@ -291,7 +291,7 @@ export default class VirtualRenderer {
             if (stableIdItem) {
                 if (!activeStableIds[key]) {
                     if (!this._optimizeForAnimations && this._isRecyclingEnabled) {
-                        this._recyclePool.putRecycledObject(stableIdItem.type, stableIdItem.key);
+                        this._recyclePool?.putRecycledObject(stableIdItem.type, stableIdItem.key);
                     }
                     delete this._stableIdToRenderKeyMap[key];
 
@@ -342,7 +342,7 @@ export default class VirtualRenderer {
                 const index = this._renderStack[key].dataIndex;
                 if (!ObjectUtil.isNullOrUndefined(index) && ObjectUtil.isNullOrUndefined(this._engagedIndexes[index])) {
                     const type = this._layoutProvider.getLayoutTypeForIndex(index);
-                    this._recyclePool.putRecycledObject(type, key);
+                    this._recyclePool?.putRecycledObject(type, key);
                 }
             }
         }
