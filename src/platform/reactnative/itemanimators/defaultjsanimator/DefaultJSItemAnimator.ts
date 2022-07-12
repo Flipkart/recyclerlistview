@@ -25,16 +25,24 @@ export class DefaultJSItemAnimator extends BaseItemAnimator {
     }
 
     public animateWillUpdate(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): void {
-        this._hasAnimatedOnce = true;
+        //no need
     }
 
     public animateShift(fromX: number, fromY: number, toX: number, toY: number, itemRef: object, itemIndex: number): boolean {
+        if (!this._isTimerOn) {
+            this._isTimerOn = true;
+            if (!this._hasAnimatedOnce) {
+                setTimeout(() => {
+                    this._hasAnimatedOnce = true;
+                }, 700);
+            }
+        }
         if (fromX !== toX || fromY !== toY) {
             if (!this.shouldAnimateOnce || this.shouldAnimateOnce && !this._hasAnimatedOnce) {
                 const viewRef = itemRef as UnmountAwareView;
                 const animXY = new Animated.ValueXY({ x: fromX, y: fromY });
                 animXY.addListener((value) => {
-                    if (viewRef._isUnmountedForRecyclerListView || (this.shouldAnimateOnce && this._hasAnimatedOnce)) {
+                    if (viewRef._isUnmountedForRecyclerListView) {
                         animXY.stopAnimation();
                         return;
                     }
@@ -51,18 +59,8 @@ export class DefaultJSItemAnimator extends BaseItemAnimator {
                     useNativeDriver: BaseItemAnimator.USE_NATIVE_DRIVER,
                 }).start(() => {
                     viewRef._lastAnimVal = null;
-                    this._hasAnimatedOnce = true;
                 });
                 return true;
-            }
-        } else {
-            if (!this._isTimerOn) {
-                this._isTimerOn = true;
-                if (!this._hasAnimatedOnce) {
-                    setTimeout(() => {
-                        this._hasAnimatedOnce = true;
-                    }, 1000);
-                }
             }
         }
         return false;
