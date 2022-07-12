@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-TARGET=$"/Users/talhanaqvi/src/github.com/Shopify/temp/rnmac/node_modules/recyclerlistview/dist" #target-path
+TARGET=$"/Users/talha.naqvi/Documents/Work/RLV-Demo/node_modules/recyclerlistview/dist" #target-path
 
 npm run build
 
