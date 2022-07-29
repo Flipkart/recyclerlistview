@@ -717,7 +717,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             }, dim, index);
         }
 
-        if (layoutManager.overrideLayout(index, dim)) {
+        // Add extra protection for overrideLayout as it can only be called when non-deterministic rendering is used.
+        if (this.props.forceNonDeterministicRendering && layoutManager.overrideLayout(index, dim)) {
             if (this._relayoutReqIndex === -1) {
                 this._relayoutReqIndex = index;
             } else {

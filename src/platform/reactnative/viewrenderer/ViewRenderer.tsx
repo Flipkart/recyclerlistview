@@ -48,10 +48,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         if (this.props.layoutProvider && this._layoutManagerRef) {
             if (this.props.layoutProvider.getLayoutManager() !== this._layoutManagerRef) {
                 this._layoutManagerRef = this.props.layoutProvider.getLayoutManager();
-                const oldDim = {...this._dim};
-                setTimeout(() => {
-                    this._forceSizeUpdate(oldDim);
-                }, 32);
+                this._scheduleForceSizeUpdateTimer();
             }
         }
     }
@@ -93,6 +90,18 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
             this.props.onItemLayout(this.props.index);
         }
     }
+
+    private _scheduleForceSizeUpdateTimer = () => {
+        // forceSizeUpdate calls onSizeChanged which can only be called when non-deterministic rendering is used.
+        if (!this.props.forceNonDeterministicRendering) {
+            return;
+        }
+        const oldDim = {...this._dim};
+        setTimeout(() => {
+            this._forceSizeUpdate(oldDim);
+        }, 32);
+    }
+
     private _forceSizeUpdate = (dim: Dimension): void => {
         if (dim.width === this._dim.width && dim.height === this._dim.height) {
             if (this.isRendererMounted && this.props.onSizeChanged) {
