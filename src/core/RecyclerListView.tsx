@@ -740,9 +740,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
 
     private _generateRenderStack(): Array<JSX.Element | null> {
         const renderedItems = [];
-        for (const key in this.state.renderStack) {
-            if (this.state.renderStack.hasOwnProperty(key)) {
-                renderedItems.push(this._renderRowUsingMeta(this.state.renderStack[key]));
+        if (this.state) {
+            for (const key in this.state.renderStack) {
+                if (this.state.renderStack.hasOwnProperty(key)) {
+                    renderedItems.push(this._renderRowUsingMeta(this.state.renderStack[key]));
+                }
             }
         }
         return renderedItems;
