@@ -6,6 +6,7 @@ import {
     ScrollView,
     View,
 } from "react-native";
+import type { ViewStyle } from "react-native";
 import BaseScrollComponent, { ScrollComponentProps } from "../../../core/scrollcomponent/BaseScrollComponent";
 import TSCast from "../../../utils/TSCast";
 /***
