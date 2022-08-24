@@ -105,11 +105,17 @@ export default class ScrollComponent extends BaseScrollComponent {
         if (event) {
             const contentOffset = event.nativeEvent.contentOffset;
             this._offset = this.props.isHorizontal ? contentOffset.x : contentOffset.y;
-            this.props.onScroll(contentOffset.x, contentOffset.y, event);
+            const { paddingTop = 0, marginTop = 0, paddingLeft = 0, marginRight = 0 } = typeof this.props.contentContainerStyle === "object"
+                ? (this.props.contentContainerStyle as ViewStyle)
+                : {};
+            const offsetY = contentOffset.y - (this.props.isHorizontal ? 0 : +paddingTop + +marginTop);
+            const offsetX = contentOffset.x - (this.props.isHorizontal ? +paddingLeft + +marginRight : 0);
+        
+            this.props.onScroll(offsetX, offsetY, event);
         }
     }
 
-    private _onLayout = (event: LayoutChangeEvent): void => {
+        private _onLayout = (event: LayoutChangeEvent): void => {
         if (this._height !== event.nativeEvent.layout.height || this._width !== event.nativeEvent.layout.width) {
             this._height = event.nativeEvent.layout.height;
             this._width = event.nativeEvent.layout.width;
