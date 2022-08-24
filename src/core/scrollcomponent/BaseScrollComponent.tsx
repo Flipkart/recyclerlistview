@@ -1,4 +1,5 @@
 import * as React from "react";
+import type { ScrollViewProps } from "react-native";
 import { Dimension } from "../dependencies/LayoutProvider";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./BaseScrollView";
 
@@ -17,6 +18,7 @@ export interface ScrollComponentProps {
     renderContentContainer?: (props?: object, children?: React.ReactNode) => React.ReactNode | null;
     renderAheadOffset: number;
     layoutSize?: Dimension;
+    contentContainerStyle?: ScrollViewProps["contentContainerStyle"];
 }
 export default abstract class BaseScrollComponent extends React.Component<ScrollComponentProps, {}> {
     public abstract scrollTo(x: number, y: number, animate: boolean): void;
