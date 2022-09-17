@@ -54,7 +54,7 @@ export abstract class BaseDataProvider {
     //No need to override this one
     //If you already know the first row where rowHasChanged will be false pass it upfront to avoid loop
     public cloneWithRows(newData: any[], firstModifiedIndex?: number): DataProvider {
-        const dp = this.newInstance(this.rowHasChanged, this.getStableId);
+        const dp = this.newInstance(this.rowHasChanged, this._hasStableIds ? this.getStableId : undefined);
         const newSize = newData.length;
         const iterCount = Math.min(this._size, newSize);
         if (ObjectUtil.isNullOrUndefined(firstModifiedIndex)) {
