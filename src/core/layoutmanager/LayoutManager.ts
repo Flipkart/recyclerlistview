@@ -214,7 +214,7 @@ export class WrapGridLayoutManager extends LayoutManager {
     }
 
     private _checkBounds(itemX: number, itemY: number, itemDim: Dimension, isHorizontal: boolean): boolean {
-        return isHorizontal ? (itemY + itemDim.height <= this._window.height) : (itemX + itemDim.width <= this._window.width);
+        return isHorizontal ? (itemY + itemDim.height <= this._window.height + 1) : (itemX + itemDim.width <= this._window.width + 1);
     }
 }
 
