@@ -12,15 +12,32 @@ import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/
 export default class ViewRenderer extends BaseViewRenderer<any> {
     private _dim: Dimension = { width: 0, height: 0 };
     private _mainDiv: HTMLDivElement | null = null;
+    private _sizeObserver?: ResizeObserver;
+    private _isPendingSizeUpdate: boolean = false;
     public componentDidMount(): void {
-        if (super.componentDidMount) {
-            super.componentDidMount();
-        }
+        super.componentDidMount();
         this._checkSizeChange();
+        if (!this._sizeObserver && ResizeObserver) {
+            this._sizeObserver = new ResizeObserver(() => {
+                this._checkSizeChange(true);
+            });
+            if (this._mainDiv) {
+                this._sizeObserver.observe(this._mainDiv);
+            }
+        }
     }
 
     public componentDidUpdate(): void {
+        this._isPendingSizeUpdate = false;
         this._checkSizeChange();
+    }
+
+    public componentWillUnmount(): void {
+        super.componentWillUnmount();
+        if (this._sizeObserver) {
+            this._sizeObserver.disconnect();
+            this._sizeObserver = undefined;
+        }
     }
 
     public renderCompat(): JSX.Element {
@@ -42,30 +59,39 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
                 ...this.props.styleOverrides,
                 ...this.animatorStyleOverrides,
             };
-        return (
-            <div ref={this._setRef} style={style}>
-                {this.renderChild()}
-            </div>
-        );
+        const props = {
+            style,
+            ref: this._setRef,
+        };
+        return this._renderItemContainer(props, this.props, this.renderChild()) as JSX.Element;
     }
 
     protected getRef(): object | null {
         return this._mainDiv;
     }
+
+    private _renderItemContainer(props: object, parentProps: ViewRendererProps<any>, children: React.ReactNode): React.ReactNode {
+        return (this.props.renderItemContainer && this.props.renderItemContainer(props, parentProps, children)) || (<div {...props}>{children}</div>);
+    }
+
     private _setRef = (div: HTMLDivElement | null): void => {
         this._mainDiv = div;
     }
+
     private _getTransform(): string {
         return "translate(" + this.props.x + "px," + this.props.y + "px)";
     }
 
-    private _checkSizeChange(): void {
+    private _checkSizeChange(fromObserver: boolean = false): void {
         if (this.props.forceNonDeterministicRendering && this.props.onSizeChanged) {
             const mainDiv = this._mainDiv;
             if (mainDiv) {
                 this._dim.width = mainDiv.clientWidth;
                 this._dim.height = mainDiv.clientHeight;
                 if (this.props.width !== this._dim.width || this.props.height !== this._dim.height) {
+                    this._isPendingSizeUpdate = true;
+                    this.props.onSizeChanged(this._dim, this.props.index);
+                } else if (fromObserver && this._isPendingSizeUpdate) {
                     this.props.onSizeChanged(this._dim, this.props.index);
                 }
             }

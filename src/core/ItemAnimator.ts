@@ -23,7 +23,7 @@ export default interface ItemAnimator {
 }
 
 export class BaseItemAnimator implements ItemAnimator {
-    public static USE_NATIVE_DRIVER = true;
+    public static USE_NATIVE_DRIVER = false;
     public animateWillMount(atX: number, atY: number, itemIndex: number): object | undefined {
         return undefined;
     }
