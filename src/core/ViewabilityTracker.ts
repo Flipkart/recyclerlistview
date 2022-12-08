@@ -1,6 +1,7 @@
 import BinarySearch from "../utils/BinarySearch";
 import { Dimension } from "./dependencies/LayoutProvider";
 import { Layout } from "./layoutmanager/LayoutManager";
+import { I18nManager, Platform } from "react-native";
 /***
  * Given an offset this utility can compute visible items. Also tracks previously visible items to compute items which get hidden or visible
  * Virtual renderer uses callbacks from this utility to main recycle pool and the render stack.
@@ -38,8 +39,9 @@ export default class ViewabilityTracker {
     private _layouts: Layout[] = [];
     private _actualOffset: number;
     private _defaultCorrection: WindowCorrection;
+    private _itemsCount: number;
 
-    constructor(renderAheadOffset: number, initialOffset: number) {
+    constructor(renderAheadOffset: number, initialOffset: number, itemsCount: number) {
         this._currentOffset = Math.max(0, initialOffset);
         this._maxOffset = 0;
         this._actualOffset = 0;
@@ -58,6 +60,7 @@ export default class ViewabilityTracker {
 
         this._relevantDim = { start: 0, end: 0 };
         this._defaultCorrection = { startCorrection: 0, endCorrection: 0, windowShift: 0 };
+        this._itemsCount = itemsCount;
     }
 
     public init(windowCorrection: WindowCorrection): void {
@@ -241,22 +244,26 @@ export default class ViewabilityTracker {
                                         newEngagedIndexes: number[]): boolean {
         const itemRect = this._layouts[index];
         let isFound = false;
+        const newIndex =
+            I18nManager.isRTL && Platform.OS === "android"
+                ? this._itemsCount - 1 - index
+                : index;
         this._setRelevantBounds(itemRect, relevantDim);
         if (this._itemIntersectsVisibleWindow(relevantDim.start, relevantDim.end)) {
             if (insertOnTop) {
-                newVisibleIndexes.splice(0, 0, index);
-                newEngagedIndexes.splice(0, 0, index);
+                newVisibleIndexes.splice(0, 0, newIndex);
+                newEngagedIndexes.splice(0, 0, newIndex);
             } else {
-                newVisibleIndexes.push(index);
-                newEngagedIndexes.push(index);
+                newVisibleIndexes.push(newIndex);
+                newEngagedIndexes.push(newIndex);
             }
             isFound = true;
         } else if (this._itemIntersectsEngagedWindow(relevantDim.start, relevantDim.end)) {
             //TODO: This needs to be optimized
             if (insertOnTop) {
-                newEngagedIndexes.splice(0, 0, index);
+                newEngagedIndexes.splice(0, 0, newIndex);
             } else {
-                newEngagedIndexes.push(index);
+                newEngagedIndexes.push(newIndex);
 
             }
             isFound = true;
