@@ -7,6 +7,7 @@ import ViewabilityTracker, { TOnItemStatusChanged, WindowCorrection } from "./Vi
 import { ObjectUtil, Default } from "ts-object-utils";
 import TSCast from "../utils/TSCast";
 import { BaseDataProvider } from "./dependencies/DataProvider";
+import { ImpressionTrackingConfig } from "./RecyclerListView";
 
 /***
  * Renderer which keeps track of recyclable items and the currently rendered items. Notifies list view to re render if something changes, like scroll offset
@@ -52,11 +53,13 @@ export default class VirtualRenderer {
     private _viewabilityTracker: ViewabilityTracker | null = null;
     private _dimensions: Dimension | null;
     private _optimizeForAnimations: boolean = false;
+    private _impressionTrackingConfig: ImpressionTrackingConfig | undefined = undefined;
 
     constructor(renderStackChanged: (renderStack: RenderStack) => void,
                 scrollOnNextUpdate: (point: Point) => void,
                 fetchStableId: StableIdProvider,
-                isRecyclingEnabled: boolean) {
+                isRecyclingEnabled: boolean,
+                impressionTrackingConfig?: ImpressionTrackingConfig) {
         //Keeps track of items that need to be rendered in the next render cycle
         this._renderStack = {};
 
@@ -78,6 +81,8 @@ export default class VirtualRenderer {
         this._startKey = 0;
 
         this.onVisibleItemsChanged = null;
+
+        this._impressionTrackingConfig = impressionTrackingConfig;
     }
 
     public getLayoutDimension(): Dimension {
@@ -192,9 +197,10 @@ export default class VirtualRenderer {
         if (this._params) {
             this._viewabilityTracker = new ViewabilityTracker(
                 Default.value<number>(this._params.renderAheadOffset, 0),
-                Default.value<number>(this._params.initialOffset, 0));
+                Default.value<number>(this._params.initialOffset, 0),
+                this._impressionTrackingConfig);
         } else {
-            this._viewabilityTracker = new ViewabilityTracker(0, 0);
+            this._viewabilityTracker = new ViewabilityTracker(0, 0, this._impressionTrackingConfig);
         }
         this._prepareViewabilityTracker();
     }

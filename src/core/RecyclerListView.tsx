@@ -76,6 +76,10 @@ export interface OnRecreateParams {
     lastOffset?: number;
 }
 
+export interface ImpressionTrackingConfig {
+    minimumViewabilityPercentage: number;
+}
+
 export interface RecyclerListViewProps {
     layoutProvider: BaseLayoutProvider;
     dataProvider: BaseDataProvider;
@@ -110,6 +114,7 @@ export interface RecyclerListViewProps {
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
+    impressionTrackingConfig?: ImpressionTrackingConfig;
     applyWindowCorrection?: (offsetX: number, offsetY: number, windowCorrection: WindowCorrection) => void;
     onItemLayout?: (index: number) => void;
     windowCorrectionConfig?: { value?: WindowCorrection, applyToInitialOffset?: boolean, applyToItemScroll?: boolean };
@@ -141,6 +146,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         onEndReachedThreshold: 0,
         onEndReachedThresholdRelative: 0,
         renderAheadOffset: IS_WEB ? 1000 : 250,
+        impressionTrackingConfig: undefined,
     };
 
     public static propTypes = {};
@@ -181,7 +187,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             this._pendingScrollToOffset = offset;
         }, (index) => {
             return this.props.dataProvider.getStableId(index);
-        }, !props.disableRecycling);
+        }, !props.disableRecycling, props.impressionTrackingConfig);
 
         if (this.props.windowCorrectionConfig) {
             let windowCorrection;

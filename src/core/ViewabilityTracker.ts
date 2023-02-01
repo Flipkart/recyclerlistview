@@ -1,6 +1,7 @@
 import BinarySearch from "../utils/BinarySearch";
 import { Dimension } from "./dependencies/LayoutProvider";
 import { Layout } from "./layoutmanager/LayoutManager";
+import { ImpressionTrackingConfig } from "./RecyclerListView";
 /***
  * Given an offset this utility can compute visible items. Also tracks previously visible items to compute items which get hidden or visible
  * Virtual renderer uses callbacks from this utility to main recycle pool and the render stack.
@@ -38,8 +39,9 @@ export default class ViewabilityTracker {
     private _layouts: Layout[] = [];
     private _actualOffset: number;
     private _defaultCorrection: WindowCorrection;
+    private _impressionTrackingConfig: ImpressionTrackingConfig | undefined;
 
-    constructor(renderAheadOffset: number, initialOffset: number) {
+    constructor(renderAheadOffset: number, initialOffset: number, impressionTrackingConfig: ImpressionTrackingConfig | undefined) {
         this._currentOffset = Math.max(0, initialOffset);
         this._maxOffset = 0;
         this._actualOffset = 0;
@@ -58,6 +60,7 @@ export default class ViewabilityTracker {
 
         this._relevantDim = { start: 0, end: 0 };
         this._defaultCorrection = { startCorrection: 0, endCorrection: 0, windowShift: 0 };
+        this._impressionTrackingConfig = impressionTrackingConfig;
     }
 
     public init(windowCorrection: WindowCorrection): void {
@@ -185,7 +188,8 @@ export default class ViewabilityTracker {
         for (let i = 0; i < count; i++) {
             itemRect = this._layouts[i];
             this._setRelevantBounds(itemRect, relevantDim);
-            if (this._itemIntersectsVisibleWindow(relevantDim.start, relevantDim.end)) {
+            const minimumViewabilityPercentage = this._impressionTrackingConfig && this._impressionTrackingConfig.minimumViewabilityPercentage || undefined;
+            if (this._itemIntersectsVisibleWindow(relevantDim.start, relevantDim.end, minimumViewabilityPercentage)) {
                 return i;
             }
         }
@@ -242,7 +246,8 @@ export default class ViewabilityTracker {
         const itemRect = this._layouts[index];
         let isFound = false;
         this._setRelevantBounds(itemRect, relevantDim);
-        if (this._itemIntersectsVisibleWindow(relevantDim.start, relevantDim.end)) {
+        const mininumViewPercentage = this._impressionTrackingConfig && this._impressionTrackingConfig.minimumViewabilityPercentage || undefined;
+        if (this._itemIntersectsVisibleWindow(relevantDim.start, relevantDim.end, mininumViewPercentage)) {
             if (insertOnTop) {
                 newVisibleIndexes.splice(0, 0, index);
                 newEngagedIndexes.splice(0, 0, index);
@@ -297,8 +302,31 @@ export default class ViewabilityTracker {
         return this._itemIntersectsWindow(this._engagedWindow, startBound, endBound);
     }
 
-    private _itemIntersectsVisibleWindow(startBound: number, endBound: number): boolean {
-        return this._itemIntersectsWindow(this._visibleWindow, startBound, endBound);
+    private _isItemInVisibleBounds(window: Range, itemStartBound: number, itemEndBound: number, mininumViewPercentage: number | undefined): boolean {
+        let visibleItemContent = 0;
+        const itemSize =  itemEndBound - itemStartBound;
+
+        if (window.start >= itemStartBound && window.end >= itemEndBound) {
+            visibleItemContent = itemEndBound - window.start;
+        } else if (window.start <= itemStartBound && window.end <= itemEndBound) {
+            visibleItemContent = window.end - itemStartBound;
+        } else if (window.start <= itemStartBound && window.end >= itemEndBound) {
+            visibleItemContent = itemEndBound - itemStartBound;
+        } else if (window.start >= itemStartBound && window.end <= itemEndBound) {
+            return true;
+        } else {
+            return false;
+        }
+
+        const isVisible = mininumViewPercentage
+            ? visibleItemContent / itemSize * 100 >= mininumViewPercentage
+            : visibleItemContent > 0;
+        return isVisible;
+    }
+
+    private _itemIntersectsVisibleWindow(startBound: number, endBound: number, mininumViewPercentage?: number): boolean {
+        return this._isItemInVisibleBounds(this._visibleWindow, startBound, endBound, mininumViewPercentage) ||
+            this._isZeroHeightEdgeElement(this._visibleWindow, startBound, endBound);
     }
 
     private _updateTrackingWindows(offset: number, correction: WindowCorrection): void {
