@@ -118,7 +118,10 @@ export default class VirtualRenderer {
     }
 
     public timerCleanup(): void {
-        this._viewabilityTracker && this._viewabilityTracker.timerCleanup();
+        if (!this._viewabilityTracker) {
+            return;
+        }
+        this._viewabilityTracker.timerCleanup();
     }
 
     public removeVisibleItemsListener(): void {

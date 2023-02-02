@@ -370,7 +370,7 @@ export default class ViewabilityTracker {
             const currAll = all.filter((index) => that._visibleIndexes.indexOf(index) >= 0);
             const currNow = currAll.filter((index) => that._lastReportedVisibleIndexes.indexOf(index) === -1);
             const currNotNow = that._lastReportedVisibleIndexes.filter((index) => currAll.indexOf(index) === -1);
-            
+
             if (currAll.length > 0 && (currNow.length > 0 || currNotNow.length > 0)) {
                 that._lastReportedVisibleIndexes = currAll;
                 callbackFunc(currAll, currNow, currNotNow);
