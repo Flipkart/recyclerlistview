@@ -1,7 +1,7 @@
 import BinarySearch from "../utils/BinarySearch";
 import { Dimension } from "./dependencies/LayoutProvider";
 import { Layout } from "./layoutmanager/LayoutManager";
-import { ImpressionTrackingConfig } from "./RecyclerListView";
+import { ViewabilityConfig } from "./RecyclerListView";
 /***
  * Given an offset this utility can compute visible items. Also tracks previously visible items to compute items which get hidden or visible
  * Virtual renderer uses callbacks from this utility to main recycle pool and the render stack.
@@ -35,13 +35,15 @@ export default class ViewabilityTracker {
     private _isHorizontal: boolean;
     private _windowBound: number;
     private _visibleIndexes: number[];
+    private _lastReportedVisibleIndexes: number[];
     private _engagedIndexes: number[];
     private _layouts: Layout[] = [];
     private _actualOffset: number;
     private _defaultCorrection: WindowCorrection;
-    private _impressionTrackingConfig: ImpressionTrackingConfig | undefined;
+    private _viewabilityConfig: ViewabilityConfig | undefined;
+    private timers: Set<number> = new Set();
 
-    constructor(renderAheadOffset: number, initialOffset: number, impressionTrackingConfig: ImpressionTrackingConfig | undefined) {
+    constructor(renderAheadOffset: number, initialOffset: number, viewabilityConfig: ViewabilityConfig | undefined) {
         this._currentOffset = Math.max(0, initialOffset);
         this._maxOffset = 0;
         this._actualOffset = 0;
@@ -54,13 +56,14 @@ export default class ViewabilityTracker {
 
         this._visibleIndexes = [];  //needs to be sorted
         this._engagedIndexes = [];  //needs to be sorted
+        this._lastReportedVisibleIndexes = [];
 
         this.onVisibleRowsChanged = null;
         this.onEngagedRowsChanged = null;
 
         this._relevantDim = { start: 0, end: 0 };
         this._defaultCorrection = { startCorrection: 0, endCorrection: 0, windowShift: 0 };
-        this._impressionTrackingConfig = impressionTrackingConfig;
+        this._viewabilityConfig = viewabilityConfig;
     }
 
     public init(windowCorrection: WindowCorrection): void {
@@ -152,6 +155,11 @@ export default class ViewabilityTracker {
        this._actualOffset = actualOffset;
     }
 
+    public timerCleanup(): void {
+        this.timers.forEach(clearTimeout);
+        this.timers.clear();
+    }
+
     private _findFirstVisibleIndexOptimally(): number {
         let firstVisibleIndex = 0;
 
@@ -188,8 +196,8 @@ export default class ViewabilityTracker {
         for (let i = 0; i < count; i++) {
             itemRect = this._layouts[i];
             this._setRelevantBounds(itemRect, relevantDim);
-            const minimumViewabilityPercentage = this._impressionTrackingConfig && this._impressionTrackingConfig.minimumViewabilityPercentage || undefined;
-            if (this._itemIntersectsVisibleWindow(relevantDim.start, relevantDim.end, minimumViewabilityPercentage)) {
+            const minimumItemViewPercentage = this._viewabilityConfig && this._viewabilityConfig.minimumItemViewPercentage || undefined;
+            if (this._itemIntersectsVisibleWindow(relevantDim.start, relevantDim.end, minimumItemViewPercentage)) {
                 return i;
             }
         }
@@ -246,7 +254,7 @@ export default class ViewabilityTracker {
         const itemRect = this._layouts[index];
         let isFound = false;
         this._setRelevantBounds(itemRect, relevantDim);
-        const mininumViewPercentage = this._impressionTrackingConfig && this._impressionTrackingConfig.minimumViewabilityPercentage || undefined;
+        const mininumViewPercentage = this._viewabilityConfig && this._viewabilityConfig.minimumItemViewPercentage || undefined;
         if (this._itemIntersectsVisibleWindow(relevantDim.start, relevantDim.end, mininumViewPercentage)) {
             if (insertOnTop) {
                 newVisibleIndexes.splice(0, 0, index);
@@ -345,18 +353,42 @@ export default class ViewabilityTracker {
 
     //TODO:Talha optimize this
     private _diffUpdateOriginalIndexesAndRaiseEvents(newVisibleItems: number[], newEngagedItems: number[]): void {
-        this._diffArraysAndCallFunc(newVisibleItems, this._visibleIndexes, this.onVisibleRowsChanged);
+        const minimumViewTime = this._viewabilityConfig && this._viewabilityConfig.minimumViewTime
+        ? this._viewabilityConfig.minimumViewTime
+        : 0;
+        this._diffArraysAndCallFunc(newVisibleItems, this._visibleIndexes, this.onVisibleRowsChanged, minimumViewTime);
         this._diffArraysAndCallFunc(newEngagedItems, this._engagedIndexes, this.onEngagedRowsChanged);
         this._visibleIndexes = newVisibleItems;
         this._engagedIndexes = newEngagedItems;
     }
 
-    private _diffArraysAndCallFunc(newItems: number[], oldItems: number[], func: TOnItemStatusChanged | null): void {
+    private checkMinimumViewTime = (all: number[], now: number[], notNow: number[], minimumViewTime: number, callbackFunc: TOnItemStatusChanged): void => {
+        const that = this;
+        const timeoutId = setTimeout(() => {
+            that.timers.delete(timeoutId);
+
+            const currAll = all.filter((index) => that._visibleIndexes.indexOf(index) >= 0);
+            const currNow = currAll.filter((index) => that._lastReportedVisibleIndexes.indexOf(index) === -1);
+            const currNotNow = that._lastReportedVisibleIndexes.filter((index) => currAll.indexOf(index) === -1);
+            
+            if (currAll.length > 0 && (currNow.length > 0 || currNotNow.length > 0)) {
+                that._lastReportedVisibleIndexes = currAll;
+                callbackFunc(currAll, currNow, currNotNow);
+            }
+        }, minimumViewTime);
+        this.timers.add(timeoutId);
+    }
+
+    private _diffArraysAndCallFunc(newItems: number[], oldItems: number[], func: TOnItemStatusChanged | null, minimumViewTime?: number): void {
         if (func) {
             const now = this._calculateArrayDiff(newItems, oldItems);
             const notNow = this._calculateArrayDiff(oldItems, newItems);
             if (now.length > 0 || notNow.length > 0) {
-                func([...newItems], now, notNow);
+                if (minimumViewTime && minimumViewTime > 0) { // TODO : should we set a minimum min view time check ? minimumViewTime > 500ms
+                    this.checkMinimumViewTime([...newItems], now, notNow, minimumViewTime, func);
+                } else {
+                    func([...newItems], now, notNow);
+                }
             }
         }
     }

@@ -76,8 +76,9 @@ export interface OnRecreateParams {
     lastOffset?: number;
 }
 
-export interface ImpressionTrackingConfig {
-    minimumViewabilityPercentage: number;
+export interface ViewabilityConfig {
+    minimumItemViewPercentage: number;
+    minimumViewTime: number;
 }
 
 export interface RecyclerListViewProps {
@@ -114,7 +115,7 @@ export interface RecyclerListViewProps {
     //For all props that need to be proxied to inner/external scrollview. Put them in an object and they'll be spread
     //and passed down. For better typescript support.
     scrollViewProps?: object;
-    impressionTrackingConfig?: ImpressionTrackingConfig;
+    viewabilityConfig?: ViewabilityConfig;
     applyWindowCorrection?: (offsetX: number, offsetY: number, windowCorrection: WindowCorrection) => void;
     onItemLayout?: (index: number) => void;
     windowCorrectionConfig?: { value?: WindowCorrection, applyToInitialOffset?: boolean, applyToItemScroll?: boolean };
@@ -146,7 +147,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         onEndReachedThreshold: 0,
         onEndReachedThresholdRelative: 0,
         renderAheadOffset: IS_WEB ? 1000 : 250,
-        impressionTrackingConfig: undefined,
+        viewabilityConfig: undefined,
     };
 
     public static propTypes = {};
@@ -187,7 +188,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             this._pendingScrollToOffset = offset;
         }, (index) => {
             return this.props.dataProvider.getStableId(index);
-        }, !props.disableRecycling, props.impressionTrackingConfig);
+        }, !props.disableRecycling, props.viewabilityConfig);
 
         if (this.props.windowCorrectionConfig) {
             let windowCorrection;
@@ -268,6 +269,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 }
             }
         }
+        this._virtualRenderer.timerCleanup();
     }
 
     public scrollToIndex(index: number, animate?: boolean): void {
