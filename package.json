@@ -9,7 +9,8 @@
     "clean": "sh scripts/clean.sh",
     "release": "sh scripts/publish-latest.sh",
     "release-beta": "sh scripts/publish-beta.sh",
-    "release-local": "sh scripts/publish-local.sh"
+    "release-local": "sh scripts/publish-local.sh",
+    "prepare": "npm run build"
   },
   "keywords": [
     "react-native",
