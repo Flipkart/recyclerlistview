@@ -385,8 +385,8 @@ export default class ViewabilityTracker {
             const now = this._calculateArrayDiff(newItems, oldItems);
             const notNow = this._calculateArrayDiff(oldItems, newItems);
             if (now.length > 0 || notNow.length > 0) {
-                // Adding default minimum view time of 250ms 
-                if (minimumViewTime && minimumViewTime > Constants.DEFAULT_MIN_VIEW_TIME) { 
+                // Adding default minimum view time of 250ms
+                if (minimumViewTime && minimumViewTime > Constants.DEFAULT_MIN_VIEW_TIME) {
                     this.checkMinimumViewTime([...newItems], now, notNow, minimumViewTime, func);
                 } else {
                     func([...newItems], now, notNow);
