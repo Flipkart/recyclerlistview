@@ -1,4 +1,5 @@
 import BinarySearch from "../utils/BinarySearch";
+import { Constants } from "./constants/Constants";
 import { Dimension } from "./dependencies/LayoutProvider";
 import { Layout } from "./layoutmanager/LayoutManager";
 import { ViewabilityConfig } from "./RecyclerListView";
@@ -384,7 +385,8 @@ export default class ViewabilityTracker {
             const now = this._calculateArrayDiff(newItems, oldItems);
             const notNow = this._calculateArrayDiff(oldItems, newItems);
             if (now.length > 0 || notNow.length > 0) {
-                if (minimumViewTime && minimumViewTime > 0) { // TODO : should we set a minimum min view time check ? minimumViewTime > 500ms
+                // Adding default minimum view time of 250ms 
+                if (minimumViewTime && minimumViewTime > Constants.DEFAULT_MIN_VIEW_TIME) { 
                     this.checkMinimumViewTime([...newItems], now, notNow, minimumViewTime, func);
                 } else {
                     func([...newItems], now, notNow);
