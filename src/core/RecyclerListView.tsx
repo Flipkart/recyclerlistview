@@ -235,6 +235,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (newProps.onVisibleIndicesChanged) {
             this._virtualRenderer.attachVisibleItemsListener(newProps.onVisibleIndicesChanged!);
         }
+        if (newProps.viewabilityConfig) {
+            this._virtualRenderer.updateViewabilityConfig(newProps.viewabilityConfig);
+        }
     }
 
     public componentDidUpdate(): void {

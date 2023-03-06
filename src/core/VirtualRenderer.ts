@@ -117,6 +117,13 @@ export default class VirtualRenderer {
         this.onVisibleItemsChanged = callback;
     }
 
+    public updateViewabilityConfig(newViewabilityConfig: ViewabilityConfig): void {
+        this._viewabilityConfig = newViewabilityConfig;
+        if (this._viewabilityTracker) {
+            this._viewabilityTracker.updateViewabilityConfig(newViewabilityConfig);
+        }
+    }
+
     public timerCleanup(): void {
         if (!this._viewabilityTracker) {
             return;

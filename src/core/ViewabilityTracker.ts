@@ -92,6 +92,10 @@ export default class ViewabilityTracker {
         this.updateOffset(offset, false, this._defaultCorrection);
     }
 
+    public updateViewabilityConfig(newViewabilityConfig: ViewabilityConfig): void {
+        this._viewabilityConfig = newViewabilityConfig;
+    }
+
     public updateOffset(offset: number, isActual: boolean, windowCorrection: WindowCorrection): void {
         let correctedOffset = offset;
         if (isActual) {
@@ -311,19 +315,25 @@ export default class ViewabilityTracker {
         return this._itemIntersectsWindow(this._engagedWindow, startBound, endBound);
     }
 
+    // Checks if list item is visible in viewport as per minimum view poercentage
     private _isItemInVisibleBounds(window: Range, itemStartBound: number, itemEndBound: number, mininumViewPercentage: number | undefined): boolean {
         let visibleItemContent = 0;
         const itemSize =  itemEndBound - itemStartBound;
 
         if (window.start >= itemStartBound && window.end >= itemEndBound) {
+            // List item is visible in viewport from screen top
             visibleItemContent = itemEndBound - window.start;
         } else if (window.start <= itemStartBound && window.end <= itemEndBound) {
+            // List item is visible in viewport from screen bottom
             visibleItemContent = window.end - itemStartBound;
         } else if (window.start <= itemStartBound && window.end >= itemEndBound) {
+            // Entire list item is visible in viewport
             visibleItemContent = itemEndBound - itemStartBound;
         } else if (window.start >= itemStartBound && window.end <= itemEndBound) {
+            // List item is covering the entire screen
             return true;
         } else {
+            // List item is not visible in viewport
             return false;
         }
 
@@ -385,9 +395,12 @@ export default class ViewabilityTracker {
             const now = this._calculateArrayDiff(newItems, oldItems);
             const notNow = this._calculateArrayDiff(oldItems, newItems);
             if (now.length > 0 || notNow.length > 0) {
-                // Adding default minimum view time of 250ms for performance optimization
-                if (minimumViewTime && minimumViewTime >= Constants.DEFAULT_MIN_VIEW_TIME) {
-                    this.checkMinimumViewTime([...newItems], now, notNow, minimumViewTime, func);
+                if (minimumViewTime) {
+                    // Adding default minimum view time for performance optimization
+                    const finalMinViewTime = minimumViewTime <= Constants.DEFAULT_MIN_VIEW_TIME
+                        ? Constants.DEFAULT_MIN_VIEW_TIME
+                        : minimumViewTime;
+                    this.checkMinimumViewTime([...newItems], now, notNow, finalMinViewTime, func);
                 } else {
                     func([...newItems], now, notNow);
                 }
