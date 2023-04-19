@@ -37,6 +37,7 @@ import VirtualRenderer, { RenderStack, RenderStackItem, RenderStackParams } from
 import ItemAnimator, { BaseItemAnimator } from "./ItemAnimator";
 import { DebugHandlers } from "..";
 import { ComponentCompat } from "../utils/ComponentCompat";
+import MVCManager from "./MVCManager";
 //#if [REACT-NATIVE]
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
@@ -81,6 +82,11 @@ export interface ViewabilityConfig {
     minimumViewTime: number;
 }
 
+export interface MVCConfigItem {
+    viewabilityConfig: ViewabilityConfig,
+    onViewableItemsChanged: TOnItemStatusChanged
+}
+
 export interface RecyclerListViewProps {
     layoutProvider: BaseLayoutProvider;
     dataProvider: BaseDataProvider;
@@ -116,6 +122,7 @@ export interface RecyclerListViewProps {
     //and passed down. For better typescript support.
     scrollViewProps?: object;
     viewabilityConfig?: ViewabilityConfig;
+    MVCConfig?: MVCConfigItem[];
     applyWindowCorrection?: (offsetX: number, offsetY: number, windowCorrection: WindowCorrection) => void;
     onItemLayout?: (index: number) => void;
     windowCorrectionConfig?: { value?: WindowCorrection, applyToInitialOffset?: boolean, applyToItemScroll?: boolean };
@@ -148,6 +155,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         onEndReachedThresholdRelative: 0,
         renderAheadOffset: IS_WEB ? 1000 : 250,
         viewabilityConfig: undefined,
+        MVCConfig: undefined
     };
 
     public static propTypes = {};
@@ -156,6 +164,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         executable();
     });
 
+    private _MVCManager: MVCManager | undefined = undefined;
     private _virtualRenderer: VirtualRenderer;
     private _onEndReachedCalled = false;
     private _initComplete = false;
@@ -189,6 +198,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }, (index) => {
             return this.props.dataProvider.getStableId(index);
         }, !props.disableRecycling, props.viewabilityConfig);
+
+        if (props.MVCConfig)
+            this._MVCManager = new MVCManager(props.MVCConfig)
 
         if (this.props.windowCorrectionConfig) {
             let windowCorrection;
@@ -226,8 +238,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     public componentWillReceivePropsCompat(newProps: RecyclerListViewProps): void {
         this._assertDependencyPresence(newProps);
         this._checkAndChangeLayouts(newProps);
-        if (!newProps.onVisibleIndicesChanged) {
+        if (!newProps.onVisibleIndicesChanged || !newProps.MVCConfig) {
             this._virtualRenderer.removeVisibleItemsListener();
+            this._MVCManager && this._MVCManager.removeMVCConfig();
         }
         if (newProps.onVisibleIndexesChanged) {
             throw new CustomError(RecyclerListViewExceptions.usingOldVisibleIndexesChangedParam);
@@ -237,6 +250,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
         if (newProps.viewabilityConfig) {
             this._virtualRenderer.updateViewabilityConfig(newProps.viewabilityConfig);
+        }
+        if (newProps.MVCConfig) {
+            this._MVCManager && this._MVCManager.updateMVCConfig(newProps.MVCConfig);
         }
     }
 
@@ -254,6 +270,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
     }
 
+    private _allViewabilityTimersCleanup() {
+        this._virtualRenderer.timerCleanup();
+        this._MVCManager && this._MVCManager.timersCleanup()
+    }
+    
     public componentWillUnmount(): void {
         this._isMounted = false;
         if (this.props.contextProvider) {
@@ -272,7 +293,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 }
             }
         }
-        this._virtualRenderer.timerCleanup();
+        this._allViewabilityTimersCleanup()
     }
 
     public scrollToIndex(index: number, animate?: boolean): void {
@@ -505,11 +526,22 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
     }
 
+    private _refreshWithAnchor() {
+        this._virtualRenderer.refreshWithAnchor();
+        this._MVCManager && this._MVCManager.refreshWithAnchor()
+    }
+
+    private _refresh() {
+        this._virtualRenderer.refresh();
+        this._MVCManager && this._MVCManager.refresh();
+    }
+
     private _checkAndChangeLayouts(newProps: RecyclerListViewProps, forceFullRender?: boolean): void {
         this._params.isHorizontal = newProps.isHorizontal;
         this._params.itemCount = newProps.dataProvider.getSize();
         this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
         this._virtualRenderer.setLayoutProvider(newProps.layoutProvider);
+        this._MVCManager && this._MVCManager.setLayoutProvider(newProps.layoutProvider);
         if (newProps.dataProvider.hasStableIds() && this.props.dataProvider !== newProps.dataProvider) {
             if (newProps.dataProvider.requiresDataChangeHandling()) {
                 this._virtualRenderer.handleDataSetChange(newProps.dataProvider);
@@ -520,10 +552,11 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (this.props.layoutProvider !== newProps.layoutProvider || this.props.isHorizontal !== newProps.isHorizontal) {
             //TODO:Talha use old layout manager
             this._virtualRenderer.setLayoutManager(newProps.layoutProvider.createLayoutManager(this._layout, newProps.isHorizontal));
+            this._MVCManager && this._MVCManager.setLayoutManager(newProps.layoutProvider.createLayoutManager(this._layout, newProps.isHorizontal));
             if (newProps.layoutProvider.shouldRefreshWithAnchoring) {
-                this._virtualRenderer.refreshWithAnchor();
+                this._refreshWithAnchor()
             } else {
-                this._virtualRenderer.refresh();
+                this._refresh()
             }
             this._refreshViewability();
         } else if (this.props.dataProvider !== newProps.dataProvider) {
@@ -539,7 +572,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             const layoutManager = this._virtualRenderer.getLayoutManager();
             if (layoutManager) {
                 const cachedLayouts = layoutManager.getLayouts();
-                this._virtualRenderer.setLayoutManager(newProps.layoutProvider.createLayoutManager(this._layout, newProps.isHorizontal, cachedLayouts));
+                const newLayoutManager = newProps.layoutProvider.createLayoutManager(this._layout, newProps.isHorizontal, cachedLayouts)
+                this._virtualRenderer.setLayoutManager(newLayoutManager);
+                this._MVCManager && this._MVCManager.setLayoutManager(newLayoutManager);
                 this._refreshViewability();
             }
         } else if (this._relayoutReqIndex >= 0) {
@@ -624,6 +659,16 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         }
     }
 
+    private _setParamsAndDimensions(): void {
+        this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
+        this._MVCManager && this._MVCManager.setParamsAndDimensions(this._params, this._layout);
+    }
+
+    private _startAllViewabilityTrackers(windowCorrection: WindowCorrection): void {
+        this._virtualRenderer.startViewabilityTracker(windowCorrection);
+        this._MVCManager && this._MVCManager.startViewabilityTracker(windowCorrection);
+    }
+
     private _initTrackers(props: RecyclerListViewProps): void {
         this._assertDependencyPresence(props);
         if (props.onVisibleIndexesChanged) {
@@ -639,11 +684,14 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             itemCount: props.dataProvider.getSize(),
             renderAheadOffset: props.renderAheadOffset,
         };
-        this._virtualRenderer.setParamsAndDimensions(this._params, this._layout);
+        this._setParamsAndDimensions()
         const layoutManager = props.layoutProvider.createLayoutManager(this._layout, props.isHorizontal, this._cachedLayouts);
         this._virtualRenderer.setLayoutManager(layoutManager);
         this._virtualRenderer.setLayoutProvider(props.layoutProvider);
+        this._MVCManager && this._MVCManager.setLayoutManager(layoutManager);
+        this._MVCManager && this._MVCManager.setLayoutProvider(props.layoutProvider);
         this._virtualRenderer.init();
+        this._MVCManager && this._MVCManager.init();
         const offset = this._virtualRenderer.getInitialOffset();
         const contentDimension = layoutManager.getContentDimension();
         if ((offset.y > 0 && contentDimension.height > this._layout.height) ||
@@ -653,7 +701,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
                 this.setState({});
             }
         } else {
-            this._virtualRenderer.startViewabilityTracker(this._getWindowCorrection(offset.x, offset.y, props));
+            this._startAllViewabilityTrackers(this._getWindowCorrection(offset.x, offset.y, props))
         }
     }
 
@@ -764,8 +812,9 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _onScroll = (offsetX: number, offsetY: number, rawEvent: ScrollEvent): void => {
         // correction to be positive to shift offset upwards; negative to push offset downwards.
         // extracting the correction value from logical offset and updating offset of virtual renderer.
-        this._virtualRenderer.updateOffset(offsetX, offsetY, true, this._getWindowCorrection(offsetX, offsetY, this.props));
-
+        const windowCorrection = this._getWindowCorrection(offsetX, offsetY, this.props)
+        this._virtualRenderer.updateOffset(offsetX, offsetY, true, windowCorrection);
+        this._MVCManager && this._MVCManager.updateOffset(offsetX, offsetY, true, windowCorrection);
         if (this.props.onScroll) {
             this.props.onScroll(rawEvent, offsetX, offsetY);
         }

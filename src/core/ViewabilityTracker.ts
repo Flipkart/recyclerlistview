@@ -44,7 +44,7 @@ export default class ViewabilityTracker {
     private _viewabilityConfig: ViewabilityConfig | undefined;
     private timers: Set<number> = new Set();
 
-    constructor(renderAheadOffset: number, initialOffset: number, viewabilityConfig: ViewabilityConfig | undefined) {
+    constructor(renderAheadOffset: number, initialOffset: number, viewabilityConfig: ViewabilityConfig | undefined, onVisibleRowsChanged: TOnItemStatusChanged | null = null) {
         this._currentOffset = Math.max(0, initialOffset);
         this._maxOffset = 0;
         this._actualOffset = 0;
@@ -59,7 +59,7 @@ export default class ViewabilityTracker {
         this._engagedIndexes = [];  //needs to be sorted
         this._lastReportedVisibleIndexes = [];
 
-        this.onVisibleRowsChanged = null;
+        this.onVisibleRowsChanged = onVisibleRowsChanged;
         this.onEngagedRowsChanged = null;
 
         this._relevantDim = { start: 0, end: 0 };
