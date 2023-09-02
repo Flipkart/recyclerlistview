@@ -85,7 +85,7 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
     private _checkSizeChange(fromObserver: boolean = false): void {
         if (this.props.forceNonDeterministicRendering && this.props.onSizeChanged) {
             const mainDiv = this._mainDiv;
-            if (mainDiv) {
+            if (mainDiv && mainDiv.clientWidth && mainDiv.clientHeight) {
                 this._dim.width = mainDiv.clientWidth;
                 this._dim.height = mainDiv.clientHeight;
                 if (this.props.width !== this._dim.width || this.props.height !== this._dim.height) {
