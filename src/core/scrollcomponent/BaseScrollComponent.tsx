@@ -25,4 +25,9 @@ export default abstract class BaseScrollComponent extends React.Component<Scroll
     public getScrollableNode(): number | null {
         return null;
     }
+
+    //Override and return ref to your custom scrollview. Useful if you need to use Animated Events on the new architecture.
+    public getNativeScrollRef(): unknown | null {
+        return null;
+    }
 }
