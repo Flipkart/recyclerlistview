@@ -16,6 +16,14 @@ export abstract class ComponentCompat<T1 = {}, T2 = {}, SS = any> extends React.
         return true;
     }
 
+    /**
+     * allow the extended component to access _hasRenderedOnce flag
+     * to ensure that the component has rendered at least once
+     * @returns _hasRenderedOnce
+     */
+    public getHasRenderedOnce(): boolean {
+        return this._hasRenderedOnce;
+    }
     //setState inside will not update the existing cycle, not a true replacement for componentWillReceiveProps
     public componentWillReceivePropsCompat(newProps: T1): void {
         //no op
