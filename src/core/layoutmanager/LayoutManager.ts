@@ -74,6 +74,18 @@ export class WrapGridLayoutManager extends LayoutManager {
     public getContentDimension(): Dimension {
         return { height: this._totalHeight, width: this._totalWidth };
     }
+    /**
+     * when remove layout is called, it will remove the layout from the layouts array
+     * and if the layouts array is empty, it will reset the total height and total width to 0
+     * @param index
+     */
+     public removeLayout(index: number): void {
+        super.removeLayout(index);
+        if (this._layouts.length === 0) {
+            this._totalHeight = 0;
+            this._totalWidth = 0;
+        }
+    }
 
     public getLayouts(): Layout[] {
         return this._layouts;
