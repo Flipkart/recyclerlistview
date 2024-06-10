@@ -596,7 +596,13 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     private _initStateIfRequired(stack?: RenderStack): boolean {
-        if (!this.state) {
+        /**
+         * this is to ensure that if the component does not has state and not render before
+         * we still initialize the state like how we do in constructor.
+         * else return false to let the caller to call setState
+         * so the component can re-render to the correct stack
+         */
+        if (!this.state && !this.getHasRenderedOnce()) {
             this.state = {
                 internalSnapshot: {},
                 renderStack: stack,
