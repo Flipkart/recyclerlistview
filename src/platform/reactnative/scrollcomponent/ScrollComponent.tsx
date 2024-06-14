@@ -50,7 +50,7 @@ export default class ScrollComponent extends BaseScrollComponent {
         return null;
     }
 
-    public getNativeScrollRef(): React.ElementRef<typeof ScrollViewComponent> | null {
+    public getNativeScrollRef(): ScrollView | null {
         return this._scrollViewRef;
     }
 

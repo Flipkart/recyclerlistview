@@ -41,7 +41,7 @@ import { ComponentCompat } from "../utils/ComponentCompat";
 import ScrollComponent from "../platform/reactnative/scrollcomponent/ScrollComponent";
 import ViewRenderer from "../platform/reactnative/viewrenderer/ViewRenderer";
 import { DefaultJSItemAnimator as DefaultItemAnimator } from "../platform/reactnative/itemanimators/defaultjsanimator/DefaultJSItemAnimator";
-import { Platform, ScrollViewComponent } from "react-native";
+import { Platform, ScrollView } from "react-native";
 const IS_WEB = !Platform || Platform.OS === "web";
 //#endif
 
@@ -54,6 +54,7 @@ const IS_WEB = !Platform || Platform.OS === "web";
 //import ViewRenderer from "../platform/web/viewrenderer/ViewRenderer";
 //import { DefaultWebItemAnimator as DefaultItemAnimator } from "../platform/web/itemanimators/DefaultWebItemAnimator";
 //const IS_WEB = true;
+//type ScrollView = unknown;
 //#endif
 
 /***
@@ -394,7 +395,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         return null;
     }
 
-    public getNativeScrollRef(): React.ElementRef<typeof ScrollViewComponent> | null {
+    public getNativeScrollRef(): ScrollView | null {
         if (this._scrollComponent && this._scrollComponent.getNativeScrollRef) {
           return this._scrollComponent.getNativeScrollRef();
         }
