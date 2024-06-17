@@ -1,4 +1,5 @@
 import * as React from "react";
+import { ScrollView } from "react-native";
 import { Dimension } from "../dependencies/LayoutProvider";
 import BaseScrollView, { ScrollEvent, ScrollViewDefaultProps } from "./BaseScrollView";
 
@@ -23,6 +24,11 @@ export default abstract class BaseScrollComponent extends React.Component<Scroll
 
     //Override and return node handle to your custom scrollview. Useful if you need to use Animated Events.
     public getScrollableNode(): number | null {
+        return null;
+    }
+
+    //Override and return ref to your custom scrollview. Useful if you need to use Animated Events on the new architecture.
+    public getNativeScrollRef(): ScrollView | null {
         return null;
     }
 }
