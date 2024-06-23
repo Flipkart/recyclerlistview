@@ -18,7 +18,7 @@
  * TODO: Observe size changes on web to optimize for reflowability
  * TODO: Solve //TSI
  */
-import debounce = require("lodash.debounce");
+const debounce = require("lodash.debounce");
 import * as PropTypes from "prop-types";
 import * as React from "react";
 import { ObjectUtil, Default } from "ts-object-utils";
@@ -92,6 +92,7 @@ export interface RecyclerListViewProps {
     onVisibleIndexesChanged?: TOnItemStatusChanged;
     onVisibleIndicesChanged?: TOnItemStatusChanged;
     renderFooter?: () => JSX.Element | JSX.Element[] | null;
+    renderHeader?: () => JSX.Element | JSX.Element[] | null;
     externalScrollView?: { new(props: ScrollViewDefaultProps): BaseScrollView };
     layoutSize?: Dimension;
     initialOffset?: number;
@@ -855,6 +856,9 @@ RecyclerListView.propTypes = {
 
     //Provide this method if you want to render a footer. Helpful in showing a loader while doing incremental loads.
     renderFooter: PropTypes.func,
+    
+    //Provide this method if you want to render a header
+    renderHeader: PropTypes.func,
 
     //Specify the initial item index you want rendering to start from. Preferred over initialOffset if both are specified.
     initialRenderIndex: PropTypes.number,
