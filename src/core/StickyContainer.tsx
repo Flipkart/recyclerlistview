@@ -126,9 +126,10 @@ export default class StickyContainer<P extends StickyContainerProps> extends Com
 
     private _getRecyclerRef = (recycler: any) => {
         this._recyclerRef = recycler as (RecyclerListView<RecyclerListViewProps, RecyclerListViewState> | undefined);
-        if (this.props.children.ref) {
-            if (typeof this.props.children.ref === "function") {
-                (this.props.children).ref(recycler);
+        const childRef = this.props.children.props.ref || this.props.children.ref;
+        if (childRef) {
+            if (typeof childRef === "function") {
+                childRef(recycler);
             } else {
                 throw new CustomError(RecyclerListViewExceptions.refNotAsFunctionException);
             }
