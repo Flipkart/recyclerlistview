@@ -1,5 +1,5 @@
 import * as React from "react";
-import { LayoutChangeEvent, View, ViewProperties } from "react-native";
+import { LayoutChangeEvent, View, ViewProperties, PixelRatio } from "react-native";
 import { Dimension } from "../../../core/dependencies/LayoutProvider";
 import { LayoutManager } from "../../../core/layoutmanager/LayoutManager";
 import BaseViewRenderer, { ViewRendererProps } from "../../../core/viewrenderer/BaseViewRenderer";
@@ -76,11 +76,13 @@ export default class ViewRenderer extends BaseViewRenderer<any> {
         //Preventing layout thrashing in super fast scrolls where RN messes up onLayout event
         const xDiff = Math.abs(this.props.x - event.nativeEvent.layout.x);
         const yDiff = Math.abs(this.props.y - event.nativeEvent.layout.y);
+        const layoutHeight = PixelRatio.roundToNearestPixel(event.nativeEvent.layout.height);
+        const layoutWidth = PixelRatio.roundToNearestPixel(event.nativeEvent.layout.width);
         if (xDiff < 1 && yDiff < 1 &&
-            (this.props.height !== event.nativeEvent.layout.height ||
-                this.props.width !== event.nativeEvent.layout.width)) {
-            this._dim.height = event.nativeEvent.layout.height;
-            this._dim.width = event.nativeEvent.layout.width;
+            (this.props.height !== layoutHeight ||
+                this.props.width !== layoutWidth)) {
+            this._dim.height = layoutHeight;
+            this._dim.width = layoutWidth;
             if (this.props.onSizeChanged) {
                 this.props.onSizeChanged(this._dim, this.props.index);
             }
