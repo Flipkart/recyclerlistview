@@ -182,7 +182,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
             this._pendingScrollToOffset = offset;
         }, (index) => {
             return this.props.dataProvider.getStableId(index);
-        }, !props.disableRecycling);
+        }, !props.disableRecycling, props.dataProvider.getSize());
 
         if (this.props.windowCorrectionConfig) {
             let windowCorrection;
