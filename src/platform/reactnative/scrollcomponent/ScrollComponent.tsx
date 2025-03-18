@@ -5,6 +5,7 @@ import {
     NativeSyntheticEvent,
     ScrollView,
     View,
+    PixelRatio,
 } from "react-native";
 import BaseScrollComponent, { ScrollComponentProps } from "../../../core/scrollcomponent/BaseScrollComponent";
 import TSCast from "../../../utils/TSCast";
@@ -114,9 +115,11 @@ export default class ScrollComponent extends BaseScrollComponent {
     }
 
     private _onLayout = (event: LayoutChangeEvent): void => {
-        if (this._height !== event.nativeEvent.layout.height || this._width !== event.nativeEvent.layout.width) {
-            this._height = event.nativeEvent.layout.height;
-            this._width = event.nativeEvent.layout.width;
+        const layoutHeight = PixelRatio.roundToNearestPixel(event.nativeEvent.layout.height);
+        const layoutWidth = PixelRatio.roundToNearestPixel(event.nativeEvent.layout.width);
+        if (this._height !== layoutHeight || this._width !== layoutWidth) {
+            this._height = layoutHeight;
+            this._width = layoutWidth;
             if (this.props.onSizeChanged) {
                 this._isSizeChangedCalledOnce = true;
                 this.props.onSizeChanged(event.nativeEvent.layout);
