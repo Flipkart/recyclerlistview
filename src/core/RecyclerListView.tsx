@@ -239,6 +239,7 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     public componentDidMount(): void {
+        this._isMounted = true;
         if (this._initComplete) {
             this._processInitialOffset();
             this._processOnEndReached();
