@@ -114,12 +114,13 @@ export default class ScrollComponent extends BaseScrollComponent {
     }
 
     private _onLayout = (event: LayoutChangeEvent): void => {
-        if (this._height !== event.nativeEvent.layout.height || this._width !== event.nativeEvent.layout.width) {
-            this._height = event.nativeEvent.layout.height;
+        const estimatedHeightSize = this.props.estimatedHeightSize || event.nativeEvent.layout.height;
+        if (this._height !== estimatedHeightSize || this._width !== event.nativeEvent.layout.width) {
+            this._height = estimatedHeightSize;
             this._width = event.nativeEvent.layout.width;
             if (this.props.onSizeChanged) {
                 this._isSizeChangedCalledOnce = true;
-                this.props.onSizeChanged(event.nativeEvent.layout);
+                this.props.onSizeChanged({...event.nativeEvent.layout, height: estimatedHeightSize });
             }
         }
         if (this.props.onLayout) {
