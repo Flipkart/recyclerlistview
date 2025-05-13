@@ -36,19 +36,20 @@ export default class ScrollComponent extends BaseScrollComponent {
 
     public render(): JSX.Element {
         const Scroller = this.props.externalScrollView as any; //TSI
+        const renderContentContainer = this.props.renderContentContainer ? this.props.renderContentContainer : this._defaultContainer;
+        const contentContainerProps = {
+            style: {
+                height: this.props.contentHeight,
+                width: this.props.contentWidth,
+            },
+        };
         return (
             <Scroller ref={(scrollView: BaseScrollView) => this._scrollViewRef = scrollView as (BaseScrollView | null)}
                 {...this.props}
                 horizontal={this.props.isHorizontal}
                 onScroll={this._onScroll}
                 onSizeChanged={this._onSizeChanged}>
-
-                <div style={{
-                    height: this.props.contentHeight,
-                    width: this.props.contentWidth,
-                }}>
-                    {this.props.children}
-                </div>
+                {renderContentContainer(contentContainerProps, this.props.children)}
                 {this.props.renderFooter ? <div style={this.props.isHorizontal ? {
                     left: this.props.contentWidth,
                     position: "absolute",
@@ -57,6 +58,14 @@ export default class ScrollComponent extends BaseScrollComponent {
                     {this.props.renderFooter()}
                 </div> : null}
             </Scroller>
+        );
+    }
+
+    private _defaultContainer(props: object, children: React.ReactNode): React.ReactNode | null {
+        return (
+            <div {...props}>
+                {children}
+            </div>
         );
     }
 
