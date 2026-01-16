@@ -39,10 +39,10 @@ export class GridLayoutManager extends WrapGridLayoutManager {
       // This causes the layouting to behave weirdly as the new dimension might not adhere to the spans and the cells arrange themselves differently
       // So, whenever we have layouts for a certain index, we explicitly override the dimension to those very layout values
       // and call super so as to set the overridden flag as true
-      const layout = this.getLayouts()[index];
-      const heightDiff = Math.abs(dim.height - layout.height);
-      const widthDiff = Math.abs(dim.width - layout.width);
+      const layout = this.getLayouts()[index] as Layout | undefined;
       if (layout) {
+        const heightDiff = Math.abs(dim.height - layout.height);
+        const widthDiff = Math.abs(dim.width - layout.width);
         if (this._isGridHorizontal) {
           if (heightDiff < this._acceptableRelayoutDelta) {
             if (widthDiff === 0) {
