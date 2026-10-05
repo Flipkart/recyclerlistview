@@ -167,6 +167,8 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     private _pendingRenderStack?: RenderStack;
     private _tempDim: Dimension = { height: 0, width: 0 };
     private _initialOffset = 0;
+    private _contextToConsume?: { provider: ContextProvider; keys: string[] };
+    private _pendingOnRecreate = false;
     private _cachedLayouts?: Layout[];
     private _scrollComponent: BaseScrollComponent | null = null;
     private _windowCorrectionConfig: WindowCorrectionConfig;
@@ -239,6 +241,18 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
     }
 
     public componentDidMount(): void {
+        // Render may be retried or discarded; consume restored context only after commit.
+        const context = this._contextToConsume;
+        this._contextToConsume = undefined;
+        if (this._pendingOnRecreate) {
+            this._pendingOnRecreate = false;
+            if (this.props.onRecreate) {
+                this.props.onRecreate({ lastOffset: this._initialOffset });
+            }
+        }
+        if (context) {
+            context.keys.forEach((key) => context.provider.remove(key));
+        }
         if (this._initComplete) {
             this._processInitialOffset();
             this._processOnEndReached();
@@ -250,17 +264,27 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (this.props.contextProvider) {
             const uniqueKey = this.props.contextProvider.getUniqueKey();
             if (uniqueKey) {
-                this.props.contextProvider.save(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX, this.getCurrentScrollOffset());
+                const offsetKey = uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX;
+                const keys = [offsetKey];
+                let offset = this.getCurrentScrollOffset();
+                if (this._pendingScrollToOffset) {
+                    offset = this.props.isHorizontal ? this._pendingScrollToOffset.x : this._pendingScrollToOffset.y;
+                } else if (!this._initComplete) {
+                    offset = this._initialOffset;
+                }
+                this.props.contextProvider.save(offsetKey, offset);
                 if (this.props.forceNonDeterministicRendering) {
                     if (this._virtualRenderer) {
                         const layoutManager = this._virtualRenderer.getLayoutManager();
-                        if (layoutManager) {
-                            const layoutsToCache = layoutManager.getLayouts();
-                            this.props.contextProvider.save(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX,
-                                JSON.stringify({ layoutArray: layoutsToCache }));
+                        const layoutsToCache = layoutManager ? layoutManager.getLayouts() : this._cachedLayouts;
+                        if (layoutsToCache) {
+                            const layoutKey = uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX;
+                            this.props.contextProvider.save(layoutKey, JSON.stringify({ layoutArray: layoutsToCache }));
+                            keys.push(layoutKey);
                         }
                     }
                 }
+                this._contextToConsume = { provider: this.props.contextProvider, keys };
             }
         }
     }
@@ -483,21 +507,21 @@ export default class RecyclerListView<P extends RecyclerListViewProps, S extends
         if (props.contextProvider) {
             const uniqueKey = props.contextProvider.getUniqueKey();
             if (uniqueKey) {
+                const keys: string[] = [];
                 const offset = props.contextProvider.get(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX);
                 if (typeof offset === "number" && offset > 0) {
                     this._initialOffset = offset;
-                    if (props.onRecreate) {
-                        props.onRecreate({ lastOffset: this._initialOffset });
-                    }
-                    props.contextProvider.remove(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX);
+                    this._pendingOnRecreate = true;
+                    keys.push(uniqueKey + Constants.CONTEXT_PROVIDER_OFFSET_KEY_SUFFIX);
                 }
                 if (props.forceNonDeterministicRendering) {
                     const cachedLayouts = props.contextProvider.get(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX) as string;
                     if (cachedLayouts && typeof cachedLayouts === "string") {
                         this._cachedLayouts = JSON.parse(cachedLayouts).layoutArray;
-                        props.contextProvider.remove(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX);
+                        keys.push(uniqueKey + Constants.CONTEXT_PROVIDER_LAYOUT_KEY_SUFFIX);
                     }
                 }
+                this._contextToConsume = { provider: props.contextProvider, keys };
             }
         }
     }
