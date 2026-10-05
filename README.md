@@ -86,7 +86,7 @@ In case you cannot determine heights of items in advance just set `forceNonDeter
 | renderAheadOffset | No | number | specify how many pixels in advance you want views to be rendered. Increasing this value can help reduce blanks (if any). However, keeping this as low as possible should be the intent. Higher values also increase re-render compute |
 | isHorizontal | No | boolean | If true, the list will operate horizontally rather than vertically | 
 | onScroll | No | rawEvent: ScrollEvent, offsetX: number, offsetY: number) => void | On scroll callback function that executes as a user scrolls |
-| onRecreate | No | (params: OnRecreateParams) => void | callback function that gets executed when recreating the recycler view from context provider |
+| onRecreate | No | (params: OnRecreateParams) => void | callback function executed after mount when restoring the recycler view from context provider |
 | externalScrollView | No | { new (props: ScrollViewDefaultProps): BaseScrollView } | Use this to pass your on implementation of BaseScrollView |
 | onEndReached | No | () => void | Callback function executed when the end of the view is hit (minus onEndThreshold if defined) |
 | onEndReachedThreshold | No | number | Specify how many pixels in advance for the onEndReached callback |
